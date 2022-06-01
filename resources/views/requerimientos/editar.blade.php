@@ -5,8 +5,8 @@
         <div class="row">
             <div class="col-sm-12">
                 <h3 class="titulo-admin-1">Orden de compra N° {{$requerimiento['idrequerimiento']}}</h3>
-                <b-button href="{{action('RequerimientoController@index')}}" class="mr-2"  variant="primary"><i class="fas fa-list"></i> Ver requerimientos</b-button>
-                <b-button href="{{action('RequerimientoController@nuevo_requerimiento')}}" class="mr-2"  variant="primary"><i class="fas fa-plus"></i> Nuevo requerimiento</b-button>
+                <b-button href="{{action('RequerimientoController@index')}}" class="mr-2"  variant="primary"><i class="fas fa-list"></i> Ver órdenes</b-button>
+                <b-button href="{{action('RequerimientoController@nuevo_requerimiento')}}" class="mr-2"  variant="primary"><i class="fas fa-plus"></i> Nueva orden</b-button>
             </div>
         </div>
         <div class="row">

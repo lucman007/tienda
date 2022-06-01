@@ -4,6 +4,9 @@ namespace sysfact\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Spipu\Html2Pdf\Html2Pdf;
+use sysfact\Emisor;
+use sysfact\Http\Controllers\Helpers\MainHelper;
 use sysfact\Inventario;
 use sysfact\Producto;
 use sysfact\Requerimiento;
@@ -139,12 +142,6 @@ class RequerimientoController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
         $requerimiento=Requerimiento::findOrFail($id);
@@ -213,5 +210,38 @@ class RequerimientoController extends Controller
 
             $i++;
         }
+    }
+
+    public function generarPdf($id){
+        $requerimiento=Requerimiento::find($id);
+        $requerimiento->productos;
+        $usuario=$requerimiento->cliente;
+        $emisor=new Emisor();
+
+        if($requerimiento->moneda=='PEN'){
+            $requerimiento->moneda='S/';
+        }
+
+
+        $view = view('requerimientos/imprimir/plantilla_1',['requerimiento'=>$requerimiento,'emisor'=>$emisor,'usuario'=>$usuario]);
+        $html=$view->render();
+        $pdf=new Html2Pdf('P','A4','es');
+        $pdf->pdf->SetTitle('OC-'.str_pad($requerimiento['idrequerimiento'],5,'0',STR_PAD_LEFT));
+        $pdf->writeHTML($html);
+        return [
+            'file'=>$pdf,
+            'name'=>'OC-'.str_pad($requerimiento['idrequerimiento'],5,'0',STR_PAD_LEFT).'.pdf'
+        ];
+    }
+
+    public function imprimir($id)
+    {
+        $pdf=$this->generarPdf($id);
+        $pdf['file']->output($pdf['name']);
+    }
+
+    public function descargar($id){
+        $pdf=$this->generarPdf($id);
+        $pdf['file']->output($pdf['name'],'D');
     }
 }

@@ -20,6 +20,7 @@ use sysfact\Descuento;
 use sysfact\Http\Controllers\ClienteController;
 use sysfact\Http\Controllers\Controller;
 use sysfact\Http\Controllers\OpcionController;
+use sysfact\Http\Controllers\ProductoController;
 use sysfact\Producto;
 
 class MainHelper extends Controller
@@ -203,6 +204,25 @@ class MainHelper extends Controller
         return json_encode($cliente);
     }
 
+    public function obtener_proveedores($search=""){
+
+        $consulta=trim($search);
+
+        $proveedor = DB::table('proveedores')
+            ->join('persona', 'persona.idpersona', '=', 'proveedores.idproveedor')
+            ->select('proveedores.*', 'persona.nombre', 'persona.direccion')
+            ->where('eliminado', 0)
+            ->where(function ($query) use ($consulta) {
+                $query->where('nombre', 'like', '%' . $consulta . '%')
+                    ->orWhere('num_documento','like','%'.$consulta.'%');
+            })
+            ->orderby('idproveedor', 'desc')
+            ->take(5)
+            ->get();
+
+        return json_encode($proveedor);
+    }
+
     public function agregar_cliente($id){
         $cliente=Cliente::find($id);
         return response()->json([
@@ -252,6 +272,11 @@ class MainHelper extends Controller
     public function nuevo_cliente(Request $request){
         $cliente=new ClienteController();
         return $cliente->store($request);
+    }
+
+    public function guardarProducto(Request $request){
+        $producto = new ProductoController();
+        return $producto->store($request);
     }
 
     public function buscar_clientes($num_doc){

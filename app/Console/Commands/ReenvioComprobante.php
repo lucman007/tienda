@@ -3,7 +3,9 @@
 namespace sysfact\Console\Commands;
 
 use Illuminate\Console\Command;
+use sysfact\Caja;
 use sysfact\Emisor;
+use sysfact\Http\Controllers\CajaController;
 use sysfact\Http\Controllers\Cpe\CpeController;
 use sysfact\Venta;
 use Illuminate\Support\Facades\Log;
@@ -42,6 +44,24 @@ class ReenvioComprobante extends Command
      */
     public function handle()
     {
+
+        //cerrar caja
+        try{
+            if(date('H') >= 4 && date('H') <= 6){
+                $caja=Caja::orderby('fecha_a','desc')
+                    ->where('estado',0)
+                    ->first();
+                if($caja){
+                    $cajaCon = new CajaController();
+                    $cajaCon->cierre_automatico($caja->idcaja);
+                    Log::info('Cerrando caja...');
+                }
+            }
+        } catch (\Exception $e){
+            Log::error($e);
+        }
+
+        //reenvío de comprobantes
         try{
             $ventas=Venta::where('eliminado','=',0)
                 ->orderby('idventa','desc')
@@ -89,7 +109,7 @@ class ReenvioComprobante extends Command
                     return $e;
                 }
             }
-            Log::info($e);
+            Log::error($e);
         }
 
     }

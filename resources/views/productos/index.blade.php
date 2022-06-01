@@ -348,7 +348,6 @@
                 mostrarProgresoGuardado:false,
                 observacion: '',
                 moneda: 'PEN',
-                descuentos: [],
                 dataFichero: "",
                 moneda_compra:'PEN',
                 tipo_cambio_compra:"{{cache('opciones')['tipo_cambio_compra']}}",

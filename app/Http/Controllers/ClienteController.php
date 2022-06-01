@@ -99,12 +99,12 @@ class ClienteController extends Controller
 		    return redirect( '/' );
 	    }
 
-	    $cliente=DB::table('cliente')
-	                ->join('persona', 'persona.idpersona', '=', 'cliente.idcliente')
-	                ->select('cliente.*','persona.*')
-	                ->where('eliminado','=',0)
-	                ->where('idcliente','=',$id)
-	                ->first();
+        $cliente = DB::table('cliente')
+            ->join('persona', 'persona.idpersona', '=', 'cliente.idcliente')
+            ->select('cliente.*', 'persona.*')
+            ->where('eliminado', '=', 0)
+            ->where('idcliente', '=', $id)
+            ->first();
 
 	    return json_encode($cliente);
     }

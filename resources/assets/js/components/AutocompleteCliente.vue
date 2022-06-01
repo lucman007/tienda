@@ -1,7 +1,7 @@
 <template>
     <div class="autocomplete-component" id="autocomplete-component-id">
         <input autocomplete="off" type="text" id="buscador-cliente" onfocus="this.value = this.value;" :disabled="disabledBuscador"
-               placeholder="Buscar cliente..." v-model="query" v-on:keyup="navigate"
+               :placeholder="es_proveedores ? 'Buscar proveedor...' : 'Buscar cliente...'" v-model="query" v-on:keyup="navigate"
                class="form-control"/>
         <i class="fas fa-times-circle borrarCliente" v-show="disabledBuscador" v-on:click="borrarCliente"></i>
         <div class="panel-footer autocomplete-wrapper" v-if="results.length">
@@ -24,7 +24,7 @@
 
 <script>
 export default{
-    props: ["esProveedores"],
+    props: ["es_proveedores"],
     data(){
         return {
             query: '',
@@ -112,10 +112,9 @@ export default{
             this.results = [];
             if (this.query.length > 1) {
                 let url = "/helper/obtener-clientes" + "/";
-                if (this.esProveedores) {
+                if (this.es_proveedores) {
                     url = "/helper/obtener-proveedores" + "/";
                 }
-
                 axios.get(url + this.query).then((response) => {
                     this.results = response.data;
                 });

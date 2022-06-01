@@ -264,6 +264,7 @@ Route::group(['middleware' => ['can:Inventario: requerimientos']], function () {
     Route::delete('requerimientos/destroy/{id}', 'RequerimientoController@destroy');
     Route::post('requerimientos/obtenerProductos', 'RequerimientoController@obtenerProductos');
     Route::post('requerimientos/recibir', 'RequerimientoController@recibir');
+    Route::get('requerimientos/imprimir/{id}', 'RequerimientoController@imprimir');
 });
 Route::group(['middleware' => ['can:Configuración']], function () {
 //Rutas para configuración
@@ -346,6 +347,7 @@ Route::group(['middleware' => ['can:Ventas']], function () {
 
 //Helper
 Route::get('helper/obtener-clientes/{search?}', 'Helpers\MainHelper@obtener_clientes');
+Route::get('helper/obtener-proveedores/{search?}', 'Helpers\MainHelper@obtener_proveedores');
 Route::get('helper/obtener-productos/{search?}', 'Helpers\MainHelper@obtener_productos');
 Route::get('helper/agregar-producto/{search}', 'Helpers\MainHelper@agregar_producto');
 Route::post('helper/buscar-ruc', 'Helpers\MainHelper@obtener_datos_usuario_de_sunat');
@@ -354,6 +356,7 @@ Route::get('helper/agregar-cliente/{id}', 'Helpers\MainHelper@agregar_cliente');
 Route::get('helper/buscar-clientes/{search}', 'Helpers\MainHelper@buscar_clientes');
 Route::get('helper/categorias', 'Helpers\MainHelper@categorias');
 Route::get('helper/obtener-descuentos/{id}', 'Helpers\MainHelper@obtenerDescuentos');
+Route::post('helper/guardar-producto', 'Helpers\MainHelper@guardarProducto');
 
 
 Auth::routes(['register' => false]);

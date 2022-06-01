@@ -12,7 +12,7 @@
                         {{result.cod_producto}} {{(result.cod_producto).length==0?"":"-"}} {{result.nombre }}
                     </div>
                     <div class="col-lg">
-                        S/{{result-moneda+result.precio }}
+                        {{result.moneda+result.precio }}
                     </div>
                     <div v-show="result.tipo_producto===1" class="col-lg">
                         <span :class="'badge '+result.badge_stock">{{result.stock+result.unidad}}</span>

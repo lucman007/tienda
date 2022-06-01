@@ -87,11 +87,35 @@
                             </template>
                         </b-input-group>
                     </div>
+                    <div v-show="tipo_producto==1" class="col-lg-4 mb-3">
+                        <label for="precio">Descuentos:</label>
+                        <button @click="agregarDescuento" class="btn btn-primary"><i class="fas fa-plus"></i> Agregar descuento
+                        </button>
+                    </div>
+                    <div v-show="tipo_producto==1"  class="col-lg-12">
+                        <div class="row">
+                            <div class="col-lg-6" v-for="(descuento,index) in descuentos" :key="index">
+                                <div class="row">
+                                    <div class="col-lg-5 form-group">
+                                        <label for="precio">Cantidad > ó =:</label>
+                                        <input class="form-control" v-model="descuento.cantidad" type="number" placeholder="cantidad">
+                                    </div>
+                                    <div class="col-lg-5 form-group">
+                                        <label for="precio">Precio:</label>
+                                        <input class="form-control" v-model="descuento.precio" type="number" placeholder="precio">
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <i style="right: 50px" @click="borrarDescuento(index)" class="fas fa-times-circle borrarCliente"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="col-lg-12 mt-3">
                         <p><strong>Data para reportes</strong></p>
                     </div>
                     <div class="col-lg-4">
-                        <label>¿Costo por ofrecer el {{tipo_producto==1?'producto':'servicio'}}?:</label>
+                        <label>Costo por ofrecer el {{tipo_producto==1?'producto':'servicio'}}:</label>
                         <b-input-group>
                             <b-form-input type="number" v-model="costo"></b-form-input>
                             <template #append>
@@ -149,6 +173,7 @@
                 tipo_producto:1,
                 moneda: 'PEN',
                 moneda_compra:'PEN',
+                descuentos: [],
             }
         },
         mounted(){
@@ -191,6 +216,7 @@
                     'medida': this.medida,
                     'tipo_producto':this.tipo_producto,
                     'moneda': this.moneda,
+                    'descuentos': JSON.stringify(this.descuentos),
                     'moneda_compra' : this.moneda_compra,
                     'tipo_cambio_compra' : this.tipo_cambio_compra,
                 })
@@ -228,6 +254,15 @@
 
                 if (this.errorDatosProducto.length) this.errorProducto = 1;
                 return this.errorProducto;
+            },
+            agregarDescuento(){
+                this.descuentos.push({
+                    cantidad: 0,
+                    precio: '0.00'
+                });
+            },
+            borrarDescuento(index){
+                this.descuentos.splice(index,1);
             },
             resetModal(){
                 this.errorDatosProducto=[];

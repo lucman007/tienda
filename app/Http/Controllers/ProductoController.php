@@ -4,6 +4,7 @@ namespace sysfact\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use Milon\Barcode\DNS1D;
 use Milon\Barcode\DNS2D;
@@ -138,7 +139,8 @@ class ProductoController extends Controller
             return response(['mensaje'=>'Se ha registrado el producto'], 200);
 
         } catch (\Exception $e){
-            return response(['mensaje'=>'Ha ocurrido un error al guardar el producto'], 500);
+            Log::error($e);
+            return response(['mensaje'=>$e->getMessage()], 500);
         }
 
 	}

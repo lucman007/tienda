@@ -1139,6 +1139,59 @@ class ReporteController extends Controller
 
     }
 
+    //funciones para reporte de caja
+
+    public function reporte_caja_data($desde, $hasta, $filtro, $buscar, $esExportable){
+        try {
+
+            $cajas = null;
+            $filtros = ['desde' => $desde, 'hasta' => $hasta, 'filtro'=>$filtro,'buscar'=>$buscar];
+
+
+            if($esExportable == 'true'){
+                $cajas = Caja::whereBetween('fecha_a', [$desde . ' 00:00:00', $hasta . ' 23:59:59'])
+                    ->orderby('fecha_a', 'desc')
+                    ->get();
+            } else{
+                $cajas = Caja::whereBetween('fecha_a', [$desde . ' 00:00:00', $hasta . ' 23:59:59'])
+                    ->orderby('fecha_a', 'desc')
+                    ->paginate(30);
+                $cajas->appends($_GET)->links();
+            }
+
+            return [
+                'cajas'=>$cajas,
+                'filtros'=>$filtros,
+                'usuario'=>auth()->user()->persona
+            ];
+
+        } catch (\Exception $e){
+            return $e->getMessage();
+        }
+    }
+
+    public function reporte_caja(Request $request, $desde=null,$hasta=null){
+
+        $esExportable = $request->get('export','false');
+        $filtro = $request->filtro;
+        $buscar = $request->buscar;
+
+        if(!$filtro){
+            $filtro='fecha';
+            $desde=date('Y-m-d');
+            $hasta=date('Y-m-d');
+        }
+
+        $cajas=$this->reporte_caja_data($desde, $hasta, $filtro, $buscar, $esExportable);
+
+        if($esExportable == 'true'){
+            return Excel::download(new CajaExport($cajas['cajas']), 'reporte_caja.xlsx');
+        } else {
+            return view('reportes.caja',$cajas);
+        }
+
+    }
+
     public function descargar_archivo($file){
 
         $extension=explode('.',$file)[1];
@@ -1153,6 +1206,5 @@ class ReporteController extends Controller
         return null;
 
     }
-
 
 }
