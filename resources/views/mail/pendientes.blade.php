@@ -1,0 +1,1 @@
+<p>Hay {{$num_comprobantes}} comprobante pendientes en sistema de {{$emisor}} </p>

@@ -1,0 +1,24 @@
+<table>
+    <thead>
+    <tr>
+        <th>Código</th>
+        <th>Nombre</th>
+        <th>RUC</th>
+        <th>Dirección</th>
+        <th>Telefono</th>
+        <th>E-mail</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach($clientes as $cliente)
+        <tr>
+            <td>{{$cliente->cod_cliente}}</td>
+            <td>{{$cliente->persona->nombre}}</td>
+            <td>{{$cliente->num_documento}}</td>
+            <td>{{$cliente->persona->direccion}}</td>
+            <td>{{$cliente->persona->telefono}}</td>
+            <td>{{$cliente->persona->correo}}</td>
+        </tr>
+    @endforeach
+    </tbody>
+</table>

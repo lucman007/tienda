@@ -1,0 +1,664 @@
+@extends('layouts.main')
+@section('titulo', 'Registrar guía')
+@section('contenido')
+    <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
+        <div class="row">
+            <div class="col-sm-12">
+                <h3 class="titulo-admin-1">
+                    <a href="{{url('guia')}}"><i class="fas fa-arrow-circle-left"></i></a>
+                    Guía electrónica
+                </h3>
+                <b-button @click="abrir_modal('venta')"  class="mr-2"  variant="primary"><i class="fas fa-copy"></i> Copiar de venta</b-button>
+                <b-button @click="abrir_modal('guia')"  class="mr-2"  variant="primary"><i class="fas fa-copy"></i> Copiar de guia</b-button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12 mt-4 mb-3">
+                <div class="card">
+                    <div class="card-header">
+                        Datos guía
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-lg-2 form-group">
+                                <label>Fecha de emisión</label>
+                                <input type="date" v-model="fecha" max="{{date('Y-m-d')}}" class="form-control">
+                            </div>
+                            <div class="col-lg-3 form-group">
+                                <label>Serie y correlativo</label>
+                                <input disabled type="text" v-model="numeroGuia" class="form-control">
+                            </div>
+                            <div class="col-lg-3 form-group">
+                                <label>Documento relacionado</label>
+                                <select v-model="guia_datos_adicionales.doc_relacionado" name="cargo" class="custom-select">
+                                    <option value="-1">Ninguno</option>
+                                    <option value="01">Numeración DAN</option>
+                                    <option value="02">N° de orden de entrega</option>
+                                    <option value="03">N° SCOP</option>
+                                    <option value="04">N° de maniefiesto de carga</option>
+                                    <option value="05">N° de constancia de detracción</option>
+                                    <option value="06">Otros</option>
+                                </select>
+                            </div>
+                            <div v-show="guia_datos_adicionales.doc_relacionado!='-1'" class="col-lg-3 form-group">
+                                <label>N° documento relacionado</label>
+                                <input type="text" v-model="guia_datos_adicionales.num_doc_relacionado" placeholder="Número documento relacionado"
+                                       class="form-control">
+                            </div>
+                            <div class="col-lg-6 form-group">
+                                <label>Dirección de llegada</label>
+                                <input maxlength="100" type="text" v-model="guia_datos_adicionales.direccion" name="direccion"
+                                       class="form-control" placeholder="*Máximo 100 caracteres">
+                            </div>
+                            <div class="col-lg-2 form-group">
+                                <label>Ubigeo</label>
+                                <input disabled type="text" v-model="guia_datos_adicionales.ubigeo" class="form-control">
+                                <b-button v-b-modal.modal-ubigeo variant="primary"
+                                          class="buscar_documento boton_adjunto">
+                                    <i class="fas fa-search"></i>
+                                </b-button>
+                            </div>
+                            <div class="col-lg-2 form-group">
+                                <label>Peso (KG)</label>
+                                <input type="text" v-model="guia_datos_adicionales.peso" name="peso"
+                                       class="form-control">
+                            </div>
+                            <div class="col-lg-2 form-group">
+                                <label>N° de bultos</label>
+                                <input type="text" v-model="guia_datos_adicionales.bultos" name="bultos"
+                                       class="form-control">
+                            </div>
+                            <div class="col-lg-2 form-group">
+                                <label>Tipo de transporte</label>
+                                <select v-model="guia_datos_adicionales.tipo_transporte" name="cargo" class="custom-select" id="tipo_transporte">
+                                    <option value="01">Público</option>
+                                    <option value="02">Privado</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-10" v-show="guia_datos_adicionales.tipo_transporte == '01'">
+                                <div class="row">
+                                    <div class="col-lg-3 form-group">
+                                        <label>Tipo documento transportista</label>
+                                        <select v-model="guia_datos_adicionales.tipo_doc_transportista" name="cargo" class="custom-select" id="tipo_transporte">
+                                            <option value="6">RUC</option>
+                                            <option value="1">DNI</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-lg-3 form-group">
+                                        <label>Número doc. tranportista</label>
+                                        <input :maxlength="guia_datos_adicionales.tipo_doc_transportista==1? 8 : 11" type="text" v-model="guia_datos_adicionales.num_doc_transportista"
+                                               class="form-control">
+                                    </div>
+                                    <div class="col-lg-6 form-group">
+                                        <label>Razón social tranportista</label>
+                                        <input type="text" v-model="guia_datos_adicionales.razon_social_transportista"
+                                               class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-10" v-show="guia_datos_adicionales.tipo_transporte == '02'">
+                                <div class="row">
+                                    <div class="col-lg-3 form-group">
+                                        <label>Placa del vehículo</label>
+                                        <input type="text" v-model="guia_datos_adicionales.placa_vehiculo"
+                                               class="form-control">
+                                    </div>
+                                    <div class="col-lg-3 form-group">
+                                        <label>DNI del conductor</label>
+                                        <input maxlength="8" type="text" v-model="guia_datos_adicionales.dni_conductor"
+                                               class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 form-group">
+                                <label>Motivo de traslado</label>
+                                <select v-model="guia_datos_adicionales.codigo_traslado" name="cargo" class="custom-select">
+                                    <option value="01">Venta</option>
+                                    <option value="14">Venta sujeta a confirmacion del comprador</option>
+                                    <option value="02">Compra</option>
+                                    <option value="04">Traslado entre establecimientos de la misma empresa</option>
+                                    <option value="18">Traslado emisor itinerante cp</option>
+                                    <option value="08">Importación</option>
+                                    <option value="09">Exportación</option>
+                                    <option value="19">Traslado a zona primaria</option>
+                                    <option value="13">Otros</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-2 form-group">
+                                <label>Fecha traslado</label>
+                                <input type="date" v-model="guia_datos_adicionales.fecha_traslado" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-12 mb-3">
+                <div class="card">
+                    <div class="card-header">
+                        Detalle
+                    </div>
+                    <div class="card-body">
+                        <div class="row mt-4">
+                            @if(json_decode(cache('config')['interfaz'], true)['buscador_clientes'] == 1)
+                                <div class="col-lg-9">
+                                    <autocomplete-cliente v-on:agregar_cliente="agregarCliente" v-on:borrar_cliente="borrarCliente" ref="suggestCliente"></autocomplete-cliente>
+                                </div>
+                                <div class="col-lg-3 no-gutters">
+                                    <b-button v-b-modal.modal-nuevo-cliente
+                                              class="mb-4 mt-2 mt-lg-0 float-right float-lg-left" variant="primary"><i class="fas fa-plus"
+                                                                                                                       v-show="!mostrarSpinnerCliente"></i>
+                                        <b-spinner v-show="mostrarSpinnerCliente" small label="Loading..."></b-spinner>
+                                        Nuevo cliente
+                                    </b-button>
+                                </div>
+                            @else
+                                <div class="col-lg-9">
+                                    <b-button v-b-modal.modal-cliente
+                                              class="mb-4 mr-2" variant="primary"><i class="fas fa-search-plus"
+                                                                                     v-show="!mostrarSpinnerCliente"></i>
+                                        <b-spinner v-show="mostrarSpinnerCliente" small label="Loading..."></b-spinner>
+                                        Seleccionar cliente
+                                    </b-button>
+                                    <b-button v-b-modal.modal-nuevo-cliente
+                                              class="mb-4" variant="primary"><i class="fas fa-user-plus"
+                                                                                v-show="!mostrarSpinnerCliente"></i>
+                                        <b-spinner v-show="mostrarSpinnerCliente" small label="Loading..."></b-spinner>
+                                        Nuevo cliente
+                                    </b-button>
+                                </div>
+                                <div class="col-lg-8">
+                                    <input type="text" v-model="nombreCliente" class="form-control mb-2"
+                                           placeholder="Cliente" disabled readonly>
+                                </div>
+                            @endif
+                        </div>
+                        <div class="row mt-4">
+                            @if(json_decode(cache('config')['interfaz'], true)['buscador_productos'] == 1)
+                                <div class="col-lg-7">
+                                    <autocomplete ref="suggest" v-on:agregar_producto="agregarProducto"></autocomplete>
+                                </div>
+                                <div class="col-lg-3">
+                                    <b-button class="mb-4 mt-2 mt-lg-0 float-right float-lg-left"  v-b-modal.modal-nuevo-producto
+                                              variant="primary"><i class="fas fa-plus" v-show="!mostrarSpinnerProducto"></i>
+                                        <b-spinner v-show="mostrarSpinnerProducto" small label="Loading..."></b-spinner>
+                                        Nuevo producto
+                                    </b-button>
+                                </div>
+                            @else
+                                <div class="col-lg-10">
+                                    <b-button v-b-modal.modal-producto variant="primary" class="mr-2">
+                                        <i class="fas fa-search-plus" v-show="!mostrarSpinnerProducto"></i>
+                                        <b-spinner v-show="mostrarSpinnerProducto" small label="Loading..."></b-spinner>
+                                        Seleccionar producto
+                                    </b-button>
+                                    <b-button class=""  v-b-modal.modal-nuevo-producto
+                                              variant="primary"><i class="fas fa-plus" v-show="!mostrarSpinnerProducto"></i>
+                                        <b-spinner v-show="mostrarSpinnerProducto" small label="Loading..."></b-spinner>
+                                        Nuevo producto
+                                    </b-button>
+                                </div>
+                            @endif
+                        </div>
+                        <div class="table-responsive tabla-gestionar">
+                            <table class="table table-striped table-hover table-sm tabla-facturar">
+                                <thead class="bg-custom-green">
+                                <tr>
+                                    <th scope="col" style="width: 10px"></th>
+                                    <th scope="col" style="width: 200px">Producto</th>
+                                    <th scope="col" style="width: 250px">Caracteristicas</th>
+                                    <th scope="col" style="width: 90px">Cantidad</th>
+                                    <th scope="col" style="width: 50px"></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr v-for="(producto,index) in productosSeleccionados" :key="producto.num_item">
+                                    <td></td>
+                                    <td style="display:none">@{{producto.idproducto}}</td>
+                                    <td>@{{producto.cod_producto}} - @{{producto.nombre}}</td>
+                                    <td><textarea rows="1" class="form-control" type="text" v-model="producto.presentacion"></textarea></td>
+                                    <td><input class="form-control" type="text"
+                                               v-model="producto.cantidad"></td>
+                                    <td>
+                                        <a @click="borrarItemVenta(index)" href="javascript:void(0)">
+                                            <button class="btn btn-danger" title="Borrar item"><i class="fas fa-trash"></i>
+                                            </button>
+                                        </a>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-12 mb-5">
+                <div class="card">
+                    <div class="card-header">
+                        Acciones
+                    </div>
+                    <div class="card-body pt-5">
+                        <div class="form-group text-center">
+                            <b-button :disabled="mostrarProgresoGuardado || productosSeleccionados.length==0" class="mb-2" @click="procesarGuia"
+                                      variant="success">
+                                <i v-show="!mostrarProgresoGuardado" class="fas fa-save"></i>
+                                <b-spinner v-show="mostrarProgresoGuardado" small label="Loading..." ></b-spinner>Procesar
+                            </b-button>
+                            <b-button class="mb-2" @click="limpiar" variant="danger"><i class="fas fa-ban"></i> Cancelar
+                            </b-button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--INICIO MODAL DOCUMENTO -->
+    <b-modal size="lg" id="modal-documento" ref="modal-documento" ok-only @hidden="resetModal">
+        <template slot="modal-title">
+            Seleccionar documento
+        </template>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label for="buscar">Busca por correlativo o cliente:</label>
+                        <input @keyup="delay()" v-model="buscar" type="text" name="buscar"
+                               placeholder="Buscar..." class="form-control" autocomplete="off">
+                    </div>
+                </div>
+                <div class="col-lg-12">
+                    <div class="table-responsive tabla-gestionar">
+                        <table class="table table-striped table-hover table-sm">
+                            <thead class="bg-custom-green">
+                            <tr>
+                                <th scope="col">N°</th>
+                                <th scope="col">Serie/correlativo</th>
+                                <th scope="col">Cliente</th>
+                                <th v-show="comprobante_a_copiar=='-1'" scope="col">Importe</th>
+                                <th scope="col">Estado</th>
+                                <th scope="col"></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr :class="{'td-anulado':doc.estado=='ANULADO'}" v-for="(doc,index) in listaDocumentos" :key="doc.idventa">
+                                <td v-show="comprobante_a_copiar=='-1'">@{{doc.idventa}}</td>
+                                <td v-show="comprobante_a_copiar=='09'">@{{doc.idguia}}</td>
+                                <td v-show="comprobante_a_copiar=='-1'" style="width: 20%">@{{doc.serie}}-@{{doc.correlativo}}</td>
+                                <td v-show="comprobante_a_copiar=='09'" style="width: 20%">@{{doc.correlativo}}</td>
+                                <td style="width: 40%">@{{doc.nombre}}</td>
+                                <td v-show="comprobante_a_copiar=='-1'">@{{doc.total_venta}}</td>
+                                <td>
+                                    <span class="badge"
+                                          :class="{'badge-warning':doc.estado == 'PENDIENTE',
+                                   'badge-success' : doc.estado == 'ACEPTADO',
+                                   'badge-dark' : doc.estado == 'ANULADO','badge-danger' : doc.estado == 'RECHAZADO'}">
+                                        @{{ doc.estado }}
+                                    </span>
+                                </td>
+                                <td style="width: 5%" class="botones-accion">
+                                    <a href="javascript:void(0)">
+                                        <button @click="agregarDocumento(doc.idventa,doc.idguia)" class="btn btn-info" title="Seleccionar documento"><i
+                                                    class="fas fa-check"></i>
+                                        </button>
+                                    </a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </b-modal>
+    <!--FIN MODAL DOCUMENTO -->
+    <modal-ubigeo
+            v-on:agregar_ubigeo="agregarUbigeo">
+    </modal-ubigeo>
+    <modal-producto
+            v-bind:stock="false"
+            v-on:agregar_producto="agregarProducto">
+    </modal-producto>
+    <modal-cliente
+            v-on:agregar_cliente="agregarCliente">
+    </modal-cliente>
+    <agregar-cliente
+            v-on:agregar="agregarClienteNuevo">
+    </agregar-cliente>
+    <agregar-producto
+            v-bind:ultimo_id="{{$ultimo_id}}"
+            v-bind:tipo_cambio_compra="{{cache('opciones')['tipo_cambio_compra']}}"
+            v-on:agregar="agregarProductoNuevo">
+    </agregar-producto>
+@endsection
+@section('script')
+    <script>
+
+        let app = new Vue({
+            el: '.app',
+            data: {
+                idpresupuesto:'<?php echo isset($_GET['presupuesto'])?$_GET['presupuesto']:null ?>',
+                accion: "insertar",
+                mostrarProgresoGuardado: false,
+                fecha: "{{date("Y-m-d")}}",
+                fecha_traslado: "{{date("Y-m-d")}}",
+                numeroGuia:"",
+
+                clienteSeleccionado: {},
+                nombreCliente: "",
+                buscar: "",
+                mostrarSpinnerCliente: false,
+
+                productosSeleccionados: [],
+                mostrarSpinnerProducto: false,
+                listaDocumentos:[],
+                comprobante_a_copiar:-1,
+                esConGuia:0,
+                guia_datos_adicionales:{
+                    direccion:"",
+                    ubigeo:"",
+                    peso:"",
+                    bultos:"",
+                    tipo_doc_transportista:"6",
+                    num_doc_transportista:"",
+                    razon_social_transportista:"",
+                    placa_vehiculo:<?php echo json_encode(json_decode(cache('config')['guia'], true)['placa']) ?>,
+                    dni_conductor:<?php echo json_encode(json_decode(cache('config')['guia'], true)['num_doc']) ?>,
+                    codigo_traslado:"01",
+                    fecha_traslado: "{{date("Y-m-d")}}",
+                    doc_relacionado:"-1",
+                    num_doc_relacionado:"",
+                    tipo_transporte:<?php echo json_encode(json_decode(cache('config')['guia'], true)['tipo_transporte']) ?>,
+                },
+                tipo_busqueda:"",
+            },
+            created(){
+                this.obtenerCorrelativo();
+                if(this.idpresupuesto !== ''){
+                    this.agregarDocumento(null, null, this.idpresupuesto);
+                }
+            },
+            methods: {
+                obtenerCorrelativo(){
+                    axios.get('/guia/obtenerCorrelativo')
+                        .then(response => {
+                            this.numeroGuia = response.data;
+                        })
+                        .catch(error => {
+                            this.alerta('No hay venta registrada. Ingresa el correlativo manualmente');
+                            console.log(error);
+                        });
+                },
+                agregarCliente(obj){
+                    this.clienteSeleccionado = obj;
+                    this.nombreCliente = this.clienteSeleccionado['num_documento']+' - '+this.clienteSeleccionado['nombre'];
+                },
+                borrarCliente(){
+                    this.clienteSeleccionado = {};
+                },
+                agregarProductoNuevo(nombre){
+                    this.buscar = nombre;
+                },
+                agregarClienteNuevo(obj){
+                    if(this.$refs['suggestCliente']){
+                        this.$refs['suggestCliente'].agregarCliente(obj);
+                    } else {
+                        this.agregarCliente(obj)
+                    }
+                },
+                obtenerDocumentos(comprobante){
+                    this.comprobante_a_copiar=-1;
+                    if(comprobante=='guia'){
+                        this.comprobante_a_copiar='09';
+                    }
+
+                    axios.post('{{action('GuiaController@obtenerDocumentos')}}', {
+                        'textoBuscado': this.buscar,
+                        'comprobante':this.comprobante_a_copiar
+                    })
+                        .then(response => {
+                            this.listaDocumentos = response.data;
+                        })
+                        .catch(error => {
+                            this.alerta('Ha ocurrido un error al obtener los documentos','error');
+                            console.log(error);
+                        });
+                },
+                agregarDocumento(idventa,idguia,idpresupuesto){
+                    let post_action='{{action('GuiaController@copiarDocumento')}}';
+                    axios.post(post_action, {
+                        'idventa': idventa,
+                        'idguia': idguia,
+                        'idpresupuesto': idpresupuesto
+                    })
+                        .then(response => {
+                            let datos = response.data;
+                            if(this.$refs['suggestCliente']){
+                                this.$refs['suggestCliente'].agregarCliente(datos.cliente);
+                            } else {
+                                this.clienteSeleccionado = datos.cliente;
+                                this.nombreCliente = this.clienteSeleccionado['num_documento']+' - '+this.clienteSeleccionado['nombre'];
+                            }
+                            this.productosSeleccionados = datos.productos;
+
+                            if(datos.guia_datos_adicionales){
+                                this.guia_datos_adicionales = datos.guia_datos_adicionales
+                                this.guia_datos_adicionales.fecha_traslado='{{date('Y-m-d')}}'
+                            } else {
+                                this.guia_datos_adicionales={
+                                    direccion:'',
+                                    ubigeo:'',
+                                    peso:'',
+                                    bultos:'',
+                                    tipo_doc_transportista:'6',
+                                    num_doc_transportista:'',
+                                    razon_social_transportista:'',
+                                    placa_vehiculo:'',
+                                    dni_conductor:'',
+                                    codigo_traslado:'01',
+                                    fecha_traslado: '{{date('Y-m-d')}}',
+                                    doc_relacionado:'-1',
+                                    num_doc_relacionado:'',
+                                    tipo_transporte:'01'
+                                }
+
+                            }
+                            this.$refs['modal-documento'].hide();
+                        })
+                        .catch(error => {
+                            this.alerta('No se ha podido copiar la venta','error');
+                            console.log(error);
+                        });
+                },
+                abrir_modal(nombre){
+                    switch (nombre){
+                        case 'venta':
+                        case 'guia':
+                            this.$refs['modal-documento'].show();
+                            this.obtenerDocumentos(nombre);
+                            break;
+                    }
+                    this.tipo_busqueda=nombre;
+                },
+                delay(){
+                    if (this.timer) {
+                        clearTimeout(this.timer);
+                        this.timer = null;
+                    }
+                    this.timer = setTimeout(() => {
+                        switch (this.tipo_busqueda){
+                            case 'venta':
+                            case 'guia':
+                                this.obtenerDocumentos(this.tipo_busqueda);
+                                break;
+                        }
+
+                    }, 500);
+                },
+                agregarProducto(obj){
+                    let productos = this.productosSeleccionados.push(Object.assign({}, obj));
+                    let i = productos - 1;
+                    this.$set(this.productosSeleccionados[i], 'num_item', i);
+                    this.$set(this.productosSeleccionados[i], 'cantidad', 1);
+                },
+                borrarItemVenta(index){
+                    this.productosSeleccionados.splice(index, 1);
+                },
+                resetModal(){
+                    this.buscar = '';
+                },
+                procesarGuia(){
+
+                    if (this.validarVenta()) {
+                        return;
+                    }
+                    this.$swal({
+                        heightAuto: false,
+                        position: 'top',
+                        icon: 'question',
+                        text: 'Se registrará una guía. Confirma esta acción.',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        cancelButtonText: 'Cancelar',
+                        confirmButtonText: 'Sí, registrar'
+                    }).then((result) => {
+                        if (result.isConfirmed){
+                            this.mostrarProgresoGuardado = true;
+                            axios.post('{{action('GuiaController@store')}}', {
+                                'idcliente': this.clienteSeleccionado['idcliente'],
+                                'num_guia': this.numeroGuia,
+                                'fecha': this.fecha,
+                                'guia_datos_adicionales': JSON.stringify(this.guia_datos_adicionales),
+                                'items': JSON.stringify(this.productosSeleccionados)
+                            })
+                                .then(response => {
+                                    if(isNaN(response.data.idguia)){
+                                        this.alerta('Ha ocurrido un error al procesar la guía','error');
+                                        this.mostrarProgresoGuardado = false;
+                                    } else{
+                                        this.$swal({
+                                            position: 'top',
+                                            icon: 'success',
+                                            title: 'Se ha guardado la guía',
+                                            text:response.data.respuesta,
+                                            timer: 6000,
+                                            confirmButtonColor: '#007bff',
+                                        }).then(()=>{
+                                            location.href = '/guia/emision/' + response.data.idguia;
+                                            this.mostrarProgresoGuardado = false;
+                                        });
+                                    }
+                                })
+                                .catch(error => {
+                                    this.alerta('Ha ocurrido un error con la guía','error');
+                                    console.log(error);
+                                    this.mostrarProgresoGuardado = false;
+                                });
+                        }
+                    })
+                },
+                validarVenta(){
+                    let errorVenta = 0;
+                    let errorDatosVenta = [];
+                    let errorString = '';
+                    if (this.fecha.length == 0) errorDatosVenta.push('*La fecha no puede estar vacia');
+                    if (this.guia_datos_adicionales.direccion.length == 0) errorDatosVenta.push('*El campo direccion de la guia no puede estar vacío');
+                    if (this.guia_datos_adicionales.ubigeo.length!=6) errorDatosVenta.push('*El campo ubigeo debe contener un código de 6 dígitos');
+                    if (isNaN(this.guia_datos_adicionales.ubigeo)) errorDatosVenta.push('*El campo ubigeo debe ser un número');
+                    if (this.guia_datos_adicionales.peso.length == 0) errorDatosVenta.push('*El campo peso no puede estar vacío');
+                    if (isNaN(this.guia_datos_adicionales.peso)) errorDatosVenta.push('*El campo peso debe ser un número');
+                    if (this.guia_datos_adicionales.bultos.length == 0) errorDatosVenta.push('*El campo N° de bultos no puede estar vacío');
+                    if (isNaN(this.guia_datos_adicionales.bultos)) errorDatosVenta.push('*El campo N° de bultos debe ser un número');
+                    if(this.guia_datos_adicionales.tipo_transporte=='01'){
+                        if (this.guia_datos_adicionales.num_doc_transportista.length == 0) errorDatosVenta.push('*El campo número de documento de transportista no puede estar vacío');
+                        if (isNaN(this.guia_datos_adicionales.num_doc_transportista)) errorDatosVenta.push('*El campo número de documento de transportista debe ser un número sin letras ni espacios');
+                        if (!(this.guia_datos_adicionales.num_doc_transportista.length === 11) && this.guia_datos_adicionales.tipo_doc_transportista == '6') errorDatosVenta.push('*El campo número documento de transportista debe contener 11 dígitos');
+                        if (!(this.guia_datos_adicionales.num_doc_transportista.length == 8) && this.guia_datos_adicionales.tipo_doc_transportista == '1') errorDatosVenta.push('*El campo número documento de transportista debe contener 8 dígitos');
+                        if (this.guia_datos_adicionales.razon_social_transportista.length == 0) errorDatosVenta.push('*El campo razón social de transportista no puede estar vacío');
+                    } else{
+                        if (this.guia_datos_adicionales.placa_vehiculo.length == 0) errorDatosVenta.push('*El campo placa vehículo no puede estar vacío');
+                        if (this.guia_datos_adicionales.dni_conductor.length == 0) errorDatosVenta.push('*El campo dni de conductor no puede estar vacío');
+                        if (isNaN(this.guia_datos_adicionales.dni_conductor)) errorDatosVenta.push('*El campo dni de conductor debe ser un número sin letras ni espacios');
+                        if (this.guia_datos_adicionales.dni_conductor.length != 8) errorDatosVenta.push('*El campo dni de conductor debe contener 8 dígitos');
+                    }
+                    if(this.guia_datos_adicionales.doc_relacionado!='-1' && this.guia_datos_adicionales.num_doc_relacionado.length == 0)errorDatosVenta.push('*El campo número de documento relacionado no puede estar vacío');
+
+                    if (/^\./.test(this.guia_datos_adicionales.bultos)) this.guia_datos_adicionales.bultos='0'+this.guia_datos_adicionales.bultos;
+                    if (/^\./.test(this.guia_datos_adicionales.peso)) this.guia_datos_adicionales.peso='0'+this.guia_datos_adicionales.peso;
+
+                    if (Object.keys(this.clienteSeleccionado).length == 0) errorDatosVenta.push('*Debes ingresar un cliente');
+
+                    //Validar motivo de traslado
+                    switch (this.guia_datos_adicionales.codigo_traslado) {
+                            case '01':
+                                if (this.clienteSeleccionado['num_documento'] == <?php echo $ruc_emisor ?>) errorDatosVenta.push('*El destinatario no debe ser igual al remitente');
+                                break;
+                            case '02':
+                            case '04':
+                            case '18':
+                                if (this.clienteSeleccionado['num_documento'] != <?php echo $ruc_emisor ?>) errorDatosVenta.push('*Para el motivo de traslado ingresado el destinatario debe ser igual al remitente');
+                                break;
+                            case '08':
+                            case '09':
+                                if (this.guia_datos_adicionales.doc_relacionado != '01') errorDatosVenta.push('*Para importación / exportación debes ingresar el número DAN');
+
+                    }
+
+
+                    if (errorDatosVenta.length) {
+                        errorVenta = 1;
+                        for (let error of errorDatosVenta) {
+                            errorString += error + '\n';
+                        }
+                        this.alerta(errorString);
+                    }
+
+                    return errorVenta;
+                },
+                agregarUbigeo(ubigeo){
+                    this.guia_datos_adicionales.ubigeo=ubigeo;
+                },
+                limpiar(){
+                    this.clienteSeleccionado = {};
+                    this.nombreCliente = '';
+                    this.codigoCliente='';
+                    this.numDocCliente='';
+                    this.productosSeleccionados = [];
+
+                    this.fecha = '{{date('Y-m-d')}}';
+                    this.fecha_vencimiento = '{{date('Y-m-d')}}';
+
+                    this.guia_datos_adicionales={
+                        direccion:'',
+                        ubigeo:'',
+                        peso:'',
+                        bultos:'',
+                        tipo_doc_transportista:'6',
+                        num_doc_transportista:'',
+                        razon_social_transportista:'',
+                        placa_vehiculo:'',
+                        dni_conductor:'',
+                        codigo_traslado:'01',
+                        fecha_traslado: '{{date('Y-m-d')}}',
+                        doc_relacionado:'-1',
+                        num_doc_relacionado:'',
+                        tipo_transporte:'01'
+                    };
+
+                    this.tipo_busqueda='';
+                    this.obtenerCorrelativo();
+                },
+                alerta(texto, icon){
+                    this.$swal({
+                        position: 'top',
+                        icon: icon || 'warning',
+                        title: texto,
+                        timer: 6000,
+                        toast:true,
+                        confirmButtonColor: '#007bff',
+                    });
+                }
+            }
+
+        });
+    </script>
+@endsection
