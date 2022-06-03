@@ -12,6 +12,7 @@ use Spipu\Html2Pdf\Html2Pdf;
 use sysfact\AppConfig;
 use sysfact\Emisor;
 use sysfact\Http\Controllers\Helpers\MainHelper;
+use sysfact\Presupuesto;
 use sysfact\Trabajador;
 use sysfact\Venta;
 
@@ -417,6 +418,8 @@ class ConfiguracionController extends Controller
         $producto->detalle = $detalle;
         $producto->unidad_medida = 'NIU/UND';
         $producto->total = 100;
+        $producto->monto = 100;
+        $producto->monto_descuento = 0;
 
         $presupuesto->productos = [$producto];
         $config = MainHelper::configuracion('mail_contact');

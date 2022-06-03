@@ -1,5 +1,5 @@
 @extends('layouts.main')
-@section('titulo', 'Registrar')
+@section('titulo', 'Requerimiento')
 @section('contenido')
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
@@ -270,7 +270,6 @@
                     this.subtotal = 0.00;
                     this.igv = 0.00;
                     this.calcularTotalCompra();
-                    this.obtenerCorrelativo();
                 }
             }
 

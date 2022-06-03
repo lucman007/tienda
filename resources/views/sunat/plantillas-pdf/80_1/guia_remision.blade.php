@@ -1,5 +1,5 @@
 @extends('sunat.plantillas-pdf.main')
-@section('titulo','Factura')
+@section('titulo','Guía de remisión')
 @section('contenido')
     <div class="header">
         <div class="info-emisor">
@@ -191,8 +191,9 @@
         }
         .header .info-emisor .texto{
             width: 62mm;
-            position: absolute;
+            float: left;
             text-align: center;
+            margin-bottom: 10px;
         }
 
         .body{
@@ -204,11 +205,10 @@
 
         .body .info-usuario{
             width: 72mm;
-            height: 20mm;
+            height: 15mm;
         }
         .body .items {
             width: 72mm;
-            margin-top: 5mm;
             position: relative;
         }
         .footer{

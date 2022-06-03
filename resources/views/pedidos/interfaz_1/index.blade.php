@@ -560,22 +560,34 @@
                             });
                     },
                     imprimir(file_or_id){
+
+                        let src = '';
+                        switch (file_or_id) {
+                            case 'comanda':
+                                src = "{{url('/pedidos/imprimir').'/'}}" + this.idpedido;
+                                break;
+                            case 'entrega':
+                                src = "{{url('/pedidos/imprimir_entrega/').'/'}}" + this.idpedido;
+                                break;
+                            default:
+                                src = "{{url('/ventas/imprimir/').'/'}}" + file_or_id;
+                        }
+
                          @if(!$agent->isDesktop())
-                            let src = '';
-                            switch(file_or_id){
-                                case 'comanda':
-                                    src = "{{url('/pedidos/imprimir').'/'}}"+this.idpedido;
-                                    break;
-                                case 'entrega':
-                                    src = "{{url('/pedidos/imprimir_entrega/').'/'}}"+this.idpedido;
-                                    break;
-                                default:
-                                    src = "{{url('/ventas/imprimir/').'/'}}"+file_or_id;
-                            }
+
                             @if(isset(json_decode(cache('config')['interfaz'], true)['rawbt']) && json_decode(cache('config')['interfaz'], true)['rawbt'])
-                                let  beforeUrl = 'intent:';
+
+                                axios.get(src+'?rawbt=true')
+                                    .then(response => {
+                                        window.location.href = response.data;
+                                    })
+                                    .catch(error => {
+                                        alert('Ha ocurrido un error al imprimir con RawBT.');
+                                        console.log(error);
+                                    });
+                                /*let  beforeUrl = 'intent:';
                                 afterUrl = '#Intent;package=ru.a402d.rawbtprinter;scheme=rawbt;component=ru.a402d.rawbtprinter.activity.PrintDownloadActivity;end;';
-                                document.location=beforeUrl+encodeURI(src)+afterUrl;
+                                document.location=beforeUrl+encodeURI(src)+afterUrl;*/
                             @else
                                 window.open(src, '_blank');
                             @endif
@@ -589,16 +601,7 @@
                                     iframe.contentWindow.print();
                                 }, 0);
                             };
-                            switch(file_or_id){
-                                case 'comanda':
-                                    iframe.src = "/pedidos/imprimir/"+this.idpedido;
-                                    break;
-                                case 'entrega':
-                                    iframe.src = '/pedidos/imprimir_entrega/'+this.idpedido;
-                                    break;
-                                default:
-                                    iframe.src = '/ventas/imprimir/'+file_or_id;
-                            }
+                            iframe.src = src;
                         @endif
                     },
                     limpiar(){

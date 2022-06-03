@@ -425,27 +425,6 @@
                 tabChanged(tab){
                     history.pushState("", "", '/configuracion?tab='+tab);
                 },
-                imprimir(){
-
-                    let img = document.createElement('img');
-                    let src = "{{url('/images/logo.png')}}";
-                    img.style.width = '78mm';
-                    img.id="aaab"
-                    document.body.appendChild(img);
-
-                    let popup = window.open('','', 'height=400,width=600');
-                    popup.document.write('<html><head><title>' + document.title  + '</title>');
-                    popup.document.write('</head><body style="width: 78mm;">');
-                    popup.document.write('<img src="{{url('/images/logo.png')}}" style="width:78mm">');
-                    popup.document.write('</body></html>');
-                    popup.document.close();
-                    popup.onload = function() {
-                        setTimeout(function () {
-                            popup.focus();
-                            popup.print();
-                        }, 0);
-                    };
-                },
             },
         });
     </script>

@@ -1,6 +1,7 @@
 @extends('layouts.main')
 @section('titulo', 'Guia '.$guia->correlativo)
 @section('contenido')
+    @php $agent = new \Jenssegers\Agent\Agent() @endphp
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
             <div class="col-sm-12">
@@ -94,7 +95,7 @@
                                 XML
                             </b-button>
                             <b-button class="mb-2"
-                                      @if(json_decode(cache('config')['interfaz'], true)['tipo_impresion'] == 1)
+                                      @if(json_decode(cache('config')['interfaz'], true)['tipo_impresion'] == 1 && $agent->isDesktop())
                                       target="_blank" href="{{url('ventas/imprimir').'/'.$guia->nombre_fichero}}"
                                       @else
                                       @click="imprimir('{{$guia->nombre_fichero}}')"
@@ -167,6 +168,21 @@
                     }
                 },
                 imprimir(file){
+                    let src = "/guia/imprimir/"+file+'.pdf';
+                    @if(!$agent->isDesktop())
+                        @if(isset(json_decode(cache('config')['interfaz'], true)['rawbt']) && json_decode(cache('config')['interfaz'], true)['rawbt'])
+                            axios.get(src+'?rawbt=true')
+                            .then(response => {
+                                window.location.href = response.data;
+                            })
+                            .catch(error => {
+                                alert('Ha ocurrido un error al imprimir con RawBT.');
+                                console.log(error);
+                            });
+                        @else
+                            window.open(src, '_blank');
+                        @endif
+                    @else
                     let iframe = document.createElement('iframe');
                     document.body.appendChild(iframe);
                     iframe.style.display = 'none';
@@ -176,7 +192,8 @@
                             iframe.contentWindow.print();
                         }, 0);
                     };
-                    iframe.src = "/guia/imprimir/"+file+'.pdf';
+                    iframe.src = src;
+                    @endif
                 },
                 alerta(texto, icon){
                     this.$swal({

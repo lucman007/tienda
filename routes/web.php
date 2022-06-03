@@ -284,6 +284,7 @@ Route::group(['middleware' => ['can:Configuración']], function () {
     Route::post('configuracion/agregar-imagen', 'ConfiguracionController@agregarImagen');
     Route::post('configuracion/borrar-imagen', 'ConfiguracionController@borrarImagen');
     Route::get('configuracion/mostrar-plantilla/{plantilla}', 'ConfiguracionController@mostrar_plantilla');
+    Route::get('configuracion/mostrar-plantilla-cotizacion/{plantilla}', 'ConfiguracionController@mostrar_plantilla_cotizacion');
     Route::get('configuracion/cerrar-sesiones', 'ConfiguracionController@cerrarSesiones');
     Route::get('configuracion/reiniciar-vistas', 'ConfiguracionController@reiniciar_vistas');
 });

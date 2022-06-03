@@ -263,7 +263,7 @@
         width: 95mm;
         position: absolute;
         right: 0;
-        top:25mm;
+        top:35mm;
     }
 
     .body{

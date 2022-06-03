@@ -13,6 +13,7 @@ class Venta extends Model
 		'idempleado',
 		'idcliente',
 		'idcajero',
+        'idcaja',
 		'fecha',
         'fecha_vencimiento',
 		'total_venta',

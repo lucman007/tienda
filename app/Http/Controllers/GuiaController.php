@@ -599,10 +599,14 @@ class GuiaController extends Controller
         $producto->store($request);
     }
 
-    public function imprimir_venta($file)
+    public function imprimir_venta(Request $request, $file)
     {
         $pathtoFile = storage_path().'/app/sunat/pdf/'.$file;
-        return response()->file($pathtoFile);
+        if($request->rawbt){
+            return 'rawbt:data:application/pdf;base64,'.base64_encode(file_get_contents($pathtoFile));
+        } else {
+            return response()->file($pathtoFile);
+        }
     }
 
 }

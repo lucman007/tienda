@@ -332,7 +332,15 @@ class PedidoController extends Controller
         $pdf=new Html2Pdf('P',[72,250],'es');
         $pdf->pdf->SetTitle('Pedido N° '.$pedido->idorden);
         $pdf->writeHTML($html);
-        $pdf->output('pedido_'.$pedido->idorden.'.pdf');
+
+        if($request->rawbt){
+            $fromFile = $pdf->output('pedido_'.$pedido->idorden.'.pdf','S');
+            return 'rawbt:data:application/pdf;base64,'.base64_encode($fromFile);
+        } else {
+            $pdf->output('pedido_'.$pedido->idorden.'.pdf');
+        }
+
+
     }
 
     public function destroy($id)
@@ -358,7 +366,7 @@ class PedidoController extends Controller
         return $cliente->store($request);
     }
 
-    public function imprimir_historial(){
+    public function imprimir_historial(Request $request){
         $ventas = Venta::where('eliminado', 0)
             ->whereHas('facturacion', function($query) {
                 $query->where(function ($query) {
@@ -381,7 +389,14 @@ class PedidoController extends Controller
         $pdf=new Html2Pdf('P',[72,250],'es');
         $pdf->pdf->SetTitle('Historial de pedidos');
         $pdf->writeHTML($html);
-        $pdf->output('historial.pdf');
+
+        if($request->rawbt){
+            $fromFile = $pdf->output('resumen.pdf','S');
+            return 'rawbt:data:application/pdf;base64,'.base64_encode($fromFile);
+        } else {
+            $pdf->output('resumen.pdf');
+        }
+
     }
 
     public function ventas(Request $request){
@@ -677,7 +692,7 @@ class PedidoController extends Controller
         }
     }
 
-    public function imprimir_datos_entrega($idpedido){
+    public function imprimir_datos_entrega(Request $request,$idpedido){
         try{
             $pedido = Orden::find($idpedido);
             $view = view('pedidos/imprimir_entrega',['orden'=>$pedido,'entrega'=>json_decode($pedido->datos_entrega, true)]);
@@ -685,7 +700,13 @@ class PedidoController extends Controller
             $pdf=new Html2Pdf('P',[72,250],'es');
             $pdf->pdf->SetTitle('Pedido N° '.$pedido->idorden);
             $pdf->writeHTML($html);
-            $pdf->output('pedido_'.$pedido->idorden.'.pdf');
+            if($request->rawbt){
+                $fromFile = $pdf->output('pedido_'.$pedido->idorden.'.pdf','S');
+                return 'rawbt:data:application/pdf;base64,'.base64_encode($fromFile);
+            } else {
+                $pdf->output('pedido_'.$pedido->idorden.'.pdf');
+            }
+
         } catch (\Exception $e){
            return $e->getMessage();
         }

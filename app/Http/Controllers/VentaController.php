@@ -27,12 +27,14 @@ class VentaController extends Controller
 {
     private $serie_comprobante;
     private $interfaz;
+    private $idcaja;
 
     public function __construct()
     {
         $this->middleware('auth');
         $this->serie_comprobante = new Serie();
         $this->interfaz = json_decode(MainHelper::configuracion('interfaz_pedidos'),true);
+        $this->idcaja = MainHelper::obtener_idcaja();
     }
 
     public function registrar()
@@ -191,7 +193,6 @@ class VentaController extends Controller
 
     public function obtenerCorrelativo($tipo_comprobante)
     {
-
         switch ($tipo_comprobante) {
             case '03':
                 $serie = $this->serie_comprobante->serie_boleta;
@@ -374,6 +375,7 @@ class VentaController extends Controller
             $venta->idempleado = auth()->user()->idempleado;
             $venta->idcliente = $request->idcliente;
             $venta->idcajero = auth()->user()->idempleado;
+            $venta->idcaja = $this->idcaja;
             $venta->fecha = $request->fecha . ' ' . date('H:i:s');
             $venta->tipo_cambio = cache('opciones')['tipo_cambio_compra'];
             if($request->fecha>date('Y-m-d')){
@@ -830,18 +832,67 @@ class VentaController extends Controller
 
     }
 
-    public function imprimir_venta($file_or_id)
+    public function imprimir_venta(Request $request, $file_or_id)
     {
         if(is_numeric($file_or_id)){
-            $this->imprimir_recibo($file_or_id);
+            return $this->imprimir_recibo($request, $file_or_id);
         } else{
             try{
                 $fromFile = storage_path().'/app/sunat/pdf/'.$file_or_id.'.pdf';
-                return response()->file($fromFile);
+
+                if($request->rawbt){
+                    return 'rawbt:data:application/pdf;base64,'.base64_encode(file_get_contents($fromFile));
+                } else {
+                    return response()->file($fromFile);
+                }
+
             } catch (\Exception $e){
                 Log::info($e);
                 return response(['idventa'=>-1,'respuesta'=>'El archivo pdf no existe'],500);
             }
+        }
+    }
+
+    public function imprimir_recibo(Request $request, $id)
+    {
+        $venta=Venta::find($id);
+        $items=$venta->productos;
+        $venta->facturacion;
+
+        if($venta->facturacion->codigo_moneda=='PEN'){
+            $moneda_letras='SOLES';
+            $venta->facturacion->codigo_moneda='S/';
+        } else{
+            $moneda_letras='DÓLARES';
+        }
+
+        $venta->leyenda=NumeroALetras::convert($venta->total_venta, $moneda_letras,true);
+        $usuario=$venta->cliente;
+        $emisor=new Emisor();
+
+        $config = MainHelper::configuracion('impresion');
+        $formato = MainHelper::getFormatoImpresionComprobantes($config);
+
+        $view = view('sunat/plantillas-pdf/'.$formato['ruta'].'/recibo',['documento'=>$venta, 'emisor'=>$emisor,'usuario'=>$usuario,'items'=>$items]);
+        $html=$view->render();
+        $pdf=new Html2Pdf('P',$formato['medidas'],'es');
+        $pdf->writeHTML($html);
+
+        if($request->rawbt){
+            $fromFile = $pdf->output('RECIBO-'.$venta->ticket.'.pdf','S');
+            return 'rawbt:data:application/pdf;base64,'.base64_encode($fromFile);
+        } else {
+            $pdf->output('RECIBO-'.$venta->ticket.'.pdf');
+        }
+
+    }
+
+    public function enviar_comprobantes_por_email(Request $request){
+        try{
+            Mail::to($request->mail)->send(new EnviarDocumentos($request));
+            return 'Se envió el correo con éxito';
+        } catch (\Swift_TransportException $e){
+            return response(['mensaje'=>$e->getMessage()],500);
         }
     }
 
@@ -868,42 +919,6 @@ class VentaController extends Controller
         $venta->orden()->update([
             'estado'=>'VENTA ANULADA'
         ]);
-    }
-
-    public function imprimir_recibo($id)
-    {
-        $venta=Venta::find($id);
-        $items=$venta->productos;
-        $venta->facturacion;
-
-        if($venta->facturacion->codigo_moneda=='PEN'){
-            $moneda_letras='SOLES';
-            $venta->facturacion->codigo_moneda='S/';
-        } else{
-            $moneda_letras='DÓLARES';
-        }
-
-        $venta->leyenda=NumeroALetras::convert($venta->total_venta, $moneda_letras,true);
-        $usuario=$venta->cliente;
-        $emisor=new Emisor();
-
-        $config = MainHelper::configuracion('impresion');
-        $formato = MainHelper::getFormatoImpresionComprobantes($config);
-
-        $view = view('sunat/plantillas-pdf/'.$formato['ruta'].'/recibo',['documento'=>$venta, 'emisor'=>$emisor,'usuario'=>$usuario,'items'=>$items]);
-        $html=$view->render();
-        $pdf=new Html2Pdf('P',$formato['medidas'],'es');
-        $pdf->writeHTML($html);
-        $pdf->output('RECIBO-'.$venta->ticket.'.pdf');
-    }
-
-    public function enviar_comprobantes_por_email(Request $request){
-        try{
-            Mail::to($request->mail)->send(new EnviarDocumentos($request));
-            return 'Se envió el correo con éxito';
-        } catch (\Swift_TransportException $e){
-            return response(['mensaje'=>$e->getMessage()],500);
-        }
     }
 
     public function categorias()
@@ -1033,6 +1048,7 @@ class VentaController extends Controller
             $venta->idempleado = $pedido->idempleado;
             $venta->idcliente = $request->idcliente?$request->idcliente:-1;
             $venta->idcajero = auth()->user()->idempleado;
+            $venta->idcaja = $this->idcaja;
             $venta->fecha = date('Y-m-d H:i:s');
             $venta->total_venta = $pedido->total;
             $venta->tipo_pago = $request->tipo_pago_contado;
@@ -1435,4 +1451,5 @@ Imprime y entrega la NOTA DE CRÉDITO junto al comprobante anulado.',
             return $e->getMessage();
         }
     }
+
 }

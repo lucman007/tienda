@@ -12,6 +12,7 @@ class Requerimiento extends Model
 	protected $fillable=[
 		'idempleado',
 		'idproveedor',
+        'correlativo',
 		'fecha_requerimiento',
 		'fecha_recepcion',
 		'total_compra',

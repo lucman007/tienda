@@ -1,10 +1,6 @@
 <div class="col-lg-12 mb-4">
     <h4>Conexion SUNAT</h4>
 </div>
-<div class="col-lg-12 mb-4">
-    <h4>Prueba</h4>
-    <b-button @click="imprimir()" class="mr-2" variant="primary"><i class="fas fa-power-off"></i> Prueba</b-button>
-</div>
 <div class="col-lg-4">
     <div class="form-group">
         <label for="dir">Usuario secundario</label>

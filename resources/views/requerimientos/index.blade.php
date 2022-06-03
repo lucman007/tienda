@@ -40,31 +40,37 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                @foreach($requerimientos as $requerimiento)
-                                    <tr>
-                                        <td></td>
-                                        <td>{{$requerimiento->idrequerimiento}}</td>
-                                        <td>{{date("d-m-Y H:i:s",strtotime($requerimiento->fecha_requerimiento))}}</td>
-                                        <td>{{$requerimiento->proveedor}}</td>
-                                        <td>{{$requerimiento->total_compra}}</td>
-                                        <td><p class="badge"
-                                               :class="['<?php echo $requerimiento->estado ?>'=='PENDIENTE' ? 'badge-warning' : 'badge-success']">{{$requerimiento->estado}}</p>
-                                        </td>
-                                        <td class="botones-accion">
-                                            <a href="{{url('requerimientos/editar').'/'.$requerimiento->idrequerimiento}}">
-                                                <button class="btn btn-success" title="Abrir requerimiento">
-                                                    <i class="fas fa-folder-open"></i>
-                                                </button>
-                                            </a>
-                                            <a @click="borrarRequerimiento({{$requerimiento->idrequerimiento}})"
-                                               href="javascript:void(0)">
-                                                <button class="btn btn-danger" title="Eliminar"><i
-                                                            class="fas fa-trash-alt"></i>
-                                                </button>
-                                            </a>
-                                        </td>
+                                @if(count($requerimientos))
+                                    @foreach($requerimientos as $requerimiento)
+                                        <tr>
+                                            <td></td>
+                                            <td>{{$requerimiento->correlativo}}</td>
+                                            <td>{{date("d-m-Y H:i:s",strtotime($requerimiento->fecha_requerimiento))}}</td>
+                                            <td>{{$requerimiento->proveedor}}</td>
+                                            <td>{{$requerimiento->total_compra}}</td>
+                                            <td><p class="badge"
+                                                   :class="['<?php echo $requerimiento->estado ?>'=='PENDIENTE' ? 'badge-warning' : 'badge-success']">{{$requerimiento->estado}}</p>
+                                            </td>
+                                            <td class="botones-accion">
+                                                <a href="{{url('requerimientos/editar').'/'.$requerimiento->idrequerimiento}}">
+                                                    <button class="btn btn-success" title="Abrir requerimiento">
+                                                        <i class="fas fa-folder-open"></i>
+                                                    </button>
+                                                </a>
+                                                <a @click="borrarRequerimiento({{$requerimiento->idrequerimiento}})"
+                                                   href="javascript:void(0)">
+                                                    <button class="btn btn-danger" title="Eliminar"><i
+                                                                class="fas fa-trash-alt"></i>
+                                                    </button>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                @else
+                                    <tr class="text-center">
+                                        <td colspan="7">No hay datos para mostrar</td>
                                     </tr>
-                                @endforeach
+                                @endif
                                 </tbody>
                             </table>
                         </div>

@@ -261,16 +261,23 @@
                     }
                 },
                 imprimir(idventa){
-                     @if($agent->isMobile())
+                     @if(!$agent->isDesktop())
                         let src = "{{url('/ventas/imprimir').'/'}}"+idventa;
                         if(idventa==null) {
                             src = "{{url('/pedidos/imprimir-historial/')}}";
                         }
                         @if(isset(json_decode(cache('config')['interfaz'], true)['rawbt']) && json_decode(cache('config')['interfaz'], true)['rawbt'])
-                            let  beforeUrl = 'intent:';
+                            axios.get(src+'?rawbt=true')
+                            .then(response => {
+                                window.location.href = response.data;
+                            })
+                            .catch(error => {
+                                alert('Ha ocurrido un error al imprimir con RawBT.');
+                                console.log(error);
+                            });
+                            /*let  beforeUrl = 'intent:';
                             afterUrl = '#Intent;package=ru.a402d.rawbtprinter;scheme=rawbt;component=ru.a402d.rawbtprinter.activity.PrintDownloadActivity;end;';
-
-                            document.location=beforeUrl+encodeURI(src)+afterUrl;
+                            document.location=beforeUrl+encodeURI(src)+afterUrl;*/
                         @else
                             window.open(src, '_blank');
                         @endif
