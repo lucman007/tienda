@@ -112,7 +112,7 @@
 <script>
     export default {
         name: 'modal-facturacion',
-        props: ['idventa','idpedido','origen','tipo_doc','items'],
+        props: ['idventa','idpedido','origen','tipo_doc','items','total'],
         data() {
             return {
                 clienteSeleccionado:{},
@@ -291,11 +291,9 @@
                     for (let pago of this.pago_fraccionado) {
                         suma_pago_fra += Number(pago.monto);
                     }
-
-                    if (suma_pago_fra > this.totalVenta) this.errorDatosVenta.push('*La suma de los pagos fraccionados supera el monto total de la venta');
-                    if (suma_pago_fra < this.totalVenta) this.errorDatosVenta.push('*La suma de los pagos fraccionados es inferior al monto total de la venta');
+                    if (suma_pago_fra > this.total) this.errorDatosVenta.push('*La suma de los pagos fraccionados supera el monto total de la venta');
+                    if (suma_pago_fra < this.total) this.errorDatosVenta.push('*La suma de los pagos fraccionados es inferior al monto total de la venta');
                 }
-
                 if (Object.keys(this.clienteSeleccionado).length == 0) this.errorDatosVenta.push('*Debes ingresar un cliente');
                 if ('nombre_o_razon_social' in this.clienteSeleccionado && this.clienteSeleccionado['nombre_o_razon_social'].length == 0) this.errorDatosVenta.push('*Debes ingresar un cliente');
 
@@ -303,8 +301,8 @@
                     if (this.clienteSeleccionado['num_documento'] && this.clienteSeleccionado['num_documento'].length != 11) this.errorDatosVenta.push('*Ingrese un RUC válido');
                 }
                 if (this.comprobante == '03') {
-                    if (this.totalVenta >= 700){
-                        str = this.clienteSeleccionado['num_documento'];
+                    if (this.total >= 700){
+                        let str = this.clienteSeleccionado['num_documento'];
                         let regex = new RegExp(/(.)\1{7}/);
                         if(regex.test(str)){
                             this.errorDatosVenta.push('*Para boletas mayores a S/.700.00 debe ingresar un DNI válido');
@@ -327,6 +325,7 @@
                 this.errorDatosVenta=[];
                 this.mostrarProgreso=false;
                 this.mostrarSpinner=false;
+                this.tipoPagoContado = 1;
             }
         }
     }

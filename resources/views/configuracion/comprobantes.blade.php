@@ -22,7 +22,7 @@
 </div>
 <div class="col-lg-3 mt-3">
     <b-form-checkbox v-model="impresion.mostrar_mozo" switch size="lg">
-        <p style="font-size: 1rem;">Mostrar mozo</p>
+        <p style="font-size: 1rem;">Mostrar vendedor</p>
     </b-form-checkbox>
 </div>
 <div class="col-lg-3 mt-3">

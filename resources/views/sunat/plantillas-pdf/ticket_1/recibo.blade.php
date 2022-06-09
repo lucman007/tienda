@@ -21,7 +21,7 @@
                     <td>{{ date('d/m/Y h:m:s A',strtotime($documento->fecha)) }}</td>
                 </tr>
                 <tr>
-                    <td colspan="2"><strong>Caja:</strong> {{ $documento->caja->nombre }} @if($documento->empleado->idpersona != -1) / <strong>Mozo(a):</strong>  {{ $documento->empleado->nombre }} @endif</td>
+                    <td colspan="2"><strong>Caja:</strong> {{ $documento->caja->nombre }} @if($documento->empleado->idpersona != -1) / <strong>Vend:</strong>  {{ $documento->empleado->nombre }} @endif</td>
                 </tr>
                 @if($usuario->persona->idpersona != -1)
                 <tr>

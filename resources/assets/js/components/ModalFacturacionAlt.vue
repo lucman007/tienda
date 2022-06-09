@@ -102,7 +102,7 @@
     import AgregarCliente from './AgregarCliente.vue'
     export default {
         name: 'modal-facturacion-alt',
-        props: ['item'],
+        props: ['item','total'],
         components: {AgregarCliente},
         data() {
             return {
@@ -254,8 +254,8 @@
                         suma_pago_fra += Number(pago.monto);
                     }
 
-                    if (suma_pago_fra > this.totalVenta) this.errorDatosVenta.push('*La suma de los pagos fraccionados supera el monto total de la venta');
-                    if (suma_pago_fra < this.totalVenta) this.errorDatosVenta.push('*La suma de los pagos fraccionados es inferior al monto total de la venta');
+                    if (suma_pago_fra > total) this.errorDatosVenta.push('*La suma de los pagos fraccionados supera el monto total de la venta');
+                    if (suma_pago_fra < total) this.errorDatosVenta.push('*La suma de los pagos fraccionados es inferior al monto total de la venta');
                 }
                 if(this.comprobante == '03' || this.comprobante == '01'){
                     if (Object.keys(this.clienteSeleccionado).length == 0) this.errorDatosVenta.push('*Debes ingresar un cliente');
@@ -264,8 +264,8 @@
                     if (this.clienteSeleccionado['num_documento'] && this.clienteSeleccionado['num_documento'].length != 11) this.errorDatosVenta.push('*Ingrese un RUC válido');
                 }
                 if (this.comprobante == '03') {
-                    if (this.totalVenta >= 700){
-                        str = this.clienteSeleccionado['num_documento'];
+                    if (total >= 700){
+                        let str = this.clienteSeleccionado['num_documento'];
                         let regex = new RegExp(/(.)\1{7}/);
                         if(regex.test(str)){
                             this.errorDatosVenta.push('*Para boletas mayores a S/.700.00 debe ingresar un DNI válido');

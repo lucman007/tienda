@@ -29,7 +29,7 @@
 <script>
     export default {
         name: 'modal-whatsapp',
-        props: ['text'],
+        props: ['text','link'],
         data() {
             return {
                 whatsapp:''
@@ -43,7 +43,7 @@
                     if(numero.includes('+')){
                         numero.replace('+', '')
                     }
-                    window.open('https://api.whatsapp.com/send/?phone='+numero+'&text='+this.text+'&app_absent=1', '_blank');
+                    window.open(this.link+'/send/?phone='+numero+'&text='+this.text+'&app_absent=1', '_blank');
                 }
             }
         }

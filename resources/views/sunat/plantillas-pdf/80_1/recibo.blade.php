@@ -24,7 +24,7 @@
                 <tr>
                     <td colspan="2"><strong>Caja:</strong> {{ $documento->caja->nombre }}
                         @if(isset(json_decode(cache('config')['impresion'], true)['mostrar_mozo']) && json_decode(cache('config')['impresion'], true)['mostrar_mozo'] && $documento->empleado->idpersona != -1)
-                            / <strong>Mozo(a):</strong>  {{ $documento->empleado->nombre }}
+                            / <strong>Vend:</strong>  {{ $documento->empleado->nombre }}
                         @endif
                     </td>
                 </tr>

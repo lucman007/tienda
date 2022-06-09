@@ -52,7 +52,7 @@
                 </tr>
                 <tr>
                     <td><strong>Caja:</strong></td>
-                    <td>{{ $documento->caja->nombre }} @if($documento->empleado->idpersona != -1)/ <strong>Mozo(a):</strong>  {{ $documento->empleado->nombre }}@endif</td>
+                    <td>{{ $documento->caja->nombre }} @if($documento->empleado->idpersona != -1)/ <strong>Vend:</strong>  {{ $documento->empleado->nombre }}@endif</td>
                 </tr>
             </table>
         </div>

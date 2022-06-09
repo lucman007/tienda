@@ -203,10 +203,11 @@
 <!--FIN MODAL ANULACION -->
     <modal-facturacion
             :idventa="idventa"
+            :total="totalVenta"
             :origen="'ventas'"
             v-on:after-save="after_save">
     </modal-facturacion>
-    <modal-whatsapp :text="text_whatsapp"></modal-whatsapp>
+    <modal-whatsapp :text="text_whatsapp" :link="'{{$agent->isDesktop()?'https://web.whatsapp.com':'https://api.whatsapp.com'}}'"></modal-whatsapp>
 @endsection
 @section('script')
     <script>
@@ -247,6 +248,7 @@
                 facturar(item){
                     this.idventa = item.idventa;
                     this.venta = item;
+                    this.totalVenta = item.total_venta;
                 },
                 eliminar(idventa){
                     if (confirm('¿Está seguro de eliminar la venta?')) {

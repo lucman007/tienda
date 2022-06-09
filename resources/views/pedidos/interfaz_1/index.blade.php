@@ -268,6 +268,7 @@
     <modal-facturacion
             :tipo_doc="comprobante"
             :idpedido="idpedido"
+            :total="totalVenta"
             :origen="'pedidos'"
             :items="productosSeleccionados"
             v-on:imprimir="imprimir"
