@@ -4,6 +4,7 @@ namespace sysfact\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Spipu\Html2Pdf\Html2Pdf;
 use sysfact\Emisor;
 use sysfact\Http\Controllers\Helpers\MainHelper;
@@ -69,6 +70,9 @@ class RequerimientoController extends Controller
         $productos = $requerimiento->productos;
         $requerimiento->proveedor;
         $requerimiento->proveedor->persona;
+        if($requerimiento->moneda=='PEN'){
+            $requerimiento->moneda='S/';
+        }
 
         $data_productos=[];
         $i=0;
@@ -86,13 +90,13 @@ class RequerimientoController extends Controller
             $data_productos[$i]['nombre']=$item->nombre;
             $data_productos[$i]['num_item']=$item->detalle->num_item;
             $data_productos[$i]['costo']=$item->detalle->monto;
-            $data_productos[$i]['descripcion']=strip_tags($item->detalle->descripcion);
+            $data_productos[$i]['presentacion']=strip_tags($item->detalle->descripcion);
             $data_productos[$i]['subtotal']=null;
             $data_productos[$i]['tipo_producto']=$item->tipo_producto;
             $data_productos[$i]['total']=null;
             $data_productos[$i]['unidad_medida']=$item->detalle->unidad_medida;
-            $data_productos[$i]['monto_recepcion']=null;
-            $data_productos[$i]['cantidad_recepcion']=null;
+            $data_productos[$i]['monto_recepcion']=$item->detalle->monto;
+            $data_productos[$i]['cantidad_recepcion']=floatval($item->detalle->cantidad);
             $i++;
 
         }
@@ -118,15 +122,19 @@ class RequerimientoController extends Controller
         $requerimiento=new Requerimiento();
         $requerimiento->idempleado=auth()->user()->idempleado;
         $requerimiento->correlativo = $correlativo;
-
-        if($request->idproveedor==''){
-            $requerimiento->idproveedor=-1;
-        } else{
-            $requerimiento->idproveedor=$request->idproveedor;
+        $requerimiento->idproveedor=$request->idproveedor??-1;
+        if ($request->moneda == 'S/') {
+            $moneda = 'PEN';
+        } else {
+            $moneda = 'USD';
         }
+        $requerimiento->moneda = $moneda;
+        $requerimiento->tipo_cambio = $request->tipo_cambio;
         $requerimiento->fecha_requerimiento=date('Y-m-d H:i:s');
         $requerimiento->estado='PENDIENTE';
+        $requerimiento->atencion=$request->atencion;
         $requerimiento->total_compra=$request->total_compra;
+        $requerimiento->observacion=$request->observaciones;
         $requerimiento->save();
         $idrequerimiento=$requerimiento->idrequerimiento;
 
@@ -158,6 +166,14 @@ class RequerimientoController extends Controller
         $requerimiento=Requerimiento::find($request->idrequerimiento);
         $requerimiento->idproveedor=$request->idproveedor;
         $requerimiento->total_compra=$request->total_compra;
+        if ($request->moneda == 'S/') {
+            $moneda = 'PEN';
+        } else {
+            $moneda = 'USD';
+        }
+        $requerimiento->moneda = $moneda;
+        $requerimiento->tipo_cambio = $request->tipo_cambio;
+        $requerimiento->observacion=$request->observaciones;
         $requerimiento->save();
 
         $detalle=[];
@@ -174,7 +190,7 @@ class RequerimientoController extends Controller
             $detalle['monto_recepcion']=$item['costo'];
             $detalle['total_recepcion']=$item['costo']*$item['cantidad'];
             $detalle['descuento']=$item['descuento'];
-            $detalle['descripcion']=strtoupper($item['descripcion']);
+            $detalle['descripcion']=strtoupper($item['presentacion']);
             $detalle['idproducto']=$item['idproducto'];
             $detalle['idrequerimiento']=$request->idrequerimiento;
 
@@ -213,52 +229,72 @@ class RequerimientoController extends Controller
 
     public function recibir(Request $request){
 
-        $requerimiento=Requerimiento::find($request->idrequerimiento);
-        $correlativo = $requerimiento->correlativo;
-        $requerimiento->idproveedor=$request->idproveedor;
-        $requerimiento->estado='RECIBIDO';
-        $requerimiento->total_compra=$request->total_compra;
-        $requerimiento->num_comprobante=strtoupper($request->num_comprobante);
-        $requerimiento->fecha_recepcion=date("Y-m-d H:i:s");
-        $requerimiento->save();
+        try{
+            DB::beginTransaction();
+            $requerimiento=Requerimiento::find($request->idrequerimiento);
+            $requerimiento->idproveedor=$request->idproveedor;
+            $requerimiento->estado='RECIBIDO';
+            $requerimiento->total_compra=$request->total_compra;
+            $requerimiento->num_comprobante=strtoupper($request->num_comprobante);
+            $requerimiento->fecha_recepcion=date("Y-m-d H:i:s");
+            $requerimiento->save();
 
-        $detalle=[];
-        $items=json_decode($request->items, TRUE);
-        $i=1;
+            $detalle=[];
+            $items=json_decode($request->items, TRUE);
+            $i=1;
 
-        DB::table('requerimiento_detalle')->where('idrequerimiento', '=', $request->idrequerimiento)->delete();
+            DB::table('requerimiento_detalle')->where('idrequerimiento', '=', $request->idrequerimiento)->delete();
 
-        foreach ($items as $item){
-            $detalle['num_item']=$i;
-            $detalle['cantidad']=$item['cantidad'];
-            $detalle['monto']=$item['monto'];
-            $detalle['cantidad_recepcion']=$item['cantidad_recepcion'];
-            $detalle['monto_recepcion']=$item['monto_recepcion'];
-            $detalle['total_recepcion']=$item['monto_recepcion']*$item['cantidad_recepcion'];
-            $detalle['descuento']=$item['descuento'];
-            $detalle['descripcion']=strtoupper($item['descripcion']);
-            $detalle['idproducto']=$item['idproducto'];
-            $detalle['idrequerimiento']=$request->idrequerimiento;
+            foreach ($items as $item){
+                $detalle['num_item']=$i;
+                $detalle['cantidad']=$item['cantidad'];
+                $detalle['monto']=$item['costo'];
+                $detalle['cantidad_recepcion']=$item['cantidad_recepcion'];
+                $detalle['monto_recepcion']=$item['monto_recepcion'];
+                $detalle['total_recepcion']=$item['monto_recepcion']*$item['cantidad_recepcion'];
+                $detalle['descuento']=$item['descuento'];
+                $detalle['descripcion']=strtoupper($item['presentacion']);
+                $detalle['idproducto']=$item['idproducto'];
+                $detalle['idrequerimiento']=$request->idrequerimiento;
 
-            DB::table('requerimiento_detalle')->insert($detalle);
+                DB::table('requerimiento_detalle')->insert($detalle);
 
-            //Actualizar inventario
-            $inventario=new Inventario();
-            $inventario->idproducto=$item['idproducto'];
-            $inventario->idempleado=auth()->user()->idempleado;
-            $inventario->cantidad=$item['cantidad_recepcion'];
+                //Actualizar inventario
+                $saldo = Inventario::where('idproducto',$item['idproducto'])->orderby('idinventario','desc')->first()->saldo;
+                Log::info($item['cantidad_recepcion'].' - '.$saldo);
+                $inventario=new Inventario();
+                $inventario->idproducto=$item['idproducto'];
+                $inventario->idempleado=auth()->user()->idempleado;
+                $inventario->cantidad=$item['cantidad_recepcion'];
+                if ($request->moneda == 'S/') {
+                    $moneda = 'PEN';
+                } else {
+                    $moneda = 'USD';
+                }
+                $inventario->costo = $item['monto_recepcion'];
+                $inventario->saldo = $saldo + $inventario->cantidad;
+                $inventario->moneda = $moneda;
+                $inventario->tipo_cambio = $request->tipo_cambio;
+                $inventario->fecha=date('Y-m-d H:i:m');
+                $inventario->operacion='INGRESO CON ORDEN DE COMPRA N° '.$request->correlativo;
+                if($request->tipo_producto==2){
+                    $inventario->cantidad=0;
+                    $inventario->saldo = 0;
+                }
+                $inventario->save();
 
-            $inventario->costo = $request->costo;
-            $inventario->saldo = $item->inventario()->first()->saldo + $inventario->cantidad;
-            $inventario->moneda = $request->moneda_compra;
-            $inventario->tipo_cambio = $request->tipo_cambio_compra;
-            $inventario->fecha=date('Y-m-d H:i:m');
-            if($request->tipo_producto==2){
-                $inventario->cantidad=0;
-                $inventario->saldo = 0;
+                $producto = Producto::find($item['idproducto']);
+                $producto->costo = $item['monto_recepcion'];
+                $producto->moneda_compra = $moneda;
+                $producto->tipo_cambio = $request->tipo_cambio;
+                $producto->save();
+                $i++;
             }
-
-            $i++;
+            DB::commit();
+        } catch (\Exception $e){
+            DB::rollBack();
+            Log::error($e);
+            return $e->getMessage();
         }
     }
 
@@ -271,6 +307,11 @@ class RequerimientoController extends Controller
 
         if($requerimiento->moneda=='PEN'){
             $requerimiento->moneda='S/';
+        }
+
+        foreach ($requerimiento->productos as $item){
+            $item->monto = $item->detalle['monto_recepcion'];
+            $item->total = $item->detalle['cantidad']*$item->monto;
         }
 
         $view = view('requerimientos/imprimir/plantilla_1',['requerimiento'=>$requerimiento,'emisor'=>$emisor,'usuario'=>$usuario, 'config'=>json_decode($config, true)]);

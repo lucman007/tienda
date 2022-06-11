@@ -204,7 +204,7 @@
                                             </button>
                                         </td>
                                     </tr>
-                                    <tr class="text-center" v-show="productosSeleccionados.length == 0"><td colspan="8">La mesa está vacía</td></tr>
+                                    <tr class="text-center" v-show="productosSeleccionados.length == 0"><td colspan="8">Agrega productos desde el buscador</td></tr>
                                     </tbody>
                                 </table>
                             @endif

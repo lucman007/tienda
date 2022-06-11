@@ -17,6 +17,24 @@
                     </div>
                     <div class="card-body">
                         <div class="row" v-show="editar">
+                            <div class="col-lg-2 form-group mb-4">
+                                <label>Moneda</label>
+                                <select v-model="moneda" class="custom-select">
+                                    <option value="S/">Soles</option>
+                                    <option value="USD">Dólares</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-3 form-group mb-4">
+                                <label>Atención</label>
+                                <input class="form-control" type="text" v-model="atencion" placeholder="Persona a quien se dirige">
+                            </div>
+                            <div class="col-lg-2">
+                                <label>Tipo cambio</label>
+                                <input type="text" v-model="tipoCambio"
+                                       class="form-control">
+                            </div>
+                        </div>
+                        <div class="row" v-show="editar">
                             <div class="col-lg-6">
                                 <autocomplete-cliente v-on:agregar_cliente="agregarProveedor"
                                                       v-on:borrar_cliente="borrarProveedor" v-bind:es_proveedores="true"
@@ -46,14 +64,14 @@
                         </div>
                         <div class="row" v-show="!editar">
                             <div class="col-lg-6">
-                                <p>Código: @{{codigoProveedor}} <br>
-                                    Proveedor: @{{nombreProveedor}} <br>
-                                    Ruc: @{{rucProveedor}} </p>
+                                <strong>Código:</strong> @{{codigoProveedor}} <hr>
+                                    <strong>Proveedor:</strong> @{{nombreProveedor}} <hr>
+                                    <strong>Ruc:</strong> @{{rucProveedor}}
                             </div>
                             <div class="col-lg-6">
-                                <p>Fecha: {{date("d-m-Y H:i:s",strtotime($requerimiento->fecha_requerimiento))}} <br>
-                                    Estado: <span class="badge" :class="[estado=='PENDIENTE' ? 'badge-warning' : 'badge-success']">@{{estado}}</span><br>
-                                    Comprobante: {{$requerimiento['num_comprobante']}} </p>
+                                <strong>Fecha:</strong>{{date("d-m-Y H:i:s",strtotime($requerimiento->fecha_requerimiento))}} <hr>
+                                    <strong>Estado:</strong> <span class="badge" :class="[estado=='PENDIENTE' ? 'badge-warning' : 'badge-success']">@{{estado}}</span><hr>
+                                    <strong>Comprobante:</strong> {{$requerimiento['num_comprobante']}}
                             </div>
                         </div>
                         <div class="table-responsive tabla-gestionar">
@@ -85,9 +103,9 @@
                                     <td>@{{ producto.costo }}</td>
                                     <td>@{{ producto.cantidad }}</td>
                                     <td>@{{ producto.total }}</td>
-                                    <td v-if="estado!='RECIBIDO'"><input @keyup="calcular(index)" class="form-control" type="text"
+                                    <td v-if="estado!='RECIBIDO'"><input @keyup="calcular(index)" class="form-control" type="number"
                                                v-model="producto.monto_recepcion"></td>
-                                    <td v-if="estado!='RECIBIDO'"><input @keyup="calcular(index)" class="form-control" type="text"
+                                    <td v-if="estado!='RECIBIDO'"><input @keyup="calcular(index)" class="form-control" type="number"
                                                v-model="producto.cantidad_recepcion"></td>
                                     <td v-if="estado=='RECIBIDO'">@{{producto.monto_recepcion}}</td>
                                     <td v-if="estado=='RECIBIDO'">@{{ producto.cantidad_recepcion }}</td>
@@ -136,11 +154,11 @@
                                 <tbody v-if="editar">
                                 <tr v-for="(producto,index) in productosSeleccionados" :key="producto.index">
                                     <td></td>
-                                    <td><input class="form-control" type="text" v-model="producto.nombre" :disabled="producto.idproducto!=-1"></td>
-                                    <td><input class="form-control" type="text" v-model="producto.descripcion" :disabled="producto.idproducto!=-1"></td>
-                                    <td><input @keyup="calcular(index)" class="form-control" type="text"
+                                    <td><input class="form-control" type="text" v-model="producto.nombre" disabled></td>
+                                    <td><input class="form-control" type="text" v-model="producto.descripcion" disabled></td>
+                                    <td><input @keyup="calcular(index)" class="form-control" type="number"
                                                v-model="producto.costo"></td>
-                                    <td><input @keyup="calcular(index)" class="form-control" type="text"
+                                    <td><input @keyup="calcular(index)" class="form-control" type="number"
                                                v-model="producto.cantidad"></td>
                                     <td>@{{producto.total}}</td>
                                     <td class="">
@@ -172,12 +190,30 @@
                             </table>
                         </div>
                         <div class="dropdown-divider"></div>
-                        <div v-if="estado=='PENDIENTE'" v-show="!editar" class="col-lg-4 offset-lg-8 mt-3">
-                            <div class="form-group">
-                                <label for="num_compronbante">N° comprobante de compra:</label>
-                                <input name="num_comprobante" class="form-control" type="text" v-model="num_comprobante_compra" placeholder="">
-                                <button @click="recibir_requerimiento" class="boton_adjunto btn btn-warning"><i v-show="!mostrarProgresoAprobacion" class="fas fa-check"></i>
-                                    <b-spinner v-show="mostrarProgresoAprobacion" small label="Loading..." ></b-spinner> Recibir</button>
+                        <div class="row" v-show="editar">
+                            <div class="col-lg-8">
+                                <div class="form-group">
+                                    <textarea placeholder="Observaciones..."  v-model="observaciones" class="form-control mt-4 mt-lg-0" cols="15" rows="1"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card" v-show="!editar" style="box-shadow: none">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-lg-8">
+                                        <strong>Observaciones:</strong> @{{ observaciones }} <br>
+                                    </div>
+                                    <div v-if="estado=='PENDIENTE'" v-show="!editar" class="col-lg-4">
+                                        <b-input-group>
+                                            <input class="form-control" type="text" v-model="num_comprobante_compra" placeholder="Comprobante de compra">
+                                            <b-input-group-append>
+                                                <b-button variant="warning" @click="recibir_requerimiento">
+                                                    <i class="fas fa-check"></i> Recibir
+                                                </b-button>
+                                            </b-input-group-append>
+                                        </b-input-group>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -192,7 +228,7 @@
                         <b-button v-if="estado!='RECIBIDO'" :disabled="!editar || productosSeleccionados.length==0" class="mb-2" @click="actualizarRequerimiento"
                                   variant="success"><i v-show="!mostrarProgresoGuardado" class="fas fa-save"></i><b-spinner v-show="mostrarProgresoGuardado" small label="Loading..." ></b-spinner> Guardar cambios
                         </b-button>
-                        <b-button v-show="!editar" v-if="estado!='RECIBIDO'" @click="editar=!editar" class="mb-2"  variant="info">
+                        <b-button v-show="!editar" v-if="estado!='RECIBIDO'" @click="editarRequerimiento" class="mb-2"  variant="info">
                             <i class="fas fa-edit"></i> Editar
                         </b-button>
                         <b-button v-if="editar" @click="cancelar_edicion" class="mb-2" variant="info"><i class="fas fa-edit"></i> Cancelar edición
@@ -226,11 +262,11 @@
                 mostrarProgresoRecepcion: false,
                 listaProveedor: [],
                 proveedorSeleccionado: {
-                    'idproveedor':'<?php echo $requerimiento['idproveedor'] ?>',
+                    'idproveedor':'{{ $requerimiento['idproveedor'] }}',
                 },
-                codigoProveedor:'<?php echo $requerimiento['proveedor']['codigo'] ?>',
-                rucProveedor:'<?php echo $requerimiento['proveedor']['num_documento'] ?>',
-                nombreProveedor: '<?php echo $requerimiento['proveedor']['persona']['nombre'] ?>',
+                codigoProveedor:"{{ $requerimiento['proveedor']['codigo'] }}",
+                rucProveedor:"{{ $requerimiento['proveedor']['num_documento'] }}",
+                nombreProveedor: "{{ $requerimiento['proveedor']['persona']['nombre'] }}",
                 buscar: '',
                 mostrarSpinnerProveedor: false,
                 listaProductos: [],
@@ -242,15 +278,26 @@
                 totalCompra_recepcion: 0.00,
                 igv_recepcion: 0.00,
                 subtotal_recepcion: 0.00,
-                moneda: 'S/.',
-                observaciones: '<?php echo $requerimiento['observaciones'] ?>',
-                estado:'<?php echo $requerimiento['estado'] ?>',
-                num_comprobante_compra:''
+                moneda: "{{ $requerimiento->moneda }}",
+                tipoCambio: "{{ $requerimiento->tipo_cambio }}",
+                observaciones: '{{ $requerimiento['observacion'] }}',
+                estado:'{{ $requerimiento['estado'] }}',
+                num_comprobante_compra:'',
+                atencion:"{{ $requerimiento->atencion }}",
             },
             created(){
                 this.calcularTotalPorItem();
             },
             methods: {
+                editarRequerimiento(){
+                    this.editar=!this.editar;
+                    let obj = <?php echo json_encode($requerimiento->proveedor)?>;
+                    if(this.$refs['suggestCliente']){
+                        this.$refs['suggestCliente'].agregarCliente(obj);
+                    } else {
+                        this.agregarCliente(obj)
+                    }
+                },
                 agregarProveedor(obj){
                     this.proveedorSeleccionado = obj;
                     this.nombreCliente = this.proveedorSeleccionado['num_documento']+' - '+this.proveedorSeleccionado['nombre'];
@@ -286,7 +333,6 @@
                     }
                     producto['total'] = (producto['costo'] * producto['cantidad']).toFixed(2);
                     producto['total_recepcion'] = (producto['monto_recepcion'] * producto['cantidad_recepcion']).toFixed(2);
-                    console.log(this.productosSeleccionados)
                     this.calcularTotalCompra();
                 },
                 calcularTotalPorItem(){
@@ -323,33 +369,39 @@
                     this.buscar = '';
                 },
                 actualizarRequerimiento(){
-                    let _this = this;
                     this.mostrarProgresoGuardado = true;
-                    console.log(this.productosSeleccionados)
                     axios.post('{{action('RequerimientoController@update')}}', {
                         'idrequerimiento': <?php echo $requerimiento['idrequerimiento'] ?>,
                         'idproveedor': this.proveedorSeleccionado['idproveedor'],
                         'total_compra': this.totalCompra,
                         'observaciones':this.observaciones,
+                        'moneda': this.moneda,
+                        'tipo_cambio': this.tipoCambio,
+                        'atencion': this.atencion,
                         'items': JSON.stringify(this.productosSeleccionados)
                     })
                         .then(function (response) {
                             location.reload();
+                            this.mostrarProgresoGuardado = false;
                         })
                         .catch(function (error) {
+                            this.mostrarProgresoGuardado = false;
                             alert('Ha ocurrido un error al procesar la orden de compra ');
                             console.log(error);
                         });
                 },
                 recibir_requerimiento(){
 
-                    if(confirm('Este procedimiento no se puede revertir, asegúrese que los datos ingresados sean correctos. ¿Desea continuar?')){
+                    if(confirm('Los productos se registrarán en el inventario, ¿deseas continuar?')){
                         this.mostrarProgresoAprobacion=true;
                         axios.post('{{action('RequerimientoController@recibir')}}', {
                             'idrequerimiento': <?php echo $requerimiento['idrequerimiento'] ?>,
+                            'correlativo': '<?php echo $requerimiento['correlativo'] ?>',
                             'idproveedor': this.proveedorSeleccionado['idproveedor'],
                             'num_comprobante':this.num_comprobante_compra,
                             'total_compra': this.totalCompra,
+                            'moneda': this.moneda,
+                            'tipo_cambio': this.tipoCambio,
                             'observaciones':this.observaciones,
                             'items': JSON.stringify(this.productosSeleccionados)
                         })

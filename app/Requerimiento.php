@@ -18,6 +18,9 @@ class Requerimiento extends Model
 		'total_compra',
 		'num_comprobante',
 		'estado',
+		'moneda',
+		'tipo_cambio',
+		'observacion',
 		'eliminado'
 	];
 

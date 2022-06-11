@@ -18,6 +18,24 @@
                     </div>
                     <div class="card-body">
                         <div class="row">
+                            <div class="col-lg-2 form-group mb-4">
+                                <label>Moneda</label>
+                                <select v-model="moneda" class="custom-select">
+                                    <option value="S/">Soles</option>
+                                    <option value="USD">Dólares</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-3 form-group mb-4">
+                                <label>Atención</label>
+                                <input class="form-control" type="text" v-model="atencion" placeholder="Persona a quien se dirige">
+                            </div>
+                            <div class="col-lg-2">
+                                <label>Tipo cambio</label>
+                                <input type="text" v-model="tipoCambio"
+                                       class="form-control">
+                            </div>
+                        </div>
+                        <div class="row">
                             <div class="col-lg-6">
                                 <autocomplete-cliente v-on:agregar_cliente="agregarProveedor"
                                                       v-on:borrar_cliente="borrarProveedor" v-bind:es_proveedores="true"
@@ -79,8 +97,17 @@
                                         </a>
                                     </td>
                                 </tr>
+                                <tr class="text-center" v-show="productosSeleccionados.length == 0"><td colspan="9">Agrega productos desde el buscador</td></tr>
                                 </tbody>
                             </table>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <div class="row mt-3">
+                            <div class="col-lg-7">
+                                <div class="form-group">
+                                    <textarea placeholder="Observaciones..."  v-model="observaciones" class="form-control mt-4 mt-lg-0" cols="15" rows="1"></textarea>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -153,7 +180,10 @@
                 igv: 0.00,
                 subtotal: 0.00,
                 moneda: 'S/',
+                tipoCambio: <?php echo cache('opciones')['tipo_cambio_compra'] ?>,
                 mostrarSpinnerProveedor: false,
+                atencion:'',
+                observaciones: "",
             },
             created(){
                 this.calcularTotalCompra();
@@ -219,9 +249,14 @@
                     axios.post('{{action('RequerimientoController@store')}}', {
                         'idproveedor': this.proveedorSeleccionado['idproveedor'],
                         'total_compra': this.totalCompra,
+                        'moneda': this.moneda,
+                        'tipo_cambio': this.tipoCambio,
+                        'atencion': this.atencion,
+                        'observaciones':this.observaciones,
                         'items': JSON.stringify(this.productosSeleccionados)
                     })
                         .then(function (response) {
+                            this.mostrarProgresoGuardado = false;
                             window.location.href='editar/'+response.data;
                         })
                         .catch(function (error) {
@@ -269,6 +304,10 @@
                     this.totalCompra = 0.00;
                     this.subtotal = 0.00;
                     this.igv = 0.00;
+                    this.atencion='';
+                    this.observaciones= "";
+                    this.moneda= 'S/';
+                    this.tipoCambio= <?php echo cache('opciones')['tipo_cambio_compra'] ?>;
                     this.calcularTotalCompra();
                 }
             }

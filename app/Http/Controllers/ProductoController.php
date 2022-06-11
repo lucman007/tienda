@@ -46,9 +46,7 @@ class ProductoController extends Controller
                     ->paginate(30);
 
                 foreach ($productos as $producto){
-                    foreach ($producto->inventario as $kardex){
-                        $producto->cantidad+=$kardex->cantidad;
-                    }
+                    $producto->cantidad=$producto->inventario->first()->saldo;
                 }
 
                 $ultimo_id_registrado=DB::table('productos')

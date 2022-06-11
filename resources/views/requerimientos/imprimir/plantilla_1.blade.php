@@ -74,24 +74,17 @@
                 <td style="width: 75mm"><strong>{{$item->nombre}}</strong><br> {!!$item->detalle['descripcion']!!}</td>
                 <td style="width: 20mm">{{floatval($item->detalle['cantidad'])}}</td>
                 <td style="width: 10mm">{{explode('/',$item->unidad_medida)[1]}}</td>
-                <td style="width: 20mm; text-align: right">{{number_format($item->monto, 3)}}</td>
+                <td style="width: 20mm; text-align: right">{{number_format($item->monto, 2)}}</td>
                 <td style="width: 20mm; text-align: right">{{number_format($item->total,2)}}</td>
             </tr>
         @endforeach
-        @if(trim($requerimiento->observaciones)!='')
+        @if(trim($requerimiento->observacion)!='')
             <tr>
                 <td><br></td>
             </tr>
             <tr>
                 <td colspan="8" style="margin-top: 5mm;width: 170mm">
-                    Observación: {{$requerimiento->observaciones}}
-                </td>
-            </tr>
-        @endif
-        @if($requerimiento->descuento > 0)
-            <tr>
-                <td colspan="8" style="margin-top: 5mm">
-                    Descuento global: {{$requerimiento->descuento_global}}
+                    Observación: {{$requerimiento->observacion}}
                 </td>
             </tr>
         @endif
@@ -112,15 +105,15 @@
                 <table>
                     <tr>
                         <td><strong>Subtotal:</strong></td>
-                        <td style="width: 28mm; text-align: right">{{$requerimiento->moneda}} {{number_format($requerimiento->presupuesto/1.18,2)}}</td>
+                        <td style="width: 28mm; text-align: right">{{$requerimiento->moneda}} {{number_format($requerimiento->total_compra/1.18,2)}}</td>
                     </tr>
                     <tr>
                         <td><strong>Total IGV 18%:</strong></td>
-                        <td style="width: 28mm; text-align: right">{{$requerimiento->moneda}} {{number_format($requerimiento->presupuesto-($requerimiento->presupuesto/1.18),2)}}</td>
+                        <td style="width: 28mm; text-align: right">{{$requerimiento->moneda}} {{number_format($requerimiento->total_compra-($requerimiento->total_compra/1.18),2)}}</td>
                     </tr>
                     <tr>
                         <td><strong>Importe total:</strong></td>
-                        <td style="width: 28mm; text-align: right">{{$requerimiento->moneda}} {{$requerimiento->presupuesto}}</td>
+                        <td style="width: 28mm; text-align: right">{{$requerimiento->moneda}} {{$requerimiento->total_compra}}</td>
                     </tr>
                 </table>
             </td>
