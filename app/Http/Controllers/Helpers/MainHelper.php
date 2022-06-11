@@ -238,8 +238,7 @@ class MainHelper extends Controller
     {
         $consulta=trim($search);
 
-        $productos=Producto::with('inventario')
-            ->where('eliminado',0)
+        $productos=Producto::where('eliminado',0)
             ->where(function ($query) use ($consulta) {
                 $query->where('nombre','LIKE','%'.$consulta.'%')
                     ->orWhere('cod_producto',$consulta)
@@ -253,6 +252,11 @@ class MainHelper extends Controller
             $producto->stock = $producto->inventario()->first()->saldo;
             $producto->moneda = $producto->moneda=='PEN'?'S/':'USD';
             $producto->unidad = explode('/',$producto->unidad_medida)[1];
+
+            $descuento=$producto->descuento()->orderby('monto_desc','asc')->first();
+            $producto->precioPorMayor = $descuento['monto_desc'];
+            $producto->cantidadPorMayor = $descuento['cantidad_min'];
+
             $producto->badge_stock = 'badge-success';
             if($producto->stock <= 0){
                 $producto->badge_stock = 'badge-danger';

@@ -30,10 +30,8 @@ class HomeController extends Controller
             ->get();
         $seleccionados=[];
 
-        foreach ($productos as $key=>$inv){
-            foreach ($inv->inventario as $kardex){
-                $inv->cantidad+=$kardex->cantidad;
-            }
+        foreach ($productos as $producto){
+            $producto->cantidad=$producto->inventario->first()->saldo;
         }
 
         $productos = array_values(array_sort($productos, function ($value) {
@@ -65,32 +63,36 @@ class HomeController extends Controller
 
         $dias_restantes=31;
         $seleccionados=[];
+        $offset=4;
 
-        $fin_de_mes = Carbon::now()->endOfMonth()->toDateString();
-        $dia_fin_de_mes=explode('-',$fin_de_mes);
-
-        $hoy = Carbon::now()->toDateString();
-        $dia_de_hoy = explode('-',$hoy);
+        $hoy= explode('-',Carbon::now()->toDateString());
+        $fin_de_mes=explode('-',Carbon::now()->endOfMonth()->toDateString());
 
         foreach ($trabajadores as $trabajador){
+
             $trabajador->persona;
 
-            $dia_de_pago=$trabajador->dia_pago;
-
-            //Si el mes tiene menos de 31 dias, adaptamos los pagos de ese dia a un dia menos
-            if($dia_de_pago>(int)$dia_fin_de_mes[2]){
-                $dia_de_pago=$dia_de_pago-($dia_de_pago-$dia_fin_de_mes[2]);
+            $dia_de_pago_trabajador=$trabajador->dia_pago;
+            if($dia_de_pago_trabajador==31){
+                $dia_de_pago_trabajador=(int)$fin_de_mes[2];
             }
 
-            $fecha_de_pago=$dia_de_pago.'-'.date('m-Y');
-            $trabajador->dia_pago=$fecha_de_pago;
+            switch ($trabajador->ciclo_pago){
+                case '2':
+                    $dia_de_pago_trabajador  = round($dia_de_pago_trabajador / 2);
+                    break;
+                case '3':
+                    $dia_de_pago_trabajador  = round($dia_de_pago_trabajador / 4);
+                    break;
+            }
 
-            //Calculamos los días restantes para el pago
-            if($dia_de_pago>=(int)$dia_de_hoy[2]){
-                $dias_restantes=$dia_de_pago-$dia_de_hoy[2];
+            if((int)$hoy[2] >= ($dia_de_pago_trabajador - $offset)){
+                $dias_restantes=$dia_de_pago_trabajador-$hoy[2];
             }
 
             $trabajador->dias_restantes=$dias_restantes;
+            $trabajador->dia_pago = $dia_de_pago_trabajador.'/'.date('m/Y');
+
         }
 
         $trabajadores = array_values(array_sort($trabajadores, function ($value) {
@@ -99,12 +101,13 @@ class HomeController extends Controller
 
         //Obtener los empleados más proximos a vencer
         foreach ($trabajadores as $trabajador){
-            if($trabajador->dias_restantes<=5){
+            if($trabajador->dias_restantes >=0 && $trabajador->dias_restantes <= $offset){
                 $seleccionados[]=$trabajador;
             }
         }
 
         return $seleccionados;
+
     }
 
     public function obtenerReporte(Request $request){

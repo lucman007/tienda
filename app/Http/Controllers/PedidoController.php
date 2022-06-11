@@ -125,6 +125,11 @@ class PedidoController extends Controller
                 $producto->moneda = $producto->moneda=='PEN'?'S/':'USD';
                 $producto->unidad = explode('/',$producto->unidad_medida)[1];
                 $producto->badge_stock = 'badge-success';
+
+                $descuento=$producto->descuento()->orderby('monto_desc','asc')->first();
+                $producto->precioPorMayor = $descuento['monto_desc'];
+                $producto->cantidadPorMayor = $descuento['cantidad_min'];
+
                 if($producto->stock <= 0){
                     $producto->badge_stock = 'badge-danger';
                 } else if($producto->stock <= $producto->stock_bajo){
@@ -159,8 +164,7 @@ class PedidoController extends Controller
     {
         $consulta=trim($search);
 
-        $productos=Producto::with('inventario:idproducto,cantidad')
-            ->where('eliminado',0)
+        $productos=Producto::where('eliminado',0)
             ->where(function ($query) use ($consulta) {
                 $query->where('nombre','LIKE','%'.$consulta.'%')
                     ->orWhere('cod_producto','like','%'.$consulta.'%')
@@ -173,9 +177,12 @@ class PedidoController extends Controller
         foreach ($productos as $producto){
             $unidad = explode('/',$producto->unidad_medida);
             $producto->unidad_medida = $unidad[1];
-            foreach ($producto->inventario as $kardex){
-                $producto->stock+=$kardex->cantidad;
-            }
+
+            $descuento=$producto->descuento()->orderby('monto_desc','asc')->first();
+            $producto->precioPorMayor = $descuento['monto_desc'];
+            $producto->cantidadPorMayor = $descuento['cantidad_min'];
+
+            $producto->stock = $producto->inventario()->first()->saldo;
         }
 
         return response()->json($productos);

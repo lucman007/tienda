@@ -87,7 +87,7 @@
                             </select>
                         </b-input-group>
                     </div>
-                    <div class="col-lg-2" v-show="filtro=='moneda'">
+                    <div class="col-lg-2" v-show="filtro=='estado'">
                         <b-input-group>
                             <b-input-group-prepend>
                                 <b-input-group-text>

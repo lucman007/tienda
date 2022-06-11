@@ -28,7 +28,9 @@
                                                             <div class="col-lg-6">{{producto.nombre}} <br>
                                                                 <span class="presentacion">{{producto.presentacion}}</span>
                                                             </div>
-                                                            <div class="col-lg-3">{{producto.moneda+producto.precio}}</div>
+                                                            <div class="col-lg-3">{{producto.moneda+producto.precio}} <br>
+                                                                <span v-show="producto.precioPorMayor" class="presentacion">{{producto.cantidadPorMayor}}{{producto.unidad}} a {{producto.moneda+producto.precioPorMayor}}</span>
+                                                            </div>
                                                             <div class="col-lg-3"><span :class="'badge '+producto.badge_stock">{{producto.stock+producto.unidad}}</span></div>
                                                             <div :id="'spinner_'+producto.idproducto" class="alert alert-success mb-0 d-none"
                                                                  style="padding: 5px 20px;position: absolute;right: 5px;bottom: 4px;">
