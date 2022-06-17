@@ -12,12 +12,15 @@
 */
 
 Route::group(['middleware' => ['can:Caja: egresos']], function () {
-    Route::get('caja/egresos', 'GastoController@index');
+    Route::get('caja/movimientos', 'GastoController@index');
+    Route::get('caja/movimientos/total', 'GastoController@obtenerTotal');
     Route::delete('caja/destroy/{id}', 'GastoController@destroy');
     Route::post('caja/store', 'GastoController@store');
     Route::post('caja/gasto/obtener-datos', 'GastoController@obtener_datos');
     Route::post('caja/gasto/obtener-empleados', 'GastoController@obtenerEmpleados');
     Route::post('caja/gasto/obtener-pago-pendiente', 'GastoController@obtenerPagoPendiente');
+    Route::get('caja/obtener-detalle-venta/{idventa}', 'GastoController@obtenerDetalleVenta');
+    Route::post('caja/devolver-productos', 'GastoController@devolver_productos');
 });
 
 Route::group(['middleware' => ['can:Caja: gestionar']], function () {

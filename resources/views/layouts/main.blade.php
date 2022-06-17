@@ -116,6 +116,7 @@
                                     <b-dropdown-item @cannot('Inventario: productos') class="disabled" disabled @endcannot href="{{action('ProductoController@index')}}"><i class="fas fa-gem"></i> Productos</b-dropdown-item>
                                     <b-dropdown-item @cannot('Mantenimiento: categorías') class="disabled" disabled @endcannot href="{{action('CategoriaController@index')}}"><i class="fas fa-th-list"></i> Categorías</b-dropdown-item>
                                     <b-dropdown-item @cannot('Inventario: requerimientos') class="disabled" disabled @endcannot href="{{action('RequerimientoController@index')}}"><i class="fas fa-box-open"></i> Requerimientos</b-dropdown-item>
+                                    <b-dropdown-item @cannot('Inventario: productos') class="disabled" disabled @endcannot href="{{url('caja/movimientos?tipo=devoluciones')}}"><i class="fas fa-undo"></i> Devoluciones</b-dropdown-item>
                                 </b-nav-item-dropdown>
                                 <b-nav-item @cannot('Cotizaciones') class="disabled" disabled @endcannot href="{{action('PresupuestoController@index')}}">
                                     <img src="{{url('images/menubar/icons/cotizar.png')}}" alt="">

@@ -221,7 +221,7 @@
                         }
 
                         if (items.length > 0) {
-                            if (confirm('Esta operación no se puede revertir ¿Está seguro de anular los?')) {
+                            if (confirm('Esta operación no se puede revertir ¿Está seguro de anular los comprobantes?')) {
                                 _this = this;
                                 this.mostrarProgreso=true;
                                 axios.post('{{url('comprobantes/anular-facturas')}}', {

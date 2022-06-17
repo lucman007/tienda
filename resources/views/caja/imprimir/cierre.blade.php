@@ -51,6 +51,10 @@
             <td class="float-r">S/ {{$caja->gastos??'0.00'}}</td>
         </tr>
         <tr>
+            <td><strong>Devoluciones:</strong></td>
+            <td class="float-r">S/ {{$caja->devoluciones??'0.00'}}</td>
+        </tr>
+        <tr>
             <td colspan="2">
                 <hr style="border: 1px dashed black">
             </td>

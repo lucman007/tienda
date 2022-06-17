@@ -12,6 +12,7 @@
         <th scope="col">Crédito</th>
         <th scope="col">Extras</th>
         <th scope="col">Gastos</th>
+        <th scope="col">Devoluciones</th>
         <th scope="col">Total teórico</th>
         <th scope="col">Total real</th>
         <th scope="col">Descuadre</th>
@@ -33,6 +34,7 @@
             <td>{{$caja->credito}}</td>
             <td>{{$caja->extras}}</td>
             <td>{{$caja->gastos}}</td>
+            <td>{{$caja->devoluciones}}</td>
             <td>{{$caja->efectivo_teorico}}</td>
             <td>{{$caja->efectivo_real}}</td>
             <td>{{$caja->descuadre}}</td>

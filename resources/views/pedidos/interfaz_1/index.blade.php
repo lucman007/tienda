@@ -232,7 +232,9 @@
                                                 </b-button>
                                                 @can('Pedido: procesar')
                                                     <b-button @if(!$agent->isDesktop()) class="col-3 col-md-2 p-md-4"
-                                                              @endif :disabled="disabledTicket" @click="generarTicket"
+                                                              @endif :disabled="disabledTicket"
+                                                              v-b-modal.modal-facturar
+                                                              @click="comprobante='30'"
                                                               variant="info"><i class="fas fa-receipt"></i>
                                                         Nota de venta
                                                     </b-button>

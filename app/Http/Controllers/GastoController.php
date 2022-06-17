@@ -4,8 +4,11 @@ namespace sysfact\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use sysfact\Gastos;
 use sysfact\Http\Controllers\Helpers\MainHelper;
+use sysfact\Inventario;
+use sysfact\Venta;
 
 class GastoController extends Controller
 {
@@ -17,36 +20,84 @@ class GastoController extends Controller
         $this->idcaja = MainHelper::obtener_idcaja();
     }
 
-    public function index(){
+    public function index(Request $request){
 
-        return view('caja.egresos',['usuario'=>auth()->user()->persona]);
+        $tipo = $request->tipo??'gastos';
+        $desde= $request->desde??date('Y-m-d');
+        $hasta= $request->hasta??date('Y-m-d');
+
+        switch($tipo){
+            case 'gastos':
+                $tipo_movimiento=1;
+                break;
+            case 'ingresos':
+                $tipo_movimiento=2;
+                break;
+            default:
+                $tipo_movimiento=3;
+        }
+
+        $data = $this->obtener_datos($desde,$hasta, $tipo_movimiento);
+
+        return view('caja.egresos',[
+            'usuario'=>auth()->user()->persona,
+            'tipo_movimiento'=>$tipo_movimiento,
+            'tipo'=>$tipo,
+            'data'=>$data,
+            'desde'=>$desde,
+            'hasta'=>$hasta,
+        ]);
     }
 
-    public function obtener_datos(Request $request){
-        $fecha_in=$request->fecha_in;
-        $fecha_out=$request->fecha_out;
-        $filtro=$request->filtro;
-        if($filtro == 3){
-            $filtro='';
+    public function obtenerTotal(Request $request){
+        $tipo = $request->tipo??'gastos';
+        $desde= $request->desde??date('Y-m-d');
+        $hasta= $request->hasta??date('Y-m-d');
+
+        switch($tipo){
+            case 'gastos':
+                $tipo_movimiento=1;
+                break;
+            case 'ingresos':
+                $tipo_movimiento=2;
+                break;
+            default:
+                $tipo_movimiento=3;
         }
-        $gasto=Gastos::whereBetween('fecha',[$fecha_in.' 00:00:00',$fecha_out.' 23:59:59'])
-            ->where('tipo','LIKE','%'.$filtro.'%')
-            ->orderby('idgasto','desc')->paginate(30);
+
+        $data = $this->obtener_datos($desde,$hasta, $tipo_movimiento, true);
+        $suma = 0;
+        foreach ($data as $item) {
+            $suma += $item->monto;
+        }
+
+        return $suma;
+
+    }
+
+    public function obtener_datos($desde, $hasta, $tipo_movimiento,$calcular = false){
+
+        if($calcular){
+            $gasto=Gastos::whereBetween('fecha',[$desde.' 00:00:00',$hasta.' 23:59:59'])
+                ->where('tipo',$tipo_movimiento)
+                ->orderby('idgasto','desc')->get();
+        } else {
+            $gasto=Gastos::whereBetween('fecha',[$desde.' 00:00:00',$hasta.' 23:59:59'])
+                ->where('tipo',$tipo_movimiento)
+                ->orderby('idgasto','desc')->paginate(30);
+        }
 
         foreach ($gasto as $item){
 
-            $item->caja=$item->cajero['nombre'];
+            $item->caja=strtoupper($item->cajero['nombre']);
 
             switch($item->tipo_egreso){
                 case '1':
-                    $item->tipo='Gastos comunes';
-                    break;
-                case '2':
-                    $item->tipo='Ingreso extra';
+                    $item->tipo_gasto='GASTOS COMUNES';
                     break;
                 case'4':
-                    $item->tipo='Pago de empleados';
-                    $item->descripcion='Pago a: '.$item->empleado['nombre'].' '.$item->empleado['apellidos'];
+                    $item->tipo_gasto='PAGO DE EMPLEADOS';
+                    $item->descripcion=mb_strtoupper('Pago a: '.$item->empleado['nombre'].' '.$item->empleado['apellidos']);
                     break;
             }
 
@@ -56,20 +107,31 @@ class GastoController extends Controller
     }
 
     public function store(Request $request){
-        $egreso=new Gastos();
-        $egreso->idcajero=auth()->user()->idempleado;
-        $egreso->fecha=date('Y-m-d H:i:s');
-        $egreso->idempleado=$request->idempleado;
-        $egreso->idcaja=$this->idcaja;
-        $egreso->tipo_egreso=$request->tipo_egreso;
-        $egreso->descripcion=$request->descripcion;
-        $egreso->tipo_pago_empleado=$request->tipo_pago_empleado;
-        $egreso->mes_pago_empleado=$request->mes_pago_empleado;
-        $egreso->tipo_comprobante=$request->tipo_comprobante;
-        $egreso->num_comprobante=strtoupper($request->num_comprobante);
-        $egreso->monto=$request->monto;
-        $egreso->tipo=$request->tipo;
-        $egreso->save();
+        try{
+            DB::beginTransaction();
+
+            $egreso=new Gastos();
+            $egreso->idcajero=auth()->user()->idempleado;
+            $egreso->fecha=date('Y-m-d H:i:s');
+            $egreso->idempleado=$request->idempleado;
+            $egreso->idcaja=$this->idcaja;
+            $egreso->descripcion=$request->descripcion;
+            $egreso->tipo_pago_empleado=$request->tipo_pago_empleado;
+            $egreso->mes_pago_empleado=$request->mes_pago_empleado;
+            $egreso->tipo_comprobante=$request->tipo_comprobante;
+            $egreso->num_comprobante=strtoupper($request->num_comprobante);
+            $egreso->monto=$request->monto;
+            $egreso->tipo=$request->tipo_movimiento;
+            $egreso->tipo_egreso=$request->tipo_movimiento==1?$request->tipo_egreso:-1;
+            $egreso->save();
+
+            DB::commit();
+
+        } catch (\Exception $e){
+            DB::rollBack();
+            Log::error($e);
+            return $e->getMessage();
+        }
     }
 
     public function destroy($id){
@@ -117,6 +179,70 @@ class GastoController extends Controller
 
 
         return json_encode($empleado->sueldo - $anticipo);
+    }
+
+    public function obtenerDetalleVenta($idventa){
+
+        $venta = Venta::find($idventa);
+        $productos = $venta->productos;
+        foreach ($productos as $producto) {
+            $producto->devolver = false;
+            $producto->cantidad_devolucion = $producto->detalle['cantidad'] - $producto->detalle['devueltos'];
+        }
+        return $productos;
+
+    }
+
+    public function devolver_productos(Request $request){
+        try{
+            DB::beginTransaction();
+
+            $productos = json_decode($request->items, true);
+
+            $egreso=new Gastos();
+            $egreso->idcajero=auth()->user()->idempleado;
+            $egreso->fecha=date('Y-m-d H:i:s');
+            $egreso->idempleado=-1;
+            $egreso->idcaja=$this->idcaja;
+            $egreso->tipo_egreso=-1;
+            $egreso->descripcion='DEVOLUCIÓN DE PRODUCTOS - VENTA N° '.$request->idventa;
+            $egreso->tipo_pago_empleado=null;
+            $egreso->mes_pago_empleado=null;
+            $egreso->tipo_comprobante=-1;
+            $egreso->num_comprobante=null;
+            $egreso->idventa=$request->idventa;
+            $egreso->monto=$request->total_devolucion;
+            $egreso->tipo=3;
+            $egreso->save();
+
+            foreach ($productos as $producto) {
+                $inv = Inventario::where('idproducto',$producto['idproducto'])->orderby('idinventario', 'desc')->first();
+
+                $inventario=new Inventario();
+                $inventario->idproducto = $producto['idproducto'];
+                $inventario->idempleado=auth()->user()->idempleado;
+                $inventario->cantidad=$producto['cantidad_devolucion'];
+                $inventario->costo = $inv->costo;
+                $inventario->saldo = $inv->saldo + $producto['cantidad_devolucion'];
+                $inventario->moneda = $inv->moneda;
+                $inventario->tipo_cambio = $inv->tipo_cambio;
+                $inventario->fecha=date('Y-m-d H:i:m');
+                $inventario->operacion='DEVOLUCIÓN DE PRODUCTO - VENTA '.$request->idventa;
+                $inventario->save();
+
+                DB::statement("UPDATE ventas_detalle SET devueltos = ".($producto['detalle']['devueltos']+$producto['cantidad_devolucion'])." WHERE idventa=".$request->idventa." AND num_item = ".$producto['detalle']['num_item']." AND idproducto=".$producto['idproducto']);
+
+            }
+
+            DB::commit();
+
+            return 'Se procesó exitosamente la devolución';
+
+        } catch (\Exception $e){
+            DB::rollBack();
+            Log::error($e);
+            return $e->getMessage();
+        }
     }
 
 }

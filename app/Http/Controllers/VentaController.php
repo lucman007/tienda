@@ -110,15 +110,37 @@ class VentaController extends Controller
         return json_encode($productos);
     }
 
-    //Funcion que permite obtener los documentos que las notas de creditos van a corregir
-
     public function obtenerDocumentos(Request $request)
     {
         $consulta=trim($request->get('textoBuscado'));
 
         switch($request->comprobante){
+            //copiar venta
             case -1:
-                $ventas = DB::table('ventas')
+                $ventas = Venta::where(function ($query) use ($consulta) {
+                    $query->whereHas('persona',function ($query) use ($consulta){
+                        $query->where('nombre','LIKE', '%'.$consulta.'%');
+                    })->orwhereHas('facturacion',function ($query) use ($consulta){
+                        $query->whereRaw('CONCAT_WS("-",facturacion.serie,facturacion.correlativo) LIKE "%'.$consulta.'%"');
+                    });
+                })
+                    ->whereHas('facturacion',function ($query){
+                        $query->where('facturacion.codigo_tipo_documento','03')
+                            ->orWhere('facturacion.codigo_tipo_documento','01')
+                            ->orWhere('facturacion.codigo_tipo_documento','30');
+                    })
+                    ->where('eliminado', 0)
+                    ->orderby('idventa', 'desc')
+                    ->take(10)
+                    ->get();
+
+                foreach ($ventas as $venta) {
+                    $venta->facturacion;
+                    $venta->persona;
+                    $venta->estado = $venta->facturacion->estado;
+                }
+
+                /*$ventas = DB::table('ventas')
                     ->join('persona', 'persona.idpersona', '=', 'ventas.idcliente')
                     ->join('facturacion', 'facturacion.idventa', '=', 'ventas.idventa')
                     ->select('ventas.idventa', 'facturacion.estado', 'facturacion.serie','facturacion.correlativo','facturacion.codigo_tipo_documento', 'persona.nombre', 'ventas.total_venta')
@@ -131,7 +153,7 @@ class VentaController extends Controller
                     ->where('eliminado', '=', 0)
                     ->orderby('idventa', 'desc')
                     ->take(10)
-                    ->get();
+                    ->get();*/
                 break;
             case -2:
                 $ventas = DB::table('ventas')
@@ -478,13 +500,18 @@ class VentaController extends Controller
                     $venta->productos()->attach($item['idproducto'], $detalle);
 
                     //Actualizar inventario
+                    $inv = Inventario::where('idproducto',$item['idproducto'])->orderby('idinventario', 'desc')->first();
                     if($request->comprobante != '07'){
-                        $saldo = $item['stock'] - $item['cantidad'];
+                        $saldo = $inv->saldo - $item['cantidad'];
                         $cantidad = $item['cantidad'] * -1;
                         $operacion = 'VENTA N° ' . $idventa;
                     } else {
-                        $saldo = $item['stock'] + $item['cantidad'];
-                        $cantidad = $item['cantidad'];
+                        if($item['detalle']['devueltos'] > 0){
+                            $cantidad = $item['cantidad'] - $item['detalle']['devueltos'];
+                        } else {
+                            $cantidad = $item['cantidad'];
+                        }
+                        $saldo = $inv->saldo + $cantidad;
                         $operacion = 'ANULACIÓN (NC) DE VENTA N° ' . $request->idventa_modifica;
                     }
 
@@ -506,35 +533,37 @@ class VentaController extends Controller
             }
 
             //Guardar tipo de pago
-            if($request->tipo_pago==2){
+            if(!($request->comprobante == '07' || $request->comprobante == '08')) {
+                if ($request->tipo_pago == 2) {
 
-                $cuotas = json_decode($request->cuotas, TRUE);
-                foreach ($cuotas as $cuota){
-                    $pago = new Pago();
-                    $pago->monto=$cuota['monto'];
-                    $pago->tipo = 2;
-                    $pago->fecha=$cuota['fecha'];
-                    $venta->pago()->save($pago);
-                }
-            } else{
-
-                if($request->tipo_pago_contado == 4){
-                    $fraccionado = json_decode($request->pago_fraccionado, TRUE);
-                    foreach ($fraccionado as $item){
+                    $cuotas = json_decode($request->cuotas, TRUE);
+                    foreach ($cuotas as $cuota) {
                         $pago = new Pago();
-                        $pago->monto=$item['monto'];
-                        $pago->tipo = $item['tipo'];
-                        $pago->fecha=date('Y-m-d H:i:s');
+                        $pago->monto = $cuota['monto'];
+                        $pago->tipo = 2;
+                        $pago->fecha = $cuota['fecha'];
                         $venta->pago()->save($pago);
                     }
-                } else{
-                    $pago = new Pago();
-                    $pago->monto=$request->total_venta;
-                    $pago->tipo=$request->tipo_pago_contado;
-                    $pago->fecha=date('Y-m-d H:i:s');
-                    $venta->pago()->save($pago);
-                }
+                } else {
 
+                    if ($request->tipo_pago_contado == 4) {
+                        $fraccionado = json_decode($request->pago_fraccionado, TRUE);
+                        foreach ($fraccionado as $item) {
+                            $pago = new Pago();
+                            $pago->monto = $item['monto'];
+                            $pago->tipo = $item['tipo'];
+                            $pago->fecha = date('Y-m-d H:i:s');
+                            $venta->pago()->save($pago);
+                        }
+                    } else {
+                        $pago = new Pago();
+                        $pago->monto = $request->total_venta;
+                        $pago->tipo = $request->tipo_pago_contado;
+                        $pago->fecha = date('Y-m-d H:i:s');
+                        $venta->pago()->save($pago);
+                    }
+
+                }
             }
 
             DB::commit();
@@ -558,14 +587,20 @@ class VentaController extends Controller
                 $cpe->generarArchivos($idventa);
             }
 
-            $respuesta_sunat='Se ha procesado la venta correctamente: '.$request->serie.'-'.$correlativo;
+            if($request->comprobante == '01' || $request->comprobante == '03' || $request->comprobante == '30'){
+                $texto = 'la venta';
+            } else {
+                $texto = 'la nota';
+            }
+
+            $respuesta_sunat='Se ha procesado '.$texto.' correctamente: '.$request->serie.'-'.$correlativo;
 
             return json_encode(['idventa' => $idventa, 'respuesta' => $respuesta_sunat]);
 
         } catch (\Exception $e) {
             DB::rollback();
             Log::info($e);
-            return response(['mensaje'=>'Ha ocurrido un error al guardar la venta'], 500);
+            return response(['mensaje'=>'Ha ocurrido un error al guardar la venta: '.$e->getMessage()], 500);
         }
 
     }
@@ -903,11 +938,18 @@ class VentaController extends Controller
 
         foreach ($detalle as $item){
             //Actualizar inventario
+
+            if($item['detalle']['devueltos'] > 0){
+                $cantidad = $item['detalle']['cantidad'] - $item['detalle']['devueltos'];
+            } else {
+                $cantidad = $item['detalle']['cantidad'];
+            }
+
             $inventario = new Inventario();
             $inventario->idproducto = $item['idproducto'];
             $inventario->idempleado = auth()->user()->idempleado;
-            $inventario->cantidad = $item['detalle']['cantidad'];
-            $inventario->saldo = $item->inventario()->first()->saldo + $item['detalle']['cantidad'];
+            $inventario->cantidad = $cantidad;
+            $inventario->saldo = $item->inventario()->first()->saldo + $cantidad;
             $inventario->operacion = 'ANULACIÓN DE VENTA N° ' . $idventa;
             $inventario->save();
         }
@@ -1176,7 +1218,7 @@ class VentaController extends Controller
 
         } catch (\Exception $e) {
             DB::rollback();
-            Log::info($e);
+            Log::error($e);
             return $e;
         }
     }
@@ -1391,13 +1433,20 @@ class VentaController extends Controller
             $productos=$venta->productos;
 
             foreach ($productos as $item){
+
+                if($item['detalle']['devueltos'] > 0){
+                    $cantidad = $item['detalle']['cantidad'] - $item['detalle']['devueltos'];
+                } else {
+                    $cantidad = $item['detalle']['cantidad'];
+                }
+
                 $inventario = new Inventario();
                 $inventario->idproducto = $item['idproducto'];
                 $inventario->idempleado = auth()->user()->idempleado;
                 $inventario->idventa = $idventa;
-                $inventario->cantidad = $item->detalle->cantidad;
+                $inventario->cantidad = $cantidad;
                 $inventario->costo = $item->costo;
-                $inventario->saldo = $item->inventario()->first()->saldo + $item->detalle->cantidad;
+                $inventario->saldo = $item->inventario()->first()->saldo + $cantidad;
                 $inventario->moneda = $item->moneda_compra;
                 $inventario->tipo_cambio = $item->tipo_cambio;
                 $inventario->operacion = 'ANULACIÓN (NC) DE VENTA N° ' . $request->idventa;

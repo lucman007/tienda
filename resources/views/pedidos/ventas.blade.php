@@ -205,6 +205,7 @@
             :idventa="idventa"
             :total="totalVenta"
             :origen="'ventas'"
+            v-on:imprimir="imprimir"
             v-on:after-save="after_save">
     </modal-facturacion>
     <modal-whatsapp :text="text_whatsapp" :link="'{{$agent->isDesktop()?'https://web.whatsapp.com':'https://api.whatsapp.com'}}'"></modal-whatsapp>
@@ -262,10 +263,10 @@
                             });
                     }
                 },
-                imprimir(idventa){
+                imprimir(file_or_id){
                      @if(!$agent->isDesktop())
-                        let src = "{{url('/ventas/imprimir').'/'}}"+idventa;
-                        if(idventa==null) {
+                        let src = "{{url('/ventas/imprimir').'/'}}"+file_or_id;
+                        if(file_or_id==null) {
                             src = "{{url('/pedidos/imprimir-historial/')}}";
                         }
                         @if(isset(json_decode(cache('config')['interfaz'], true)['rawbt']) && json_decode(cache('config')['interfaz'], true)['rawbt'])
@@ -277,9 +278,6 @@
                                 alert('Ha ocurrido un error al imprimir con RawBT.');
                                 console.log(error);
                             });
-                            /*let  beforeUrl = 'intent:';
-                            afterUrl = '#Intent;package=ru.a402d.rawbtprinter;scheme=rawbt;component=ru.a402d.rawbtprinter.activity.PrintDownloadActivity;end;';
-                            document.location=beforeUrl+encodeURI(src)+afterUrl;*/
                         @else
                             window.open(src, '_blank');
                         @endif
@@ -288,10 +286,10 @@
                         let iframe = document.createElement('iframe');
                         document.body.appendChild(iframe);
                         iframe.style.display = 'none';
-                        if(idventa==null) {
+                        if(file_or_id==null) {
                             iframe.src = "/pedidos/imprimir-historial/";
                         } else{
-                            iframe.src = "/ventas/imprimir/"+idventa;
+                            iframe.src = "/ventas/imprimir/"+file_or_id;
                         }
                         iframe.onload = function() {
                             setTimeout(function() {
@@ -322,7 +320,6 @@
                     ]
                 },
                 after_save(data){
-                    this.imprimir(data.file);
                     let comp = (data.file).split('-');
                     let badge_class = 'badge-success';
                     if(comp[2].includes('F00')){

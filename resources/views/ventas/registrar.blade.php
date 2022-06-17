@@ -638,8 +638,9 @@
                             <tr :class="{'td-anulado':doc.estado=='ANULADO'}" v-for="(doc,index) in listaDocumentos"
                                 :key="doc.idventa">
                                 <td>@{{doc.idventa}}</td>
-                                <td style="width: 20%">@{{doc.serie}}-@{{doc.correlativo}}</td>
-                                <td style="width: 40%">@{{doc.nombre}}</td>
+                                <td v-show="doc.facturacion.codigo_tipo_documento != 30"  style="width: 20%">@{{doc.facturacion.serie}}-@{{doc.facturacion.correlativo}}</td>
+                                <td v-show="doc.facturacion.codigo_tipo_documento == 30"  style="width: 20%">@{{doc.ticket}}</td>
+                                <td style="width: 40%">@{{doc.persona.nombre}}</td>
                                 <td>@{{doc.total_venta}}</td>
                                 <td>
                                     <span class="badge"
@@ -769,7 +770,7 @@
                 numeroGuia: '',
                 numeroOc: '',
                 fecha: '{{date('Y-m-d')}}',
-                serie: 'B001',
+                serie: '{{$serie_comprobantes['boleta']}}',
                 correlativo: '',
                 motivo: '',
                 tipo_nota_electronica: '01',
@@ -1378,11 +1379,15 @@
                                     localStorage.removeItem('productos');
                                     localStorage.removeItem('cliente');
                                     localStorage.removeItem('esConIgv');
+                                    let texto = 'la venta';
+                                    if(comprobante == '07' || comprobante == '08'){
+                                        texto = 'la nota';
+                                    }
                                     if (isNaN(response.data.idventa)) {
                                         this.$swal({
                                             position: 'top',
                                             icon: 'info',
-                                            title: 'Se ha guardado la venta',
+                                            title: 'Se ha guardado '+texto,
                                             text: 'Existen algunos problemas con el envío de comprobantes',
                                             timer: 3000,
                                         }).then(() => {
@@ -1394,7 +1399,7 @@
                                         this.$swal({
                                             position: 'top',
                                             icon: 'success',
-                                            title: 'Se ha guardado la venta',
+                                            title: 'Se ha guardado '+texto,
                                             text: response.data.respuesta,
                                             timer: 60000,
                                         }).then(() => {
@@ -1537,28 +1542,25 @@
 
                     switch (this.comprobante) {
                         case '01':
-                            this.serie = 'F001';
+                            this.serie = '{{$serie_comprobantes['factura']}}';
                             break;
                         case '03':
-                            this.serie = 'B001';
+                            this.serie = '{{$serie_comprobantes['boleta']}}';
                             break;
                         case '07.01':
-                            this.serie = 'BC01';
+                            this.serie = '{{$serie_comprobantes['nota_credito_boleta']}}';
                             break;
                         case '07.02':
-                            this.serie = 'FC01';
+                            this.serie = '{{$serie_comprobantes['nota_credito_factura']}}';
                             break;
                         case '08.01':
-                            this.serie = 'BD01';
+                            this.serie = '{{$serie_comprobantes['nota_debito_boleta']}}';
                             break;
                         case '08.02':
-                            this.serie = 'FD01';
-                            break;
-                        case '20':
-                            this.serie = 'PROF';
+                            this.serie = '{{$serie_comprobantes['nota_debito_factura']}}';
                             break;
                         default:
-                            this.serie = 'REC';
+                            this.serie = '{{$serie_comprobantes['recibo']}}';
                     }
 
 
@@ -1574,7 +1576,7 @@
                     this.nombreCliente = "";
                     this.productosSeleccionados = [];
                     this.comprobante = '30';
-                    this.serie = 'B001';
+                    this.serie = '{{$serie_comprobantes['boleta']}}';
                     this.comprobanteReferencia = '';
                     this.motivo = '';
                     this.tipo_nota_electronica = '01';

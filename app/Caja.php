@@ -18,6 +18,7 @@ class Caja extends Model
         'efectivo_real',
         'efectivo',
         'tarjeta',
+        'devoluciones',
         'credito',
         'extras',
         'gastos',

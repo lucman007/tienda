@@ -6,17 +6,18 @@
             </template>
             <div class="container">
                 <div class="row">
-                    <div class="col-lg-3" v-show="comprobante != 30">
+                    <div class="col-lg-3">
                         <div class="form-group">
                             <label>Comprobante</label>
                             <select :disabled="origen=='pedidos'" v-model="comprobante" name="comprobante"
                                     class="custom-select" id="selectComprobante">
                                 <option value="03">Boleta</option>
                                 <option value="01">Factura</option>
+                                <option v-show="origen=='pedidos'" value="30">Nota de venta</option>
                             </select>
                         </div>
                     </div>
-                    <div class="col-lg-6">
+                    <div class="col-lg-9">
                         <label>Tipo de pago</label>
                         <div class="row">
                             <div class="col-lg-4 form-group">
@@ -26,10 +27,15 @@
                                     <option value="4">Fraccionado</option>
                                 </select>
                             </div>
-                            <div v-show="tipoPagoContado==4" class="col-lg-4 form-group">
-                                <b-button v-b-modal.modal-pagofraccionado variant="primary"><i
+                            <div class="col-lg-4 form-group">
+                                <b-button v-show="tipoPagoContado==4" v-b-modal.modal-pagofraccionado variant="primary"><i
                                         class="fas fa-plus"></i> Editar pago
                                 </b-button>
+                            </div>
+                            <div class="col-lg-4">
+                                <b-form-checkbox v-model="imprimir" switch size="lg" class="float-right">
+                                    <p style="font-size: 1rem;">Imprimir</p>
+                                </b-form-checkbox>
                             </div>
                         </div>
                     </div>
@@ -87,7 +93,7 @@
                         <div class="row">
                             <div class="col-lg-5">
                                 <label>Monto</label>
-                                <input v-model="pago.monto" type="text" class="form-control">
+                                <input v-model="pago.monto" type="number" class="form-control">
                             </div>
                             <div class="col-lg-6">
                                 <label>Tipo de pago</label>
@@ -127,6 +133,7 @@
                 tituloModal:'',
                 query:'',
                 tipoPagoContado: 1,
+                imprimir:true,
                 pago_fraccionado:[
                     {
                         monto: '0.00',
@@ -147,6 +154,10 @@
                         this.disabledClienteRuc=false;
                     } else if(this.tipo_doc == '03') {
                         this.tituloModal = 'Generar boleta';
+                        this.query = '00000000';
+                        this.buscarCliente(null);
+                    } else if(this.tipo_doc == '30') {
+                        this.tituloModal = 'Generar nota de venta';
                         this.query = '00000000';
                         this.buscarCliente(null);
                     }
@@ -228,14 +239,17 @@
                             } else{
                                 if(isNaN(data.file)){
                                     this.enviar_documentos(data.idventa,data.file,'0');
-                                    if(this.origen == 'pedidos'){
-                                        this.$emit('imprimir',data.file);
-                                        this.$emit('limpiar');
-                                    } else{
-                                        this.$emit('after-save',data);
-                                    }
-                                    this.$refs['modal-facturar'].hide();
                                 }
+
+                                if(this.origen == 'pedidos'){
+                                    this.$emit('limpiar');
+                                } else{
+                                    this.$emit('after-save',data);
+                                }
+                                if(this.imprimir){
+                                    this.$emit('imprimir',data.file);
+                                }
+                                this.$refs['modal-facturar'].hide();
                             }
                         }
                     })
@@ -326,6 +340,7 @@
                 this.mostrarProgreso=false;
                 this.mostrarSpinner=false;
                 this.tipoPagoContado = 1;
+                this.imprimir = true;
             }
         }
     }

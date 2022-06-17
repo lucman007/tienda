@@ -1,94 +1,106 @@
 @extends('layouts.main')
-@section('titulo', 'Gastos e ingresos')
+@section('titulo', 'Movimientos')
 @section('contenido')
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
             <div class="col-lg-8">
-                <h3 class="titulo-admin-1">Registro de egresos</h3>
-                <b-button v-b-modal.modal-1 variant="primary"><i class="fas fa-plus"></i> Agregar gasto</b-button>
-                <b-button v-b-modal.modal-ingreso variant="primary" class="ml-1"><i class="fas fa-plus"></i> Ingreso extra</b-button>
-            </div>
-            <div class="col-lg-3">
-                <div class="form-group">
-                    <label>Filtrar:</label>
-                    <select @change="obtener_datos" v-model="filtro" class="custom-select">
-                        <option value="3">Todo</option>
-                        <option value="1">Egresos</option>
-                        <option value="2">Ingresos</option>
-                    </select>
-                </div>
+                <h3 class="titulo-admin-1">Movimientos</h3>
             </div>
             <div class="col-lg-2 form-group">
-                <label for="">Desde</label>
-                <input @change="obtener_datos" type="date" v-model="fecha_in" name="fecha_in" class="form-control">
+                <range-calendar class="float-right" :inicio="desde + ' 00:00:00'" :fin="hasta + ' 00:00:00'" v-on:setparams="setParams"></range-calendar>
             </div>
-            <div class="col-lg-2 form-group">
-                <label for="">Hasta</label>
-                <input @change="obtener_datos" type="date" v-model="fecha_out" name="fecha_out" class="form-control">
+            <div class="col-lg-2">
+                <b-button href="/reportes/caja" class="btn btn-success float-right w-100" title="Reportes">
+                    <i class="fas fa-chart-line"></i> Ir a reportes
+                </b-button>
             </div>
         </div>
         <div class="row">
             <div class="col-sm-12">
                 <div class="card">
-                    <div class="card-header">
-                        Lista de gastos
-                    </div>
                     <div class="card-body">
-                        <div class="table-responsive tabla-gestionar">
-                            <table class="table table-striped table-hover table-sm">
-                                <thead class="bg-custom-green">
-                                <tr>
-                                    <th scope="col"></th>
-                                    <th scope="col">Fecha</th>
-                                    <th scope="col">Caja</th>
-                                    <th scope="col">Tipo</th>
-                                    <th scope="col">Descripción</th>
-                                    <th scope="col">N° comprobante</th>
-                                    <th scope="col">Monto</th>
-                                    <th scope="col">Opciones</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr v-show="lista_gastos.data" v-for="item in lista_gastos.data">
-                                    <td></td>
-                                    <td>@{{item.fecha}}</td>
-                                    <td>@{{item.caja}}</td>
-                                    <td>@{{item.tipo}}</td>
-                                    <td>@{{item.descripcion}}</td>
-                                    <td>@{{item.num_comprobante}}</td>
-                                    <td>@{{item.monto}}</td>
-                                    <td class="botones-accion">
-                                        <a @click="borrarGastoIngreso(item.idgasto)" href="javascript:void(0)">
-                                            <button class="btn btn-danger" title="Eliminar"><i
-                                                        class="fas fa-trash-alt"></i>
-                                            </button>
-                                        </a>
-                                        @can('Mantenimiento: empleados')
-                                        <a v-if="item.tipo_egreso==4" :href="'/trabajadores/pagos/'+item.idempleado">
-                                            <button class="btn btn-warning" title="Historial de pagos de empleado"><i class="fas fa-coins"></i></button>
-                                        </a>
-                                        @endcan
-                                    </td>
-                                </tr>
-                                <tr v-show="!lista_gastos.data" class="text-center"><td colspan="9">@{{mensajeTabla}}</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="alert alert-success text-right" role="alert">
-                            <div class="row">
-                                <div class="offset-lg-6"></div>
-                                <div class="col-lg-3"><strong>Total gastos: @{{ total_gastos }}</strong></div>
-                                <div class="col-lg-3"><strong>Total ingresos: @{{ total_ingresos }}</strong></div>
+                        <div class="row">
+                            <div class="col-lg-12 mb-4">
+                                <b-nav tabs>
+                                    <b-nav-item href="/caja/movimientos?tipo=gastos" :active="'{{$tipo_movimiento}}'==1">Gastos</b-nav-item>
+                                    <b-nav-item href="/caja/movimientos?tipo=ingresos" :active="'{{$tipo_movimiento}}'==2">Ingreso de efectivo</b-nav-item>
+                                    <b-nav-item href="/caja/movimientos?tipo=devoluciones" :active="'{{$tipo_movimiento}}'==3">Devoluciones</b-nav-item>
+                                </b-nav>
+                            </div>
+                            <div class="col-lg-12">
+                                <b-button v-show="'{{$tipo_movimiento}}'==1" v-b-modal.modal-1 variant="primary"><i class="fas fa-plus"></i> Agregar gasto</b-button>
+                                <b-button v-show="'{{$tipo_movimiento}}'==2" v-b-modal.modal-ingreso variant="primary" class="ml-1"><i class="fas fa-plus"></i> Agregar efectivo</b-button>
+                                <b-button v-show="'{{$tipo_movimiento}}'==3" v-b-modal.modal-documento variant="primary" class="ml-1"><i class="fas fa-plus"></i> Agregar devolución</b-button>
+                                <h4 class="float-right">Total: S/ @{{ total }}</h4>
+                                <div class="table-responsive tabla-gestionar">
+                                    <table class="table table-striped table-hover table-sm">
+                                        <thead class="bg-custom-green">
+                                        <tr>
+                                            <th scope="col"></th>
+                                            <th scope="col">Fecha</th>
+                                            <th scope="col">Caja</th>
+                                            @if($tipo_movimiento == 1)
+                                            <th scope="col">Tipo de gasto</th>
+                                            @endif
+                                            <th scope="col">Descripción</th>
+                                            @if($tipo_movimiento == 1)
+                                            <th scope="col">N° comprobante</th>
+                                            @endif
+                                            <th scope="col">Monto</th>
+                                            @if($tipo_movimiento != 3)
+                                            <th scope="col">Opciones</th>
+                                            @endif
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        @if(count($data))
+                                            @foreach($data as $item)
+                                                <tr>
+                                                    <td></td>
+                                                    <td style="width: 130px">{{date('d/m/Y H:i',strtotime($item->fecha))}}</td>
+                                                    <td style="width: 130px">{{$item->caja}}</td>
+                                                    @if($tipo_movimiento == 1)
+                                                    <td>{{$item->tipo_gasto}}</td>
+                                                    @endif
+                                                    <td>{{$item->descripcion}} @if($tipo_movimiento == 3) <a href="{{url('facturacion/documento/'.$item->idventa)}}"> Ver detalle</a> @endif</td>
+                                                    @if($tipo_movimiento == 1)
+                                                    <td>{{$item->num_comprobante}}</td>
+                                                    @endif
+                                                    <td>S/{{$item->monto}}</td>
+                                                    @if($tipo_movimiento != 3)
+                                                    <td class="botones-accion">
+                                                        <a @click="borrarGastoIngreso({{$item->idgasto}})" href="javascript:void(0)">
+                                                            <button class="btn btn-danger" title="Eliminar"><i
+                                                                        class="fas fa-trash-alt"></i>
+                                                            </button>
+                                                        </a>
+                                                        @can('Mantenimiento: empleados')
+                                                            @if($item->tipo_egreso==4)
+                                                            <a :href="'/trabajadores/pagos/'+'{{$item->idempleado}}'">
+                                                                <button class="btn btn-warning" title="Historial de pagos de empleado"><i class="fas fa-coins"></i></button>
+                                                            </a>
+                                                            @endif
+                                                        @endcan
+                                                    </td>
+                                                    @endif
+                                                </tr>
+                                            @endforeach
+                                        @else
+                                        <tr class="text-center"><td colspan="9">No hay datos para mostrar</td></tr>
+                                        @endif
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {{$data->links('layouts.paginacion')}}
                             </div>
                         </div>
-                        <paginacion-js v-on:paginate="obtener_datos" v-bind:pagination="lista_gastos"></paginacion-js>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     <!--INICIO MODAL GASTOS-->
-    <b-modal id="modal-1" ref="modal-1" size="lg" @ok="agregarGasto" @@hidden="resetModal">
+    <b-modal id="modal-1" ref="modal-1" size="lg" @ok="agregarMovimiento" @@hidden="resetModal">
     <template slot="modal-title">
         Agregar gasto
     </template>
@@ -151,7 +163,7 @@
                     <div class="col-lg-3">
                         <div class="form-group">
                             <label>Monto:</label>
-                            <input autocomplete="off" type="text" v-model="monto" class="form-control">
+                            <input autocomplete="off" type="number" v-model="monto" class="form-control">
                         </div>
                     </div>
                 </div>
@@ -366,7 +378,7 @@
     </b-modal>
     <!--FIN MODAL EMPLEADO -->
     <!--INICIO MODAL INGRESO -->
-    <b-modal size="lg" id="modal-ingreso" ref="modal-ingreso" @ok="agregarIngreso" @hidden="resetModal">
+    <b-modal size="lg" id="modal-ingreso" ref="modal-ingreso" @ok="agregarMovimiento" @hidden="resetModal">
         <template slot="modal-title">
             Ingreso extra
         </template>
@@ -381,7 +393,7 @@
                 <div class="col-lg-3">
                     <div class="form-group">
                         <label>Monto</label>
-                        <input autocomplete="off" type="text" v-model="monto" class="form-control">
+                        <input autocomplete="off" type="number" v-model="monto" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-12">
@@ -393,6 +405,108 @@
         </div>
     </b-modal>
     <!--FIN MODAL INGRESO -->
+    <!--INICIO MODAL DOCUMENTO -->
+    <b-modal size="lg" id="modal-documento" ref="modal-documento" ok-only @hidden="resetModal">
+        <template slot="modal-title">
+            Seleccionar documento
+        </template>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label for="buscar">Busca por correlativo o cliente:</label>
+                        <input @keyup="delay()" v-model="buscar" type="text" name="buscar"
+                               placeholder="Buscar..." class="form-control" autocomplete="off">
+                    </div>
+                </div>
+                <div class="col-lg-12">
+                    <div class="table-responsive tabla-gestionar">
+                        <table class="table table-striped table-hover table-sm">
+                            <thead class="bg-custom-green">
+                            <tr>
+                                <th scope="col">N° Doc.</th>
+                                <th scope="col">Serie/correlativo</th>
+                                <th scope="col">Cliente</th>
+                                <th scope="col">Importe</th>
+                                <th scope="col"></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr :class="{'td-anulado':doc.estado=='ANULADO'}" v-for="(doc,index) in listaDocumentos"
+                                :key="doc.idventa">
+                                <td>@{{doc.idventa}}</td>
+                                <td style="width: 20%">@{{doc.serie}}-@{{doc.correlativo}}</td>
+                                <td style="width: 40%">@{{doc.nombre}}</td>
+                                <td>@{{doc.total_venta}}</td>
+                                <td style="width: 5%" class="botones-accion">
+                                    <button :disabled="doc.estado == 'ANULADO' || doc.estado == 'RECHAZADO'" @click="verDetalle(doc)" class="btn btn-info"
+                                            title="Ver detalle"><i
+                                                class="fas fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </b-modal>
+    <!--FIN MODAL DOCUMENTO -->
+    <!--INICIO MODAL DOCUMENTO DETALLE -->
+    <b-modal size="lg" id="modal-documento-detalle" ref="modal-documento-detalle" @hidden="resetModal">
+        <template slot="modal-title">
+            @{{titulo_modal_detalle}}
+        </template>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <span class="float-right"><strong>Total devolución: @{{ moneda_devolucion+' '+ total_devolucion}}</strong></span>
+                </div>
+                <div class="col-lg-12">
+                    <div class="table-responsive tabla-gestionar">
+                        <table class="table table-striped table-hover table-sm">
+                            <thead class="bg-custom-green">
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Producto</th>
+                                <th scope="col">Precio</th>
+                                <th scope="col">Cantidad</th>
+                                <th scope="col">Total</th>
+                                <th scope="col" style="width: 120px">Devolución</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr :style="{opacity:Number(item.detalle.devueltos) >= Number(item.detalle.cantidad)?0.5:1}" v-for="(item,index) in detalle"
+                                :key="index">
+                                <td>@{{ item.detalle.num_item }}</td>
+                                <td>@{{ item.nombre }} <span v-show="Number(item.detalle.devueltos) > 0" class="badge badge-warning">@{{item.detalle.devueltos}} DEVUELTOS</span></td>
+                                <td>@{{ item.detalle.monto }}</td>
+                                <td>@{{ item.detalle.cantidad }}</td>
+                                <td>@{{ item.detalle.total }}</td>
+                                <td>
+                                    <b-form-checkbox @change="calcularMontoDevolucion" :disabled="Number(item.detalle.devueltos) >= Number(item.detalle.cantidad)" class="float-left" v-model="item.devolver" switch size="sm">
+                                    </b-form-checkbox>
+                                    <input @keyup="calcularMontoDevolucion" v-model="item.cantidad_devolucion" v-show="item.devolver" type="number" class="form-control w-50" max="item.cantidad_devolucion">
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <template #modal-footer="{ ok, cancel}">
+            <b-button variant="secondary" @click="cancel()">
+                Cancel
+            </b-button>
+            <b-button variant="primary" @click="devolverProductos">
+                <b-spinner v-show="mostrarProgresoGuardado" small label="Loading..." ></b-spinner>
+                <span v-show="!mostrarProgresoGuardado">Devolver productos</span>
+            </b-button>
+        </template>
+    </b-modal>
+    <!--FIN MODAL DOCUMENTO DETALLE -->
         @endsection
         @section('script')
             <script>
@@ -400,17 +514,10 @@
                 let app = new Vue({
                     el: '.app',
                     data: {
-                        fecha_in: '{{date('Y-m-d')}}',
-                        fecha_out: '{{date('Y-m-d')}}',
-                        filtro: '3',
                         fecha_gasto: '{{date('Y-m-d')}}',
-                        mensajeTabla: 'Cargando...',
-                        lista_gastos: {
-                            current_page: 1
-                        },
+                        mostrarProgresoGuardado:false,
                         errorDatosGastosIngresos: [],
                         errorGastosIngresos: 0,
-                        accion: 'insertar',
                         descripcion: '',
                         monto: '',
                         comprobante: '7',
@@ -423,51 +530,137 @@
                         mes_pago_empleado: '-1',
                         num_comprobante: '',
                         totalPendiente: '-',
-                        total_gastos:'0.00',
-                        total_ingresos:'0.00'
+                        total:'0.00',
+                        listaDocumentos: [],
+                        detalle:[],
+                        titulo_modal_detalle:'',
+                        total_devolucion:'0.00',
+                        moneda_devolucion: 'S/',
+                        desde:'{{$desde}}',
+                        hasta:'{{$hasta}}',
+                        idventa: -1
                     },
                     created(){
-                        this.obtener_datos();
-                        let today = new Date().toISOString().split('T')[0];
-                        document.getElementsByName("fecha_in")[0].setAttribute('max', today);
-                        document.getElementsByName("fecha_out")[0].setAttribute('max', today);
+                        this.obtenerTotal();
                     },
                     methods: {
-                        obtener_datos(){
-                            let _this = this;
-                            axios.post('/caja/gasto/obtener-datos?page=' + this.lista_gastos.current_page, {
-                                'fecha_in': this.fecha_in,
-                                'fecha_out': this.fecha_out,
-                                'filtro': this.filtro,
-                            })
-                                .then(function (response) {
-                                    let datos = response.data;
-                                    let suma_ingresos=0;
-                                    let suma_gastos=0;
-                                    if (datos.data.length===0) {
-                                        _this.mensajeTabla = 'No se han encontrado registros';
-                                        _this.lista_gastos.data = null;
-                                    } else {
-                                        _this.lista_gastos = datos;
+                        setParams(obj){
+                            let d1 = new Date(obj.startDate).toISOString().split('T')[0];
+                            let d2 = new Date(obj.endDate).toISOString().split('T')[0];
+                            this.desde=d1;
+                            this.hasta=d2;
+                            window.location.href='/caja/movimientos?tipo={{$tipo}}'+'&desde='+this.desde+'&hasta='+this.hasta;
+                        },
+                        calcularMontoDevolucion(){
 
-                                        for(let item of datos.data){
-                                            if(item.tipo_egreso == '2'){
-                                                suma_ingresos += Number(item['monto']);
-                                            } else {
-                                                suma_gastos += Number(item['monto']);
-                                            }
-                                        }
+                            this.$nextTick(() => {
+                                let suma = 0;
+                                for (let item of this.detalle) {
+                                    if (item.devolver) {
+                                        suma += item.detalle.monto * item.cantidad_devolucion;
                                     }
+                                }
+                                this.total_devolucion = suma.toFixed(2);
 
-                                    _this.total_gastos=suma_gastos.toFixed(2);
-                                    _this.total_ingresos=suma_ingresos.toFixed(2);
+                            });
+
+                        },
+                        obtenerTotal(){
+                            axios.get('/caja/movimientos/total?tipo={{$tipo}}'+'&desde='+this.desde+'&hasta='+this.hasta)
+                                .then(response => {
+                                    this.total = response.data.toFixed(2);
+                                })
+                                .catch(error => {
+                                    alert('Ha ocurrido un error');
+                                    console.log(error);
+                                });
+                        },
+                        devolverProductos(){
+                            let items = [];
+                            let i = 0;
+
+                            for (let item of this.detalle) {
+                                if (item.devolver) {
+                                    if(Number(item.cantidad_devolucion) > item.detalle.cantidad){
+                                        alert('No se puede devolver más cantidad de la vendida.');
+                                        return;
+                                    }
+                                    if(Number(item.cantidad_devolucion) <= 0){
+                                        alert('La cantidad de devolución debe ser mayor a 0');
+                                        return;
+                                    }
+                                    items[i] = item;
+                                    i++;
+                                }
+                            }
+
+                            if (items.length > 0) {
+                                if (confirm('Los productos seleccionados retornarán al inventario. ¿Confirma esta acción?')) {
+                                    this.mostrarProgresoGuardado=true;
+                                    axios.post('{{url('caja/devolver-productos')}}', {
+                                        'total_devolucion':this.total_devolucion,
+                                        'moneda_devolucion':this.moneda_devolucion,
+                                        'idventa':this.idventa,
+                                        'items': JSON.stringify(items)
+                                    })
+                                        .then(response => {
+                                            alert(response.data);
+                                            this.mostrarProgresoGuardado=false;
+                                            window.location.reload();
+                                        })
+                                        .catch(error => {
+                                            alert('Ha ocurrido un error al procesar la operación.');
+                                            this.mostrarProgresoGuardado=false;
+                                            console.log(error);
+                                        });
+                                }
+
+                            } else {
+                                alert('No hay productos seleccionados')
+                            }
+
+                        },
+                        verDetalle(venta){
+                            this.$refs['modal-documento'].hide();
+                            this.$refs['modal-documento-detalle'].show();
+                            this.titulo_modal_detalle = 'Venta N° '+venta.idventa;
+                            this.moneda_devolucion = 'S/';
+                            this.idventa = venta.idventa;
+
+                            axios.get('/caja/obtener-detalle-venta'+'/'+venta.idventa, {
+                                'idventa':venta.idventa
+                            })
+                                .then(response => {
+                                   this.detalle = response.data;
                                 })
                                 .catch(function (error) {
                                     alert('Ha ocurrido un error al obtener los datos.');
                                     console.log(error);
                                 });
                         },
-                        agregarGasto(e){
+                        delay(){
+                            if (this.timer) {
+                                clearTimeout(this.timer);
+                                this.timer = null;
+                            }
+                            this.timer = setTimeout(() => {
+                                this.obtenerDocumentos(true);
+                            }, 500);
+                        },
+                        obtenerDocumentos(){
+                            axios.post('{{action('VentaController@obtenerDocumentos')}}', {
+                                'textoBuscado': this.buscar,
+                                'comprobante': -1
+                            })
+                                .then(response => {
+                                    this.listaDocumentos = response.data;
+                                })
+                                .catch(error => {
+                                    this.alerta('Ha ocurrido un error al obtener los documentos');
+                                    console.log(error);
+                                });
+                        },
+                        agregarMovimiento(e){
                             if (this.validarGastos()) {
                                 e.preventDefault();
                                 return;
@@ -482,36 +675,12 @@
                                 'tipo_comprobante': this.comprobante,
                                 'num_comprobante': this.num_comprobante,
                                 'monto': this.monto,
-                                'tipo': '1',
+                                'tipo_movimiento': '{{$tipo_movimiento}}',
                             };
 
                             axios.post('{{action('GastoController@store')}}', dataset)
                                 .then(function () {
-                                    window.location.href = "/caja/egresos"
-                                })
-                                .catch(function (error) {
-                                    alert('Ha ocurrido un error al guardar los datos.');
-                                    console.log(error);
-                                });
-                        },
-                        agregarIngreso(e){
-                            if (this.validarIngresos()) {
-                                e.preventDefault();
-                                return;
-                            }
-
-                            let dataset = {
-                                'tipo_egreso': '2',
-                                'idempleado': this.personaSeleccionada['idempleado'],
-                                'descripcion': this.descripcion,
-                                'tipo_comprobante': '7',
-                                'monto': this.monto,
-                                'tipo': '2',
-                            };
-
-                            axios.post('{{action('GastoController@store')}}', dataset)
-                                .then(function () {
-                                    window.location.href = "/caja/egresos"
+                                    window.location.reload();
                                 })
                                 .catch(function (error) {
                                     alert('Ha ocurrido un error al guardar los datos.');
@@ -538,22 +707,11 @@
                             return this.errorGastosIngresos;
 
                         },
-                        validarIngresos(){
-                            this.errorGastosIngresos = 0;
-                            this.errorDatosGastosIngresos = [];
-                            if (this.descripcion.length == 0) this.errorDatosGastosIngresos.push('*Agregue una descripción');
-                            if (this.monto.length == 0) this.errorDatosGastosIngresos.push('*Monto no puede estar vacio');
-                            if (this.monto <= 0) this.errorDatosGastosIngresos.push('*Monto debe ser mayor que cero');
-                            if (isNaN(this.monto)) this.errorDatosGastosIngresos.push('*El monto debe contener sólo números');
-                            if (this.errorDatosGastosIngresos.length) this.errorGastosIngresos = 1;
-                            return this.errorGastosIngresos;
-
-                        },
                         borrarGastoIngreso(id){
                             if (confirm('Realmente desea eliminar el registro')) {
                                 axios.delete('{{url('/caja/destroy')}}' + '/' + id)
                                     .then(function () {
-                                        window.location.href = "/caja/egresos"
+                                        window.location.reload();
                                     })
                                     .catch(function (error) {
                                         console.log(error);
@@ -580,12 +738,11 @@
                             this.$refs['modal-proveedor'].hide();
                         },
                         obtenerEmpleados(){
-                            let _this = this;
                             axios.post('{{action('GastoController@obtenerEmpleados')}}', {
                                 'textoBuscado': this.buscar
                             })
-                                .then(function (response) {
-                                    _this.listaModal = response.data;
+                                .then(response => {
+                                    this.listaModal = response.data;
                                 })
                                 .catch(function (error) {
                                     alert('Ha ocurrido un error.');
@@ -607,7 +764,6 @@
                             }
                         },
                         resetModal(){
-                            this.idgasto = -1;
                             this.descripcion = '';
                             this.monto = '';
                             this.nombre = '';
@@ -624,16 +780,15 @@
                             this.listaModal = [];
                         },
                         obtenerPagoPendiente(){
-                            let _this = this;
                             axios.post('{{action('GastoController@obtenerPagoPendiente')}}', {
                                 'idempleado': this.personaSeleccionada['idempleado'],
                                 'mes': this.mes_pago_empleado,
                                 'tipo': this.tipo_pago_empleado
                             })
-                                .then(function (response) {
+                                .then(response => {
                                     let datos = response.data;
-                                    _this.totalPendiente = datos;
-                                    _this.monto = datos;
+                                    this.totalPendiente = datos;
+                                    this.monto = datos;
                                 })
                                 .catch(function (error) {
                                     alert('Ha ocurrido un error.');

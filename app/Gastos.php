@@ -20,7 +20,8 @@ class Gastos extends Model
         'tipo_pago_empleado',
         'mes_pago_empleado',
         'tipo_comprobante',
-        'num_comprobante'
+        'num_comprobante',
+        'idventa'
     ];
 
     public function empleado(){
@@ -28,7 +29,7 @@ class Gastos extends Model
     }
 
     public function cajero(){
-        return $this->hasOne(Persona::class,'idpersona','idcaja');
+        return $this->hasOne(Persona::class,'idpersona','idcajero');
     }
 
 }

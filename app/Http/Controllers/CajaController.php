@@ -89,6 +89,7 @@ class CajaController extends Controller
             $caja->efectivo_teorico=$request->efectivo_teorico;
             $caja->efectivo=$request->efectivo;
             $caja->tarjeta=$request->tarjeta;
+            $caja->devoluciones=$request->devoluciones;
             $caja->credito=$request->credito;
             $caja->extras=$request->extras;
             $caja->gastos=$request->gastos;
@@ -159,6 +160,7 @@ class CajaController extends Controller
         $suma_ventas_efectivo=0;
         $suma_ventas_credito=0;
         $suma_ventas_tarjeta=0;
+        $suma_devoluciones=0;
         $suma_gastos=0;
         $suma_extras=0;
         $suma_dolares=0;
@@ -207,19 +209,25 @@ class CajaController extends Controller
         }
 
         foreach ($gastos as $gasto) {
-            if($gasto->tipo==1){
-                $suma_gastos += $gasto->monto;
-            } else{
-                $suma_extras += $gasto->monto;
+            switch($gasto->tipo){
+                case 1:
+                    $suma_gastos += $gasto->monto;
+                    break;
+                case 2:
+                    $suma_extras += $gasto->monto;
+                    break;
+                case 3:
+                    $suma_devoluciones += $gasto->monto;
+                    break;
             }
 
         }
 
-        $total_cierre=$caja->apertura+$suma_ventas_efectivo+$suma_extras-$suma_gastos;
+        $total_cierre=$caja->apertura+$suma_ventas_efectivo+$suma_extras-$suma_gastos-$suma_devoluciones;
 
         return ['idcaja'=>$caja->idcaja,'apertura'=>$caja->apertura,'efectivo'=>$suma_ventas_efectivo,
             'tarjeta'=>$suma_ventas_tarjeta,'credito'=>$suma_ventas_credito,
-            'gastos'=>$suma_gastos,'extras'=>$suma_extras,'total_cierre'=>$total_cierre,'dolares'=>$suma_dolares];
+            'gastos'=>$suma_gastos,'extras'=>$suma_extras,'devoluciones'=>$suma_devoluciones,'total_cierre'=>$total_cierre,'dolares'=>$suma_dolares];
 
     }
 

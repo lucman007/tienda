@@ -4,7 +4,7 @@
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
             <div class="col-md-6 col-lg-8 mb-md-2">
-                <h3 class="titulo-admin-1">Gestionar caja</h3>
+                <h3 class="titulo-admin-1">Turnos</h3>
             </div>
             <div class="col-md-6 col-lg-4">
                 <b-button href="/reportes/caja" class="btn btn-success float-right" title="Reportes">
@@ -23,14 +23,7 @@
         <div class="row">
             <div class="col-sm-12 mt-4">
                 <div class="card">
-                    <div class="card-body">{{--
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <div class="alert alert-primary">
-                                    Se ha actualizado la interfaz de caja. Si no abres caja se abrirá automáticamente con la primera venta. Luego puedes editar el saldo inicial dando click al botón verde "Editar". También ya puedes descargar un reporte de caja.
-                                </div>
-                            </div>
-                        </div>--}}
+                    <div class="card-body">
                         <div class="row">
                             @if(!$caja)
                                 <div class="col-lg-12 text-center">
@@ -105,7 +98,7 @@
                                         </div>
                                         @if($caja)
                                         <div class="alert alert-primary">
-                                            <strong>Total apertura: @if($caja) {{$caja->moneda}} {{ $caja->apertura }} @endif</strong>
+                                            <strong>Saldo inicial: @if($caja) {{$caja->moneda}} {{ $caja->apertura }} @endif</strong>
                                         </div>
                                         <p><strong>Observación:</strong> {{$caja->observacion_a}}</p>
                                             @if(!$caja->estado)
@@ -149,6 +142,10 @@
                                                         <td>{{ date('d/m/Y H:i:s', strtotime($caja->fecha_c)) }}</td>
                                                     </tr>
                                                     <tr>
+                                                        <td><strong>Saldo inicial:</strong></td>
+                                                        <td>{{$caja->moneda}} {{ $caja->apertura }}</td>
+                                                    </tr>
+                                                    <tr>
                                                         <td><strong>Total efectivo:</strong></td>
                                                         <td>{{$caja->moneda}} {{ $caja->efectivo }}</td>
                                                     </tr>
@@ -163,6 +160,10 @@
                                                     <tr>
                                                         <td><strong>Total gastos:</strong></td>
                                                         <td>{{$caja->moneda}} {{ $caja->gastos }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><strong>Total devoluciones:</strong></td>
+                                                        <td>{{$caja->moneda}} {{ $caja->devoluciones }}</td>
                                                     </tr>
                                                 @endif
                                                 </tbody>
@@ -349,76 +350,82 @@
     </template>
     <div class="container">
         <div class="row">
-            <div class="col-lg-6">
+            <div class="col-md-6">
                 <div class="form-group">
-                    <label for="apertura">Apertura (+):</label>
+                    <label for="apertura">Saldo inicial:</label>
                     <input type="text" v-model="apertura" class="form-control" disabled>
                 </div>
             </div>
-            <div class="col-lg-6">
+            <div class="col-md-6">
                 <div class="form-group">
-                    <label for="efectivo">Extras (+):</label>
+                    <label for="efectivo">Efectivo extra:</label>
                     <input type="text" v-model="extras" class="form-control" disabled>
                 </div>
             </div>
-            <div class="col-lg-6">
+            <div class="col-md-6">
                 <div class="form-group">
-                    <label for="efectivo">Ingresos efectivo (+):</label>
+                    <label for="efectivo">Ventas en efectivo:</label>
                     <input type="text" v-model="efectivo" class="form-control" disabled>
                 </div>
             </div>            
-            <div class="col-lg-6">
+            <div class="col-md-6">
                 <div class="form-group">
-                    <label for="gastos">Gastos (-):</label>
+                    <label for="gastos">Total gastos:</label>
                     <input type="text" v-model="gastos" class="form-control" disabled>
                 </div>
             </div>
-            <div class="col-lg-6">
+            <div class="col-md-6">
                 <div class="form-group">
-                    <label for="credito">Total crédito:</label>
+                    <label for="credito">Ventas a crédito:</label>
                     <input type="text" v-model="credito" class="form-control" disabled>
                 </div>
             </div>
-            <div class="col-lg-6">
+            <div class="col-md-6">
                 <div class="form-group">
-                    <label for="tarjeta">Total tarjeta:</label>
+                    <label for="tarjeta">Ventas con tarjeta:</label>
                     <input type="text" v-model="tarjeta" class="form-control" disabled>
                 </div>
             </div>
-            <div class="col-lg-6">
+            <div class="col-md-6">
                 <div class="form-group">
-                    <label><strong>Efectivo teórico en caja:</strong></label>
-                    <h3>S/ @{{ efectivo_teorico }}</h3>
+                    <label for="tarjeta">Total devoluciones:</label>
+                    <input type="text" v-model="devoluciones" class="form-control" disabled>
                 </div>
             </div>
-            <div class="col-lg-6">
+            <div class="col-md-6">
+                <div class="alert alert-success">
+                    <label><strong>Efectivo teórico en caja:</strong></label>
+                    <h3 class="mb-0">S/ @{{ efectivo_teorico }}</h3>
+                </div>
+            </div>
+            <div class="col-md-6">
                 <div class="form-group">
                     <label><strong>Efectivo real en caja:</strong></label>
                     <input v-model="total_real" @keyup="calcularDescuadre" class="form-control" type="number" id="focusthis">
                 </div>
             </div>
-            <div v-show="dolares > 0" class="col-lg-6">
+            <div v-show="dolares > 0" class="col-md-6">
                 <div class="form-group">
                     <label>Ventas en dólares:</label>
                     <h3>USD @{{ dolares }}</h3>
                 </div>
             </div>
-            <div class="col-lg-6">
+            <div class="col-md-6">
                 <div class="form-group">
                     <label for="tarjeta">Descuadre:</label>
                     <input type="text" v-model="descuadre" class="form-control" disabled>
                 </div>
             </div>
-            <div class="col-lg-12">
+            <div class="col-md-12">
                 <div class="form-group">
                     <label for="observacion_c">Observación:</label>
                     <textarea v-model="observacion_c" class="form-control" rows="2"></textarea>
                 </div>
             </div>
-            <div class="col-lg-12">
+            <div class="col-md-12">
                 <b-form-checkbox @change="" v-model="notificacion" switch size="lg"><p style="font-size: 1rem;">Notificar al administrador</p></b-form-checkbox>
             </div>
-            <div class="col-lg-12" v-show="notificacion">
+            <div class="col-md-12" v-show="notificacion">
                 <div class="form-group">
                     @if(json_decode(cache('config')['mail_contact'], true)['notificacion_caja'])
                         <label for="total_apertura">Correo:</label>
@@ -475,6 +482,7 @@
                 extras:'',
                 credito:'',
                 tarjeta:'',
+                devoluciones:'',
                 gastos:'',
                 efectivo_teorico:'',
                 dolares:'',
@@ -548,6 +556,7 @@
                             this.apertura=cierre.apertura;
                             this.efectivo=cierre.efectivo.toFixed(2);
                             this.tarjeta=cierre.tarjeta.toFixed(2);
+                            this.devoluciones=cierre.devoluciones.toFixed(2);
                             this.credito=cierre.credito.toFixed(2);
                             this.gastos=cierre.gastos.toFixed(2);
                             this.dolares=cierre.dolares.toFixed(2);
@@ -567,6 +576,7 @@
                         'apertura':this.apertura,
                         'efectivo':this.efectivo,
                         'tarjeta':this.tarjeta,
+                        'devoluciones':this.devoluciones,
                         'credito':this.credito,
                         'gastos':this.gastos,
                         'extras':this.extras,
