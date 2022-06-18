@@ -530,7 +530,7 @@
                                 });
                         }
                     },
-                    generarTicket(){
+                    /*generarTicket(){
                         this.mostrarSpinner = true;
                         this.disabledTicket = true;
                         axios.post('/ventas/facturacion-rapida-alt',{
@@ -561,7 +561,7 @@
                                 alert('Ha ocurrido un error.');
                                 console.log(error);
                             });
-                    },
+                    },*/
                     imprimir(file_or_id){
 
                         let src = '';

@@ -464,16 +464,15 @@ class PedidoController extends Controller
                 switch ($item->facturacion->codigo_tipo_documento){
                     case '01':
                         $item->badge_comp='badge-warning';
-                        $item->comprobante = $item->facturacion->serie.'-'.$item->facturacion->correlativo;
+
                         break;
                     case '03':
                         $item->badge_comp='badge-success';
-                        $item->comprobante = $item->facturacion->serie.'-'.$item->facturacion->correlativo;
                         break;
                     case '30':
-                        $item->comprobante = '';
+                        $item->badge_comp='';
                 }
-
+                $item->comprobante = $item->facturacion->serie.'-'.$item->facturacion->correlativo;
                 switch ($item->tipo_pago){
                     case 1:
                         $item->tipo_pago='EFECTIVO';

@@ -10,6 +10,7 @@ namespace sysfact\Http\Controllers;
 
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use sysfact\Emisor;
 use sysfact\Facturacion;
@@ -497,4 +498,27 @@ class ComprobanteController extends Controller
 
         return $rpta;
     }
+
+    public function temp_update_serie(){
+        try{
+            DB::beginTransaction();
+            $ventas = Venta::all();
+            foreach ($ventas as $venta) {
+                if($venta->facturacion->serie == 'REC'){
+                    $explode = explode('-',$venta->ticket);
+                    $facturacion = Facturacion::find($venta->idventa);
+                    $facturacion->serie = 'TIC';
+                    $facturacion->correlativo = str_pad($explode[1], 8, '0', STR_PAD_LEFT);
+                    $facturacion->save();
+                }
+            }
+            DB::commit();
+            return 'Éxito';
+        } catch (\Exception $e){
+            DB::rollBack();
+            return $e->getMessage();
+        }
+
+    }
+
 }

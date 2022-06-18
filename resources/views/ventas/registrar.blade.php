@@ -638,9 +638,8 @@
                             <tr :class="{'td-anulado':doc.estado=='ANULADO'}" v-for="(doc,index) in listaDocumentos"
                                 :key="doc.idventa">
                                 <td>@{{doc.idventa}}</td>
-                                <td v-show="doc.facturacion.codigo_tipo_documento != 30"  style="width: 20%">@{{doc.facturacion.serie}}-@{{doc.facturacion.correlativo}}</td>
-                                <td v-show="doc.facturacion.codigo_tipo_documento == 30"  style="width: 20%">@{{doc.ticket}}</td>
-                                <td style="width: 40%">@{{doc.persona.nombre}}</td>
+                                <td style="width: 20%">@{{doc.serie}}-@{{doc.correlativo}}</td>
+                                <td style="width: 40%">@{{doc.nombre}}</td>
                                 <td>@{{doc.total_venta}}</td>
                                 <td>
                                     <span class="badge"

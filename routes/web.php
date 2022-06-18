@@ -224,6 +224,7 @@ Route::group(['middleware' => ['can:Facturación: comprobantes']], function () {
     Route::post('comprobantes/obtener-resumen', 'ComprobanteController@obtener_resumen');
     Route::get('comprobantes/{desde}/{hasta}','ComprobanteController@comprobantes');
     Route::get('comprobantes', 'ComprobanteController@comprobantes');
+    Route::get('comprobantes/update-serie', 'ComprobanteController@temp_update_serie');
 });
 
 Route::group(['middleware' => ['can:Reportes']], function () {

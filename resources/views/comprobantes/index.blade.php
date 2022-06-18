@@ -183,7 +183,6 @@
                                                 </button>
                                                 @if($venta->facturacion->codigo_tipo_documento == '30')
                                                 <button @click="eliminar({{$venta->idventa}})"
-                                                        v-if="'{{$venta->facturacion->serie}}'=='REC'"
                                                         class="btn btn-danger" title="Eliminar"><i class="fas fa-trash-alt"></i>
                                                 </button>
                                                     @elseif(($venta->facturacion->codigo_tipo_documento == '01' || $venta->facturacion->codigo_tipo_documento == '03') && $venta->facturacion->estado=='ACEPTADO')

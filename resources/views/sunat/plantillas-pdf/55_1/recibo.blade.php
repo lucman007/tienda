@@ -8,7 +8,7 @@
                     <strong>{{$emisor->razon_social}}</strong><br>
                     R.U.C. {{$emisor->ruc}}<br>{{$emisor->direccion}}, {{$emisor->urbanizacion==''?'':$emisor->urbanizacion.','}} {{$emisor->provincia}},
                     {{$emisor->departamento}}, {{$emisor->distrito}} <br> {{$emisor->telefono_1}}<br>
-                    <strong>TICKET {{$documento->ticket}}</strong>
+                    <strong>NOTA DE VENTA {{$documento->facturacion->serie}}-{{$documento->facturacion->correlativo}}</strong>
                 </p>
             </div>
         </div>

@@ -41,7 +41,6 @@
                                     <th scope="col">Cliente</th>
                                     <th scope="col">Importe</th>
                                     <th scope="col">Pago</th>
-                                    <th scope="col">Nota de venta</th>
                                     <th scope="col">N° comprobante</th>
                                     <th scope="col">Opciones</th>
                                 </tr>
@@ -56,10 +55,9 @@
                                             <td>{{$item->persona->nombre}}</td>
                                             <td>{{$item->total_venta}}</td>
                                             <td>{{$item->tipo_pago}}</td>
-                                            <td>{{$item->ticket}}</td>
                                             <td id="comp_{{$item->idventa}}">
-                                                @if($item->comprobante=='')
-                                                    -
+                                                @if($item->facturacion->codigo_tipo_documento=='30')
+                                                    {{$item->comprobante}}
                                                 @else
                                                     <span class="badge {{$item->badge_comp}}">{{$item->comprobante}}</span>
                                                 @endif
@@ -73,8 +71,11 @@
                                                     @can('Facturación: facturar')
                                                         <b-dropdown-item id="btn_facturar_{{$item->idventa}}" @if($item->facturacion->codigo_tipo_documento != '30') disabled @else v-b-modal.modal-facturar @endif @click="facturar({{$item}})"><i class="fas fa-file-import"></i> Crear Boleta / Factura</b-dropdown-item>
                                                     @endcan
+                                                    @if($item->facturacion->codigo_tipo_documento == '30')
                                                     <b-dropdown-item @click="imprimir('{{$item->idventa}}')"><i class="fas fa-receipt"></i> Imprimir nota de venta</b-dropdown-item>
-                                                    <b-dropdown-item id="btn_imprimir_{{$item->idventa}}" @click="imprimir('{{$item->nombre_fichero}}')" @if($item->facturacion->codigo_tipo_documento == '30') disabled @endif><i class="fas fa-file-invoice-dollar"></i> Imprimir comprobante</b-dropdown-item>
+                                                    @else
+                                                    <b-dropdown-item id="btn_imprimir_{{$item->idventa}}" @click="imprimir('{{$item->nombre_fichero}}')"><i class="fas fa-file-invoice-dollar"></i> Imprimir comprobante</b-dropdown-item>
+                                                    @endif
                                                     <b-dropdown-item id="btn_anular_{{$item->idventa}}" @click="abrir_modal('anulacion',{{$item}})" @if($item->facturacion->codigo_tipo_documento == '30') disabled @endif><i class="fas fa-times"></i> Anular comprobante</b-dropdown-item>
                                                     <b-dropdown-item @click="text_whatsapp = '{{$item->text_whatsapp}}'" @if($item->facturacion->codigo_tipo_documento == '30') disabled @else v-b-modal.modal-whatsapp @endif><i style="width: 2em;" class="fab fa-whatsapp"></i> Enviar por whatsapp</b-dropdown-item>
                                                 </b-dropdown>

@@ -117,7 +117,7 @@ class VentaController extends Controller
         switch($request->comprobante){
             //copiar venta
             case -1:
-                $ventas = Venta::where(function ($query) use ($consulta) {
+                /*$ventas = Venta::where(function ($query) use ($consulta) {
                     $query->whereHas('persona',function ($query) use ($consulta){
                         $query->where('nombre','LIKE', '%'.$consulta.'%');
                     })->orwhereHas('facturacion',function ($query) use ($consulta){
@@ -138,9 +138,9 @@ class VentaController extends Controller
                     $venta->facturacion;
                     $venta->persona;
                     $venta->estado = $venta->facturacion->estado;
-                }
+                }*/
 
-                /*$ventas = DB::table('ventas')
+                $ventas = DB::table('ventas')
                     ->join('persona', 'persona.idpersona', '=', 'ventas.idcliente')
                     ->join('facturacion', 'facturacion.idventa', '=', 'ventas.idventa')
                     ->select('ventas.idventa', 'facturacion.estado', 'facturacion.serie','facturacion.correlativo','facturacion.codigo_tipo_documento', 'persona.nombre', 'ventas.total_venta')
@@ -153,7 +153,7 @@ class VentaController extends Controller
                     ->where('eliminado', '=', 0)
                     ->orderby('idventa', 'desc')
                     ->take(10)
-                    ->get();*/
+                    ->get();
                 break;
             case -2:
                 $ventas = DB::table('ventas')
@@ -371,26 +371,6 @@ class VentaController extends Controller
             $correlativo = '00000001';
         }
 
-        //ticket
-        if($request->comprobante == '03' || $request->comprobante == '01' || $request->comprobante == '30'){
-            $venta_ticket = DB::table('ventas')
-                ->select('ticket')
-                ->where('ticket','!=','-1')
-                ->orderby('idventa', 'desc')
-                ->first();
-
-            if($venta_ticket){
-                $explode = $venta_ticket->ticket?explode('-', $venta_ticket->ticket)[1]:1;
-                $ticket = 'TIC-'.str_pad($explode + 1, 6, '0', STR_PAD_LEFT);
-            } else{
-                $ticket = 'TIC-000001';
-            }
-
-        } else{
-            $ticket = '-1';
-        }
-
-
         DB::beginTransaction();
         try {
             $venta = new Venta();
@@ -410,7 +390,6 @@ class VentaController extends Controller
                 $venta->tipo_pago = $request->tipo_pago_contado;
             }
             $venta->igv_incluido = $request->esConIgv;
-            $venta->ticket = $ticket;
             $venta->save();
             $idventa = $venta->idventa;
 
@@ -911,13 +890,14 @@ class VentaController extends Controller
         $view = view('sunat/plantillas-pdf/'.$formato['ruta'].'/recibo',['documento'=>$venta, 'emisor'=>$emisor,'usuario'=>$usuario,'items'=>$items]);
         $html=$view->render();
         $pdf=new Html2Pdf('P',$formato['medidas'],'es');
+        $pdf->pdf->SetTitle($venta->facturacion->serie.'-'.$venta->facturacion->correlativo.'.pdf');
         $pdf->writeHTML($html);
 
         if($request->rawbt){
-            $fromFile = $pdf->output('RECIBO-'.$venta->ticket.'.pdf','S');
+            $fromFile = $pdf->output($venta->facturacion->serie.'-'.$venta->facturacion->correlativo.'.pdf','S');
             return 'rawbt:data:application/pdf;base64,'.base64_encode($fromFile);
         } else {
-            $pdf->output('RECIBO-'.$venta->ticket.'.pdf');
+            $pdf->output($venta->facturacion->serie.'-'.$venta->facturacion->correlativo.'.pdf');
         }
 
     }
@@ -1062,20 +1042,6 @@ class VentaController extends Controller
             $correlativo = '00000001';
         }
 
-        //ticket
-        $venta_ticket = DB::table('ventas')
-            ->select('ticket')
-            ->where('ticket','!=','-1')
-            ->orderby('ticket', 'desc')
-            ->first();
-
-        if($venta_ticket){
-            $explode = $venta_ticket->ticket?explode('-', $venta_ticket->ticket)[1]:1;
-            $ticket = 'TIC-'.str_pad($explode + 1, 6, '0', STR_PAD_LEFT);
-        } else{
-            $ticket = 'TIC-000001';
-        }
-
         //obtener pedido
         $pedido = Orden::find($request->idpedido);
         $subtotal = round($pedido->total / 1.18, 2);
@@ -1095,7 +1061,6 @@ class VentaController extends Controller
             $venta->total_venta = $pedido->total;
             $venta->tipo_pago = $request->tipo_pago_contado;
             $venta->igv_incluido = true;
-            $venta->ticket = $ticket;
             $venta->save();
             $idventa = $venta->idventa;
 
@@ -1151,16 +1116,14 @@ class VentaController extends Controller
                     $venta->productos()->attach($item->idproducto, $detalle);
 
                     //Actualizar inventario
-                    if($request->comprobante != '07'){
-                        $inventario = new Inventario();
-                        $inventario->idproducto = $item->idproducto;
-                        $inventario->idempleado = auth()->user()->idempleado;
-                        $inventario->idventa = $idventa;
-                        $inventario->cantidad = $item->detalle->cantidad * -1;
-                        $inventario->saldo = $item->inventario()->first()->saldo - $item->detalle->cantidad;
-                        $inventario->operacion = 'VENTA N° ' . $idventa;
-                        $inventario->save();
-                    }
+                    $inventario = new Inventario();
+                    $inventario->idproducto = $item->idproducto;
+                    $inventario->idempleado = auth()->user()->idempleado;
+                    $inventario->idventa = $idventa;
+                    $inventario->cantidad = $item->detalle->cantidad * -1;
+                    $inventario->saldo = $item->inventario()->first()->saldo - $item->detalle->cantidad;
+                    $inventario->operacion = 'VENTA N° ' . $idventa;
+                    $inventario->save();
 
                     $i++;
                 }
@@ -1214,7 +1177,7 @@ class VentaController extends Controller
             if($request->comprobante==30){
                 $file = $idventa;
             }
-            return json_encode(['idventa' => $idventa, 'respuesta' => $respuesta_sunat, 'file' => $file, 'ticket' => $ticket]);
+            return json_encode(['idventa' => $idventa, 'respuesta' => $respuesta_sunat, 'file' => $file]);
 
         } catch (\Exception $e) {
             DB::rollback();
@@ -1275,7 +1238,7 @@ class VentaController extends Controller
         foreach ($venta->productos as $item) {
             $total_item = round($item->detalle->monto * $item->detalle->cantidad, 2);
             if ($total_item == 0) {
-                return json_encode(['idventa' => -1, 'respuesta' => 'El ticket no se puede convertir a boleta o factura debido a que contiene items con monto igual a 0.00', 'file' => null]);
+                return json_encode(['idventa' => -1, 'respuesta' => 'La nota de venta no se puede convertir a boleta o factura debido a que contiene items con monto igual a 0.00', 'file' => null]);
             }
         }
 
@@ -1378,7 +1341,6 @@ class VentaController extends Controller
             $serie = $this->serie_comprobante->serie_nota_credito_boleta;
             $duplicado->fecha = date('Y-m-d H:i:s');
             $duplicado->fecha_vencimiento = date('Y-m-d H:i:s');
-            $duplicado->ticket = -1;
             if($request->comprobante == '01'){
                 $serie = $this->serie_comprobante->serie_nota_credito_factura;
             }
