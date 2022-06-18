@@ -34,7 +34,7 @@ class VentaController extends Controller
         $this->middleware('auth');
         $this->serie_comprobante = new Serie();
         $this->interfaz = json_decode(MainHelper::configuracion('interfaz_pedidos'),true);
-        $this->idcaja = MainHelper::obtener_idcaja();
+        //$this->idcaja = MainHelper::obtener_idcaja();
     }
 
     public function registrar()
@@ -377,7 +377,7 @@ class VentaController extends Controller
             $venta->idempleado = auth()->user()->idempleado;
             $venta->idcliente = $request->idcliente;
             $venta->idcajero = auth()->user()->idempleado;
-            $venta->idcaja = $this->idcaja;
+            $venta->idcaja = MainHelper::obtener_idcaja();
             $venta->fecha = $request->fecha . ' ' . date('H:i:s');
             $venta->tipo_cambio = cache('opciones')['tipo_cambio_compra'];
             if($request->fecha>date('Y-m-d')){
@@ -1056,7 +1056,7 @@ class VentaController extends Controller
             $venta->idempleado = $pedido->idempleado;
             $venta->idcliente = $request->idcliente?$request->idcliente:-1;
             $venta->idcajero = auth()->user()->idempleado;
-            $venta->idcaja = $this->idcaja;
+            $venta->idcaja = MainHelper::obtener_idcaja();;
             $venta->fecha = date('Y-m-d H:i:s');
             $venta->total_venta = $pedido->total;
             $venta->tipo_pago = $request->tipo_pago_contado;

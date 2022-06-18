@@ -42,3 +42,4 @@ Vue.component('modal-descuento',require('./components/ModalDescuento.vue'));
 Vue.component('modal-producto', require('./components/Modalproducto.vue'));
 Vue.component('modal-ubigeo',require('./components/ModalUbigeo.vue'));
 Vue.component('modal-producto-descuento',require('./components/ProductoDescuento.vue'));
+Vue.component('modal-devolucion',require('./components/ModalDevolucion.vue'));

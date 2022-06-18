@@ -17,7 +17,7 @@ class GastoController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-        $this->idcaja = MainHelper::obtener_idcaja();
+        //$this->idcaja = MainHelper::obtener_idcaja();
     }
 
     public function index(Request $request){
@@ -114,7 +114,7 @@ class GastoController extends Controller
             $egreso->idcajero=auth()->user()->idempleado;
             $egreso->fecha=date('Y-m-d H:i:s');
             $egreso->idempleado=$request->idempleado;
-            $egreso->idcaja=$this->idcaja;
+            $egreso->idcaja=MainHelper::obtener_idcaja();;
             $egreso->descripcion=$request->descripcion;
             $egreso->tipo_pago_empleado=$request->tipo_pago_empleado;
             $egreso->mes_pago_empleado=$request->mes_pago_empleado;
@@ -203,7 +203,7 @@ class GastoController extends Controller
             $egreso->idcajero=auth()->user()->idempleado;
             $egreso->fecha=date('Y-m-d H:i:s');
             $egreso->idempleado=-1;
-            $egreso->idcaja=$this->idcaja;
+            $egreso->idcaja=MainHelper::obtener_idcaja();;
             $egreso->tipo_egreso=-1;
             $egreso->descripcion='DEVOLUCIÓN DE PRODUCTOS - VENTA N° '.$request->idventa;
             $egreso->tipo_pago_empleado=null;

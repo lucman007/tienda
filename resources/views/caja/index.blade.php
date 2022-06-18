@@ -1,6 +1,7 @@
 @extends('layouts.main')
 @section('titulo', 'Caja')
 @section('contenido')
+    @php $agent = new \Jenssegers\Agent\Agent() @endphp
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
             <div class="col-md-6 col-lg-8 mb-md-2">
@@ -125,7 +126,7 @@
                                                 </p>
                                             </div>
                                             <div class="col-lg-7">
-                                                <b-button @if(!$caja) disabled @endif  target="_blank" :href="'/caja/imprimir/' + idcaja" class="btn btn-warning float-right mr-3" title="Imprimir">
+                                                <b-button @if(!$caja) disabled @endif  @click="imprimir" class="btn btn-warning float-right mr-3" title="Imprimir">
                                                     <i class="fas fa-print"></i> Imprimir
                                                 </b-button>
                                                 <b-button  @if(!$caja || ($caja && $caja->estado)) disabled @endif class="mr-2 float-right" @click="cerrar_caja" variant="primary">
@@ -501,6 +502,25 @@
                 },
                 buscar(){
                     window.location.href='/caja/'+this.fecha;
+                },
+                imprimir(){
+                    let src = "{{url('/caja/imprimir').'/'}}"+this.idcaja;
+                    @if(!$agent->isDesktop())
+                        @if(isset(json_decode(cache('config')['interfaz'], true)['rawbt']) && json_decode(cache('config')['interfaz'], true)['rawbt'])
+                            axios.get(src+'?rawbt=true')
+                                .then(response => {
+                                    window.location.href = response.data;
+                                })
+                                .catch(error => {
+                                    alert('Ha ocurrido un error al imprimir con RawBT.');
+                                    console.log(error);
+                                });
+                        @else
+                            window.open(src, '_blank');
+                        @endif
+                    @else
+                         window.open(src, '_blank');
+                    @endif
                 },
                 calcularDescuadre(){
                     if (this.timer) {

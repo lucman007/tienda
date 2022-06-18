@@ -244,16 +244,27 @@ class CajaController extends Controller
         return $success;
     }
 
-    public function imprimir_cierre($id){
+    public function imprimir_cierre(Request $request, $id){
 
-        $caja = Caja::find($id);
+        try{
+            $caja = Caja::find($id);
+            $view = view('caja/imprimir/cierre',['caja'=>$caja]);
+            $html=$view->render();
+            $pdf=new Html2Pdf('P',[72,250],'es');
+            $pdf->pdf->SetTitle('Cierre '.$caja->fecha);
+            $pdf->writeHTML($html);
 
-        $view = view('caja/imprimir/cierre',['caja'=>$caja]);
-        $html=$view->render();
-        $pdf=new Html2Pdf('P',[72,250],'es');
-        $pdf->pdf->SetTitle('Cierre '.$caja->fecha);
-        $pdf->writeHTML($html);
-        $pdf->output('Cierre_'.$caja->fecha.'.pdf');
+            if($request->rawbt){
+                $fromFile = $pdf->output('Cierre_'.$caja->fecha.'.pdf','S');
+                return 'rawbt:data:application/pdf;base64,'.base64_encode($fromFile);
+            } else {
+                $pdf->output('Cierre_'.$caja->fecha.'.pdf');
+            }
+
+        } catch (\Exception $e){
+            return $e->getMessage();
+        }
+
     }
 
     /*public function gestionar_creditos(Request $request){

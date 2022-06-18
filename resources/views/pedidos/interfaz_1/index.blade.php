@@ -68,16 +68,19 @@
                                         </div>
                                     </div>
                                     @endif
-                                    <div class="col-12 col-md-6 mt-2 mt-md-0 @if(!$agent->isDesktop()) offset-md-6 @endif">
+                                    <div class="col-12 col-md-12 mt-2 mt-md-0">
                                         <b-button :disabled="idpedido == -1" v-b-modal.modal-entrega class="float-right mr-2" variant="primary" title="Datos de entrega">
-                                            <i class="fas fa-map-marker-alt"></i> Entrega
+                                            <i class="fas fa-map-marker-alt"></i> {{!($agent->isTablet()||$agent->isDesktop())?'':'Entrega'}}
                                         </b-button>
-                                        <div class="float-md-right mr-2">
+                                        <div class="float-md-right mr-2 d-inline">
                                             <select @if($idvendedor != -1) disabled @endif @change="cambiarEmpleado" v-model="idvendedor" style="width: 150px" class="custom-select">
                                                 <option value="-1" style="font-weight: bold">Vendedor:</option>
                                                 <option v-for="empleado in empleados" :value="empleado.idempleado">@{{ empleado.persona.nombre }}</option>
                                             </select>
                                         </div>
+                                        <b-button v-b-modal.modal-devolucion class="float-right mr-2" variant="success" title="Datos de entrega">
+                                            <i class="fas fa-undo"></i> {{!($agent->isTablet()||$agent->isDesktop())?'':'Devolución'}}
+                                        </b-button>
                                     </div>
                                 </div>
                             </div>
@@ -294,7 +297,8 @@
             :can-edit-precio="@can('Pedido: editar precio') true @else false @endcan"
             v-on:actualizar="actualizarDetalle(null)">
     </modal-detalle>
-    <modal-producto-descuento :item="item" v-on:agregar="agregarDescuento">></modal-producto-descuento>
+    <modal-producto-descuento :item="item" v-on:agregar="agregarDescuento"></modal-producto-descuento>
+    <modal-devolucion></modal-devolucion>
 @endsection
 @section('script')
     <script>
