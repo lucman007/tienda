@@ -27,9 +27,9 @@
 
         @foreach($pedidos as $item)
             <tr class="item-borde">
-                <td style="width: 10mm">{{explode('-',$item->ticket)[1]}}</td>
+                <td style="width: 12mm">{{$item->facturacion->serie}}-{{+$item->facturacion->correlativo}}</td>
                 <td style="width: 30mm">{{$item->cliente->persona->nombre}}</td>
-                <td style="width: 20mm">{{$item->total_venta}}</td>
+                <td style="width: 18mm">{{$item->total_venta}}</td>
             </tr>
             @php
                 $sum+=$item->total_venta;

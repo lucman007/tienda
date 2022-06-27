@@ -6,15 +6,13 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <base href=""/>
+    <link rel="shortcut icon" href="{{url('images/favicon.ico')}}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <!-- Font awesome -->
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css"
-          integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
     <!-- app.css -->
     <link rel="stylesheet" href="{{asset('css/app.css')}}">
     <!-- CSS personalizado -->
     <link rel="stylesheet" href="{{asset('css/admin.css')}}">
-    <title>Facfa | @yield('titulo') </title>
+    <title>Facsy | @yield('titulo') </title>
     <script>
         window.Laravel = {!! json_encode([
             'csrfToken' => csrf_token(),

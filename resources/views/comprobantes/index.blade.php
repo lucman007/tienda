@@ -1,6 +1,7 @@
 @extends('layouts.main')
 @section('titulo', 'Comprobantes')
 @section('contenido')
+    @php $agent = new \Jenssegers\Agent\Agent() @endphp
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
             <div class="col-lg-9">
@@ -156,13 +157,9 @@
                                             <td>{{$venta->total_venta}}</td>
                                             <td>{{$venta->facturacion->codigo_moneda}}</td>
                                             <td>{{$venta->tipo_pago}}</td>
-                                            @if($venta->facturacion->codigo_tipo_documento=='30' && $venta->ticket!='')
-                                            <td>{{$venta->ticket}}</td>
-                                            @else
-                                            <td>{{$venta->facturacion->serie}}-{{$venta->facturacion->correlativo}}<br>
-                                                {{$venta->guia_relacionada['correlativo']}}
+                                            <td><span class="badge {{$venta->badge_class_documento}} badge_doc">{{$venta->facturacion->serie}}-{{$venta->facturacion->correlativo}}</span><br>
+                                                <span class="badge badge-info badge_doc">{{$venta->guia_relacionada['correlativo']}}</span>
                                             </td>
-                                            @endif
                                             <td>
                                                 <span class="badge {{$venta->badge_class}}">{{$venta->facturacion->estado}}</span><br>
                                                 @if($venta->guia_relacionada)
@@ -257,11 +254,6 @@
                 anulacionDisabled:false,
                 mostrarProgresoGuardado: false,
             },
-            created(){
-                let today = new Date().toISOString().split('T')[0];
-                document.getElementsByName("fecha_in")[0].setAttribute('max', today);
-                document.getElementsByName("fecha_out")[0].setAttribute('max', today);
-            },
             methods: {
                 setParams(obj){
                     let d1 = new Date(obj.startDate).toISOString().split('T')[0];
@@ -282,6 +274,34 @@
                             this.filtrar();
                             break;
                     }
+                },
+                imprimir(file_or_id){
+                    @if(!$agent->isDesktop())
+                        let src = "{{url('/ventas/imprimir').'/'}}"+file_or_id;
+                        @if(isset(json_decode(cache('config')['interfaz'], true)['rawbt']) && json_decode(cache('config')['interfaz'], true)['rawbt'])
+                            axios.get(src+'?rawbt=true')
+                                .then(response => {
+                                    window.location.href = response.data;
+                                })
+                                .catch(error => {
+                                    alert('Ha ocurrido un error al imprimir con RawBT.');
+                                    console.log(error);
+                                });
+                        @else
+                            window.open(src, '_blank');
+                        @endif
+                    @else
+                        let iframe = document.createElement('iframe');
+                        document.body.appendChild(iframe);
+                        iframe.style.display = 'none';
+                        iframe.src = "/ventas/imprimir/"+file_or_id;
+                        iframe.onload = function() {
+                            setTimeout(function() {
+                                iframe.focus();
+                                iframe.contentWindow.print();
+                            }, 0);
+                        };
+                    @endif
                 },
                 reenviar(idventa,nombre_comprobante, doc_relacionado){
                     if(confirm('¿Está seguro de enviar el comprobante a SUNAT?')){

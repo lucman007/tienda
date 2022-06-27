@@ -247,7 +247,7 @@
                                     this.$emit('after-save',data);
                                 }
                                 if(this.imprimir){
-                                    this.$emit('imprimir',data.file);
+                                    this.$emit('imprimir',data.idventa);
                                 }
                                 this.$refs['modal-facturar'].hide();
                             }

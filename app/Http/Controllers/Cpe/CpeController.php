@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use sysfact\Emisor;
 use sysfact\Http\Controllers\Controller;
 use sysfact\Http\Controllers\Helpers\MainHelper;
+use sysfact\Http\Controllers\Helpers\PdfHelper;
 use sysfact\Venta;
 
 class CpeController extends Controller
@@ -252,27 +253,32 @@ class CpeController extends Controller
         }
     }
 
-    public function descargarArchivo($file){
+    public function descargarArchivo(Request $request, $file_or_id){
 
-        $archivo=explode('.',$file);
-        switch($archivo[1]) {
-            case 'pdf':
-                $pathtoFile = storage_path().'/app/sunat/pdf/' . $file;
-                return response()->download($pathtoFile);
-                break;
-            case 'xml':
-                $pathtoFile = storage_path().'/app/sunat/xml/' . $file;
-                return response()->download($pathtoFile);
-                break;
-            case 'cdr':
-                $pathtoFile = storage_path().'/app/sunat/cdr/' .$archivo[0].'.xml';
-                if (!file_exists($pathtoFile)) {
-                    return redirect('/comprobantes/consulta-cdr')->withErrors(['No se ha obtenido el CDR del comprobante. LLena los datos abajo, dale al botón CONSULTAR CDR y vuelve a descargar desde la página anterior.']);
-                }
-                return response()->download($pathtoFile);
-                break;
-            default:
-                return null;
+        if(is_numeric($file_or_id)){
+            if($request->guia){
+                PdfHelper::generarPdfGuia($file_or_id,false, 'D');
+            } else {
+                PdfHelper::generarPdf($file_or_id,false, 'D');
+            }
+
+        } else {
+            $archivo=explode('.',$file_or_id);
+            switch($archivo[1]) {
+                case 'xml':
+                    $pathtoFile = storage_path().'/app/sunat/xml/' . $file_or_id;
+                    return response()->download($pathtoFile);
+                    break;
+                case 'cdr':
+                    $pathtoFile = storage_path().'/app/sunat/cdr/' .$archivo[0].'.xml';
+                    if (!file_exists($pathtoFile)) {
+                        return redirect('/comprobantes/consulta-cdr')->withErrors(['No se ha obtenido el CDR del comprobante. LLena los datos abajo, dale al botón CONSULTAR CDR y vuelve a descargar desde la página anterior.']);
+                    }
+                    return response()->download($pathtoFile);
+                    break;
+                default:
+                    return null;
+            }
         }
 
     }

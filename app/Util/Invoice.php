@@ -12,7 +12,7 @@ class Invoice {
         $this->venta=$venta;
     }
 
-    public function generar_xml(){
+    public function generar_xml($render = true){
 
         $documento=$this->venta;
         $usuario=$this->venta->cliente;
@@ -159,8 +159,10 @@ class Invoice {
         $usuario->razon_social=$usuario->persona['nombre'];
         $this->nombre_fichero=$emisor->ruc.'-'.$documento->codigo_tipo_documento.'-'.$documento->serie.'-'.$documento->correlativo;
 
-        $view = view('sunat/docs/invoice',['documento'=>$documento,'usuario'=>$usuario,'items'=>$detalle,'emisor'=>$emisor]);
-        return $view->render();
+        if($render){
+            $view = view('sunat/docs/invoice',['documento'=>$documento,'usuario'=>$usuario,'items'=>$detalle,'emisor'=>$emisor]);
+            return $view->render();
+        }
 
     }
 

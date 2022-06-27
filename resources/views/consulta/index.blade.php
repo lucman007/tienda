@@ -32,7 +32,7 @@
                             <div class="col-lg-5">
                                 <div class="form-group">
                                     <label for="correlativo">Correlativo:</label>
-                                    <input maxlength="8" autocomplete="off" type="text" v-model="correlativo" name="correlativo" class="form-control">
+                                    <input maxlength="8" autocomplete="off" type="number" v-model="correlativo" name="correlativo" class="form-control">
                                 </div>
                             </div>
                             <div class="col-lg-4 form-group">
@@ -42,7 +42,7 @@
                             <div class="col-lg-4">
                                 <div class="form-group">
                                     <label for="total">Monto total:</label>
-                                    <input autocomplete="off" type="text" v-model="total" name="total" class="form-control">
+                                    <input autocomplete="off" type="number" v-model="total" name="total" class="form-control">
                                 </div>
                             </div>
                             <div class="col-lg-4">
@@ -56,7 +56,7 @@
                             </div>
                             <div v-if="mostrar" class="col-lg-12">
                                 <div class="form-group text-center">
-                                    <b-button :href="'/consulta/descargar/'+nombreFichero+'.pdf'" class="mt-4" variant="warning"><i class="fas fa-file-pdf"></i> Descargar PDF
+                                    <b-button :href="'/consulta/descargar/'+idventa" class="mt-4" variant="warning"><i class="fas fa-file-pdf"></i> Descargar PDF
                                     </b-button>
                                     <b-button :href="'/consulta/descargar/'+nombreFichero+'.xml'" class="mt-4" variant="warning"><i class="fas fa-code"></i> Descargar XML
                                     </b-button>
@@ -87,7 +87,8 @@
                 mostrarSpinner:false,
                 mostrar:0,
                 mostrarMensaje:0,
-                nombreFichero:''
+                nombreFichero:'',
+                idventa:-1
             },
             methods:{
                 consultar(){
@@ -96,7 +97,6 @@
                         return;
                     }
 
-                    let _this = this;
                     axios.post('consulta/obtenerDocumento',{
                         'tipo_documento':this.tipo_documento,
                         'serie':this.serie,
@@ -104,11 +104,11 @@
                         'total':this.total,
                         'fecha':this.fecha
                     })
-                        .then(function (response) {
-                            _this.mostrar=response.data.mostrar;
-                            _this.mostrarMensaje=!response.data.mostrar;
-                            _this.nombreFichero=response.data.nombre_fichero;
-                            console.log(response.data)
+                        .then(response => {
+                            this.mostrar=response.data.mostrar;
+                            this.mostrarMensaje=!response.data.mostrar;
+                            this.nombreFichero=response.data.nombre_fichero;
+                            this.idventa = response.data.idventa;
                         })
                         .catch(function (error) {
                             alert('Hubo un error al consultar el documento');

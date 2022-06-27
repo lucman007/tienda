@@ -4,11 +4,13 @@ namespace sysfact\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use sysfact\Categoria;
 use sysfact\Emisor;
 use sysfact\Facturacion;
 use sysfact\Guia;
 use sysfact\Http\Controllers\Cpe\CpeController;
+use sysfact\Http\Controllers\Helpers\PdfHelper;
 use sysfact\Presupuesto;
 use sysfact\Producto;
 use sysfact\Venta;
@@ -23,37 +25,45 @@ class GuiaController extends Controller
         $this->middleware('auth');
     }
 
-    public function index()
+    public function index(Request $request, $desde=null,$hasta=null)
     {
-        return $this->guiasEmitidas(date('Y-m-d'), date('Y-m-d'), 'n', 'n');
+        $filtro = $request->filtro;
+        $buscar = $request->buscar;
+
+        if(!$filtro){
+            $filtro='fecha';
+            $desde=date('Y-m-d');
+            $hasta=date('Y-m-d');
+        }
+        return $this->guiasEmitidas($desde, $hasta, $filtro, $buscar);
     }
 
-    public function guiasEmitidas($fecha_in, $fecha_out, $busqueda, $filtro)
+    public function guiasEmitidas($desde, $hasta, $filtro, $buscar)
     {
 
         try {
 
             $guias = null;
-            $filtros = ['fecha_in' => $fecha_in, 'fecha_out' => $fecha_out, 'busqueda' => $busqueda, 'tipo' => $filtro];
+            $filtros = ['desde' => $desde, 'hasta' => $hasta, 'filtro'=>$filtro,'buscar'=>$buscar];
 
-            switch ($busqueda) {
 
+            switch ($filtro) {
                 case 'estado':
-                    $guias = Guia::whereBetween('fecha_emision', [$fecha_in . ' 00:00:00', $fecha_out . ' 23:59:59'])
+                    $guias = Guia::whereBetween('fecha_emision', [$desde . ' 00:00:00', $hasta . ' 23:59:59'])
                         ->orderby('idguia', 'desc')
-                        ->where('estado', '=', strtoupper($filtro))
+                        ->where('estado', strtoupper($buscar))
                         ->paginate(30);
                     break;
                 case 'cliente':
-                    $guias = Guia::whereBetween('fecha_emision', [$fecha_in . ' 00:00:00', $fecha_out . ' 23:59:59'])
+                    $guias = Guia::whereBetween('fecha_emision', [$desde . ' 00:00:00', $hasta . ' 23:59:59'])
                         ->orderby('idguia', 'desc')
-                        ->whereHas('persona', function ($query) use ($filtro, $busqueda) {
-                            $query->where('nombre', 'LIKE', '%' . strtoupper($filtro) . '%');
+                        ->whereHas('persona', function ($query) use ($filtro, $buscar) {
+                            $query->where('nombre', 'LIKE', '%' . $buscar . '%');
                         })
                         ->paginate(30);
                     break;
                 default:
-                    $guias = Guia::whereBetween('fecha_emision', [$fecha_in . ' 00:00:00', $fecha_out . ' 23:59:59'])
+                    $guias = Guia::whereBetween('fecha_emision', [$desde . ' 00:00:00', $hasta . ' 23:59:59'])
                         ->orderby('idguia', 'desc')
                         ->paginate(30);
 
@@ -80,10 +90,12 @@ class GuiaController extends Controller
 
             }
 
+            $guias->appends($_GET)->links();
+
             return view('guia.index', ['usuario' => auth()->user()->persona, 'guias' => $guias, 'filtros' => $filtros]);
 
         } catch (\Exception $e) {
-            return $e;
+            return $e->getMessage();
         }
 
     }
@@ -521,7 +533,11 @@ class GuiaController extends Controller
     public function enviar_comprobantes_por_email(Request $request)
     {
         try {
+            PdfHelper::generarPdfGuia($request->idguia, false, 'F');
             Mail::to($request->mail)->send(new EnviarDocumentos($request));
+            if(file_exists(storage_path() . '/app/sunat/pdf/' . $request->guia . '.pdf')){
+                unlink(storage_path() . '/app/sunat/pdf/' . $request->guia . '.pdf');
+            }
             return 'Se envió el correo con éxito';
         } catch (\Swift_TransportException $e) {
             return response(['mensaje'=>$e->getMessage()],500);
@@ -599,13 +615,14 @@ class GuiaController extends Controller
         $producto->store($request);
     }
 
-    public function imprimir_venta(Request $request, $file)
+    public function imprimir_guia(Request $request, $idguia)
     {
-        $pathtoFile = storage_path().'/app/sunat/pdf/'.$file;
-        if($request->rawbt){
-            return 'rawbt:data:application/pdf;base64,'.base64_encode(file_get_contents($pathtoFile));
-        } else {
-            return response()->file($pathtoFile);
+
+        try{
+            PdfHelper::generarPdfGuia($idguia, $request->rawbt);
+        } catch (\Exception $e){
+            Log::info($e);
+            return response(['idventa'=>-1,'respuesta'=>$e->getMessage()],500);
         }
     }
 

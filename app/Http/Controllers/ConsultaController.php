@@ -4,6 +4,7 @@ namespace sysfact\Http\Controllers;
 
 use Illuminate\Http\Request;
 use sysfact\Emisor;
+use sysfact\Http\Controllers\Helpers\PdfHelper;
 use sysfact\Venta;
 
 class ConsultaController extends Controller
@@ -29,22 +30,34 @@ class ConsultaController extends Controller
         $nombre_fichero=$emisor->ruc.'-'.$venta['facturacion']['codigo_tipo_documento'].'-'.$venta['facturacion']['serie'].'-'.$venta['facturacion']['correlativo'];
 
         if($venta){
-            return json_encode(['mostrar'=>1,'nombre_fichero'=>$nombre_fichero]);
+            return json_encode(['mostrar'=>1,'nombre_fichero'=>$nombre_fichero,'idventa'=>$venta->idventa]);
         } else{
-            return json_encode(['mostrar'=>0,'nombre_fichero'=>'']);
+            return json_encode(['mostrar'=>0,'nombre_fichero'=>'','idventa'=>-1]);
         }
 
     }
 
-    public function descargarArchivo($file){
+    public function descargarArchivo($file_or_id){
 
-        $extension=explode('.',$file)[1];
-        if($extension=='pdf'){
-            $pathtoFile = storage_path().'/app/sunat/pdf/'.$file;
-            return response()->download($pathtoFile);
-        } else if($extension=='xml'){
-            $pathtoFile = storage_path().'/app/sunat/xml/'.$file;
-            return response()->download($pathtoFile);
+        if(is_numeric($file_or_id)){
+            PdfHelper::generarPdf($file_or_id,false, 'D');
+        } else {
+            $archivo=explode('.',$file_or_id);
+            switch($archivo[1]) {
+                case 'xml':
+                    $pathtoFile = storage_path().'/app/sunat/xml/' . $file_or_id;
+                    return response()->download($pathtoFile);
+                    break;
+                case 'cdr':
+                    $pathtoFile = storage_path().'/app/sunat/cdr/' .$archivo[0].'.xml';
+                    if (!file_exists($pathtoFile)) {
+                        return redirect('/comprobantes/consulta-cdr')->withErrors(['No se ha obtenido el CDR del comprobante. LLena los datos abajo, dale al botón CONSULTAR CDR y vuelve a descargar desde la página anterior.']);
+                    }
+                    return response()->download($pathtoFile);
+                    break;
+                default:
+                    return null;
+            }
         }
 
         return null;
@@ -83,7 +96,23 @@ class ConsultaController extends Controller
             $nombre_fichero=$emisor->ruc.'-'.$venta['facturacion']['codigo_tipo_documento'].'-'.$venta['facturacion']['serie'].'-'.$venta['facturacion']['correlativo'];
             //return $ruc_emisor.'-'.$tipo_documento.'-'.$serie.'-'.$correlativo.'-'.$fecha.'-'.$total;
             if($venta){
-                return response()->download(storage_path('/app/sunat/'.$tipo.'/').$nombre_fichero.'.'.$tipo);
+
+                switch($tipo) {
+                    case 'pdf':
+                        PdfHelper::generarPdf($venta->idventa,false, 'D');
+                        break;
+                    case 'cdr':
+                    case 'xml':
+                        $pathtoFile = storage_path('/app/sunat/'.$tipo.'/').$nombre_fichero.'.'.$tipo;
+                        if (!file_exists($pathtoFile)) {
+                            return redirect('/comprobantes/consulta-cdr')->withErrors(['No se ha obtenido el CDR del comprobante. LLena los datos abajo, dale al botón CONSULTAR CDR y vuelve a descargar desde la página anterior.']);
+                        }
+                        return response()->download($pathtoFile);
+                        break;
+                    default:
+                        return null;
+                }
+
             } else {
                 return redirect('https://www.google.com');
             }
@@ -94,10 +123,5 @@ class ConsultaController extends Controller
 
 
     }
-
-    /*public function printFile($file){
-        $fromFile = storage_path().'/app/sunat/pdf/'.$file;
-        return response()->file($fromFile);
-    }*/
 
 }

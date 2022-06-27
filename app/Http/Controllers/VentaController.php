@@ -11,8 +11,11 @@ use Spipu\Html2Pdf\Html2Pdf;
 use sysfact\Categoria;
 use sysfact\Emisor;
 use sysfact\Facturacion;
+use sysfact\Guia;
 use sysfact\Http\Controllers\Cpe\CpeController;
 use sysfact\Http\Controllers\Helpers\MainHelper;
+use sysfact\Http\Controllers\Helpers\PdfHelper;
+use sysfact\Http\Controllers\Helpers\PdfXmlHelper;
 use sysfact\Inventario;
 use sysfact\Mail\EnviarDocumentos;
 use sysfact\Orden;
@@ -560,10 +563,29 @@ class VentaController extends Controller
 
             }    */
 
+            $idguia = -1;
+            if ($request->esConGuia){
+                $guia_remision=new GuiaController();
+                $idguia = $guia_remision->store($request,$venta);
+            }
+
             //Generar archivos
+            $response_guia = '';
             if($request->comprobante != '30') {
                 $cpe = new CpeController();
                 $cpe->generarArchivos($idventa);
+
+                if ($request->esConGuia) {
+                    //Procesar guia:
+                    if($idguia > 0){
+                        $response_guia = $cpe->sendGuia($idguia);
+                    } else{
+                        $response_guia = 'La guía no ha podido ser procesada.';
+                    }
+
+                    $response_guia = ' / '.$response_guia;
+
+                }
             }
 
             if($request->comprobante == '01' || $request->comprobante == '03' || $request->comprobante == '30'){
@@ -572,7 +594,7 @@ class VentaController extends Controller
                 $texto = 'la nota';
             }
 
-            $respuesta_sunat='Se ha procesado '.$texto.' correctamente: '.$request->serie.'-'.$correlativo;
+            $respuesta_sunat='Se ha procesado '.$texto.' correctamente: '.$request->serie.'-'.$correlativo.' '.$response_guia;
 
             return json_encode(['idventa' => $idventa, 'respuesta' => $respuesta_sunat]);
 
@@ -846,28 +868,18 @@ class VentaController extends Controller
 
     }
 
-    public function imprimir_venta(Request $request, $file_or_id)
+    public function imprimir_venta(Request $request, $idventa)
     {
-        if(is_numeric($file_or_id)){
-            return $this->imprimir_recibo($request, $file_or_id);
-        } else{
-            try{
-                $fromFile = storage_path().'/app/sunat/pdf/'.$file_or_id.'.pdf';
-
-                if($request->rawbt){
-                    return 'rawbt:data:application/pdf;base64,'.base64_encode(file_get_contents($fromFile));
-                } else {
-                    return response()->file($fromFile);
-                }
-
-            } catch (\Exception $e){
-                Log::info($e);
-                return response(['idventa'=>-1,'respuesta'=>'El archivo pdf no existe'],500);
-            }
+        try{
+            PdfHelper::generarPdf($idventa, $request->rawbt);
+        } catch (\Exception $e){
+            Log::info($e);
+            return response(['idventa'=>-1,'respuesta'=>$e->getMessage()],500);
         }
+
     }
 
-    public function imprimir_recibo(Request $request, $id)
+    /*public function imprimir_recibo(Request $request, $id)
     {
         $venta=Venta::find($id);
         $items=$venta->productos;
@@ -900,11 +912,44 @@ class VentaController extends Controller
             $pdf->output($venta->facturacion->serie.'-'.$venta->facturacion->correlativo.'.pdf');
         }
 
+    }*/
+
+    public function verificar_cdr_previo_mail(Request $request){
+        $cdr_factura = storage_path().'/app/sunat/cdr/R-' .$request->factura.'.xml';
+        $cdr_guia = storage_path().'/app/sunat/cdr/R-' .$request->guia.'.xml';
+        $mensaje = '';
+        $error = false;
+        if ($request->factura && !file_exists($cdr_factura)) {
+            $error = true;
+            $mensaje .= 'La factura no tiene el CDR.<br>';
+        }
+        if ($request->guia && !file_exists($cdr_guia)) {
+            $error = true;
+            $mensaje .= 'La guía no tiene el CDR.<br>';
+        }
+
+        if($error){
+            $mensaje .= '¿Desea enviar de todas formas? <br><br>';
+            return $mensaje.'<a style="text-decoration: underline !important;" href="/comprobantes/consulta-cdr">No, primero obtener el CDR</a>';
+        } else{
+            return 1;
+        }
+
     }
 
     public function enviar_comprobantes_por_email(Request $request){
         try{
+            PdfHelper::generarPdf($request->idventa, false, 'F');
+            if($request->idguia != -1){
+                PdfHelper::generarPdfGuia($request->idguia, false, 'F');
+            }
             Mail::to($request->mail)->send(new EnviarDocumentos($request));
+            if(file_exists(storage_path() . '/app/sunat/pdf/' . $request->factura . '.pdf')){
+                unlink(storage_path() . '/app/sunat/pdf/' . $request->factura . '.pdf');
+            }
+            if(file_exists(storage_path() . '/app/sunat/pdf/' . $request->guia . '.pdf')){
+                unlink(storage_path() . '/app/sunat/pdf/' . $request->guia . '.pdf');
+            }
             return 'Se envió el correo con éxito';
         } catch (\Swift_TransportException $e){
             return response(['mensaje'=>$e->getMessage()],500);
@@ -1417,17 +1462,16 @@ class VentaController extends Controller
 
             $cpe = new CpeController();
             $cpe->generarArchivos($idventa);
-            $emisor = new Emisor();
-
             return json_encode([
                 'success'=>true,
                 'mensaje'=>'¡Se anuló el comprobante!
 Imprime y entrega la NOTA DE CRÉDITO junto al comprobante anulado.',
-                'idventa'=>$emisor->ruc.'-07-'.$serie.'-'.$correlativo
+                'idventa'=>$idventa
             ]);
 
         } catch (\Exception $e){
-            return $e;
+            Log::error($e);
+            return $e->getMessage();
         }
     }
 

@@ -74,7 +74,7 @@
                                                     @if($item->facturacion->codigo_tipo_documento == '30')
                                                     <b-dropdown-item @click="imprimir('{{$item->idventa}}')"><i class="fas fa-receipt"></i> Imprimir nota de venta</b-dropdown-item>
                                                     @else
-                                                    <b-dropdown-item id="btn_imprimir_{{$item->idventa}}" @click="imprimir('{{$item->nombre_fichero}}')"><i class="fas fa-file-invoice-dollar"></i> Imprimir comprobante</b-dropdown-item>
+                                                    <b-dropdown-item id="btn_imprimir_{{$item->idventa}}" @click="imprimir('{{$item->idventa}}')"><i class="fas fa-file-invoice-dollar"></i> Imprimir comprobante</b-dropdown-item>
                                                     @endif
                                                     <b-dropdown-item id="btn_anular_{{$item->idventa}}" @click="abrir_modal('anulacion',{{$item}})" @if($item->facturacion->codigo_tipo_documento == '30') disabled @endif><i class="fas fa-times"></i> Anular comprobante</b-dropdown-item>
                                                     <b-dropdown-item @click="text_whatsapp = '{{$item->text_whatsapp}}'" @if($item->facturacion->codigo_tipo_documento == '30') disabled @else v-b-modal.modal-whatsapp @endif><i style="width: 2em;" class="fab fa-whatsapp"></i> Enviar por whatsapp</b-dropdown-item>

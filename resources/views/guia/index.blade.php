@@ -9,48 +9,53 @@
             </div>
         </div>
         <div class="row">
-            <div v-show="tipo_comprobante==-1" class="col-lg-10">
+            <div class="col-lg-10">
                 <div class="row">
-                    <div class="col-lg-3 form-group">
-                        <label><i class="far fa-calendar-alt"></i> Desde</label>
-                        <input @change="filtrar" type="date" v-model="fecha_in" name="fecha_in"
-                               class="form-control">
-                    </div>
-                    <div class="col-lg-3 form-group">
-                        <label><i class="far fa-calendar-alt"></i> Hasta</label>
-                        <input @change="filtrar" type="date" v-model="fecha_out" name="fecha_out"
-                               class="form-control">
-                    </div>
-                    <div class="col-lg-2">
-                        <div class="form-group">
-                            <label><i class="fas fa-filter"></i> Filtrar por</label>
-                            <select @change="cambiarBusqueda" v-model="tipo_busqueda" class="custom-select">
-                                <option value="n">Ninguno</option>
+                    <div class="col-lg-3">
+                        <b-input-group>
+                            <b-input-group-prepend>
+                                <b-input-group-text>
+                                    <i class="fas fa-filter"></i>
+                                </b-input-group-text>
+                            </b-input-group-prepend>
+                            <select v-model="filtro" class="custom-select">
+                                <option value="fecha">Fecha</option>
                                 <option value="estado">Estado</option>
                                 <option value="cliente">Cliente</option>
                             </select>
-                        </div>
+                        </b-input-group>
                     </div>
-                    <div class="col-lg-3" v-show="tipo_busqueda=='estado'">
-                        <div class="form-group">
-                            <label><i class="fas fa-check"></i> Estado</label>
-                            <select v-model="filtro" class="custom-select">
+                    <div class="col-lg-2" v-show="filtro=='estado'">
+                        <b-input-group>
+                            <b-input-group-prepend>
+                                <b-input-group-text>
+                                    <i class="fas fa-check"></i>
+                                </b-input-group-text>
+                            </b-input-group-prepend>
+                            <select @change="filtrar" v-model="buscar" class="custom-select">
                                 <option value="n">Seleccionar</option>
                                 <option value="pendiente">Pendiente</option>
                                 <option value="aceptado">Aceptado</option>
                                 <option value="anulado">Anulado</option>
                                 <option value="rechazado">Rechazado</option>
                             </select>
-                        </div>
+                        </b-input-group>
                     </div>
-                    <div class="col-lg-4 form-group" v-show="tipo_busqueda=='cliente'">
-                        <label><i class="fas fa-check"></i> Cliente</label>
-                        <div class="input-group" id="buscador">
-                            <input v-model="filtro" type="text" class="form-control" placeholder="Buscar...">
-                            <div class="input-group-append">
-                                <button @click="filtrar" class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
-                            </div>
-                        </div>
+                    <div class="col-lg-5 form-group" v-show="filtro=='cliente'">
+                        <b-input-group>
+                            <b-input-group-prepend>
+                                <b-input-group-text>
+                                    <i class="fas fa-user"></i>
+                                </b-input-group-text>
+                            </b-input-group-prepend>
+                            <input v-model="buscar" type="text" class="form-control" placeholder="Buscar..." @keyup="buscar_cliente">
+                            <b-input-group-append>
+                                <b-button :disabled="buscar.length==0" @click="filtrar" variant="primary" ><i class="fas fa-search"></i></b-button>
+                            </b-input-group-append>
+                        </b-input-group>
+                    </div>
+                    <div class="col-lg-3 form-group">
+                        <range-calendar :inicio="desde + ' 00:00:00'" :fin="hasta + ' 00:00:00'" v-on:setparams="setParams"></range-calendar>
                     </div>
                 </div>
             </div>
@@ -72,7 +77,6 @@
                                     <th scope="col">Cliente</th>
                                     <th scope="col" style="width: 12%">Comprobante</th>
                                     <th scope="col">Estado</th>
-                                    <th v-show="tipo_comprobante==40">Motivo</th>
                                     <th scope="col">Opciones</th>
                                 </tr>
                                 </thead>
@@ -121,41 +125,34 @@
         let app = new Vue({
             el: '.app',
             data: {
-                fecha_in: '{{$filtros['fecha_in']}}',
-                fecha_out: '{{$filtros['fecha_out']}}',
-                tipo_comprobante: -1,
-                tipo_busqueda: '{{$filtros['busqueda']}}',
-                filtro:'{{$filtros['tipo']}}'
-            },
-            created(){
-                let today = new Date().toISOString().split('T')[0];
-                document.getElementsByName("fecha_in")[0].setAttribute('max', today);
-                document.getElementsByName("fecha_out")[0].setAttribute('max', today);
-            },
-            watch:{
-                filtro(){
-                    if(this.tipo_busqueda!=='cliente'){
-                        window.location.href='/guia/'+this.fecha_in+'/'+this.fecha_out+'/'+this.tipo_busqueda+'/'+this.filtro;
-                    }
-                }
+                filtro:'{{$filtros['filtro']}}',
+                desde:'{{$filtros['desde']}}',
+                hasta:'{{$filtros['hasta']}}',
+                buscar:'{{$filtros['buscar']}}',
             },
             methods: {
-                cambiarBusqueda(){
-                    this.filtro='n';
-                    if(this.tipo_busqueda==='n'){
-                        window.location.href='/guia/'+this.fecha_in+'/'+this.fecha_out+'/'+this.tipo_busqueda+'/'+this.filtro;
-                    }
-                    if(this.tipo_busqueda==='cliente'){
-                        this.filtro='';
-                    }
+                setParams(obj){
+                    let d1 = new Date(obj.startDate).toISOString().split('T')[0];
+                    let d2 = new Date(obj.endDate).toISOString().split('T')[0];
+                    this.desde=d1;
+                    this.hasta=d2;
+                    this.filtrar();
                 },
                 filtrar(){
-                    if(!(this.fecha_in=='' || this.fecha_out=='')){
-                        window.location.href='/guia/'+this.fecha_in+'/'+this.fecha_out+'/'+this.tipo_busqueda+'/'+this.filtro;
+                    if(this.buscar!=='n'){
+                        window.location.href='/guia/'+this.desde+'/'+this.hasta+'?filtro='+this.filtro+'&buscar='+this.buscar;
+                    }
+                },
+                buscar_cliente(event){
+                    switch (event.code) {
+                        case 'Enter':
+                        case 'NumpadEnter':
+                            this.filtrar();
+                            break;
                     }
                 },
                 enviar(idguia, tipo){
-                    if(confirm('¿Está seguro de enviar el comprobante a SUNAT?')){
+                    if(confirm('¿Está seguro de enviar la guía a SUNAT?')){
                         axios.get('{{url('ventas/enviar')}}' + '/' + tipo + '/' + idguia)
                             .then(response => {
                                 alert(response.data);
@@ -167,22 +164,23 @@
                             });
                     }
                 },
-                eliminar(idguia){
 
-                    if (confirm('¿Está seguro de eliminar la guia?')) {
-
-                        axios.get('{{url('ventas/eliminar-venta')}}'+'/'+idguia)
-                            .then(() => {
-                                window.location.reload();
-                            })
-                            .catch(error => {
-                                alert('Ha ocurrido un error al eliminar la guia.');
-                                console.log(error);
-                            });
+            },
+            watch:{
+                filtro(){
+                    this.buscar='n';
+                    switch (this.filtro){
+                        case 'cliente':
+                            this.buscar='';
+                            break;
+                        case 'fecha':
+                            window.location.href='/guia';
+                            break;
                     }
-                }
-
-            }
+                    this.desde = '{{date('Y-m-d')}}';
+                    this.hasta = '{{date('Y-m-d')}}';
+                },
+            },
 
         })
     </script>

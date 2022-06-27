@@ -199,6 +199,7 @@ Route::group(['middleware' => ['can:Facturación: facturar']], function () {
     Route::post('ventas/nuevo_cliente', 'VentaController@nuevo_cliente');
     Route::post('ventas/update_tipo_pago', 'VentaController@update_tipo_pago');
     Route::post('ventas/anulacion-rapida', 'VentaController@anulacion_rapida');
+    Route::post('ventas/verificar-cdr-mail','VentaController@verificar_cdr_previo_mail');
 
     //Rutas facturacion
     Route::get('ventas/reenviar/{id}/{file}/{doc_relacionado}','Cpe\CpeController@reenviar');
@@ -295,7 +296,6 @@ Route::group(['middleware' => ['can:Configuración']], function () {
 
 Route::group(['middleware' => ['can:Facturación: guía']], function () {
     //Rutas para guia
-    Route::get('guia','GuiaController@index');
     Route::get('guia/nuevo','GuiaController@nuevo');
     Route::get('guia/obtenerCorrelativo/','GuiaController@obtenerCorrelativo');
     Route::post('guia/store','GuiaController@store');
@@ -311,8 +311,10 @@ Route::group(['middleware' => ['can:Facturación: guía']], function () {
     Route::get('guia/{fecha_in}/{fecha_out}/{busqueda}/{filtro}','GuiaController@guiasEmitidas');
     Route::get('guia/obtenerCategorias', 'GuiaController@categorias');
     Route::post('guia/guardar-producto', 'GuiaController@guardarProducto');
-    Route::get('guia/imprimir/{id}', 'GuiaController@imprimir_venta');
+    Route::get('guia/imprimir/{id}', 'GuiaController@imprimir_guia');
     Route::get('guia/descargar/{file}', 'Cpe\CpeController@descargarArchivo');
+    Route::get('guia/{desde}/{hasta}','GuiaController@index');
+    Route::get('guia','GuiaController@index');
 
 });
 
@@ -384,5 +386,3 @@ Route::get('logout', 'Auth\LoginController@logout')->name('logout');
 Route::group(['middleware' => ['auth']], function () {
     Route::get('logs', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'index']);
 });
-
-Route::get('productos/imagick', 'ProductoController@pdf_to_image');

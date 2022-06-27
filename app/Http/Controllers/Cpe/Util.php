@@ -14,6 +14,7 @@ use Spipu\Html2Pdf\Html2Pdf;
 use sysfact\Emisor;
 use sysfact\Guia;
 use sysfact\Http\Controllers\Helpers\MainHelper;
+use sysfact\Http\Controllers\Helpers\PdfHelper;
 use sysfact\Http\Controllers\OpcionController;
 use sysfact\libraries\QrCodeGenerador;
 use sysfact\libraries\xmldsig\XMLSecurityDSig;
@@ -75,7 +76,7 @@ class Util
 
         $xml = $documento->generar_xml();
         $this->firmar($xml);
-        $this->generarPdf();
+        //$this->generarPdf();
         return $documento->getNombreFichero();
 
     }
@@ -94,7 +95,7 @@ class Util
 
         $xml = $documento->generar_xml();
         $this->firmar($xml);
-        $this->generarPdfGuia($documento);
+        //$this->generarPdfGuia($documento);
         return $documento->getNombreFichero();
     }
 
@@ -247,91 +248,91 @@ class Util
 
     }
 
-    public function generarPdf($esGuia=false){
+//    public function generarPdf($esGuia=false){
+//
+//        $documento=$this->documento->getVenta();
+//        $nombre_fichero=$this->documento->getNombreFichero();
+//
+//
+//        /*OBTENER CÓDIGO HASH*/
+//        $dom = new \DOMDocument();
+//        $dom->load(storage_path().'/app/sunat/xml/'.$nombre_fichero.'.xml');
+//        $digest = $dom->getElementsByTagName('DigestValue')->item(0);
+//        $documento->hash=$digest->nodeValue;
+//        $documento->qr=$nombre_fichero.'.png';
+//
+//        /*CREAR CÓDIGO QR*/
+//        /*-----------------------------------------------------------------------------*/
+//        $data=$documento->emisor->ruc."|01|".$documento->serie ."|". $documento->correlativo."|".
+//            $documento->facturacion->igv ."|". $documento->total_venta ."|". $documento->fecha ."|".
+//            $documento->cliente->tipo_documento ."|". $documento->cliente->num_documento ."|". $documento->hash;
+//        /*-----------------------------------------------------------------------------*/
+//        $qr = new QrCodeGenerador($data);
+//        $qr->generar($nombre_fichero);
+//
+//        /*SELECCIONAR PLANTILLA*/
+//
+//        if($esGuia){
+//            $plantilla_pdf = 'guia_remision';
+//            $documento->titulo_doc = 'Guia de Remisión Remitente';
+//        }else{
+//            switch ($documento->facturacion->codigo_tipo_documento){
+//                case 01:
+//                    $documento->titulo_doc = 'Factura';
+//                    $plantilla_pdf = 'factura';
+//                    break;
+//                case 03:
+//                    $documento->titulo_doc = 'Boleta de venta';
+//                    $plantilla_pdf = 'boleta';
+//                    break;
+//                case 07:
+//                    $documento->titulo_doc = 'Nota de Crédito';
+//                    $plantilla_pdf = 'nota_credito';
+//                    break;
+//                default:
+//                    $documento->titulo_doc = 'Nota de Débito';
+//                    $plantilla_pdf = 'nota_debito';
+//            }
+//        }
+//
+//        if($documento->codigo_moneda=='PEN'){
+//            $documento->codigo_moneda='S/';
+//        } else{
+//            $documento->codigo_moneda='USD';
+//        }
+//
+//        $opcion=new OpcionController();
+//        $tipo_cambio=$opcion->obtener_tipo_de_cambio();
+//
+//        $datos = ['documento' => $documento, 'usuario' => $documento->cliente, 'items' => $documento->productos, 'emisor' => $documento->emisor,'tipo_cambio'=>$tipo_cambio];
+//
+//        $view = view('sunat/plantillas-pdf/'.$this->ruta_formato.'/' . $plantilla_pdf, $datos);
+//        $html = $view->render();
+//        $pdf = new Html2Pdf('P', $this->formato, 'es');
+//        $pdf->writeHTML($html);
+//        $pdf->output(storage_path().'/app/sunat/pdf/' . $nombre_fichero . '.pdf', 'F');
+//        unlink(public_path('images/qr/'.$nombre_fichero.'.png'));
+//    }
 
-        $documento=$this->documento->getVenta();
-        $nombre_fichero=$this->documento->getNombreFichero();
-
-
-        /*OBTENER CÓDIGO HASH*/
-        $dom = new \DOMDocument();
-        $dom->load(storage_path().'/app/sunat/xml/'.$nombre_fichero.'.xml');
-        $digest = $dom->getElementsByTagName('DigestValue')->item(0);
-        $documento->hash=$digest->nodeValue;
-        $documento->qr=$nombre_fichero.'.png';
-
-        /*CREAR CÓDIGO QR*/
-        /*-----------------------------------------------------------------------------*/
-        $data=$documento->emisor->ruc."|01|".$documento->serie ."|". $documento->correlativo."|".
-            $documento->facturacion->igv ."|". $documento->total_venta ."|". $documento->fecha ."|".
-            $documento->cliente->tipo_documento ."|". $documento->cliente->num_documento ."|". $documento->hash;
-        /*-----------------------------------------------------------------------------*/
-        $qr = new QrCodeGenerador($data);
-        $qr->generar($nombre_fichero);
-
-        /*SELECCIONAR PLANTILLA*/
-
-        if($esGuia){
-            $plantilla_pdf = 'guia_remision';
-            $documento->titulo_doc = 'Guia de Remisión Remitente';
-        }else{
-            switch ($documento->facturacion->codigo_tipo_documento){
-                case 01:
-                    $documento->titulo_doc = 'Factura';
-                    $plantilla_pdf = 'factura';
-                    break;
-                case 03:
-                    $documento->titulo_doc = 'Boleta de venta';
-                    $plantilla_pdf = 'boleta';
-                    break;
-                case 07:
-                    $documento->titulo_doc = 'Nota de Crédito';
-                    $plantilla_pdf = 'nota_credito';
-                    break;
-                default:
-                    $documento->titulo_doc = 'Nota de Débito';
-                    $plantilla_pdf = 'nota_debito';
-            }
-        }
-
-        if($documento->codigo_moneda=='PEN'){
-            $documento->codigo_moneda='S/';
-        } else{
-            $documento->codigo_moneda='USD';
-        }
-
-        $opcion=new OpcionController();
-        $tipo_cambio=$opcion->obtener_tipo_de_cambio();
-
-        $datos = ['documento' => $documento, 'usuario' => $documento->cliente, 'items' => $documento->productos, 'emisor' => $documento->emisor,'tipo_cambio'=>$tipo_cambio];
-
-        $view = view('sunat/plantillas-pdf/'.$this->ruta_formato.'/' . $plantilla_pdf, $datos);
-        $html = $view->render();
-        $pdf = new Html2Pdf('P', $this->formato, 'es');
-        $pdf->writeHTML($html);
-        $pdf->output(storage_path().'/app/sunat/pdf/' . $nombre_fichero . '.pdf', 'F');
-        unlink(public_path('images/qr/'.$nombre_fichero.'.png'));
-    }
-
-    public function generarPdfGuia($esGuia=false){
-
-        $documento=$this->documento->getVenta();
-        $nombre_fichero=$this->documento->getNombreFichero();
-
-        /*OBETENER CÓDIGO HASH*/
-        $dom = new \DOMDocument();
-        $dom->load(storage_path().'/app/sunat/xml/'.$nombre_fichero.'.xml');
-        $digest = $dom->getElementsByTagName('DigestValue')->item(0);
-        $documento->hash=$digest->nodeValue;
-        $documento->titulo_doc = 'Guia de Remisión Remitente';
-
-        $datos = ['documento' => $documento, 'usuario' => $documento->cliente, 'items' => $documento->productos, 'emisor' => $documento->emisor];
-        $view = view('sunat/plantillas-pdf/'.$this->ruta_formato.'/guia_remision', $datos);
-        $html = $view->render();
-        $pdf = new Html2Pdf('P', $this->formato, 'es');
-        $pdf->writeHTML($html);
-        $pdf->output(storage_path().'/app/sunat/pdf/' . $nombre_fichero . '.pdf', 'F');
-    }
+//    public function generarPdfGuia($esGuia=false){
+//
+//        $documento=$this->documento->getVenta();
+//        $nombre_fichero=$this->documento->getNombreFichero();
+//
+//        /*OBETENER CÓDIGO HASH*/
+//        $dom = new \DOMDocument();
+//        $dom->load(storage_path().'/app/sunat/xml/'.$nombre_fichero.'.xml');
+//        $digest = $dom->getElementsByTagName('DigestValue')->item(0);
+//        $documento->hash=$digest->nodeValue;
+//        $documento->titulo_doc = 'Guia de Remisión Remitente';
+//
+//        $datos = ['documento' => $documento, 'usuario' => $documento->cliente, 'items' => $documento->productos, 'emisor' => $documento->emisor];
+//        $view = view('sunat/plantillas-pdf/'.$this->ruta_formato.'/guia_remision', $datos);
+//        $html = $view->render();
+//        $pdf = new Html2Pdf('P', $this->formato, 'es');
+//        $pdf->writeHTML($html);
+//        $pdf->output(storage_path().'/app/sunat/pdf/' . $nombre_fichero . '.pdf', 'F');
+//    }
 
     public function getTipoDocumento()
     {

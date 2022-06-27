@@ -534,38 +534,6 @@
                                 });
                         }
                     },
-                    /*generarTicket(){
-                        this.mostrarSpinner = true;
-                        this.disabledTicket = true;
-                        axios.post('/ventas/facturacion-rapida-alt',{
-                            'idpedido':this.idpedido,
-                            'comprobante':'30',
-                            'tipo_pago_contado':1,
-                            'cliente':JSON.stringify({idcliente:-1,esNuevo:0}),
-                            'items':JSON.stringify(this.productosSeleccionados),
-                            'pago_fraccionado': []
-                        })
-                            .then(response => {
-                                this.mostrarSpinner = false;
-                                this.obtener_delivery();
-                                if (isNaN(response.data.idventa)) {
-                                    alert('Ha ocurrido un error al procesar la venta');
-                                } else {
-                                    setTimeout(() => {
-                                        if(confirm('¿Imprimir la nota de venta?')){
-                                            this.imprimir(response.data.idventa);
-                                        }
-                                        this.limpiar();
-                                    },100);
-                                    this.ticket = response.data.ticket;
-                                }
-                            })
-                            .catch(error => {
-                                this.mostrarSpinner = false;
-                                alert('Ha ocurrido un error.');
-                                console.log(error);
-                            });
-                    },*/
                     imprimir(file_or_id){
 
                         let src = '';
