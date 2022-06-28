@@ -247,7 +247,7 @@ class ReporteController extends Controller
                         $ventas = Venta::where('eliminado', '=', 0)
                             ->orderby('idventa', 'desc')
                             ->whereHas('persona', function ($query) use ($filtro, $buscar) {
-                                $query->where($filtro, 'LIKE', '%' . $param_1 . '%');
+                                $query->where($filtro, 'LIKE', '%' . $buscar . '%');
                             })
                             ->whereHas('facturacion', function($query) {
                                 $query->where(function ($query) {

@@ -6,16 +6,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
-use Luecano\NumeroALetras\NumeroALetras;
-use Spipu\Html2Pdf\Html2Pdf;
 use sysfact\Categoria;
 use sysfact\Emisor;
 use sysfact\Facturacion;
-use sysfact\Guia;
 use sysfact\Http\Controllers\Cpe\CpeController;
 use sysfact\Http\Controllers\Helpers\MainHelper;
 use sysfact\Http\Controllers\Helpers\PdfHelper;
-use sysfact\Http\Controllers\Helpers\PdfXmlHelper;
 use sysfact\Inventario;
 use sysfact\Mail\EnviarDocumentos;
 use sysfact\Orden;
@@ -871,7 +867,7 @@ class VentaController extends Controller
     public function imprimir_venta(Request $request, $idventa)
     {
         try{
-            PdfHelper::generarPdf($idventa, $request->rawbt);
+            return PdfHelper::generarPdf($idventa, $request->rawbt);
         } catch (\Exception $e){
             Log::info($e);
             return response(['idventa'=>-1,'respuesta'=>$e->getMessage()],500);

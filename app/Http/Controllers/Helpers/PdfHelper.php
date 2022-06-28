@@ -177,7 +177,7 @@ class PdfHelper
         $guia->emisor=new Emisor();
 
         $doc=new Despatch($guia);
-        $doc->generar_xml();
+        $doc->generar_xml(false);
         $documento=$doc->getVenta();
         $nombre_fichero=$doc->getNombreFichero();
 

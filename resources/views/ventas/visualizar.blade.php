@@ -484,10 +484,9 @@
                         });
                 },
                 imprimir(idventa, esGuia){
+                    let src = "/ventas/imprimir/"+idventa;
                     if(esGuia){
-                        let src = "/guia/imprimir/"+idventa;
-                    } else {
-                        let src = "/ventas/imprimir/"+idventa;
+                        src = "/guia/imprimir/"+idventa;
                     }
 
                     @if(!$agent->isDesktop())

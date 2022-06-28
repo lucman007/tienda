@@ -10,13 +10,9 @@ namespace sysfact\Http\Controllers\Cpe;
 
 
 use Illuminate\Support\Facades\DB;
-use Spipu\Html2Pdf\Html2Pdf;
 use sysfact\Emisor;
 use sysfact\Guia;
 use sysfact\Http\Controllers\Helpers\MainHelper;
-use sysfact\Http\Controllers\Helpers\PdfHelper;
-use sysfact\Http\Controllers\OpcionController;
-use sysfact\libraries\QrCodeGenerador;
 use sysfact\libraries\xmldsig\XMLSecurityDSig;
 use sysfact\libraries\xmldsig\XMLSecurityKey;
 use sysfact\Util\CreditNote;

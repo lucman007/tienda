@@ -11,7 +11,7 @@ class Despatch {
         $this->guia=$guia;
     }
 
-	public function generar_xml(){
+	public function generar_xml($render = true){
 
 		$documento=$this->guia;
 		$usuario=$this->guia->cliente;
@@ -62,8 +62,10 @@ class Despatch {
 		$usuario->razon_social=$usuario->persona['nombre'];
 		$this->nombre_fichero=$emisor->ruc.'-09-'.$documento->correlativo;
 
-		$view = view('sunat/docs/despatch',['documento'=>$documento,'usuario'=>$usuario,'items'=>$detalle,'emisor'=>$emisor]);
-		return $view->render();
+        if($render) {
+            $view = view('sunat/docs/despatch', ['documento' => $documento, 'usuario' => $usuario, 'items' => $detalle, 'emisor' => $emisor]);
+            return $view->render();
+        }
 
 	}
 

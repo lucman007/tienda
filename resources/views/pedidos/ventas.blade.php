@@ -375,6 +375,7 @@
                         .then(response => {
                             this.mostrarProgresoGuardado = false;
                             alert(response.data);
+                            window.location.reload();
                             this.$refs['modal-editarPago'].hide()
                         })
                         .catch(error => {

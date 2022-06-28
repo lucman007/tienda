@@ -1,5 +1,5 @@
 @extends('layouts.main')
-@section('titulo', 'Registrar')
+@section('titulo', 'Pedidos')
 @section('contenido')
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}} interfaz_3">
         <div class="row">
