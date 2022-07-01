@@ -24,8 +24,21 @@ class Producto extends Model
         'tipo_cambio',
         'imagen',
         'eliminado',
-        'discounts'
+        'discounts',
+        'marca',
+        'modelo',
+        'param_1',
+        'param_2',
+        'param_3',
+        'param_4',
+        'param_5',
 	];
+
+    public function almacen(){
+        return $this->belongsToMany(Almacen::class,'almacen_productos','idproducto','idalmacen')
+            ->as('almacen_productos')
+            ->withPivot('idubicacion');
+    }
 
 	public function inventario(){
 		return $this->hasMany(Inventario::class,'idproducto')->orderby('idinventario','desc');

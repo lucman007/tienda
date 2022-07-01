@@ -52,6 +52,10 @@ Route::group(['middleware' => ['can:Inventario: productos']], function () {
     Route::get('productos/mostrar_categorias', 'ProductoController@mostrar_categorias');
     Route::post('productos/agregar-imagen', 'ProductoController@agregar_imagen');
     Route::get('productos/update-saldo', 'ProductoController@temp_saldo_productos');
+    Route::get('productos/mostrar-almacen', 'ProductoController@mostrar_almacen');
+    Route::get('productos/mostrar-ubicacion/{id}', 'ProductoController@mostrar_ubicacion');
+    Route::post('productos/ocultar-columnas', 'ProductoController@ocultar_columnas');
+    Route::get('productos/temp-almacen', 'ProductoController@temp_almacen');
 });
 
 Route::group(['middleware' => ['can:Mantenimiento: categorías']], function () {
@@ -349,6 +353,18 @@ Route::group(['middleware' => ['can:Ventas']], function () {
     Route::get('notificaciones/marcar-como-leido/{id}','NotificacionesController@marcarComoLeido');
     Route::get('notificaciones/marcar-todo-como-leido','NotificacionesController@marcarTodoComoLeido');
     Route::get('notificaciones/obtener-notificaciones','NotificacionesController@obtenerNotificaciones');
+});
+
+Route::group(['middleware' => ['can:Almacen']], function () {
+    Route::get('almacenes','AlmacenController@index');
+    Route::post('almacenes/store', 'AlmacenController@store');
+    Route::post('almacenes/store-ubicacion', 'AlmacenController@storeUbicacion');
+    Route::delete('almacenes/destroy/{id}', 'AlmacenController@destroy');
+    Route::get('almacenes/show', 'AlmacenController@show');
+    Route::get('almacenes/editar/{id}', 'AlmacenController@edit');
+    Route::get('almacenes/editar-ubicacion/{id}', 'AlmacenController@editarUbicacion');
+    Route::post('almacenes/update', 'AlmacenController@update');
+    Route::post('almacenes/update-ubicacion', 'AlmacenController@updateUbicacion');
 });
 
 

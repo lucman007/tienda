@@ -321,6 +321,7 @@ class MainHelper extends Controller
         $ruta_formato = $formato;
         switch ($formato){
             case 'A4_2':
+            case 'A4_5':
                 $formato_impresion = 'A4';
                 break;
             case 'A5_1':

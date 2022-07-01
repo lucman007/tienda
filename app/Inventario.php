@@ -12,6 +12,8 @@ class Inventario extends Model
 	protected $fillable=[
 		'idproducto',
 		'idempleado',
+		'idventa',
+        'idalmacen',
 		'fecha',
 		'cantidad',
         'costo',

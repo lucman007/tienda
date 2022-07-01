@@ -7,6 +7,7 @@
         <select v-model="impresion.formato" class="custom-select">
             <option value="80_1">Ticket 80mm</option>
             <option value="55_1">Ticket 55mm</option>
+            <option value="A4_5">A4 - modelo 5</option>
         </select>
     </div>
 </div>

@@ -8,13 +8,16 @@ use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use Milon\Barcode\DNS1D;
 use Milon\Barcode\DNS2D;
+use sysfact\Almacen;
 use sysfact\Categoria;
 use sysfact\Descuento;
 use sysfact\Exports\ProductosExport;
 use sysfact\Imports\ProductosImport;
 use sysfact\Inventario;
+use sysfact\Opciones;
 use sysfact\Producto;
 use Intervention\Image\ImageManagerStatic as Image;
+use sysfact\Ubicacion;
 
 class ProductoController extends Controller
 {
@@ -47,6 +50,15 @@ class ProductoController extends Controller
 
                 foreach ($productos as $producto){
                     $producto->cantidad=$producto->inventario->first()->saldo;
+                    $almacen = DB::table('almacen_productos')->where('idproducto', $producto->idproducto)->orderby('fecha','asc')->first();
+                    if($almacen){
+                        $ubicacion = Ubicacion::find($almacen->idubicacion);
+                        $producto->ubicacion = $ubicacion->nombre;
+                    } else {
+                        $producto->ubicacion = null;
+                    }
+
+
                 }
 
                 $ultimo_id_registrado=DB::table('productos')
@@ -58,6 +70,30 @@ class ProductoController extends Controller
 
                 $productos->appends($_GET)->links();
 
+                
+
+                $opcion = Opciones::where('nombre_opcion','col_productos')->first();
+                if($opcion){
+                    $columnas = json_decode($opcion->valor_json, true);
+                } else {
+                    $columnas = [
+                        'ubicacion'=>false,
+                        'codigo'=>true,
+                        'tipo_producto'=>true,
+                        'marca'=>false,
+                        'modelo'=>false,
+                        'categoria'=>true,
+                        'stock'=>true,
+                        'costo'=>true,
+                        'precio'=>true,
+                        'imagen'=>true,
+                        'montaje'=>false,
+                        'capsula'=>false,
+                        'tipo'=>false,
+                        'precio_min'=>false,
+                    ];
+                }
+
                 return view('productos.index',[
                     'productos'=>$productos,
                     'ultimo_id'=>json_encode($ultimo_id_registrado),
@@ -65,7 +101,9 @@ class ProductoController extends Controller
                     'textoBuscado'=>$consulta,
                     'order'=>$order=='desc'?'asc':'desc',
                     'orderby'=>$orderby,
-                    'order_icon'=>$order=='desc'?'<i class="fas fa-caret-square-up"></i>':'<i class="fas fa-caret-square-down"></i>'
+                    'order_icon'=>$order=='desc'?'<i class="fas fa-caret-square-up"></i>':'<i class="fas fa-caret-square-down"></i>',
+                    'domain'=>app()->domain(),
+                    'columnas'=>$columnas
                 ]);
             } catch (\Exception $e){
                 if($e->getCode()=='42S22'){
@@ -76,6 +114,29 @@ class ProductoController extends Controller
 
         }
 
+    }
+
+    public function ocultar_columnas(Request $request){
+        try {
+
+            $cols = $request->columnas;
+
+            $opcion = Opciones::where('nombre_opcion','col_productos')->first();
+
+            if(!$opcion){
+                $opcion = new Opciones();
+                $opcion->nombre_opcion = 'col_productos';
+            }
+
+            $opcion->valor_json = $cols;
+            $opcion->save();
+
+
+
+        } catch (\Exception $e) {
+            Log::error($e);
+            return response($e->getMessage(), 500);
+        }
     }
 
 
@@ -93,6 +154,13 @@ class ProductoController extends Controller
             $producto->tipo_cambio = $request->tipo_cambio_compra;
             $producto->eliminado=0;
             $producto->imagen='';
+            $producto->marca=strtoupper($request->marca);
+            $producto->modelo=strtoupper($request->modelo);
+            $producto->param_1=strtoupper($request->param_1);
+            $producto->param_2=strtoupper($request->param_2);
+            $producto->param_3=strtoupper($request->param_3);
+            $producto->param_4=$request->param_4;
+            $producto->param_5=$request->param_5;
             $producto->stock_bajo=$request->stock_bajo;
             if($request->tipo_producto==2){
                 $producto->stock_bajo=0;
@@ -125,6 +193,12 @@ class ProductoController extends Controller
             $inventario->descripcion=$request->observacion;
             $producto->inventario()->save($inventario);
 
+
+            $producto->almacen()->attach($request->idalmacen, [
+                'idubicacion'=>$request->idubicacion,
+            ]);
+
+
             if($request->tipo_producto == 1){
                 foreach ($descuentos as $item){
                     $descuento=new Descuento();
@@ -154,6 +228,10 @@ class ProductoController extends Controller
 		$producto=Producto::find($id);
 		$descuentos = Descuento::select('cantidad_min as cantidad','monto_desc as precio')->where('idproducto',$id)->get();
 		$inventario=Inventario::select('cantidad')->where('idproducto',$id)->get();
+		$almacen = DB::table('almacen_productos')
+            ->where('idproducto',$id)
+            ->orderBy('fecha', 'asc')
+            ->first();
 
         $suma=0;
         foreach ($inventario as $inv){
@@ -165,6 +243,11 @@ class ProductoController extends Controller
 
 		$producto->cantidad=$suma;
         $producto->descuentos=$descuentos;
+         if($almacen){
+             $producto->almacen = $almacen;
+         } else {
+             $producto->almacen = ['idalmacen'=>null, 'idubicacion'=>null];
+         }
 
 		return $producto;
 	}
@@ -206,6 +289,13 @@ class ProductoController extends Controller
         $producto->tipo_cambio = $request->tipo_cambio_compra;
         $producto->stock_bajo=$request->stock_bajo;
         $producto->moneda=$request->moneda;
+        $producto->marca=strtoupper($request->marca);
+        $producto->modelo=strtoupper($request->modelo);
+        $producto->param_1=strtoupper($request->param_1);
+        $producto->param_2=strtoupper($request->param_2);
+        $producto->param_3=strtoupper($request->param_3);
+        $producto->param_4=$request->param_4;
+        $producto->param_5=$request->param_5;
         if($request->tipo_producto==2){
             $producto->stock_bajo=0;
         }
@@ -238,6 +328,13 @@ class ProductoController extends Controller
 
             $producto->inventario()->save($inventario);
         }
+
+        DB::table('almacen_productos')
+            ->where('idproducto',$request->idproducto)
+            ->update([
+            'idalmacen'=>$request->idalmacen,
+            'idubicacion'=>$request->idubicacion
+        ]);
 
         DB::table('descuentos')->where('idproducto',$request->idproducto)->delete();
         if($request->tipo_producto == 1){
@@ -292,7 +389,8 @@ class ProductoController extends Controller
             return 0;
 
         } catch (\Exception $e){
-            return $e;
+            Log::error($e);
+            return $e->getMessage();
         }
 
     }
@@ -310,6 +408,18 @@ class ProductoController extends Controller
 
     }
 
+    public function mostrar_almacen()
+    {
+        return ['almacen'=>Almacen::where('eliminado',0)->get()];
+
+    }
+
+    public function mostrar_ubicacion($id)
+    {
+        return ['ubicacion'=>Ubicacion::where('eliminado',0)->where('idalmacen',$id)->get()];
+
+    }
+
     public function generar_codigo_producto(){
         $ultimo_id_registrado=DB::table('productos')
             ->select('idproducto')
@@ -321,7 +431,13 @@ class ProductoController extends Controller
 
     public function agregar_imagen(Request $request){
         try{
-            if($request->hasFile('imagen')){
+
+            $producto=Producto::find($request->idproducto);
+            $producto->imagen = $request->imagen;
+            $producto->save();
+            return 1;
+
+            /*if($request->hasFile('imagen')){
                 if ($request->file('imagen')->isValid()) {
 
                    $validated = $request->validate([
@@ -352,9 +468,10 @@ class ProductoController extends Controller
                 return 'La imagen no es válida';
             } else{
                 return 'La imagen es demasido grande, tamaño máximo 1MB';
-            }
+            }*/
         } catch (\Exception $e){
-            return 'Error: la imagen no es válida';
+            Log::error($e);
+            return $e->getMessage();
         }
     }
 
@@ -384,6 +501,28 @@ class ProductoController extends Controller
                     $i++;
                 }
             }
+
+            DB::commit();
+            return 'success';
+
+        } catch (\Exception $e){
+            DB::rollBack();
+            return $e->getMessage();
+        }
+    }
+
+    public function temp_almacen(){
+        try{
+            DB::beginTransaction();
+
+            $productos = Producto::all();
+
+            foreach ($productos as $producto) {
+                $producto->almacen()->attach(1, [
+                    'idubicacion'=>1,
+                ]);
+            }
+
 
             DB::commit();
             return 'success';

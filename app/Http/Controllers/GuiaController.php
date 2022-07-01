@@ -617,9 +617,8 @@ class GuiaController extends Controller
 
     public function imprimir_guia(Request $request, $idguia)
     {
-
         try{
-            PdfHelper::generarPdfGuia($idguia, $request->rawbt);
+            return PdfHelper::generarPdfGuia($idguia, $request->rawbt);
         } catch (\Exception $e){
             Log::info($e);
             return response(['idventa'=>-1,'respuesta'=>$e->getMessage()],500);

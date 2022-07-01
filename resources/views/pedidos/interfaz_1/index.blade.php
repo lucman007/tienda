@@ -57,7 +57,7 @@
                             <div class="card-header">
                                 <div class="row">
                                     @if($agent->isDesktop())
-                                    <div class="col-12 col-lg-6">
+                                    <div class="col-12 col-md-12 col-lg-6">
                                         <div v-show="idpedido != -1">
                                             <div class="info_selected_mesa">
                                                 <h4>
@@ -68,7 +68,7 @@
                                         </div>
                                     </div>
                                     @endif
-                                    <div class="col-12 col-md-12 mt-2 mt-md-0">
+                                    <div class="col-12 col-md-12 col-lg-6 mt-2 mt-md-0">
                                         <b-button :disabled="idpedido == -1" v-b-modal.modal-entrega class="float-right mr-2" variant="primary" title="Datos de entrega">
                                             <i class="fas fa-map-marker-alt"></i> {{!($agent->isTablet()||$agent->isDesktop())?'':'Entrega'}}
                                         </b-button>

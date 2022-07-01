@@ -309,6 +309,7 @@ class ConfiguracionController extends Controller
         $producto->num_item = 1;
         $producto->codigo = 'ASD8727';
         $producto->nombre = 'ARROZ CON POLLO';
+        $producto->descripcion = 'ARROZ CON POLLO';
         $producto->cantidad = 5;
         $producto->detalle = $detalle;
         $producto->unidad_medida = 'UND';
