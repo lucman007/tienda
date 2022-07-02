@@ -57,6 +57,9 @@ class LoginController extends Controller
             if(auth()->user()->hasRole('Contabilidad')){
                 return redirect('/reportes/comprobantes');
             }
+            if(auth()->user()->cannot('Pedido')){
+                return redirect('/');
+            }
             return redirect('/pedidos');
 		} else{
             return redirect('login')

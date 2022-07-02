@@ -22,9 +22,13 @@
                         <div class="row">
                             <div class="col-lg-12 mb-4">
                                 <b-nav tabs>
+                                    @can('Caja: gestionar')
                                     <b-nav-item href="/caja/movimientos?tipo=gastos" :active="'{{$tipo_movimiento}}'==1">Gastos</b-nav-item>
                                     <b-nav-item href="/caja/movimientos?tipo=ingresos" :active="'{{$tipo_movimiento}}'==2">Ingreso de efectivo</b-nav-item>
+                                    @endcan
+                                    @can('Inventario: productos')
                                     <b-nav-item href="/caja/movimientos?tipo=devoluciones" :active="'{{$tipo_movimiento}}'==3">Devoluciones</b-nav-item>
+                                    @endcan
                                 </b-nav>
                             </div>
                             <div class="col-lg-12">

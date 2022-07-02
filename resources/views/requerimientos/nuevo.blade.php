@@ -53,7 +53,7 @@
                         </div>
                         <div class="row">
                             <div class="col-lg-7">
-                                <autocomplete ref="suggest" v-on:agregar_producto="agregarProducto"></autocomplete>
+                                <autocomplete ref="suggest" v-on:agregar_producto="agregarProducto" :origen="'compras'"></autocomplete>
                             </div>
                             <div class="col-lg-3">
                                 <b-button class="mb-4 mt-2 mt-lg-0 float-right float-lg-left"  v-b-modal.modal-nuevo-producto

@@ -11,7 +11,7 @@
 |
 */
 
-Route::group(['middleware' => ['can:Caja: egresos']], function () {
+Route::group(['middleware' => ['permission:Caja: egresos|Inventario: productos']], function () {
     Route::get('caja/movimientos', 'GastoController@index');
     Route::get('caja/movimientos/total', 'GastoController@obtenerTotal');
     Route::delete('caja/destroy/{id}', 'GastoController@destroy');
@@ -355,7 +355,7 @@ Route::group(['middleware' => ['can:Ventas']], function () {
     Route::get('notificaciones/obtener-notificaciones','NotificacionesController@obtenerNotificaciones');
 });
 
-Route::group(['middleware' => ['can:Almacen']], function () {
+Route::group(['middleware' => ['can:Inventario: almacenes']], function () {
     Route::get('almacenes','AlmacenController@index');
     Route::post('almacenes/store', 'AlmacenController@store');
     Route::post('almacenes/store-ubicacion', 'AlmacenController@storeUbicacion');

@@ -5,11 +5,11 @@
         <div class="row">
             <div class="col-lg-9">
                 <h3 class="titulo-admin-1">Almacén</h3>
-                <b-button v-b-modal.modal-1 variant="primary"><i class="fas fa-plus"></i> Nuevo almacén</b-button>
+                {{--<b-button v-b-modal.modal-1 variant="primary"><i class="fas fa-plus"></i> Nuevo almacén</b-button>--}}
             </div>
-            <div class="col-lg-3">
+           {{-- <div class="col-lg-3">
                 @include('almacen.buscador')
-            </div>
+            </div>--}}
         </div>
         <div class="row">
             <div class="col-sm-12 mt-4">
@@ -25,12 +25,12 @@
                                     <th scope="col"></th>
                                     <th scope="col">Código</th>
                                     <th scope="col">Nombre</th>
-                                    <th scope="col">Mostrar
+                                    {{--<th scope="col">Mostrar
                                         <i class="fas fa-question-circle" id="popover-target-1"></i>
                                         <b-popover target="popover-target-1" triggers="hover" placement="top" variant="danger">
                                             Cuando realices una venta muestra u oculta los productos pertenecientes a determinado almacén
                                         </b-popover>
-                                    </th>
+                                    </th>--}}
                                     <th scope="col">Opciones</th>
                                 </tr>
                                 </thead>
@@ -41,10 +41,10 @@
                                             <td></td>
                                             <td>{{$item->codigo}}</td>
                                             <td>{{$item->nombre}}</td>
-                                            <td>
+                                            {{--<td>
                                                 <b-form-checkbox switch size="sm">
                                                 </b-form-checkbox>
-                                            </td>
+                                            </td>--}}
                                             <td class="botones-accion">
                                                 <button @click="editarAlmacen({{$item->idalmacen}})" class="btn btn-success" title="Editar almacen"><i
                                                             class="fas fa-edit"></i></button>

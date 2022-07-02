@@ -11,7 +11,10 @@
                     <div class="col-lg-8">
                         {{result.cod_producto}} {{(result.cod_producto).length==0?"":"-"}} {{result.nombre }}
                     </div>
-                    <div class="col-lg">
+                    <div v-if="origen=='compras'" class="col-lg">
+                        {{result.moneda_compra+result.costo }}
+                    </div>
+                    <div v-else class="col-lg">
                         {{result.moneda+result.precio }}
                     </div>
                     <div v-show="result.tipo_producto===1" class="col-lg">
@@ -29,6 +32,7 @@
 
 <script>
 export default{
+    props: ['origen'],
     data(){
         return {
             query: '',
@@ -95,7 +99,7 @@ export default{
                                 }
                             });
                     }
-                    this.limpiar();
+                    //this.limpiar();
                     break;
                 default:
                     this.currentItem = 0;
@@ -143,5 +147,10 @@ export default{
     .list-group-item:hover {
         background-color: #2b2b2b;
         color: white
+    }
+    .list-group-item{
+        border: none;
+        font-size: 12px;
+        padding: 0.4rem 1.25rem;
     }
 </style>
