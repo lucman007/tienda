@@ -3,12 +3,21 @@
     <tr>
         <th>ID</th>
         <th>Cód.</th>
-        <th>Tipo</th>
+        <th>Clasificación</th>
         <th>Producto</th>
-        <th>Características</th>
+        <th>Descripción</th>
         <th>Stock</th>
-        <th>Costo</th>
-        <th>Precio</th>
+        <th>Compra</th>
+        <th>Moneda compra</th>
+        <th>Precio venta</th>
+        <th>Moneda precio venta</th>
+        <th>Montaje</th>
+        <th>Cápsula</th>
+        <th>Tipo</th>
+        <th>Marca</th>
+        <th>Modelo</th>
+        <th>Precio min</th>
+        <th>Moneda precio min</th>
     </tr>
     </thead>
     <tbody>
@@ -29,7 +38,17 @@
                 <td>-</td>
             @endif
             <td>{{$producto->costo}}</td>
+            <td>{{$producto->moneda_compra}}</td>
             <td>{{$producto->precio}}</td>
+            <td>{{$producto->moneda}}</td>
+            <td>{{$producto->param_1}}</td>
+            <td>{{$producto->param_2}}</td>
+            <td>{{$producto->param_3}}</td>
+            <td>{{$producto->marca}}</td>
+            <td>{{$producto->modelo}}</td>
+            <td>{{$producto->param_4}}</td>
+            <td>{{$producto->param_5}}</td>
+            <td></td>
         </tr>
     @endforeach
     </tbody>

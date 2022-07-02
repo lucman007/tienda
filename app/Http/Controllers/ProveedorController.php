@@ -73,7 +73,8 @@ class ProveedorController extends Controller
         $persona->direccion=mb_strtoupper($request->direccion);
         $persona->telefono=$request->telefono;
         $persona->correo=$request->correo;
-        $id = $persona->save();
+        $persona->save();
+        $id = $persona->idpersona;
 
         $proveedor=new Proveedor();
         $codigo=$this->generar_codigo_proveedor();

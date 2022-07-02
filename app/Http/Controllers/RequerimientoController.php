@@ -10,6 +10,7 @@ use sysfact\Emisor;
 use sysfact\Http\Controllers\Helpers\MainHelper;
 use sysfact\Inventario;
 use sysfact\Producto;
+use sysfact\Proveedor;
 use sysfact\Requerimiento;
 
 class RequerimientoController extends Controller
@@ -239,6 +240,8 @@ class RequerimientoController extends Controller
             $requerimiento->fecha_recepcion=date("Y-m-d H:i:s");
             $requerimiento->save();
 
+            $proveedor = Proveedor::find($request->idproveedor);
+
             $detalle=[];
             $items=json_decode($request->items, TRUE);
             $i=1;
@@ -261,7 +264,6 @@ class RequerimientoController extends Controller
 
                 //Actualizar inventario
                 $saldo = Inventario::where('idproducto',$item['idproducto'])->orderby('idinventario','desc')->first()->saldo;
-                Log::info($item['cantidad_recepcion'].' - '.$saldo);
                 $inventario=new Inventario();
                 $inventario->idproducto=$item['idproducto'];
                 $inventario->idempleado=auth()->user()->idempleado;
@@ -276,7 +278,7 @@ class RequerimientoController extends Controller
                 $inventario->moneda = $moneda;
                 $inventario->tipo_cambio = $request->tipo_cambio;
                 $inventario->fecha=date('Y-m-d H:i:m');
-                $inventario->operacion='INGRESO CON ORDEN DE COMPRA N° '.$request->correlativo;
+                $inventario->operacion='ORDEN DE COMPRA N° '.$request->correlativo.' - PROVEEDOR: '.$proveedor->persona->nombre;
                 if($request->tipo_producto==2){
                     $inventario->cantidad=0;
                     $inventario->saldo = 0;

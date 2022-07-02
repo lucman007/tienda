@@ -36,9 +36,9 @@
                                     <th scope="col"></th>
                                     <th @if(!$columnas['ubicacion']) style="display: none;" @endif scope="col">Ubicación</th>
                                     <th @if(!$columnas['codigo']) style="display: none;" @endif scope="col"><a href="?orderby=cod_producto&order={{$order}}">Código <span class="icon-hover @if($orderby=='cod_producto') icon-hover-active @endif">{!!$order_icon!!}</span></a></th>
-                                    <th @if(!$columnas['tipo_producto']) style="display: none;" @endif scope="col">Tipo</th>
+                                    <th @if(!$columnas['tipo_producto']) style="display: none;" @endif scope="col">Clasif.</th>
                                     <th style="width: 15%" scope="col"><a href="?orderby=nombre&order={{$order}}">Producto <span class="icon-hover @if($orderby=='nombre') icon-hover-active @endif">{!!$order_icon!!}</span></a></th>
-                                    <th scope="col" style="width: 20%">Características</th>
+                                    <th scope="col" style="width: 20%">Descripción</th>
                                     <th @if(!$columnas['montaje']) style="display: none;" @endif>Montaje</th>
                                     <th @if(!$columnas['capsula']) style="display: none;" @endif>Cápsula</th>
                                     <th @if(!$columnas['tipo']) style="display: none;" @endif>Tipo</th>
@@ -46,7 +46,7 @@
                                     <th @if(!$columnas['modelo']) style="display: none;" @endif scope="col">Modelo</th>
                                     <th @if(!$columnas['categoria']) style="display: none;" @endif scope="col"><a href="?orderby=categoria&order={{$order}}">Categoría <span class="icon-hover @if($orderby=='categoria') icon-hover-active @endif">{!!$order_icon!!}</span></a></th>
                                     <th @if(!$columnas['stock']) style="display: none;" @endif scope="col">Stock</th>
-                                    <th @if(!$columnas['costo']) style="display: none;" @endif scope="col">Costo</th>
+                                    <th @if(!$columnas['costo']) style="display: none;" @endif scope="col">Compra</th>
                                     <th @if(!$columnas['precio']) style="display: none;" @endif scope="col"><a href="?orderby=precio&order={{$order}}">Precio <span class="icon-hover @if($orderby=='precio') icon-hover-active @endif">{!!$order_icon!!}</span></a></th>
                                     <th @if(!$columnas['precio_min']) style="display: none;" @endif scope="col">Precio min.</th>
                                     <th @if(!$columnas['imagen']) style="display: none;" @endif scope="col">Imagen</th>
@@ -216,7 +216,7 @@
                                     <p><strong>Data para reportes</strong></p>
                                 </div>
                                 <div class="col-lg-4">
-                                    <label>Costo por ofrecer el @{{tipo_producto==1?'producto':'servicio'}}:</label>
+                                    <label>@{{tipo_producto==1?'Precio de compra':'Costo de producción'}}:</label>
                                     <b-input-group>
                                         <b-form-input type="number" v-model="costo"></b-form-input>
                                         <template #append>
@@ -431,7 +431,7 @@
             <div class="col-lg-12">
                 <b-form-checkbox v-model="columnas.ubicacion" switch>Ubicación</b-form-checkbox>
                 <b-form-checkbox v-model="columnas.codigo" switch>Código</b-form-checkbox>
-                <b-form-checkbox v-model="columnas.tipo_producto" switch>Tipo producto</b-form-checkbox>
+                <b-form-checkbox v-model="columnas.tipo_producto" switch>Clasificación</b-form-checkbox>
                 <b-form-checkbox v-model="columnas.marca" switch>Marca</b-form-checkbox>
                 <b-form-checkbox v-model="columnas.modelo" switch>Modelo</b-form-checkbox>
                 <b-form-checkbox v-model="columnas.categoria" switch>Categoría</b-form-checkbox>
@@ -730,6 +730,7 @@
                     if (isNaN(this.cantidad) || this.cantidad.length == 0) this.errorDatosProducto.push('*El campo cantidad debe contener un número');
                     if (isNaN(this.stock_bajo) || this.stock_bajo.length == 0) this.errorDatosProducto.push('*El campo stock bajo debe contener un número');
                     if (!this.idubicacion) this.errorDatosProducto.push('*Ubicación de producto no puede quedar en blanco');
+                    if (this.accion == 'editar' && this.cantidad != this.cantidad_aux && this.tipo_producto==1 && !this.observacion) this.errorDatosProducto.push('*El motivo de edición no puede estar vacío');
 
                     if(this.tipo_producto == '1' && this.descuentos.length > 0){
 

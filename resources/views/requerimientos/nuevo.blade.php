@@ -246,6 +246,7 @@
                         return;
                     }
                     this.mostrarProgresoGuardado = true;
+                    console.log(this.proveedorSeleccionado)
                     axios.post('{{action('RequerimientoController@store')}}', {
                         'idproveedor': this.proveedorSeleccionado['idproveedor'],
                         'total_compra': this.totalCompra,
