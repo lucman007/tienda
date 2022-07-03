@@ -165,6 +165,7 @@
                                         <option value="KGM/KG">Kilogramo</option>
                                         <option value="GRM/G">Gramo</option>
                                         <option value="LTR/L">Litro</option>
+                                        <option value="NIU/PZA">Pieza</option>
                                         <option value="MTK/M2">Metro cuadrado</option>
                                         <option value="MTQ/M3">Metro cúbico</option>
                                         <option value="PK/PQ">Paquete</option>
@@ -496,7 +497,8 @@
                 param_3:'',
                 param_4:'0.00',
                 param_5:'PEN',
-                columnas: <?php echo json_encode($columnas) ?>
+                columnas: <?php echo json_encode($columnas) ?>,
+                search: '{{$textoBuscado}}'
             },
             mounted(){
                 this.obtener_categorias();

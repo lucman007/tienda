@@ -34,19 +34,53 @@ class ProductoController extends Controller
 
             try{
                 $consulta=trim($request->get('textoBuscado'));
+                $filtro=$request->get('filtro');
                 $orderby=$request->get('orderby','idproducto');
                 $order=$request->get('order', 'desc');
 
-                $productos=Producto::join('categorias', 'categorias.idcategoria', '=', 'productos.idcategoria')
-                    ->where('eliminado',0)
-                    ->select('productos.*','categorias.nombre as categoria')
-                    ->where(function ($query) use ($consulta) {
-                        $query->where('productos.nombre','LIKE','%'.$consulta.'%')
-                            ->orWhere('cod_producto','like','%'.$consulta.'%')
-                            ->orWhere('presentacion','like','%'.$consulta.'%');
-                    })
-                    ->orderby($orderby,$order)
-                    ->paginate(30);
+                if($filtro){
+                    switch ($filtro){
+                        case 'categoria':
+                            $productos=Producto::join('categorias', 'categorias.idcategoria', '=', 'productos.idcategoria')
+                                ->where('eliminado',0)
+                                ->select('productos.*','categorias.nombre as categoria')
+                                ->where('categorias.nombre','LIKE','%'.$consulta.'%')
+                                ->orderby($orderby,$order)
+                                ->paginate(30);
+
+                            break;
+                        case 'ubicacion':
+                            $productos=Producto::join('categorias', 'categorias.idcategoria', '=', 'productos.idcategoria')
+                                ->where('eliminado',0)
+                                ->select('productos.*','categorias.nombre as categoria')
+                                ->where('categorias.nombre','LIKE','%'.$consulta.'%')
+                                ->orderby($orderby,$order)
+                                ->paginate(30);
+
+                            break;
+                        default:
+                            $productos=Producto::join('categorias', 'categorias.idcategoria', '=', 'productos.idcategoria')
+                                ->where('eliminado',0)
+                                ->select('productos.*','categorias.nombre as categoria')
+                                ->where($filtro,'LIKE','%'.$consulta.'%')
+                                ->orderby($orderby,$order)
+                                ->paginate(30);
+                    }
+
+                } else {
+                    $productos=Producto::join('categorias', 'categorias.idcategoria', '=', 'productos.idcategoria')
+                        ->where('eliminado',0)
+                        ->select('productos.*','categorias.nombre as categoria')
+                        ->where(function ($query) use ($consulta) {
+                            $query->where('productos.nombre','LIKE','%'.$consulta.'%')
+                                ->orWhere('cod_producto','like','%'.$consulta.'%')
+                                ->orWhere('presentacion','like','%'.$consulta.'%');
+                        })
+                        ->orderby($orderby,$order)
+                        ->paginate(30);
+                }
+
+
 
                 foreach ($productos as $producto){
                     $producto->cantidad=$producto->inventario->first()->saldo;
@@ -69,8 +103,6 @@ class ProductoController extends Controller
                 if($ultimo_id_registrado==null)$ultimo_id_registrado=['idproducto'=>1];
 
                 $productos->appends($_GET)->links();
-
-                
 
                 $opcion = Opciones::where('nombre_opcion','col_productos')->first();
                 if($opcion){

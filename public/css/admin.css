@@ -1392,6 +1392,12 @@ table tr td, table tr th{
     box-shadow: none !important;
 }
 
+.variant-alt{
+    background: white;
+    color:#495057;
+    border-color: #ced4da;
+}
+
 /*RESPONSIVE*/
 
 @media (min-width: 576px) {
