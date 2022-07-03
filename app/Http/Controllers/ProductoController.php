@@ -458,7 +458,12 @@ class ProductoController extends Controller
             ->where('eliminado',0)
             ->orderby('idproducto','desc')
             ->first();
-        return 'PR'.substr(date('Y'),2,2).$ultimo_id_registrado->idproducto;
+        if($ultimo_id_registrado){
+            return 'PR'.substr(date('Y'),2,2).$ultimo_id_registrado->idproducto;
+        } else {
+            return 'PR'.substr(date('Y'),2,2).'1';
+        }
+
     }
 
     public function agregar_imagen(Request $request){

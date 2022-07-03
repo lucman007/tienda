@@ -123,7 +123,7 @@ class ProductosFirstSheet implements ToCollection, WithHeadingRow
                 }
             }
 
-            if($row['cantidad']<=0 || $row['cantidad']==''){
+            if($row['cantidad']==''){
                 $tipo_producto = 2;
             } else {
                 $tipo_producto = 1;

@@ -180,6 +180,11 @@
                         </div>
                     </div>
                 </div>
+                <div class="row" v-show="spinner">
+                    <div class="col-lg-12 my4" style="margin-bottom: 20px">
+                        <b-spinner small label="Loading..." ></b-spinner> Cargando resumen...
+                    </div>
+                </div>
                 <div class="row">
                     <div class="col-sm-12 mt-1">
                         <div class="card no-shadow">
@@ -243,7 +248,8 @@
                 hasta:'{{$filtros['hasta']}}',
                 buscar:'{{$filtros['buscar']}}',
                 usdReport:null,
-                penReport:null
+                penReport:null,
+                spinner:false,
             },
             mounted(){
                 this.getReportBadge();
@@ -270,16 +276,18 @@
                     }
                 },
                 getReportBadge(){
+                    this.spinner = true;
                     axios.get('/reportes/ventas/badge/'+this.desde+'/'+this.hasta+'?filtro='+this.filtro+'&buscar='+this.buscar)
                         .then(response => {
                             this.penReport = response.data[0];
                             this.usdReport = response.data[1];
+                            this.spinner = false;
                         })
                         .catch(error => {
                             alert('Ha ocurrido un error');
                             console.log(error);
+                            this.spinner = false;
                         });
-
                 }
             },
             watch:{

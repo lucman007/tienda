@@ -54,50 +54,56 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                @foreach($productos as $producto)
-                                    <tr>
-                                        <td></td>
-                                        <td @if(!$columnas['ubicacion']) style="display: none;" @endif>{{$producto->ubicacion}}</td>
-                                        <td @if(!$columnas['codigo']) style="display: none;" @endif>{{$producto->cod_producto}}</td>
-                                        @if($producto->tipo_producto==1)
-                                            <td @if(!$columnas['tipo_producto']) style="display: none;" @endif scope="col">PRODUCTO</td>
-                                        @else
-                                            <td @if(!$columnas['tipo_producto']) style="display: none;" @endif scope="col">SERVICIO</td>
-                                        @endif
-                                        <td>{{$producto->nombre}}</td>
-                                        <td>{{$producto->presentacion}}</td>
-                                        <td @if(!$columnas['montaje']) style="display: none;" @endif>{{$producto->param_1}}</td>
-                                        <td @if(!$columnas['capsula']) style="display: none;" @endif>{{$producto->param_2}}</td>
-                                        <td @if(!$columnas['tipo']) style="display: none;" @endif>{{$producto->param_3}}</td>
-                                        <td @if(!$columnas['marca']) style="display: none;" @endif>{{$producto->marca}}</td>
-                                        <td @if(!$columnas['modelo']) style="display: none;" @endif>{{$producto->modelo}}</td>
-                                        <td @if(!$columnas['categoria']) style="display: none;" @endif>{{$producto->categoria}}</td>
-                                        @if($producto->tipo_producto==1)
-                                            <td @if(!$columnas['stock']) style="display: none;" @endif>{{$producto->cantidad}}</td>
-                                        @else
-                                            <td @if(!$columnas['stock']) style="display: none;" @endif>-</td>
-                                        @endif
-                                        <td @if(!$columnas['costo']) style="display: none;" @endif>{{$producto->moneda_compra=='PEN'?'S/':'USD'}}{{$producto->costo}}</td>
-                                        <td @if(!$columnas['precio']) style="display: none;" @endif>{{$producto->moneda=='PEN'?'S/':'USD'}}{{$producto->precio}}</td>
-                                        <td @if(!$columnas['precio_min']) style="display: none;" @endif>@if($producto->param_5) {{$producto->param_5=='PEN'?'S/':'USD'}} @endif{{$producto->param_4}}</td>
-                                        <td @if(!$columnas['imagen']) style="display: none;" @endif class="image-product"><a><img @click="modalImagen({{$producto->idproducto}},'{{$producto->imagen}}')" src="{{$producto->imagen?$producto->imagen:url('images/no-image.jpg')}}" class="card-img-top"></a></td>
-                                        <td class="botones-accion" style="width: 10%">
-                                            <a @click="editarProducto({{$producto->idproducto}})" href="javascript:void(0)">
-                                                <button class="btn btn-success" title="Editar producto"><i
-                                                            class="fas fa-edit"></i></button>
-                                            </a>
-                                            <b-dropdown id="dropdown-1" text="Más" class="m-md-2 " variant="warning">
-                                                <b-dropdown-item @can('Inventario: kardex') href="{{url('productos/inventario').'/'.$producto->idproducto}}" @endcan><i class="fas fa-list"></i> Ver kardex</b-dropdown-item>
-{{--
-                                                <b-dropdown-item @cannot('Inventario: gestionar producto') disabled @endcannot @click="borrarProducto({{$producto->idproducto}})"><i class="fas fa-exchange-alt"></i> Trasladar</b-dropdown-item>
---}}
-{{--                                                <b-dropdown-item @cannot('Inventario: gestionar producto') disabled @endcannot @click="borrarProducto({{$producto->idproducto}})"><i class="fas fa-copy"></i> Duplicar</b-dropdown-item>
-                                                <b-dropdown-item @cannot('Inventario: gestionar producto') disabled @endcannot @click="borrarProducto({{$producto->idproducto}})"><i class="fas fa-ban"></i> Inhabilitar</b-dropdown-item>--}}
-                                                <b-dropdown-item @cannot('Inventario: gestionar producto') disabled @endcannot @click="borrarProducto({{$producto->idproducto}})"><i class="fas fa-trash"></i> Eliminar</b-dropdown-item>
-                                            </b-dropdown>
-                                        </td>
+                                @if(count($productos) > 0)
+                                    @foreach($productos as $producto)
+                                        <tr>
+                                            <td></td>
+                                            <td @if(!$columnas['ubicacion']) style="display: none;" @endif>{{$producto->ubicacion}}</td>
+                                            <td @if(!$columnas['codigo']) style="display: none;" @endif>{{$producto->cod_producto}}</td>
+                                            @if($producto->tipo_producto==1)
+                                                <td @if(!$columnas['tipo_producto']) style="display: none;" @endif scope="col">PRODUCTO</td>
+                                            @else
+                                                <td @if(!$columnas['tipo_producto']) style="display: none;" @endif scope="col">SERVICIO</td>
+                                            @endif
+                                            <td>{{$producto->nombre}}</td>
+                                            <td>{{$producto->presentacion}}</td>
+                                            <td @if(!$columnas['montaje']) style="display: none;" @endif>{{$producto->param_1}}</td>
+                                            <td @if(!$columnas['capsula']) style="display: none;" @endif>{{$producto->param_2}}</td>
+                                            <td @if(!$columnas['tipo']) style="display: none;" @endif>{{$producto->param_3}}</td>
+                                            <td @if(!$columnas['marca']) style="display: none;" @endif>{{$producto->marca}}</td>
+                                            <td @if(!$columnas['modelo']) style="display: none;" @endif>{{$producto->modelo}}</td>
+                                            <td @if(!$columnas['categoria']) style="display: none;" @endif>{{$producto->categoria}}</td>
+                                            @if($producto->tipo_producto==1)
+                                                <td @if(!$columnas['stock']) style="display: none;" @endif>{{$producto->cantidad}}</td>
+                                            @else
+                                                <td @if(!$columnas['stock']) style="display: none;" @endif>-</td>
+                                            @endif
+                                            <td @if(!$columnas['costo']) style="display: none;" @endif>{{$producto->moneda_compra=='PEN'?'S/':'USD'}}{{$producto->costo}}</td>
+                                            <td @if(!$columnas['precio']) style="display: none;" @endif>{{$producto->moneda=='PEN'?'S/':'USD'}}{{$producto->precio}}</td>
+                                            <td @if(!$columnas['precio_min']) style="display: none;" @endif>@if($producto->param_5) {{$producto->param_5=='PEN'?'S/':'USD'}} @endif{{$producto->param_4}}</td>
+                                            <td @if(!$columnas['imagen']) style="display: none;" @endif class="image-product"><a><img @click="modalImagen({{$producto->idproducto}},'{{$producto->imagen}}')" src="{{$producto->imagen?$producto->imagen:url('images/no-image.jpg')}}" class="card-img-top"></a></td>
+                                            <td class="botones-accion" style="width: 10%">
+                                                <a @click="editarProducto({{$producto->idproducto}})" href="javascript:void(0)">
+                                                    <button class="btn btn-success" title="Editar producto"><i
+                                                                class="fas fa-edit"></i></button>
+                                                </a>
+                                                <b-dropdown id="dropdown-1" text="Más" class="m-md-2 " variant="warning">
+                                                    <b-dropdown-item @can('Inventario: kardex') href="{{url('productos/inventario').'/'.$producto->idproducto}}" @endcan><i class="fas fa-list"></i> Ver kardex</b-dropdown-item>
+    {{--
+                                                    <b-dropdown-item @cannot('Inventario: gestionar producto') disabled @endcannot @click="borrarProducto({{$producto->idproducto}})"><i class="fas fa-exchange-alt"></i> Trasladar</b-dropdown-item>
+    --}}
+    {{--                                                <b-dropdown-item @cannot('Inventario: gestionar producto') disabled @endcannot @click="borrarProducto({{$producto->idproducto}})"><i class="fas fa-copy"></i> Duplicar</b-dropdown-item>
+                                                    <b-dropdown-item @cannot('Inventario: gestionar producto') disabled @endcannot @click="borrarProducto({{$producto->idproducto}})"><i class="fas fa-ban"></i> Inhabilitar</b-dropdown-item>--}}
+                                                    <b-dropdown-item @cannot('Inventario: gestionar producto') disabled @endcannot @click="borrarProducto({{$producto->idproducto}})"><i class="fas fa-trash"></i> Eliminar</b-dropdown-item>
+                                                </b-dropdown>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                @else
+                                    <tr class="text-center">
+                                        <td colspan="18">No hay datos que mostrar</td>
                                     </tr>
-                                @endforeach
+                                @endif
                                 </tbody>
                             </table>
                         </div>
