@@ -98,6 +98,11 @@ class AlmacenController extends Controller
                 $ubicacion->idalmacen = mb_strtoupper($item['idalmacen']);
                 $ubicacion->descripcion = mb_strtoupper($item['descripcion']);
                 $ubicacion->save();
+                $idubicacion = $ubicacion->idubicacion;
+
+                if($request->origen){
+                    return $idubicacion;
+                }
 
             }
 

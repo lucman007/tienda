@@ -292,10 +292,19 @@
                             </div>
                             <div class="col-lg-6">
                                 <div class="form-group">
-                                    <label>Ubicación</label>
-                                    <select v-model="idubicacion" class="custom-select">
+                                    <label class="w-100">Ubicación
+                                        <a style="color:#0062cc" v-show="!nuevaUbicacion" @click="nuevaUbicacion = true" class="float-right"><i class="fas fa-plus"></i> Nueva ubicación</a>
+                                        <a style="color:red" v-show="nuevaUbicacion" @click="nuevaUbicacion = false" class="float-right"><i class="fas fa-ban"></i> Cancelar</a>
+                                    </label>
+                                    <select v-show="!nuevaUbicacion" v-model="idubicacion" class="custom-select">
                                         <option v-for="item in ubicacion" v-bind:value="item.idubicacion">@{{item.nombre}}</option>
                                     </select>
+                                    <b-input-group v-show="nuevaUbicacion">
+                                        <input type="text" class="form-control" v-model="nombreUbicacion">
+                                        <b-input-group-append>
+                                            <button :disabled="nombreUbicacion.length == ''" @click="guardarUbicacion" class="btn btn-primary"><i class="fas fa-save"></i></button>
+                                        </b-input-group-append>
+                                    </b-input-group>
                                 </div>
                             </div>
                         </div>
@@ -504,13 +513,35 @@
                 param_4:'0.00',
                 param_5:'PEN',
                 columnas: <?php echo json_encode($columnas) ?>,
-                search: '{{$textoBuscado}}'
+                search: '{{$textoBuscado}}',
+                nuevaUbicacion:false,
+                nombreUbicacion:''
             },
             mounted(){
                 this.obtener_categorias();
                 this.obtener_almacen();
             },
             methods: {
+                guardarUbicacion(e){
+                    axios.post('/almacenes/store-ubicacion?origen=productos', {
+                        'idalmacen':this.idalmacen,
+                        'ubicacion': JSON.stringify([{
+                            idubicacion:null,
+                            idalmacen:this.idalmacen,
+                            nombre: this.nombreUbicacion,
+                            descripcion: '',
+                            eliminado: 0
+                        }]),
+                    })
+                        .then(response => {
+                            this.obtener_ubicacion(response.data);
+                            this.nuevaUbicacion = false;
+                        })
+                        .catch(function (error) {
+                            alert(error);
+                            console.log(error);
+                        });
+                },
                 ocultarColumnas(){
                     axios.post('{{url('/productos/ocultar-columnas')}}', {
                         'columnas':JSON.stringify(this.columnas),
@@ -546,23 +577,28 @@
                             if (datos.almacen.length > 0) {
                                 this.idalmacen = datos.almacen[0]['idalmacen'];
                             }
-                            this.obtener_ubicacion(this.idalmacen)
+                            this.obtener_ubicacion()
                         })
                         .catch(error => {
                             this.alerta('Ha ocurrido un error al obtener los datos');
                             console.log(error);
                         });
                 },
-                obtener_ubicacion(){
+                obtener_ubicacion(idubicacion = false){
                     axios.get('{{url('/productos/mostrar-ubicacion')}}'+'/'+this.idalmacen)
                         .then(response => {
                             let datos = response.data;
                             this.ubicacion = datos.ubicacion;
-                            if (datos.ubicacion.length > 0) {
-                                this.idubicacion = datos.ubicacion[0]['idubicacion'];
+                            if(idubicacion){
+                                this.idubicacion = idubicacion;
                             } else {
-                                this.idubicacion = null;
+                                if (datos.ubicacion.length > 0) {
+                                    this.idubicacion = datos.ubicacion[0]['idubicacion'];
+                                } else {
+                                    this.idubicacion = null;
+                                }
                             }
+
                         })
                         .catch(error => {
                             this.alerta('Ha ocurrido un error al obtener los datos');
@@ -835,6 +871,7 @@
                     this.param_3 = '';
                     this.param_4 = '0.00';
                     this.param_5 = 'PEN';
+                    this.nombreUbicacion = '';
                 },
                 alerta(texto, icon){
                     this.$swal({
