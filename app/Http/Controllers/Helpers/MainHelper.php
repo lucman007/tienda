@@ -234,19 +234,44 @@ class MainHelper extends Controller
         ]);
     }
 
-    public function obtener_productos($search="")
+    public function obtener_productos(Request $request, $search="")
     {
         $consulta=trim($search);
+        $filtro = $request->filtro;
 
-        $productos=Producto::where('eliminado',0)
-            ->where(function ($query) use ($consulta) {
-                $query->where('nombre','LIKE','%'.$consulta.'%')
-                    ->orWhere('cod_producto',$consulta)
-                    ->orWhere('presentacion','like','%'.$consulta.'%');
-            })
-            ->orderby('nombre','asc')
-            ->take(8)
-            ->get();
+        if($filtro && $filtro != -1){
+            switch ($filtro) {
+                case 'categoria':
+                    $productos = Producto::where('eliminado', 0)
+                        ->whereHas('categoria', function ($query) use ($consulta){
+                            $query->where('nombre', 'LIKE', '%' . $consulta . '%');
+                        })
+                        ->orderby('nombre', 'asc')
+                        ->take(10)
+                        ->get();
+                    break;
+                default:
+                    $productos = Producto::where('eliminado', 0)
+                        ->where(function ($query) use ($filtro, $consulta) {
+                            $query->where($filtro, 'LIKE', '%' . $consulta . '%');
+                        })
+                        ->orderby('nombre', 'asc')
+                        ->take(10)
+                        ->get();
+            }
+        } else {
+            $productos=Producto::where('eliminado',0)
+                ->where(function ($query) use ($consulta) {
+                    $query->where('nombre','LIKE','%'.$consulta.'%')
+                        ->orWhere('cod_producto',$consulta)
+                        ->orWhere('presentacion','like','%'.$consulta.'%');
+                })
+                ->orderby('nombre','asc')
+                ->take(10)
+                ->get();
+        }
+
+
 
         foreach ($productos as $producto) {
             $producto->stock = $producto->inventario()->first()->saldo;

@@ -369,7 +369,7 @@
                     <form class="form-upload" method="POST" action="{{url('productos/importar-productos')}}"
                           enctype="multipart/form-data">
                         <div class="form-group">
-                            <input @change="cargarFichero" type="file" id="excel_file" name="excel_file" class="form-control-file">
+                            <input @change="cargarFichero" type="file" id="excel_file" name="excel_file" class="form-control-file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
                         </div>
                     </form>
                 </div>
@@ -535,6 +535,7 @@
                     })
                         .then(response => {
                             this.obtener_ubicacion(response.data);
+                            this.nombreUbicacion = '';
                             this.nuevaUbicacion = false;
                         })
                         .catch(function (error) {
@@ -872,6 +873,7 @@
                     this.param_4 = '0.00';
                     this.param_5 = 'PEN';
                     this.nombreUbicacion = '';
+                    this.nuevaUbicacion = false;
                 },
                 alerta(texto, icon){
                     this.$swal({

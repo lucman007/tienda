@@ -1,6 +1,6 @@
 <template>
     <div class="autocomplete-component" id="autocomplete-component-id">
-        <input autocomplete="off" type="text" id="buscador-cliente" onfocus="this.value = this.value;" :disabled="disabledBuscador"
+        <input autocomplete="off" type="text" id="buscador-cliente" onclick="this.select()" @click="autoComplete" :disabled="disabledBuscador"
                :placeholder="es_proveedores ? 'Buscar proveedor...' : 'Buscar cliente...'" v-model="query" v-on:keyup="navigate"
                class="form-control"/>
         <i class="fas fa-times-circle borrarCliente" v-show="disabledBuscador" v-on:click="borrarCliente"></i>
@@ -35,18 +35,16 @@ export default{
         }
     },
     created() {
-        this.handler = function(e){
+        this.handler = e => {
             if((e.code=='ArrowUp' || e.code=='ArrowDown') && document.getElementById("buscador-cliente") === document.activeElement){
                 e.view.event.preventDefault();
             }
         };
         window.addEventListener('keydown', this.handler);
 
-        let _this = this;
-
-        window.addEventListener('click', function(e){
+        window.addEventListener('click', e => {
             if (!document.getElementById('autocomplete-component-id').contains(e.target)){
-                _this.results = [];
+                this.results = [];
             }
         })
     },
@@ -71,6 +69,7 @@ export default{
                     this.query = '';
                     break;
                 case 'Enter':
+                case 'NumpadEnter':
                     if (this.results.length > 0) {
                         this.$emit('agregar_cliente', this.results[this.currentItem]);
                         this.disabledBuscador = true;
@@ -110,12 +109,18 @@ export default{
         },
         autoComplete(){
             this.results = [];
+            let url = "/helper/obtener-clientes" + "/";
+            if (this.es_proveedores) {
+                url = "/helper/obtener-proveedores" + "/";
+            }
+
             if (this.query.length > 1) {
-                let url = "/helper/obtener-clientes" + "/";
-                if (this.es_proveedores) {
-                    url = "/helper/obtener-proveedores" + "/";
-                }
                 axios.get(url + this.query).then((response) => {
+                    this.results = response.data;
+                });
+
+            } else if(this.query.length == 0){
+                axios.get(url + '').then((response) => {
                     this.results = response.data;
                 });
             }

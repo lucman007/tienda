@@ -1,9 +1,24 @@
 <template>
     <div class="autocomplete-component" id="autocomplete-component-id">
-        <input autocomplete="off" type="text" id="buscador" onfocus="this.value = this.value;"
-               placeholder="Buscar producto..." v-model="query" v-on:keyup="navigate"
-               class="form-control"/>
-        <div class="panel-footer autocomplete-wrapper" v-if="results.length">
+        <b-input-group>
+            <input autocomplete="off" type="text" id="buscador" onclick="this.select()" @click="autoComplete"
+                   :placeholder="'Buscar producto...'" v-model="query" v-on:keyup="navigate"
+                   class="form-control"/>
+            <b-input-group-append>
+                <b-dropdown :variant="filtro==-1?'secondary':'success'">
+                    <template #button-content>
+                        <i class="fas fa-sliders-h"></i>
+                    </template>
+                    <b-dropdown-item @click="activarFiltro('categoria')">Categoría</b-dropdown-item>
+                    <b-dropdown-item @click="activarFiltro('marca')">Marca</b-dropdown-item>
+                    <b-dropdown-item @click="activarFiltro('param_1')">Montaje</b-dropdown-item>
+                    <b-dropdown-item @click="activarFiltro('param_2')">Cápsula</b-dropdown-item>
+                    <b-dropdown-item @click="activarFiltro('param_3')">Tipo</b-dropdown-item>
+                    <b-dropdown-item v-show="filtro != -1" @click="activarFiltro(-1)"><span style="color:red">Quitar filtro</span></b-dropdown-item>
+                </b-dropdown>
+            </b-input-group-append>
+        </b-input-group>
+        <div class="panel-footer autocomplete-wrapper">
             <ul class="list-group">
                 <li v-on:click="agregarProducto(index)" style="cursor:pointer" class="list-group-item d-flex"
                     v-for="(result,index) in results"
@@ -38,7 +53,8 @@ export default{
             query: '',
             results: [],
             currentItem: 0,
-            cursor_position: 0
+            cursor_position: 0,
+            filtro: -1,
         }
     },
     mounted(){
@@ -46,7 +62,7 @@ export default{
         input.focus();
     },
     created() {
-        this.handler = function(e){
+        this.handler = e => {
             if((e.code=='ArrowUp' || e.code=='ArrowDown') && document.getElementById("buscador") === document.activeElement){
                 e.view.event.preventDefault();
                 let input = document.getElementById("buscador");
@@ -55,11 +71,9 @@ export default{
         };
         window.addEventListener('keydown', this.handler);
 
-        let _this = this;
-
-        window.addEventListener('click', function(e){
+        window.addEventListener('click', e => {
             if (!document.getElementById('autocomplete-component-id').contains(e.target)){
-                _this.results = [];
+                this.results = [];
             }
         })
     },
@@ -67,6 +81,9 @@ export default{
         window.removeEventListener('keydown', this.handler);
     },
     methods: {
+        activarFiltro(filtro){
+          this.filtro = filtro;
+        },
         navigate(event){
             switch (event.code) {
                 case 'ArrowUp':
@@ -88,14 +105,13 @@ export default{
                     if (this.results.length > 0) {
                         this.$emit('agregar_producto', this.results[this.currentItem]);
                     } else{
-                        let _this = this;
                         axios.get('/helper/agregar-producto' + '/' + this.query)
                             .then(response => {
-                                _this.results = response.data;
-                                if((Object.keys(_this.results).length === 0)){
+                                this.results = response.data;
+                                if((Object.keys(this.results).length === 0)){
                                     alert('No se ha encontrado el producto con el código marcado');
                                 } else{
-                                    _this.$emit('agregar_producto', _this.results);
+                                    this.$emit('agregar_producto', this.results);
                                 }
                             });
                     }
@@ -122,7 +138,12 @@ export default{
         autoComplete(){
             this.results = [];
             if (this.query.length > 1) {
-                axios.get('/helper/obtener-productos' + '/' + this.query)
+                axios.get('/helper/obtener-productos' + '/' + this.query+'?filtro='+this.filtro)
+                    .then(response => {
+                        this.results = response.data;
+                    });
+            } else if(this.query.length == 0){
+                axios.get('/helper/obtener-productos' + '/' + '')
                     .then(response => {
                         this.results = response.data;
                     });
