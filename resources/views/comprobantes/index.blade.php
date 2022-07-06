@@ -182,7 +182,7 @@
                                                 <button @click="eliminar({{$venta->idventa}})"
                                                         class="btn btn-danger" title="Eliminar"><i class="fas fa-trash-alt"></i>
                                                 </button>
-                                                    @elseif(($venta->facturacion->codigo_tipo_documento == '01' || $venta->facturacion->codigo_tipo_documento == '03') && $venta->facturacion->estado=='ACEPTADO')
+                                                @elseif(($venta->facturacion->codigo_tipo_documento == '01' || $venta->facturacion->codigo_tipo_documento == '03') && $venta->facturacion->estado=='ACEPTADO')
                                                     <b-button id="btn_anular_{{$venta->idventa}}" variant="danger" @click="abrir_modal('anulacion',{{$venta}})"><i class="fas fa-times"></i>
                                                     </b-button>
                                                 @endif

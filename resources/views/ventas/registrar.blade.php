@@ -1442,8 +1442,10 @@
                         if (suma_cuotas < this.totalVenta) errorDatosVenta.push('*La suma de las cuotas es inferior al monto total de la venta');
                     }
 
+                    if (this.comprobante == '01' || this.comprobante == '07.02' || this.comprobante == '08.02') {
+                        if (Object.keys(this.clienteSeleccionado).length == 0) errorDatosVenta.push('*Debes ingresar un cliente');
+                    }
 
-                    if (Object.keys(this.clienteSeleccionado).length == 0) errorDatosVenta.push('*Debes ingresar un cliente');
                     if (this.comprobante == '01' || this.comprobante == '07.02' || this.comprobante == '08.02') {
                         if (this.clienteSeleccionado['num_documento'] && this.clienteSeleccionado['num_documento'].length != 11 && this.codigo_tipo_factura == '0101') errorDatosVenta.push('*Ingrese un RUC válido');
                     } else if (this.comprobante == '03' || this.comprobante == '07.01' || this.comprobante == '08.01') {
@@ -1451,13 +1453,16 @@
                         if(this.moneda == 'USD'){
                             totalCheck = this.totalVenta * Number(this.tipoCambio);
                         }
-                        if (this.clienteSeleccionado['num_documento'] && totalCheck >= 700){
-                            str = this.clienteSeleccionado['num_documento'];
-                            let regex = new RegExp(/(.)\1{7}/);
-                            if(regex.test(str)){
+                        if (totalCheck >= 700){
+                            if(this.clienteSeleccionado['num_documento']){
+                                str = this.clienteSeleccionado['num_documento'];
+                                let regex = new RegExp(/(.)\1{7}/);
+                                if(regex.test(str)){
+                                    errorDatosVenta.push('*Para boletas mayores a S/.700.00 debe ingresar un DNI válido');
+                                }
+                            } else{
                                 errorDatosVenta.push('*Para boletas mayores a S/.700.00 debe ingresar un DNI válido');
                             }
-
                         }
                         if (this.clienteSeleccionado['num_documento'] && (this.clienteSeleccionado['num_documento'].length < 8 || this.clienteSeleccionado['num_documento'].length > 11)) errorDatosVenta.push('*Ingrese un DNI o RUC válido');
                     }

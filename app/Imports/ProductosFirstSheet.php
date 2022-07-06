@@ -37,6 +37,9 @@ class ProductosFirstSheet implements ToCollection, WithHeadingRow
                 case 'METRO':
                     $row['unidad_de_medida']='MTR/M';
                     break;
+                case 'ROLLO':
+                    $row['unidad_de_medida']='RO/ROL';
+                    break;
                 case 'KILOGRAMO':
                     $row['unidad_de_medida']='KGM/KG';
                     break;
@@ -46,11 +49,35 @@ class ProductosFirstSheet implements ToCollection, WithHeadingRow
                 case 'LITRO':
                     $row['unidad_de_medida']='LTR/L';
                     break;
+                case 'PIEZA':
+                    $row['unidad_de_medida']='NIU/PZA';
+                    break;
+                case 'METRO CUADRADO':
+                    $row['unidad_de_medida']='MTK/M2';
+                    break;
+                case 'METRO CUBICO':
+                    $row['unidad_de_medida']='MTQ/M3';
+                    break;
                 case 'PAQUETE':
                     $row['unidad_de_medida']='PK/PQ';
                     break;
                 case 'CAJA':
                     $row['unidad_de_medida']='BX/CJ';
+                    break;
+                case 'JUEGO':
+                    $row['unidad_de_medida']='NIU/JG';
+                    break;
+                case 'PAR':
+                    $row['unidad_de_medida']='NIU/PR';
+                    break;
+                case 'FARDO':
+                    $row['unidad_de_medida']='BE/BE';
+                    break;
+                case 'BOLSA':
+                    $row['unidad_de_medida']='BG/BG';
+                    break;
+                case 'BALDE':
+                    $row['unidad_de_medida']='BJ/BJ';
                     break;
                 default:
                     $row['unidad_de_medida']='NIU/UND';

@@ -103,12 +103,7 @@ class PresupuestoController extends Controller
 	    try{
             $presupuesto=new Presupuesto();
             $presupuesto->idempleado=auth()->user()->idempleado;
-            if($request->idcliente==''){
-                $presupuesto->idcliente=-1;
-            } else{
-                $presupuesto->idcliente=$request->idcliente;
-            }
-
+            $presupuesto->idcliente=$request->idcliente??-1;
             if ($request->moneda == 'S/') {
                 $moneda = 'PEN';
             } else {
@@ -287,7 +282,7 @@ class PresupuestoController extends Controller
         try{
 
             $presupuesto=Presupuesto::find($request->idpresupuesto);
-            $presupuesto->idcliente=$request->idcliente;
+            $presupuesto->idcliente=$request->idcliente??-1;
             $presupuesto->presupuesto=$request->presupuesto;
             $presupuesto->descuento=$request->descuento?$request->descuento:'0.00';
             $presupuesto->porcentaje_descuento=$request->porcentaje_descuento?$request->porcentaje_descuento:'0.00';

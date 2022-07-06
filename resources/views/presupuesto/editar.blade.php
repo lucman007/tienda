@@ -39,7 +39,7 @@
                                 <strong>Lugar de entrega:</strong> {{$presupuesto->lugar_entrega}} <hr>
                             </div>
                             <div class="col-lg-8">
-                                <strong>Cliente:</strong> {{$presupuesto->cliente['num_documento']}} - {{$presupuesto->persona['nombre']}} <hr>
+                                <strong>Cliente:</strong> @if($presupuesto->cliente->idcliente != -1) {{$presupuesto->cliente['num_documento']}} - {{$presupuesto->persona['nombre']}}@endif <hr>
                             </div>
                             <div class="col-lg-4" v-show="exportacion">
                                 <strong>Incoterm:</strong> {{$presupuesto->incoterm}} / <strong>Flete:</strong> {{$presupuesto->flete}}/ <strong>Seguro:</strong> {{$presupuesto->seguro}}
@@ -739,7 +739,7 @@
                     let errorDatosVenta = [];
                     let errorString = '';
 
-                    if (Object.keys(this.clienteSeleccionado).length == 0) errorDatosVenta.push('*Debes ingresar un cliente');
+                    //if (Object.keys(this.clienteSeleccionado).length == 0) errorDatosVenta.push('*Debes ingresar un cliente');
 
                     if (errorDatosVenta.length) {
                         errorVenta = 1;

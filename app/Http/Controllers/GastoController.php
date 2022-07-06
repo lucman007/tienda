@@ -114,7 +114,7 @@ class GastoController extends Controller
             $egreso->idcajero=auth()->user()->idempleado;
             $egreso->fecha=date('Y-m-d H:i:s');
             $egreso->idempleado=$request->idempleado;
-            $egreso->idcaja=MainHelper::obtener_idcaja();;
+            $egreso->idcaja=MainHelper::obtener_idcaja();
             $egreso->descripcion=$request->descripcion;
             $egreso->tipo_pago_empleado=$request->tipo_pago_empleado;
             $egreso->mes_pago_empleado=$request->mes_pago_empleado;

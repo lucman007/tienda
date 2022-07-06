@@ -128,7 +128,7 @@
                                         </p>
                                     </div>
                                     <div class="col-md col-sm-6">
-                                        <p class="mb-0">Costos <br>
+                                        <p class="mb-0">Precio de compra <br>
                                             <span style="font-size: 25px;">S/@{{ penReport.costos.toFixed(2) }}</span>
                                         </p>
                                     </div>

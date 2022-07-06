@@ -374,7 +374,7 @@ class VentaController extends Controller
         try {
             $venta = new Venta();
             $venta->idempleado = auth()->user()->idempleado;
-            $venta->idcliente = $request->idcliente;
+            $venta->idcliente = $request->idcliente??-1;
             $venta->idcajero = auth()->user()->idempleado;
             $venta->idcaja = MainHelper::obtener_idcaja();
             $venta->fecha = $request->fecha . ' ' . date('H:i:s');
@@ -875,40 +875,6 @@ class VentaController extends Controller
 
     }
 
-    /*public function imprimir_recibo(Request $request, $id)
-    {
-        $venta=Venta::find($id);
-        $items=$venta->productos;
-        $venta->facturacion;
-
-        if($venta->facturacion->codigo_moneda=='PEN'){
-            $moneda_letras='SOLES';
-            $venta->facturacion->codigo_moneda='S/';
-        } else{
-            $moneda_letras='DÓLARES';
-        }
-
-        $venta->leyenda=NumeroALetras::convert($venta->total_venta, $moneda_letras,true);
-        $usuario=$venta->cliente;
-        $emisor=new Emisor();
-
-        $config = MainHelper::configuracion('impresion');
-        $formato = MainHelper::getFormatoImpresionComprobantes($config);
-
-        $view = view('sunat/plantillas-pdf/'.$formato['ruta'].'/recibo',['documento'=>$venta, 'emisor'=>$emisor,'usuario'=>$usuario,'items'=>$items]);
-        $html=$view->render();
-        $pdf=new Html2Pdf('P',$formato['medidas'],'es');
-        $pdf->pdf->SetTitle($venta->facturacion->serie.'-'.$venta->facturacion->correlativo.'.pdf');
-        $pdf->writeHTML($html);
-
-        if($request->rawbt){
-            $fromFile = $pdf->output($venta->facturacion->serie.'-'.$venta->facturacion->correlativo.'.pdf','S');
-            return 'rawbt:data:application/pdf;base64,'.base64_encode($fromFile);
-        } else {
-            $pdf->output($venta->facturacion->serie.'-'.$venta->facturacion->correlativo.'.pdf');
-        }
-
-    }*/
 
     public function verificar_cdr_previo_mail(Request $request){
         $cdr_factura = storage_path().'/app/sunat/cdr/R-' .$request->factura.'.xml';

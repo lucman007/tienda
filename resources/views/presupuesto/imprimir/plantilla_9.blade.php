@@ -51,6 +51,7 @@
 
             </td>
             <td>
+                @if($usuario->idcliente != -1)
                 <table>
                     <tr>
                         <td colspan="3"><strong style="text-decoration: underline">CLIENTE:</strong></td>
@@ -68,6 +69,7 @@
                         <td style="width: 85mm" colspan="3">{{ $usuario->persona->direccion }}</td>
                     </tr>
                 </table>
+                @endif
             </td>
         </tr>
         <tr>

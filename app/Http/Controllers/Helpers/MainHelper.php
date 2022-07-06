@@ -12,6 +12,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use sysfact\AppConfig;
 use sysfact\Caja;
 use sysfact\Categoria;
@@ -277,6 +278,7 @@ class MainHelper extends Controller
             $producto->stock = $producto->inventario()->first()->saldo;
             $producto->moneda = $producto->moneda=='PEN'?'S/':'USD';
             $producto->unidad = explode('/',$producto->unidad_medida)[1];
+            $producto->descripcion = Str::words($producto->presentacion,10,'...');
 
             $descuento=$producto->descuento()->orderby('monto_desc','asc')->first();
             $producto->precioPorMayor = $descuento['monto_desc'];

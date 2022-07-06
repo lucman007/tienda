@@ -50,8 +50,10 @@
                             </div>
                             <div class="col-lg-4">
                                 @if($venta->facturacion->codigo_tipo_documento != '30')
-                                <strong>Estado de {{$venta->facturacion['comprobante']}}:</strong> <span class="badge {{$venta->badge_class}}">@{{estado}}</span>
-                                <hr>
+                                <strong>Estado de {{$venta->facturacion['comprobante']}}:</strong> <span class="badge" :class="{'badge-warning':estado=='PENDIENTE',
+                                   'badge-success' : estado=='ACEPTADO',
+                                   'badge-dark' : estado=='ANULADO',
+                                   'badge-danger' :estado=='RECHAZADO'}">@{{estado}}</span><br>
                                 @endif
                                     @if($venta->guia_relacionada)
                                         <strong>Guía:</strong>

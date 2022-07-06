@@ -601,7 +601,7 @@
                     let errorDatosVenta = [];
                     let errorString = '';
 
-                    if (Object.keys(this.clienteSeleccionado).length == 0) errorDatosVenta.push('*Debes ingresar un cliente');
+                    //if (Object.keys(this.clienteSeleccionado).length == 0) errorDatosVenta.push('*Debes ingresar un cliente');
 
                     if (errorDatosVenta.length) {
                         errorVenta = 1;
