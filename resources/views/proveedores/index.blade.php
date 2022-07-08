@@ -33,6 +33,8 @@
                                     <th scope="col"></th>
                                     <th scope="col">Codigo</th>
                                     <th scope="col">Nombre</th>
+                                    <th scope="col">Descripción</th>
+                                    <th scope="col">Cuentas</th>
                                     <th scope="col">Contacto</th>
                                     <th scope="col">Telefono 1</th>
                                     <th scope="col">Telefono 2</th>
@@ -44,10 +46,20 @@
                                 <tbody>
                                 @foreach($proveedores as $proveedor)
                                     <tr>
+                                        @php
+                                        $cuentas = $proveedor->cuentas?json_decode($proveedor->cuentas, true):false;
+                                        @endphp
                                         <td></td>
-                                        <td style="display:none">{{$proveedor->idproveedor}}</td>
                                         <td>{{$proveedor->codigo}}</td>
                                         <td>{{$proveedor->nombre}}</td>
+                                        <td>{{$proveedor->observaciones}}</td>
+                                        <td>
+                                            @if($cuentas)
+                                                @foreach ($cuentas as $cuenta)
+                                                    {{$cuenta['banco'].' '.$cuenta['moneda'].': '.$cuenta['cuenta'].' '.$cuenta['cci']}} <br>
+                                                @endforeach
+                                            @endif
+                                        </td>
                                         <td>{{$proveedor->contacto}}</td>
                                         <td>{{$proveedor->telefono}}</td>
                                         <td>{{$proveedor->telefono_2}}</td>

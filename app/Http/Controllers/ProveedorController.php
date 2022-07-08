@@ -3,6 +3,7 @@
 namespace sysfact\Http\Controllers;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use sysfact\Persona;
 use sysfact\Proveedor;
 use Illuminate\Http\Request;
@@ -50,50 +51,43 @@ class ProveedorController extends Controller
 	    }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
 
     public function store(Request $request)
     {
-        if(Proveedor::where('num_documento', $request->num_documento)
-            ->where('eliminado',0)
-            ->exists()
-        ){
-            return 1;
+        try{
+            if(Proveedor::where('num_documento', $request->num_documento)
+                ->where('eliminado',0)
+                ->exists()
+            ){
+                return 1;
+            }
+            $persona=new Persona();
+            $persona->nombre=mb_strtoupper($request->nombre);
+            $persona->direccion=mb_strtoupper($request->direccion);
+            $persona->telefono=$request->telefono;
+            $persona->correo=$request->correo;
+            $persona->save();
+            $id = $persona->idpersona;
+
+            $proveedor=new Proveedor();
+            $codigo=$this->generar_codigo_proveedor();
+            $proveedor->codigo=$codigo;
+            $proveedor->num_documento=$request->num_documento;
+            $proveedor->tipo_documento=$request->tipo_documento;
+            $proveedor->contacto=mb_strtoupper($request->contacto);
+            $proveedor->telefono_2=$request->telefono_2;
+            $proveedor->web=$request->web;
+            $proveedor->cuentas=$request->cuentas;
+            $proveedor->observaciones=$request->observacion;
+            $proveedor->eliminado=0;
+            $persona->proveedor()->save($proveedor);
+
+            return 0;
+
+        } catch (\Exception $e){
+            Log::error($e);
+            return $e->getMessage();
         }
-        $persona=new Persona();
-        $persona->nombre=mb_strtoupper($request->nombre);
-        $persona->direccion=mb_strtoupper($request->direccion);
-        $persona->telefono=$request->telefono;
-        $persona->correo=$request->correo;
-        $persona->save();
-        $id = $persona->idpersona;
-
-        $proveedor=new Proveedor();
-        $codigo=$this->generar_codigo_proveedor();
-        $proveedor->codigo=$codigo;
-        $proveedor->num_documento=$request->num_documento;
-        $proveedor->contacto=mb_strtoupper($request->contacto);
-        $proveedor->telefono_2=$request->telefono_2;
-        $proveedor->web=$request->web;
-        $proveedor->observaciones=mb_strtoupper($request->observaciones);
-        $proveedor->eliminado=0;
-        $persona->proveedor()->save($proveedor);
-
-        return response()->json([
-            "idproveedor"=>$id,
-            "codigo"=>$codigo,
-            "nombre"=>$request->nombre,
-            "persona"=>["nombre"=>$request->nombre],
-            "num_documento"=>$request->num_documento
-        ]);
     }
 
 
@@ -110,6 +104,8 @@ class ProveedorController extends Controller
             ->where('idproveedor', '=', $id)
             ->first();
 
+	    //$proveedor->cuentas = json_decode($proveedor->observaciones, true);
+
 	    return json_encode($proveedor);
     }
 
@@ -125,10 +121,12 @@ class ProveedorController extends Controller
 	    $proveedor=Proveedor::find($request->idproveedor);
 	    $proveedor->codigo=mb_strtoupper($request->codigo);
 	    $proveedor->num_documento=$request->num_documento;
+	    $proveedor->tipo_documento=$request->tipo_documento;
 	    $proveedor->contacto=mb_strtoupper($request->contacto);
 	    $proveedor->telefono_2=$request->telefono_2;
 	    $proveedor->web=$request->web;
-	    $proveedor->observaciones=mb_strtoupper($request->observaciones);
+	    $proveedor->cuentas=$request->cuentas;
+        $proveedor->observaciones=$request->observacion;
 
 	    $persona->proveedor()->save($proveedor);
     }

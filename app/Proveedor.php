@@ -18,6 +18,7 @@ class Proveedor extends Model
 		'web',
 		'contacto',
 		'observaciones',
+        'cuentas',
 		'eliminado'
 	];
 
