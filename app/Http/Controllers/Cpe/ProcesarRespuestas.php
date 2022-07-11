@@ -274,7 +274,7 @@ class ProcesarRespuestas
                         $inventario->idproducto = $item['idproducto'];
                         $inventario->idempleado = auth()->user()->idempleado;
                         $inventario->cantidad = $item->detalle->cantidad;
-                        $inventario->saldo = $item->inventario()->first()->saldo + $item->detalle->cantidad;
+                        $inventario->saldo = $item->inventario()->first()->saldo - $item->detalle->cantidad; //corregir -> es cantidad - devueltos
                         $inventario->operacion = 'NOTA DE CREDITO RECHAZADA - ID '. $this->idventa;
                         $inventario->save();
                     }
