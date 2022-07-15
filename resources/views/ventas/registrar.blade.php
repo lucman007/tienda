@@ -349,10 +349,15 @@
                                     <autocomplete ref="suggest" v-on:agregar_producto="agregarProducto"></autocomplete>
                                 </div>
                                 <div class="col-lg-3">
-                                    <b-button v-b-modal.modal-nuevo-producto
+                                    <b-button v-b-modal.modal-nuevo-producto class="float-right float-lg-left"
                                               variant="primary"><i class="fas fa-plus" v-show="!mostrarSpinnerProducto"></i>
                                         <b-spinner v-show="mostrarSpinnerProducto" small label="Loading..."></b-spinner>
                                         Nuevo producto
+                                    </b-button>
+                                    <b-button class="mb-4 mt-2 ml-1 mt-lg-0 float-left" :disabled="disabledNr" @click="agregar_nr('00NR')"
+                                              variant="success"><i class="fas fa-plus"></i>
+                                        <b-spinner v-show="mostrarSpinnerProducto" small label="Loading..."></b-spinner>
+                                        NR
                                     </b-button>
                                 </div>
                             @else
@@ -397,7 +402,7 @@
                                 <tr v-for="(producto,index) in productosSeleccionados" :key="producto.num_item">
                                     <td></td>
                                     <td style="display:none">@{{producto.idproducto}}</td>
-                                    <td>@{{producto.cod_producto}} - @{{producto.nombre}}</td>
+                                    <td>@{{producto.nombre}}</td>
                                     <td><textarea rows="1" @keyup="agregarCaracteristicasSession()" class="form-control" type="text"
                                                   v-model="producto.presentacion"></textarea></td>
                                     <td><input @keyup="calcular(index)" class="form-control" type="text"
@@ -835,7 +840,8 @@
                 guiasRelacionadasAux: [],
                 tipoCambio: <?php echo cache('opciones')['tipo_cambio_compra'] ?>,
                 nombreCliente: "",
-                idventa_modifica:-1
+                idventa_modifica:-1,
+                disabledNr:false
             },
             mounted() {
                 if (localStorage.getItem('productos')) {
@@ -1660,7 +1666,25 @@
                         toast:true,
                         confirmButtonColor: '#007bff',
                     });
-                }
+                },
+                agregar_nr(codigo){
+                    this.disabledNr = true;
+                    axios.get('/helper/agregar-producto'+'/'+codigo)
+                        .then(response => {
+                            this.results = response.data;
+                            if((Object.keys(this.results).length === 0)){
+                                alert('No se ha encontrado el producto con el código marcado');
+                            } else{
+                                this.agregarProducto(this.results);
+                            }
+                            this.disabledNr = false;
+                        })
+                        .catch(error => {
+                            this.disabledNr = false;
+                            alert('Ha ocurrido un error.');
+                            console.log(error);
+                        });
+                },
             },
             watch: {
                 comprobante(comp){

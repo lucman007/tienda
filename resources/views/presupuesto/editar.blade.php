@@ -145,6 +145,11 @@
                                         <b-spinner v-show="mostrarSpinnerProducto" small label="Loading..."></b-spinner>
                                         Nuevo producto
                                     </b-button>
+                                    <b-button class="mb-4 mt-2 ml-1 mt-lg-0 float-left" :disabled="disabledNr" @click="agregar_nr('00NR')"
+                                              variant="success"><i class="fas fa-plus"></i>
+                                        <b-spinner v-show="mostrarSpinnerProducto" small label="Loading..."></b-spinner>
+                                        NR
+                                    </b-button>
                                 </div>
                             @else
                                 <div class="col-lg-10">
@@ -515,6 +520,7 @@
                 esDstoGlobal: false,
                 dataDescuento:{},
                 referencia: '<?php echo $presupuesto->referencia ?>',
+                disabledNr:false
             },
             created(){
                 this.calcularTotalPorItem();
@@ -853,7 +859,25 @@
                         toast:true,
                         confirmButtonColor: '#007bff',
                     });
-                }
+                },
+                agregar_nr(codigo){
+                    this.disabledNr = true;
+                    axios.get('/helper/agregar-producto'+'/'+codigo)
+                        .then(response => {
+                            this.results = response.data;
+                            if((Object.keys(this.results).length === 0)){
+                                alert('No se ha encontrado el producto con el código marcado');
+                            } else{
+                                this.agregarProducto(this.results);
+                            }
+                            this.disabledNr = false;
+                        })
+                        .catch(error => {
+                            this.disabledNr = false;
+                            alert('Ha ocurrido un error.');
+                            console.log(error);
+                        });
+                },
             },
             watch:{
                 esConIgv(){

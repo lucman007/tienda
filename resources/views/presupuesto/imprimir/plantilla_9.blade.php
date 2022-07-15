@@ -90,16 +90,16 @@
                         </td>
                     </tr>
                     <tr>
-                        <td>Atención: <strong>{{ mb_strtoupper($presupuesto->atencion) }} </strong></td>
+                        <td style="width: 70mm">Atención: <strong>{{ mb_strtoupper($presupuesto->atencion) }} </strong></td>
                     </tr>
                     <tr>
-                        <td>Forma de pago: <strong>{{strtoupper($presupuesto->condicion_pago)}}</strong></td>
+                        <td style="width: 70mm">Forma de pago: <strong>{{strtoupper($presupuesto->condicion_pago)}}</strong></td>
                     </tr>
                     <tr>
-                        <td>Tiempo de entrega: <strong>{{strtoupper($presupuesto->tiempo_entrega)}}</strong></td>
+                        <td style="width: 70mm">Tiempo de entrega: <strong>{{strtoupper($presupuesto->tiempo_entrega)}}</strong></td>
                     </tr>
                     <tr>
-                        <td>Punto de entrega: <strong>{{mb_strtoupper($presupuesto->lugar_entrega)}}</strong></td>
+                        <td style="width: 70mm">Punto de entrega: <strong>{{mb_strtoupper($presupuesto->lugar_entrega)}}</strong></td>
                     </tr>
                 </table>
             </td>
@@ -132,7 +132,7 @@
             @foreach($presupuesto['productos'] as $item)
                 <tr class="items-tr">
                     <td style="width: 5mm">{{$i++}}</td>
-                    <td style="width: 65mm"><strong>{{$item->nombre}}</strong><br> {!!$item->detalle['descripcion']!!}</td>
+                    <td style="width: 65mm"><strong>{{$item->nombre}}</strong>{!!$item->nombre!=''?'<br>':''!!} {!!$item->detalle['descripcion']!!}</td>
                     <td style="width: 25mm">@if($item->imagen) <img style="width: 100%; padding-right:5px " src="{{$item->imagen}}" alt="">@endif</td>
                     <td style="width: 20mm;">{{floatval($item->detalle['cantidad'])}}</td>
                     <td style="width: 10mm">{{explode('/',$item->unidad_medida)[1]}}</td>
@@ -146,7 +146,7 @@
                     <td><br></td>
                 </tr>
                 <tr>
-                    <td colspan="7" style="margin-top: 5mm">
+                    <td colspan="8" style="margin-top: 5mm; width: 180mm">
                         Observación: {{$presupuesto->observaciones}}
                     </td>
                 </tr>

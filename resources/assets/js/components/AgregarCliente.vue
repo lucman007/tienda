@@ -39,6 +39,7 @@
                         <div class="form-group">
                             <label>Tipo de documento:</label>
                             <select v-model="tipo_documento" class="custom-select">
+                                <option value="9">Ninguno</option>
                                 <option value="6">RUC</option>
                                 <option value="1">DNI</option>
                                 <option value="0">NIF</option>
@@ -47,7 +48,7 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-lg-3">
+                    <div class="col-lg-3" v-show="tipo_documento != 9">
                         <div class="form-group">
                             <label>*N° documento:</label>
                             <input autocomplete="off" type="text" v-model="num_documento" class="form-control" :maxlength="max_num">
@@ -95,7 +96,7 @@
                 cod_cliente: "",
                 nombre: "",
                 num_documento: "",
-                tipo_documento:'1',
+                tipo_documento:'9',
                 direccion: "",
                 telefono:"",
                 email: "",
@@ -212,10 +213,10 @@
                 this.errorCliente = 0;
                 this.errorDatosCliente = [];
                 if (this.nombre.length==0) this.errorDatosCliente.push('*Nombre de cliente no puede estar vacio');
-                if(this.num_documento.length==0) this.errorDatosCliente.push('*El campo N° documento no puede estar vacío');
-                if(this.direccion.length==0) this.errorDatosCliente.push('*El campo Dirección no puede estar vacío');
+                if(this.num_documento.length==0 && this.tipo_documento != 9) this.errorDatosCliente.push('*El campo N° documento no puede estar vacío');
+                if(this.direccion.length==0 && this.tipo_documento != 9) this.errorDatosCliente.push('*El campo Dirección no puede estar vacío');
                 if(isNaN(this.telefono)) this.errorDatosCliente.push('*El campo telefono debe contener un número');
-                if(isNaN(this.num_documento) && this.tipo_documento != 0) this.errorDatosCliente.push('*El campo N° documento debe contener un número');
+                if(isNaN(this.num_documento) && !(this.tipo_documento == 0 || this.tipo_documento == 9)) this.errorDatosCliente.push('*El campo N° documento debe contener un número');
                 switch(this.tipo_documento){
                     case '1':
                         if(this.num_documento.length!=8) this.errorDatosCliente.push('*El número de documento de identidad no contiene la cantidad de dígitos correctos (8 dígitos)');
@@ -244,7 +245,7 @@
                 this.nombre= '';
                 this.direccion= '';
                 this.num_documento= '';
-                this.tipo_documento='6';
+                this.tipo_documento='9';
                 this.telefono='';
                 this.eliminado= 0;
                 this.email= '';

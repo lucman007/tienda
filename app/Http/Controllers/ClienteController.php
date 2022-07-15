@@ -79,7 +79,7 @@ class ClienteController extends Controller
 	    $cliente=new Cliente();
 	    $codigo=$this->generar_codigo_cliente();
 	    $cliente->cod_cliente=$codigo;
-	    $cliente->num_documento=$request->num_documento;
+	    $cliente->num_documento=$request->num_documento??$codigo;
 	    $cliente->tipo_documento=$request->tipo_documento;
 	    $cliente->eliminado=0;
 	    $persona->cliente()->save($cliente);
@@ -89,7 +89,7 @@ class ClienteController extends Controller
             "cod_cliente"=>$codigo,
             "nombre"=>$request->nombre,
             "persona"=>["nombre"=>$request->nombre],
-            "num_documento"=>$request->num_documento
+            "num_documento"=>$request->num_documento??$codigo
         ]);
     }
 
@@ -120,7 +120,7 @@ class ClienteController extends Controller
 
 	    $cliente=Cliente::find($request->idcliente);
 	    $cliente->cod_cliente=mb_strtoupper($request->cod_cliente);
-	    $cliente->num_documento=$request->num_documento;
+	    $cliente->num_documento=$request->num_documento??'';
 	    $cliente->tipo_documento=$request->tipo_documento;
 	    $persona->cliente()->save($cliente);
     }
