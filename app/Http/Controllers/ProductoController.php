@@ -43,6 +43,7 @@ class ProductoController extends Controller
                         case 'categoria':
                             $productos=Producto::join('categorias', 'categorias.idcategoria', '=', 'productos.idcategoria')
                                 ->where('eliminado',0)
+                                ->where('cod_producto','!=','00NR')
                                 ->select('productos.*','categorias.nombre as categoria')
                                 ->where('categorias.nombre','LIKE','%'.$consulta.'%')
                                 ->orderby($orderby,$order)
@@ -52,6 +53,7 @@ class ProductoController extends Controller
                         case 'ubicacion':
                             $productos=Producto::join('categorias', 'categorias.idcategoria', '=', 'productos.idcategoria')
                                 ->where('eliminado',0)
+	                            ->where('cod_producto','!=','00NR')
                                 ->select('productos.*','categorias.nombre as categoria')
                                 ->where('categorias.nombre','LIKE','%'.$consulta.'%')
                                 ->orderby($orderby,$order)
@@ -61,6 +63,7 @@ class ProductoController extends Controller
                         default:
                             $productos=Producto::join('categorias', 'categorias.idcategoria', '=', 'productos.idcategoria')
                                 ->where('eliminado',0)
+	                            ->where('cod_producto','!=','00NR')
                                 ->select('productos.*','categorias.nombre as categoria')
                                 ->where($filtro,'LIKE','%'.$consulta.'%')
                                 ->orderby($orderby,$order)
@@ -70,6 +73,7 @@ class ProductoController extends Controller
                 } else {
                     $productos=Producto::join('categorias', 'categorias.idcategoria', '=', 'productos.idcategoria')
                         ->where('eliminado',0)
+	                    ->where('cod_producto','!=','00NR')
                         ->select('productos.*','categorias.nombre as categoria')
                         ->where(function ($query) use ($consulta) {
                             $query->where('productos.nombre','LIKE','%'.$consulta.'%')

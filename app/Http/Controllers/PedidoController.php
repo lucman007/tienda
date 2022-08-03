@@ -221,7 +221,9 @@ class PedidoController extends Controller
             $detalle=[];
             $items=json_decode($request->items, TRUE);
             $i=1;
+            $suma_detalle = 0;
             foreach ($items as $item){
+                $suma_detalle += $item['precio'] * $item['cantidad'];
                 $detalle['num_item']=$i;
                 $detalle['cantidad']=$item['cantidad'];
                 $detalle['monto']=$item['precio'];
@@ -231,6 +233,12 @@ class PedidoController extends Controller
                 $detalle['idorden']=$idorden;
                 DB::table('orden_detalle')->insert($detalle);
                 $i++;
+            }
+
+            if(round($suma_detalle,2) != round($request->total,2)){
+                $orden=Orden::find($idorden);
+                $orden->total=round($suma_detalle,2);
+                $orden->update();
             }
 
             DB::commit();
@@ -291,8 +299,9 @@ class PedidoController extends Controller
             $i = 1;
 
             DB::table('orden_detalle')->where('idorden', '=', $request->idorden)->delete();
-
+            $suma_detalle = 0;
             foreach ($items as $item) {
+                $suma_detalle += $item['precio'] * $item['cantidad'];
                 $detalle['num_item'] = $i;
                 $detalle['cantidad'] = $item['cantidad'];
                 $detalle['monto'] = $item['precio'];
@@ -303,6 +312,12 @@ class PedidoController extends Controller
                 DB::table('orden_detalle')->insert($detalle);
 
                 $i++;
+            }
+
+            if(round($suma_detalle,2) == round($request->total,2)){
+                $orden=Orden::find($request->idorden);
+                $orden->total=round($suma_detalle,2);
+                $orden->update();
             }
 
             DB::commit();

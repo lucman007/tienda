@@ -296,6 +296,7 @@ Route::group(['middleware' => ['can:Configuración']], function () {
     Route::get('configuracion/mostrar-plantilla-cotizacion/{plantilla}', 'ConfiguracionController@mostrar_plantilla_cotizacion');
     Route::get('configuracion/cerrar-sesiones', 'ConfiguracionController@cerrarSesiones');
     Route::get('configuracion/reiniciar-vistas', 'ConfiguracionController@reiniciar_vistas');
+    Route::get('configuracion/verificar-totales', 'ConfiguracionController@verificar_totales');
 });
 
 Route::group(['middleware' => ['can:Facturación: guía']], function () {

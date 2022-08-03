@@ -5,6 +5,7 @@ namespace sysfact\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Log;
 use Intervention\Image\Facades\Image;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -455,6 +456,34 @@ class ConfiguracionController extends Controller
         $artisan = Artisan::call("view:clear");
         $output = Artisan::output();
         return redirect('/configuracion?tab=sistema');
+    }
+
+    public function verificar_totales(){
+        try{
+            $ventas=Venta::where('eliminado','=',0)
+                ->orderby('idventa','desc')
+                ->get();
+
+            foreach ($ventas as $venta) {
+                $monto = 0;
+                $total = $venta->total_venta;
+                $productos = $venta->productos;
+                foreach ($productos as $producto) {
+                    $monto += $producto->detalle->monto * $producto->detalle->cantidad;
+                }
+                $total = round($total,2);
+                $monto = round($monto,2);
+                if($total == $monto){
+                    Log::info('OK -'.$venta->idventa.' - '.$venta->total_venta.' - '.$monto);
+                } else{
+                    Log::info('ERROR -'.$venta->idventa.' - '.$venta->total_venta.' - '.$monto);
+                }
+
+            }
+            return 'success';
+        } catch (\Exception $e){
+            return $e;
+        }
     }
 
 }

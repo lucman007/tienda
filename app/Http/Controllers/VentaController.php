@@ -1102,8 +1102,10 @@ class VentaController extends Controller
             if ($guardado) {
                 $detalle = [];
                 $i = 1;
+                $suma_detalle = 0;
                 foreach ($pedido->productos as $item) {
                     $total_item = round($item->detalle->monto * $item->detalle->cantidad, 2);
+                    $suma_detalle += $total_item;
                     if($request->comprobante != 30 && $total_item == 0){
                         return json_encode(['idventa' => -1, 'respuesta' => 'No está permitido items con monto igual a 0.00, edite su pedido', 'file' => null]);
 
@@ -1133,6 +1135,13 @@ class VentaController extends Controller
                     $inventario->save();
 
                     $i++;
+                }
+
+                if(round($suma_detalle,2) != round($pedido->total,2)){
+                    Log::info('Actualizando el total por inconsistencia en el cálculo');
+                    $venta=venta::find($idventa);
+                    $venta->total_venta=$suma_detalle;
+                    $venta->update();
                 }
 
             }
