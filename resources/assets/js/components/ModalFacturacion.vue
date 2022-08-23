@@ -22,9 +22,7 @@
                         <div class="row">
                             <div class="col-lg-4 form-group">
                                 <select v-model="tipoPagoContado" class="custom-select">
-                                    <option value="1">Efectivo</option>
-                                    <option value="3">Tarjeta / depósito</option>
-                                    <option value="4">Fraccionado</option>
+                                    <option v-show="pago['num_val'] != 2" v-for="pago in tipo_pago" v-bind:value="pago['num_val']">{{pago['label']}}</option>
                                 </select>
                             </div>
                             <div class="col-lg-4 form-group">
@@ -97,9 +95,8 @@
                             </div>
                             <div class="col-lg-6">
                                 <label>Tipo de pago</label>
-                                <select disabled v-model="pago.tipo" class="custom-select">
-                                    <option value="1">Efectivo</option>
-                                    <option value="3">Tarjeta / depósito</option>
+                                <select v-model="pago.tipo" class="custom-select">
+                                    <option v-show="!(pago['num_val'] == 4 || pago['num_val'] == 2)" v-for="pago in tipo_pago" v-bind:value="pago['num_val']">{{pago['label']}}</option>
                                 </select>
                             </div>
                         </div>
@@ -118,7 +115,7 @@
 <script>
     export default {
         name: 'modal-facturacion',
-        props: ['idventa','idpedido','origen','tipo_doc','items','total'],
+        props: ['idventa','idpedido','origen','tipo_doc','items','total','tipo_de_pago'],
         data() {
             return {
                 clienteSeleccionado:{},
@@ -144,6 +141,8 @@
                         tipo: '3'
                     },
                 ],
+                tipo_pago:[],
+                num_operacion:''
             }
         },
         methods: {
@@ -171,6 +170,7 @@
                     this.query ='00000000';
                     this.buscarCliente();
                 }
+                this.tipo_pago = this.tipo_de_pago;
             },
             buscarCliente(event){
                 if(event == null || event.code == 'Enter' || event.code == 'NumpadEnter'){
@@ -221,6 +221,7 @@
                     'comprobante':this.comprobante,
                     'tipo_pago_contado':this.tipoPagoContado,
                     'cliente':JSON.stringify(this.clienteSeleccionado),
+                    'num_operacion':this.num_operacion,
                     'pago_fraccionado': JSON.stringify(this.pago_fraccionado)
                 })
                     .then(response => {

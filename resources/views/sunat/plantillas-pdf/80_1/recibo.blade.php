@@ -19,7 +19,7 @@
             <table cellpadding="0">
                 <tr>
                     <td><strong>Fecha:</strong></td>
-                    <td>{{ date('d/m/Y h:m:s A',strtotime($documento->fecha)) }}</td>
+                    <td style="width: 50mm">{{ date('d/m/Y h:m:s A',strtotime($documento->fecha)) }}</td>
                 </tr>
                 <tr>
                     <td colspan="2"><strong>Caja:</strong> {{ $documento->caja->nombre }}
@@ -34,7 +34,7 @@
                             <td colspan="2" style="width:42mm"><strong>Para llevar</strong></td>
                         @else
                             <td><strong>Mesa:</strong></td>
-                            <td style="width:42mm">{{$documento->mesa}}</td>
+                            <td style="width:52mm">{{$documento->mesa}}</td>
                         @endif
                     </tr>
                 @endif
@@ -44,6 +44,15 @@
                     <td style="width:42mm">{{$usuario->persona->nombre}}</td>
                 </tr>
                 @endif
+                {{--<tr>
+                    <td><strong>Forma de pago:</strong></td>
+                    <td>{{ $documento->tipo_pago==2?'CRÉDITO':'CONTADO' }}</td>
+                </tr>--}}
+                <tr>
+                    <td colspan="2">
+                        <hr style="border: 1px dashed black">
+                    </td>
+                </tr>
             </table>
         </div>
         <table class="items" cellpadding="0">
@@ -66,6 +75,14 @@
                 <td></td>
                 <td>TOTAL:</td>
                 <td>{{$documento->codigo_moneda}} {{$documento->total_venta}}</td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <hr style="border: 1px dashed black">
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">PAGO: {{$documento->tipo_pago}}</td>
             </tr>
             </tbody>
         </table>
@@ -149,7 +166,6 @@
             margin-top: 0;
             width: 72mm;
             position: relative;
-            border-top:2px dashed #1f1f1f;
         }
         .footer{
             width: 72mm;

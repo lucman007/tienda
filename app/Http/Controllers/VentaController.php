@@ -10,6 +10,7 @@ use sysfact\Categoria;
 use sysfact\Emisor;
 use sysfact\Facturacion;
 use sysfact\Http\Controllers\Cpe\CpeController;
+use sysfact\Http\Controllers\Helpers\DataTipoPago;
 use sysfact\Http\Controllers\Helpers\MainHelper;
 use sysfact\Http\Controllers\Helpers\PdfHelper;
 use sysfact\Inventario;
@@ -1110,6 +1111,8 @@ class VentaController extends Controller
                         return json_encode(['idventa' => -1, 'respuesta' => 'No está permitido items con monto igual a 0.00, edite su pedido', 'file' => null]);
 
                     }
+
+                    $item_inv = $item->inventario()->first();
                     $subtotal_item = round($total_item / 1.18, 2);
                     $igv_item = round($total_item - $subtotal_item, 2);
                     $detalle['num_item'] = $i;
@@ -1130,7 +1133,10 @@ class VentaController extends Controller
                     $inventario->idempleado = auth()->user()->idempleado;
                     $inventario->idventa = $idventa;
                     $inventario->cantidad = $item->detalle->cantidad * -1;
-                    $inventario->saldo = $item->inventario()->first()->saldo - $item->detalle->cantidad;
+                    $inventario->costo = $item->costo;
+                    $inventario->saldo = $item_inv->saldo - $item->detalle->cantidad;
+                    $inventario->moneda = $item->moneda_compra;
+                    $inventario->tipo_cambio = $item->tipo_cambio;
                     $inventario->operacion = 'VENTA N° ' . $idventa;
                     $inventario->save();
 

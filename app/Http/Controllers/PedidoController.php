@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Spipu\Html2Pdf\Html2Pdf;
 use sysfact\Categoria;
 use sysfact\Emisor;
+use sysfact\Http\Controllers\Helpers\DataTipoPago;
 use sysfact\Http\Controllers\Helpers\MainHelper;
 use sysfact\Orden;
 use sysfact\Producto;
@@ -488,19 +489,10 @@ class PedidoController extends Controller
                         $item->badge_comp='';
                 }
                 $item->comprobante = $item->facturacion->serie.'-'.$item->facturacion->correlativo;
-                switch ($item->tipo_pago){
-                    case 1:
-                        $item->tipo_pago='EFECTIVO';
-                        break;
-                    case 2:
-                        $item->tipo_pago='CRÉDITO';
-                        break;
-                    case 3:
-                        $item->tipo_pago='TARJETA';
-                        break;
-                    default:
-                        $item->tipo_pago='OTROS';
-                }
+
+                $pago = DataTipoPago::getTipoPago();
+                $find = array_search($item->tipo_pago, array_column($pago,'num_val'));
+                $item->tipo_pago = mb_strtoupper($pago[$find]['label']);
 
             }
             $agent = new Agent();

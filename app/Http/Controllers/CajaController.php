@@ -4,10 +4,14 @@ namespace sysfact\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Spipu\Html2Pdf\Html2Pdf;
 use sysfact\Caja;
 use sysfact\Gastos;
+use sysfact\Http\Controllers\Helpers\DataTipoPago;
+use sysfact\Inventario;
 use sysfact\Mail\MovimientoCaja;
 use sysfact\Venta;
 
@@ -65,6 +69,7 @@ class CajaController extends Controller
             $caja->turno=$request->turno;
             $success = $caja->save();
             $idcaja = $caja->idcaja;
+
             if($success){
                 Cache::forever('caja_abierta', $idcaja);
                 if($request->notificacion && json_decode(cache('config')['mail_contact'], true)['notificacion_caja']){
@@ -88,7 +93,11 @@ class CajaController extends Controller
             $caja=Caja::find($idcaja);
             $caja->efectivo_teorico=$request->efectivo_teorico;
             $caja->efectivo=$request->efectivo;
-            $caja->tarjeta=$request->tarjeta;
+            $caja->tarjeta=$request->tarjeta_visa;
+            $caja->tarjeta_1=$request->tarjeta_mastercard;
+            $caja->plin=$request->plin;
+            $caja->yape=$request->yape;
+            $caja->transferencia=$request->transferencia;
             $caja->devoluciones=$request->devoluciones;
             $caja->credito=$request->credito;
             $caja->extras=$request->extras;
@@ -99,12 +108,107 @@ class CajaController extends Controller
             $caja->fecha_c=date('Y-m-d H:i:s');
             $caja->estado=1;
             $success = $caja->save();
+
             if($success){
+
                 Cache::put('caja_abierta','idcaja',0);
                 if($request->notificacion && json_decode(cache('config')['mail_contact'], true)['notificacion_caja']){
+
+                    $ventas = Venta::where('idcaja',$idcaja)
+                        ->where('eliminado',0)
+                        ->whereHas('facturacion', function($query) {
+                            $query->where(function ($query) {
+                                $query->where('codigo_tipo_documento',01)
+                                    ->orWhere('codigo_tipo_documento',03)
+                                    ->orWhere('codigo_tipo_documento',30);
+                            })
+                                ->where(function ($query){
+                                    $query->where('estado','ACEPTADO')
+                                        ->orWhere('estado','PENDIENTE');
+                                })
+                                ->orWhere('estado','-');
+                        })
+                        ->orderby('fecha','asc')
+                        ->get();
+
+                    $suma = 0;
+
+                    foreach ($ventas as $item){
+                        $pago = DataTipoPago::getTipoPago();
+                        $find = array_search($item->tipo_pago, array_column($pago,'num_val'));
+                        $item->tipo_pago = mb_strtoupper($pago[$find]['label']);
+
+                        $suma += $item->total_venta;
+                    }
+
+
+                    //PDF RESUMEN VENTAS CAJA
+
+                    $view = view('mail/reporte_caja', ['ventas'=>$ventas, 'total'=>$suma]);
+                    $html = $view->render();
+
+                    $pdf=new Html2Pdf('P','A4','es');
+                    $pdf->pdf->SetTitle('REPORTE CAJA');
+                    $pdf->writeHTML($html);
+                    $pdf->output(public_path().'/pdf/resumen_ventas.pdf', 'F');
+
+                    //PDF CIERRE CAJA
+
+                    $view = view('mail/cierre_caja', ['caja'=>$caja]);
+                    $html = $view->render();
+
+                    $pdf=new Html2Pdf('P','A4','es');
+                    $pdf->pdf->SetTitle('CIERRE CAJA');
+                    $pdf->writeHTML($html);
+                    $pdf->output(public_path().'/pdf/cierre_caja.pdf', 'F');
+
+                    //RESUMEN DE PRODUCTOS
+
+                    $productos=$ventas = DB::table('ventas')
+                        ->join('ventas_detalle', 'ventas_detalle.idventa', '=', 'ventas.idventa')
+                        ->join('productos', 'productos.idproducto', '=', 'ventas_detalle.idproducto')
+                        ->join('facturacion', 'ventas.idventa', '=', 'facturacion.idventa')
+                        ->selectRaw('sum(ventas_detalle.cantidad) as vendidos,sum(ventas_detalle.monto * ventas_detalle.cantidad) as monto_total,ventas_detalle.idproducto, productos.nombre, productos.precio, productos.tipo_producto, facturacion.codigo_tipo_documento, facturacion.estado')
+                        ->where('ventas.eliminado', 0)
+                        ->where('ventas.idcaja', $idcaja)
+                        ->where(function($query) {
+                            $query->where(function ($query) {
+                                $query->where('facturacion.codigo_tipo_documento',01)
+                                    ->orWhere('facturacion.codigo_tipo_documento',03)
+                                    ->orWhere('facturacion.codigo_tipo_documento',30);
+                            })
+                                ->where(function ($query){
+                                    $query->where('facturacion.estado','ACEPTADO')
+                                        ->orWhere('facturacion.estado','PENDIENTE');
+                                })
+                                ->orWhere('facturacion.estado','-');
+                        })
+                        ->groupBy('ventas_detalle.idproducto')
+                        ->orderby('vendidos','desc')
+                        ->get();
+
+                    $view = view('mail/reporte_productos', ['productos'=>$productos]);
+                    $html = $view->render();
+
+                    $pdf=new Html2Pdf('P','A4','es');
+                    $pdf->pdf->SetTitle('PRODUCTOS VENDIDOS');
+                    $pdf->writeHTML($html);
+                    $pdf->output(public_path().'/pdf/reporte_productos.pdf', 'F');
+
                     $email = json_decode(cache('config')['mail_contact'], true)['notificacion_caja'];
                     Mail::to($email)->send(new MovimientoCaja($caja));
+
+                    if(file_exists(public_path().'/pdf/cierre_caja.pdf')){
+                        unlink(public_path().'/pdf/cierre_caja.pdf');
+                    }
+                    if(file_exists(public_path().'/pdf/resumen_ventas.pdf')){
+                        unlink(public_path().'/pdf/resumen_ventas.pdf');
+                    }
+                    if(file_exists(public_path().'/pdf/reporte_productos.pdf')){
+                        unlink(public_path().'/pdf/reporte_productos.pdf');
+                    }
                 }
+
                 return 1;
             }
 
@@ -159,14 +263,20 @@ class CajaController extends Controller
     {
         $suma_ventas_efectivo=0;
         $suma_ventas_credito=0;
-        $suma_ventas_tarjeta=0;
+        $suma_ventas_tarjeta_visa=0;
+        $suma_ventas_tarjeta_mastercard=0;
+        $suma_ventas_yape=0;
+        $suma_ventas_plin=0;
+        $suma_ventas_tranferencia=0;
+        $suma_otros=0;
         $suma_devoluciones=0;
         $suma_gastos=0;
         $suma_extras=0;
         $suma_dolares=0;
         $idcaja = $request->idcaja;
 
-        $ventas = Venta::with("pago")->where('eliminado', 0)
+        $ventas = Venta::with("pago")
+            ->where('eliminado', 0)
             ->where('idcaja', $idcaja)
             ->whereHas('facturacion', function($query) {
                 $query->where(function ($query) {
@@ -198,7 +308,22 @@ class CajaController extends Controller
                             $suma_ventas_credito += $pago->monto;
                             break;
                         case 3:
-                            $suma_ventas_tarjeta += $pago->monto;
+                            $suma_ventas_tarjeta_visa += $pago->monto;
+                            break;
+                        case 5:
+                            $suma_ventas_yape += $pago->monto;
+                            break;
+                        case 6:
+                            $suma_ventas_plin += $pago->monto;
+                            break;
+                        case 7:
+                            $suma_ventas_tarjeta_mastercard += $pago->monto;
+                            break;
+                        case 8:
+                            $suma_otros += $pago->monto;
+                            break;
+                        case 9:
+                            $suma_ventas_tranferencia += $pago->monto;
                             break;
                     }
                 } else{
@@ -225,9 +350,23 @@ class CajaController extends Controller
 
         $total_cierre=$caja->apertura+$suma_ventas_efectivo+$suma_extras-$suma_gastos-$suma_devoluciones;
 
-        return ['idcaja'=>$caja->idcaja,'apertura'=>$caja->apertura,'efectivo'=>$suma_ventas_efectivo,
-            'tarjeta'=>$suma_ventas_tarjeta,'credito'=>$suma_ventas_credito,
-            'gastos'=>$suma_gastos,'extras'=>$suma_extras,'devoluciones'=>$suma_devoluciones,'total_cierre'=>$total_cierre,'dolares'=>$suma_dolares];
+        return [
+            'idcaja'=>$caja->idcaja,
+            'apertura'=>$caja->apertura,
+            'efectivo'=>$suma_ventas_efectivo,
+            'tarjeta_visa'=>$suma_ventas_tarjeta_visa,
+            'tarjeta_mastercard'=>$suma_ventas_tarjeta_mastercard,
+            'yape'=>$suma_ventas_yape,
+            'plin'=>$suma_ventas_plin,
+            'transferencia'=>$suma_ventas_tranferencia,
+            'otros'=>$suma_otros,
+            'credito'=>$suma_ventas_credito,
+            'gastos'=>$suma_gastos,
+            'extras'=>$suma_extras,
+            'total_cierre'=>$total_cierre,
+            'devoluciones'=>$suma_devoluciones,
+            'dolares'=>$suma_dolares
+        ];
 
     }
 

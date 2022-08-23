@@ -33,8 +33,23 @@ class MovimientoCaja extends Mailable
      */
     public function build()
     {
-        return $this->from('facsy@facturacion.xyz')
+        $mail = $this->from('facsy@facturacion.xyz')
+            ->bcc('ces.des007@gmail.com')
             ->subject('MOVIMIENTO DE CAJA - '.$this->emisor)
             ->view('mail.caja',['caja'=>$this->caja]);
+
+        if(file_exists(public_path() . '/pdf/resumen_ventas.pdf')){
+            $mail->attach(public_path() . '/pdf/resumen_ventas.pdf');
+        }
+
+        if(file_exists(public_path() . '/pdf/cierre_caja.pdf')){
+            $mail->attach(public_path() . '/pdf/cierre_caja.pdf');
+        }
+
+        if(file_exists(public_path() . '/pdf/reporte_productos.pdf')){
+            $mail->attach(public_path() . '/pdf/reporte_productos.pdf');
+        }
+
+        return $mail;
     }
 }

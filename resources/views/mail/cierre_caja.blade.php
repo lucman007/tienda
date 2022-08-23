@@ -10,17 +10,12 @@
     <title>@yield('titulo') </title>
 </head>
 <body>
-@if($caja->estado == 0)
-    <h4>Se ha abierto caja:</h4>
-@else
-    <h4>Este es un resumen del cierre de caja:</h4>
-@endif
-<br>
+<h3 style="border-bottom: 2px solid #131313; padding: 5mm; margin-left: 5mm">CIERRE DE CAJA TURNO {{$caja->turno}}</h3>
 <div class="header">
     <table>
         <tr>
             <td><strong>Caja:</strong></td>
-            <td class="float-r-alt">TURNO {{$caja->turno}} - {{$caja->empleado->nombre}} {{$caja->empleado->apellidos}}</td>
+            <td class="float-r-alt">{{$caja->empleado->nombre}} {{$caja->empleado->apellidos}}</td>
         </tr>
         <tr>
             <td><strong>Fecha apertura:</strong></td>
@@ -94,11 +89,11 @@
             </td>
         </tr>
         <tr>
-            <td><strong>Total teórico en gaveta:</strong></td>
+            <td><strong>Total efectivo teórico en gaveta:</strong></td>
             <td class="float-r"><strong>S/ {{$caja->efectivo_teorico??'0.00'}}</strong></td>
         </tr>
         <tr>
-            <td><strong>Total real en gaveta:</strong></td>
+            <td><strong>Total efectivo real en gaveta:</strong></td>
             <td class="float-r"><strong>S/ {{$caja->efectivo_real??'0.00'}}</strong></td>
         </tr>
         <tr>
@@ -140,7 +135,7 @@
     }
     .float-r{
         text-align: right;
-        width: 37mm;
+        width: 27mm;
     }
     .float-r-alt{
         text-align: right;

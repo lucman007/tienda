@@ -57,10 +57,12 @@
                                     </b-input-group-prepend>
                                     <select @change="filtrar" v-model="buscar" class="custom-select">
                                         <option value="n">Seleccionar</option>
-                                        <option value="efectivo">Efectivo</option>
-                                        <option value="credito">Crédito</option>
-                                        <option value="tarjeta">Tarjeta</option>
-                                        <option value="otros">Otros</option>
+                                        @php
+                                            $tipo_pago = \sysfact\Http\Controllers\Helpers\DataTipoPago::getTipoPago();
+                                        @endphp
+                                        @foreach($tipo_pago as $pago)
+                                            <option value="{{$pago['text_val']}}">{{$pago['label']}}</option>
+                                        @endforeach
                                     </select>
                                 </b-input-group>
                             </div>

@@ -413,7 +413,6 @@ class ProcesarRespuestas
     }
 
     public function mensajeGetStatusCdr($response,$request,$nombre_archivo){
-        Log::info('Reponse getStatusCdr: '.$response);
         if(!$response){
             Log::info('SUNAT no ha podido procesar su solicitud. Inténtalo nuevamente en unos minutos. Response: '.$response);
             return 'SUNAT no ha podido procesar su solicitud. Inténtalo nuevamente en unos minutos.';

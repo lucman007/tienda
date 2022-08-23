@@ -54,7 +54,6 @@ class ReenvioComprobante extends Command
                 if($caja){
                     $cajaCon = new CajaController();
                     $cajaCon->cierre_automatico($caja->idcaja);
-                    Log::info('Cerrando caja...');
                 }
             }
         } catch (\Exception $e){

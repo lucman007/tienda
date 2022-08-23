@@ -275,6 +275,7 @@
             :idpedido="idpedido"
             :total="totalVenta"
             :origen="'pedidos'"
+            :tipo_de_pago="{{json_encode(\sysfact\Http\Controllers\Helpers\DataTipoPago::getTipoPago())}}"
             :items="productosSeleccionados"
             v-on:imprimir="imprimir"
             v-on:obtener-mesas="obtener_delivery"

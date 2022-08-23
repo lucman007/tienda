@@ -42,10 +42,42 @@
             <td><strong>Total efectivo:</strong></td>
             <td class="float-r">S/ {{$caja->efectivo??'0.00'}}</td>
         </tr>
+        @if($caja->tarjeta > 0)
         <tr>
-            <td><strong>Total tarjeta:</strong></td>
+            <td><strong>Tarjeta (Visa):</strong></td>
             <td class="float-r">S/ {{$caja->tarjeta??'0.00'}}</td>
         </tr>
+        @endif
+        @if($caja->tarjeta_1 > 0)
+        <tr>
+            <td><strong>Tarjeta (Mastercard):</strong></td>
+            <td class="float-r">S/ {{$caja->tarjeta_1??'0.00'}}</td>
+        </tr>
+        @endif
+        @if($caja->yape > 0)
+        <tr>
+            <td><strong>Yape:</strong></td>
+            <td class="float-r">S/ {{$caja->yape??'0.00'}}</td>
+        </tr>
+        @endif
+        @if($caja->plin > 0)
+        <tr>
+            <td><strong>Plin:</strong></td>
+            <td class="float-r">S/ {{$caja->plin??'0.00'}}</td>
+        </tr>
+        @endif
+        @if($caja->transferencia > 0)
+        <tr>
+            <td><strong>Transferencia:</strong></td>
+            <td class="float-r">S/ {{$caja->transferencia??'0.00'}}</td>
+        </tr>
+        @endif
+        @if($caja->otros > 0)
+        <tr>
+            <td><strong>Otros:</strong></td>
+            <td class="float-r">S/ {{$caja->otros??'0.00'}}</td>
+        </tr>
+        @endif
         <tr>
             <td><strong>Gastos:</strong></td>
             <td class="float-r">S/ {{$caja->gastos??'0.00'}}</td>

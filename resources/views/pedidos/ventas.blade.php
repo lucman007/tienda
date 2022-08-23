@@ -114,9 +114,15 @@
                 </div>
                 <div class="col-lg-6">
                     <label>Tipo de pago</label>
-                    <select disabled v-model="pago.tipo" class="custom-select">
-                        <option value="1">Efectivo</option>
-                        <option value="3">Tarjeta / depósito</option>
+                    <select v-model="pago.tipo" class="custom-select">
+                        @php
+                            $tipo_pago = \sysfact\Http\Controllers\Helpers\DataTipoPago::getTipoPago();
+                        @endphp
+                        @foreach($tipo_pago as $pago)
+                            @if($pago['num_val'] != 4)
+                                <option value="{{$pago['num_val']}}">{{$pago['label']}}</option>
+                            @endif
+                        @endforeach
                     </select>
                 </div>
             </div>
@@ -142,9 +148,12 @@
             <div class="row">
                 <div class="col-lg-5 form-group">
                     <select v-model="tipoPagoContado" class="custom-select">
-                        <option value="1">Efectivo</option>
-                        <option value="3">Tarjeta / depósito</option>
-                        <option value="4">Fraccionado</option>
+                        @php
+                            $tipo_pago = \sysfact\Http\Controllers\Helpers\DataTipoPago::getTipoPago();
+                        @endphp
+                        @foreach($tipo_pago as $pago)
+                            <option value="{{$pago['num_val']}}">{{$pago['label']}}</option>
+                        @endforeach
                     </select>
                 </div>
                 <div v-show="tipoPagoContado==4" class="col-lg-5 form-group">

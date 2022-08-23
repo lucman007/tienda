@@ -14,8 +14,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use sysfact\Emisor;
 use sysfact\Facturacion;
-use sysfact\Guia;
 use sysfact\Http\Controllers\Cpe\CpeController;
+use sysfact\Http\Controllers\Helpers\DataTipoPago;
 use sysfact\Http\Controllers\Helpers\MainHelper;
 use sysfact\Resumen;
 use sysfact\Serie;
@@ -111,10 +111,10 @@ class ComprobanteController extends Controller
                         case 'credito':
                             $buscar = '2';
                             break;
-                        case 'deposito':
+                        case 'tarjeta':
                             $buscar = '3';
                             break;
-                        case 'tarjeta':
+                        case 'otros':
                             $buscar = '4';
                     }
                     $filtro = 'tipo_pago';
@@ -143,19 +143,10 @@ class ComprobanteController extends Controller
                 $item->cliente->persona;
                 $emisor=new Emisor();
                 $item->nombre_fichero=$emisor->ruc.'-'.$item->facturacion['codigo_tipo_documento'].'-'.$item->facturacion['serie'].'-'.$item->facturacion['correlativo'];
-                switch ($item->tipo_pago){
-                    case 1:
-                        $item->tipo_pago='EFECTIVO';
-                        break;
-                    case 2:
-                        $item->tipo_pago='CRÉDITO';
-                        break;
-                    case 3:
-                        $item->tipo_pago='TARJETA';
-                        break;
-                    default:
-                        $item->tipo_pago='OTROS';
-                }
+
+                $pago = DataTipoPago::getTipoPago();
+                $find = array_search($item->tipo_pago, array_column($pago,'num_val'));
+                $item->tipo_pago = mb_strtoupper($pago[$find]['label']);
 
                 switch ($item->facturacion->estado){
                     case 'PENDIENTE':
@@ -285,10 +276,10 @@ class ComprobanteController extends Controller
                         case 'credito':
                             $buscar = '2';
                             break;
-                        case 'deposito':
+                        case 'tarjeta':
                             $buscar = '3';
                             break;
-                        case 'tarjeta':
+                        case 'otros':
                             $buscar = '4';
                     }
                     $filtro = 'tipo_pago';

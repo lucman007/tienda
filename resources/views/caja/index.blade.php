@@ -150,14 +150,48 @@
                                                         <td><strong>Total efectivo:</strong></td>
                                                         <td>{{$caja->moneda}} {{ $caja->efectivo }}</td>
                                                     </tr>
+                                                    @if($caja->tarjeta > 0)
                                                     <tr>
-                                                        <td><strong>Total tarjeta:</strong></td>
+                                                        <td><strong>Tarjeta visa:</strong></td>
                                                         <td>{{$caja->moneda}} {{ $caja->tarjeta }}</td>
                                                     </tr>
+                                                    @endif
+                                                    @if($caja->tarjeta_1 > 0)
+                                                    <tr>
+                                                        <td><strong>Tarjeta mastercard:</strong></td>
+                                                        <td>{{$caja->moneda}} {{ $caja->tarjeta_1 }}</td>
+                                                    </tr>
+                                                    @endif
+                                                    @if($caja->yape > 0)
+                                                    <tr>
+                                                        <td><strong>Total Yape:</strong></td>
+                                                        <td>{{$caja->moneda}} {{ $caja->yape }}</td>
+                                                    </tr>
+                                                    @endif
+                                                    @if($caja->plin > 0)
+                                                    <tr>
+                                                        <td><strong>Total Plin:</strong></td>
+                                                        <td>{{$caja->moneda}} {{ $caja->plin }}</td>
+                                                    </tr>
+                                                    @endif
+                                                    @if($caja->transferencia > 0)
+                                                    <tr>
+                                                        <td><strong>Total transferencia:</strong></td>
+                                                        <td>{{$caja->moneda}} {{ $caja->transferencia }}</td>
+                                                    </tr>
+                                                    @endif
+                                                    @if($caja->otros > 0)
+                                                        <tr>
+                                                            <td><strong>Total transferencia:</strong></td>
+                                                            <td>{{$caja->moneda}} {{ $caja->otros }}</td>
+                                                        </tr>
+                                                    @endif
+                                                    @if($caja->credito > 0)
                                                     <tr>
                                                         <td><strong>Total crédito:</strong></td>
                                                         <td>{{$caja->moneda}} {{ $caja->credito }}</td>
                                                     </tr>
+                                                    @endif
                                                     <tr>
                                                         <td><strong>Total gastos:</strong></td>
                                                         <td>{{$caja->moneda}} {{ $caja->gastos }}</td>
@@ -357,7 +391,7 @@
                     <input type="text" v-model="apertura" class="form-control" disabled>
                 </div>
             </div>
-            <div class="col-md-6">
+            <div v-show="extras > 0" class="col-md-6">
                 <div class="form-group">
                     <label for="efectivo">Efectivo extra:</label>
                     <input type="text" v-model="extras" class="form-control" disabled>
@@ -375,16 +409,46 @@
                     <input type="text" v-model="gastos" class="form-control" disabled>
                 </div>
             </div>
-            <div class="col-md-6">
+            <div v-show="credito > 0" class="col-md-6">
                 <div class="form-group">
                     <label for="credito">Ventas a crédito:</label>
                     <input type="text" v-model="credito" class="form-control" disabled>
                 </div>
             </div>
-            <div class="col-md-6">
+            <div v-show="tarjeta_visa > 0" class="col-md-6">
                 <div class="form-group">
-                    <label for="tarjeta">Ventas con tarjeta:</label>
-                    <input type="text" v-model="tarjeta" class="form-control" disabled>
+                    <label for="tarjeta">Tarjeta visa:</label>
+                    <input type="text" v-model="tarjeta_visa" class="form-control" disabled>
+                </div>
+            </div>
+            <div v-show="tarjeta_mastercard > 0" class="col-md-6">
+                <div class="form-group">
+                    <label for="tarjeta">Tarjeta mastercard:</label>
+                    <input type="text" v-model="tarjeta_mastercard" class="form-control" disabled>
+                </div>
+            </div>
+            <div v-show="yape > 0" class="col-md-6">
+                <div class="form-group">
+                    <label for="tarjeta">Total yape:</label>
+                    <input type="text" v-model="yape" class="form-control" disabled>
+                </div>
+            </div>
+            <div v-show="plin > 0" class="col-md-6">
+                <div class="form-group">
+                    <label for="tarjeta">Total plin:</label>
+                    <input type="text" v-model="plin" class="form-control" disabled>
+                </div>
+            </div>
+            <div v-show="transferencia > 0" class="col-md-6">
+                <div class="form-group">
+                    <label for="tarjeta">Transferencia:</label>
+                    <input type="text" v-model="transferencia" class="form-control" disabled>
+                </div>
+            </div>
+            <div v-show="otros > 0" class="col-md-6">
+                <div class="form-group">
+                    <label for="tarjeta">Otros:</label>
+                    <input type="text" v-model="otros" class="form-control" disabled>
                 </div>
             </div>
             <div class="col-md-6">
@@ -424,7 +488,7 @@
                 </div>
             </div>
             <div class="col-md-12">
-                <b-form-checkbox @change="" v-model="notificacion" switch size="lg"><p style="font-size: 1rem;">Notificar al administrador</p></b-form-checkbox>
+                <b-form-checkbox @if(json_decode(cache('config')['interfaz'], true)['notificar_caja']??false) disabled @endif  v-model="notificacion" switch size="lg"><p style="font-size: 1rem;">Notificar al administrador</p></b-form-checkbox>
             </div>
             <div class="col-md-12" v-show="notificacion">
                 <div class="form-group">
@@ -482,13 +546,18 @@
                 efectivo:'',
                 extras:'',
                 credito:'',
-                tarjeta:'',
-                devoluciones:'',
+                tarjeta_visa:'',
+                tarjeta_mastercard:'',
+                yape:'',
+                plin:'',
+                transferencia:'',
+                otros:'',
                 gastos:'',
+                devoluciones:'',
                 efectivo_teorico:'',
                 dolares:'',
                 observacion_c:'',
-                notificacion: false,
+                notificacion: <?php echo json_encode(json_decode(cache('config')['interfaz'], true)['notificar_caja']??false)??false ?>,
                 observacion_a:'',
                 descuadre:'0.00',
                 total_real:'',
@@ -575,7 +644,12 @@
                             this.idcaja=cierre.idcaja;
                             this.apertura=cierre.apertura;
                             this.efectivo=cierre.efectivo.toFixed(2);
-                            this.tarjeta=cierre.tarjeta.toFixed(2);
+                            this.tarjeta_visa=cierre.tarjeta_visa.toFixed(2);
+                            this.tarjeta_mastercard=cierre.tarjeta_mastercard.toFixed(2);
+                            this.yape=cierre.yape.toFixed(2);
+                            this.transferencia=cierre.transferencia.toFixed(2);
+                            this.plin=cierre.plin.toFixed(2);
+                            this.otros=cierre.otros.toFixed(2);
                             this.devoluciones=cierre.devoluciones.toFixed(2);
                             this.credito=cierre.credito.toFixed(2);
                             this.gastos=cierre.gastos.toFixed(2);
@@ -595,9 +669,14 @@
                         'idcaja':this.idcaja,
                         'apertura':this.apertura,
                         'efectivo':this.efectivo,
-                        'tarjeta':this.tarjeta,
-                        'devoluciones':this.devoluciones,
+                        'tarjeta_visa':this.tarjeta_visa,
+                        'tarjeta_mastercard':this.tarjeta_mastercard,
                         'credito':this.credito,
+                        'devoluciones':this.devoluciones,
+                        'yape':this.yape,
+                        'transferencia':this.transferencia,
+                        'plin':this.plin,
+                        'otros':this.otros,
                         'gastos':this.gastos,
                         'extras':this.extras,
                         'efectivo_teorico':this.efectivo_teorico,
