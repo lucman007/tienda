@@ -213,7 +213,8 @@
                                                     <td style="width: 5%">{{$venta->idventa}}</td>
                                                     <td style="width: 15%">{{$venta->fecha}}</td>
                                                     <td>{{$venta->cliente->persona->nombre}}</td>
-                                                    <td>{{$venta->total_venta}} {{$venta->tipo_pago=='OTROS'?'(EFECT.'.$venta->pago[0]->monto.'/TARJ.'.$venta->pago[1]->monto.')':''}}</td>
+                                                    <td>{{$venta->total_venta}}</td>
+                                                    {{--<td>{{$venta->total_venta}} {{$venta->tipo_pago=='OTROS'?'(EFECT.'.$venta->pago[0]->monto.'/TARJ.'.$venta->pago[1]->monto.')':''}}</td>--}}
                                                     <td>{{$venta->facturacion->codigo_moneda}}</td>
                                                     <td>{{$venta->tipo_pago}}</td>
                                                     <td><a target="_blank" href="/facturacion/documento/{{$venta->idventa}}">{{$venta->facturacion->serie}}-{{$venta->facturacion->correlativo}}</a><br>

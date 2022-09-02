@@ -1,8 +1,17 @@
 @extends('sunat.plantillas-pdf.main')
 @section('titulo','Recibo')
 @section('contenido')
+    @php
+        $logo_ticket = json_decode(cache('config')['impresion'], true)['mostrar_logo_ticket']??false;
+        $ancho_logo = json_decode(cache('config')['interfaz'], true)['ancho_logo']??'40';
+    @endphp
     <div class="header">
         <div class="info-emisor">
+            @if($emisor->logo && $logo_ticket)
+                <div class="logo">
+                    <img src="{{public_path('images/'.$emisor->logo)}}" style="width: {{$ancho_logo}}mm">
+                </div>
+            @endif
             <div class="texto">
                 <p>
                     <strong>{{$emisor->nombre_comercial?$emisor->nombre_comercial:$emisor->nombre_publicitario}}</strong><br>
@@ -18,25 +27,18 @@
         <div class="info-usuario">
             <table cellpadding="0">
                 <tr>
-                    <td><strong>Fecha:</strong></td>
-                    <td style="width: 50mm">{{ date('d/m/Y h:m:s A',strtotime($documento->fecha)) }}</td>
+                    <td style="width: 20mm"><strong>Fecha:</strong></td>
+                    <td style="width: 35mm">{{ date('d/m/Y h:m:s A',strtotime($documento->fecha)) }}</td>
                 </tr>
                 <tr>
-                    <td colspan="2"><strong>Caja:</strong> {{ $documento->caja->nombre }}
-                        @if(isset(json_decode(cache('config')['impresion'], true)['mostrar_mozo']) && json_decode(cache('config')['impresion'], true)['mostrar_mozo'] && $documento->empleado->idpersona != -1)
-                            / <strong>Vend:</strong>  {{ $documento->empleado->nombre }}
-                        @endif
-                    </td>
+                    <td><strong>Caja:</strong></td>
+                    <td>{{ $documento->caja->nombre }}</td>
                 </tr>
-                @if(isset(json_decode(cache('config')['impresion'], true)['mostrar_mesa']) && json_decode(cache('config')['impresion'], true)['mostrar_mesa'] && $documento->mesa)
-                    <tr>
-                        @if($documento->mesa == 'DELIVERY')
-                            <td colspan="2" style="width:42mm"><strong>Para llevar</strong></td>
-                        @else
-                            <td><strong>Mesa:</strong></td>
-                            <td style="width:52mm">{{$documento->mesa}}</td>
-                        @endif
-                    </tr>
+                @if(isset(json_decode(cache('config')['impresion'], true)['mostrar_mozo']) && json_decode(cache('config')['impresion'], true)['mostrar_mozo'] && $documento->empleado->idpersona != -1)
+                <tr>
+                    <td><strong>Vend:</strong></td>
+                    <td>{{ $documento->empleado->nombre }}</td>
+                </tr>
                 @endif
                 @if($usuario->persona->idpersona != -1)
                 <tr>
@@ -44,10 +46,6 @@
                     <td style="width:42mm">{{$usuario->persona->nombre}}</td>
                 </tr>
                 @endif
-                {{--<tr>
-                    <td><strong>Forma de pago:</strong></td>
-                    <td>{{ $documento->tipo_pago==2?'CRÉDITO':'CONTADO' }}</td>
-                </tr>--}}
                 <tr>
                     <td colspan="2">
                         <hr style="border: 1px dashed black">
@@ -66,9 +64,9 @@
             <tbody>
             @foreach($items as $item)
                 <tr>
-                    <td style="width: 38mm">{{$item->detalle->cantidad}} {{$item->nombre}} {{$item->detalle->descripcion}}</td>
-                    <td style="width: 13mm">{{$item->detalle->monto}}</td>
-                    <td style="width: 13mm">{{$item->detalle->total}}</td>
+                    <td style="width: 35mm">{{$item->detalle->cantidad}} {{$item->nombre}} {{$item->detalle->descripcion}}</td>
+                    <td style="width: 10mm">{{$item->detalle->monto}}</td>
+                    <td style="width: 10mm">{{$item->detalle->total}}</td>
                 </tr>
             @endforeach
             <tr>
@@ -84,6 +82,14 @@
             <tr>
                 <td colspan="2">PAGO: {{$documento->tipo_pago}}</td>
             </tr>
+            <tr>
+                <td colspan="3">
+                    <hr style="border: 1px dashed black">
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">SON: {{$documento->leyenda}}</td>
+            </tr>
             </tbody>
         </table>
         <table style="text-align: center">
@@ -96,10 +102,6 @@
         .logo{
             width: 62mm;
             text-align: center;
-        }
-
-        .logo img{
-            width: 40mm;
         }
 
         h3{
@@ -119,25 +121,9 @@
             margin: 0;
             padding: 0;
         }
-
-        .qr{
-            width: 25mm;
-        }
-
         .header{
             position: relative;
             height: 15mm;
-        }
-
-        .header .info-ruc{
-            position: absolute;
-            right: 0;
-            text-align: center;
-            width: 30mm;
-            padding: 10px 25px 18px 25px;
-            border: 1px solid black;
-            border-radius: 3px;
-            margin-top: 2mm;
         }
 
         .header .info-emisor{
@@ -167,12 +153,6 @@
             width: 72mm;
             position: relative;
         }
-        .footer{
-            width: 72mm;
-            height: 20mm;
-            margin-top: 5mm;
-        }
-
         .leyenda{
             width: 72mm;
             margin-top: 3mm;

@@ -1,7 +1,7 @@
 <?php
 
 namespace sysfact\Http\Controllers;
-
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -423,6 +423,7 @@ class PedidoController extends Controller
     }
 
     public function ventas(Request $request){
+        $idcaja = $caja= Cache::get('caja_abierta');
         if ($request) {
             $consulta = trim($request->get('textoBuscado'));
 
@@ -442,7 +443,8 @@ class PedidoController extends Controller
                         })
                         ->orWhere('estado','-');
                 })
-                ->whereBetween('fecha', [date('Y-m-d') . ' 00:00:00', date('Y-m-d') . ' 23:59:59'])
+                //->whereBetween('fecha', [date('Y-m-d') . ' 00:00:00', date('Y-m-d') . ' 23:59:59'])
+                ->where('idcaja',$idcaja)
                 ->orderby('idventa','desc')
                 ->paginate(50);
 
@@ -459,7 +461,8 @@ class PedidoController extends Controller
                         })
                         ->orWhere('estado','-');
                 })
-                ->whereBetween('fecha', [date('Y-m-d') . ' 00:00:00', date('Y-m-d') . ' 23:59:59'])
+                //->whereBetween('fecha', [date('Y-m-d') . ' 00:00:00', date('Y-m-d') . ' 23:59:59'])
+                ->where('idcaja',$idcaja)
                 ->sum('total_venta');
 
             $emisor = new Emisor();
@@ -480,7 +483,6 @@ class PedidoController extends Controller
                 switch ($item->facturacion->codigo_tipo_documento){
                     case '01':
                         $item->badge_comp='badge-warning';
-
                         break;
                     case '03':
                         $item->badge_comp='badge-success';

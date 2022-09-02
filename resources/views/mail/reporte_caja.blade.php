@@ -30,10 +30,10 @@
             <tr class="items-tr">
                 <td>{{str_pad($i, 2, "0", STR_PAD_LEFT)}}</td>
                 <td>{{$venta->fecha}}</td>
-                <td style="width: 90mm; text-align: left">{{$venta->cliente->persona->nombre}}</td>
+                <td style="width: 75mm; text-align: left">{{$venta->cliente->persona->nombre}}</td>
                 <td style="width: 20mm">S/ {{$venta->total_venta}}</td>
-                <td>{{$venta->tipo_pago}}</td>
-                <td>{{$venta->facturacion->codigo_tipo_documento==30?$venta->ticket:$venta->facturacion->serie.'-'.$venta->facturacion->correlativo}}</td>
+                <td style="width: 25mm">{{$venta->tipo_pago}}</td>
+                <td>{{$venta->facturacion->serie.'-'.$venta->facturacion->correlativo}}</td>
             </tr>
             @php
                 $i++;

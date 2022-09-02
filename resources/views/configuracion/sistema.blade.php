@@ -30,6 +30,7 @@
 <div class="col-lg-12 mb-4">
     <h4>Logs</h4>
     <b-button target="_blank" href="/logs" class="mr-2" variant="primary"><i class="fas fa-bug"></i> Ver logs</b-button>
+    <b-button target="_blank" href="/configuracion/lista" class="mr-2" variant="primary"><i class="fas fa-eye"></i> Ver caché de configuraciones</b-button>
 </div>
 <div class="col-lg-12 mb-4">
     <h4>acciones</h4>

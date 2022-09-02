@@ -126,12 +126,18 @@
                                                 </p>
                                             </div>
                                             <div class="col-lg-7">
-                                                <b-button @if(!$caja) disabled @endif  @click="imprimir" class="btn btn-warning float-right mr-3" title="Imprimir">
-                                                    <i class="fas fa-print"></i> Imprimir
-                                                </b-button>
-                                                <b-button  @if(!$caja || ($caja && $caja->estado)) disabled @endif class="mr-2 float-right" @click="cerrar_caja" variant="primary">
-                                                    <i class="fas fa-check"></i> Cerrar caja
-                                                </b-button>
+                                                @if(!$caja || ($caja && $caja->estado))
+                                                   <b-form-checkbox v-model="detallado" switch size="lg" class="float-right">
+                                                        <p style="font-size: 1rem;">Detallado</p>
+                                                    </b-form-checkbox>
+                                                    <b-button @if(!$caja) disabled @endif  @click="imprimir" class="btn btn-warning float-right mr-3" title="Imprimir">
+                                                        <i class="fas fa-print"></i> Imprimir
+                                                    </b-button>
+                                                @else
+                                                    <b-button class="mr-2 float-right" @click="cerrar_caja" variant="primary">
+                                                        <i class="fas fa-check"></i> Cerrar caja
+                                                    </b-button>
+                                                @endif
                                             </div>
                                         </div>
                                         <div class="table-responsive tabla-gestionar">
@@ -182,7 +188,7 @@
                                                     @endif
                                                     @if($caja->otros > 0)
                                                         <tr>
-                                                            <td><strong>Total transferencia:</strong></td>
+                                                            <td><strong>Total otros:</strong></td>
                                                             <td>{{$caja->moneda}} {{ $caja->otros }}</td>
                                                         </tr>
                                                     @endif
@@ -370,7 +376,7 @@
         <b-button variant="secondary" @click="cancel()">
             Cancel
         </b-button>
-        <b-button :disabled="!total_apertura" @click="abrirCaja" variant="primary">
+        <b-button :disabled="!total_apertura || mostrarProgreso" @click="abrirCaja" variant="primary">
             <b-spinner v-show="mostrarProgreso" small label="Loading..." ></b-spinner>
             <span v-show="!mostrarProgreso">OK</span>
         </b-button>
@@ -378,107 +384,111 @@
     </b-modal>
     <!--FIN MODAL APERTURA-->
     <!--INICIO MODAL CIERRE-->
-    <b-modal id="modal-2" ref="modal-2" size="md"
+    <b-modal id="modal-2" ref="modal-2" size="lg"
              title="" @ok="procesar_cierre" @hidden="resetModal" @shown="focus()">
     <template slot="modal-title">
         Cerrar caja
     </template>
     <div class="container">
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-3">
                 <div class="form-group">
                     <label for="apertura">Saldo inicial:</label>
                     <input type="text" v-model="apertura" class="form-control" disabled>
                 </div>
             </div>
-            <div v-show="extras > 0" class="col-md-6">
+            <div v-show="extras > 0" class="col-md-3">
                 <div class="form-group">
                     <label for="efectivo">Efectivo extra:</label>
                     <input type="text" v-model="extras" class="form-control" disabled>
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-3">
                 <div class="form-group">
                     <label for="efectivo">Ventas en efectivo:</label>
                     <input type="text" v-model="efectivo" class="form-control" disabled>
                 </div>
             </div>            
-            <div class="col-md-6">
+            <div class="col-md-3">
                 <div class="form-group">
                     <label for="gastos">Total gastos:</label>
                     <input type="text" v-model="gastos" class="form-control" disabled>
                 </div>
             </div>
-            <div v-show="credito > 0" class="col-md-6">
+            <div v-show="credito > 0" class="col-md-3">
                 <div class="form-group">
                     <label for="credito">Ventas a crédito:</label>
                     <input type="text" v-model="credito" class="form-control" disabled>
                 </div>
             </div>
-            <div v-show="tarjeta_visa > 0" class="col-md-6">
+            <div v-show="tarjeta_visa > 0" class="col-md-3">
                 <div class="form-group">
                     <label for="tarjeta">Tarjeta visa:</label>
                     <input type="text" v-model="tarjeta_visa" class="form-control" disabled>
                 </div>
             </div>
-            <div v-show="tarjeta_mastercard > 0" class="col-md-6">
+            <div v-show="tarjeta_mastercard > 0" class="col-md-3">
                 <div class="form-group">
                     <label for="tarjeta">Tarjeta mastercard:</label>
                     <input type="text" v-model="tarjeta_mastercard" class="form-control" disabled>
                 </div>
             </div>
-            <div v-show="yape > 0" class="col-md-6">
+            <div v-show="yape > 0" class="col-md-3">
                 <div class="form-group">
                     <label for="tarjeta">Total yape:</label>
                     <input type="text" v-model="yape" class="form-control" disabled>
                 </div>
             </div>
-            <div v-show="plin > 0" class="col-md-6">
+            <div v-show="plin > 0" class="col-md-3">
                 <div class="form-group">
                     <label for="tarjeta">Total plin:</label>
                     <input type="text" v-model="plin" class="form-control" disabled>
                 </div>
             </div>
-            <div v-show="transferencia > 0" class="col-md-6">
+            <div v-show="transferencia > 0" class="col-md-3">
                 <div class="form-group">
                     <label for="tarjeta">Transferencia:</label>
                     <input type="text" v-model="transferencia" class="form-control" disabled>
                 </div>
             </div>
-            <div v-show="otros > 0" class="col-md-6">
+            <div v-show="otros > 0" class="col-md-3">
                 <div class="form-group">
                     <label for="tarjeta">Otros:</label>
                     <input type="text" v-model="otros" class="form-control" disabled>
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-3">
                 <div class="form-group">
                     <label for="tarjeta">Total devoluciones:</label>
                     <input type="text" v-model="devoluciones" class="form-control" disabled>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="alert alert-success">
-                    <label><strong>Efectivo teórico en caja:</strong></label>
-                    <h3 class="mb-0">S/ @{{ efectivo_teorico }}</h3>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label><strong>Efectivo real en caja:</strong></label>
-                    <input v-model="total_real" @keyup="calcularDescuadre" class="form-control" type="number" id="focusthis">
-                </div>
-            </div>
-            <div v-show="dolares > 0" class="col-md-6">
+            <div v-show="dolares > 0" class="col-md-3">
                 <div class="form-group">
                     <label>Ventas en dólares:</label>
                     <h3>USD @{{ dolares }}</h3>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label for="tarjeta">Descuadre:</label>
-                    <input type="text" v-model="descuadre" class="form-control" disabled>
+            <div class="col-lg-12">
+                <div class="row">
+                    <div class="col-lg-4">
+                        <div class="alert alert-success">
+                            <label><strong>Efectivo teórico en caja:</strong></label>
+                            <h3 class="mb-0">S/ @{{ efectivo_teorico }}</h3>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="form-group">
+                            <label><strong>Efectivo real en caja:</strong></label>
+                            <input v-model="total_real" @keyup="calcularDescuadre" class="form-control" type="number" id="focusthis">
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="form-group">
+                            <label for="tarjeta">Descuadre:</label>
+                            <input type="text" v-model="descuadre" class="form-control" disabled>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="col-md-12">
@@ -506,7 +516,7 @@
         <b-button variant="secondary" @click="cancel()">
             Cancel
         </b-button>
-        <b-button :disabled="!total_real" @click="procesar_cierre" variant="primary">
+        <b-button :disabled="!total_real || mostrarProgreso" @click="procesar_cierre" variant="primary">
             <b-spinner v-show="mostrarProgreso" small label="Loading..." ></b-spinner>
             <span v-show="!mostrarProgreso">OK</span>
         </b-button>
@@ -563,6 +573,7 @@
                 total_real:'',
                 turno: "{{$caja->turno??1}}",
                 nuevo_turno:"{{count($cajas)+1??1}}",
+                detallado:<?php echo json_encode(json_decode(cache('config')['interfaz'], true)['cierre_detallado']??false)??false ?>,
             },
             methods: {
                 focus(){
@@ -573,7 +584,7 @@
                     window.location.href='/caja/'+this.fecha;
                 },
                 imprimir(){
-                    let src = "{{url('/caja/imprimir').'/'}}"+this.idcaja;
+                    let src = "{{url('/caja/imprimir').'/'}}"+this.idcaja+'?detallado='+this.detallado;
                     @if(!$agent->isDesktop())
                         @if(isset(json_decode(cache('config')['interfaz'], true)['rawbt']) && json_decode(cache('config')['interfaz'], true)['rawbt'])
                             axios.get(src+'?rawbt=true')

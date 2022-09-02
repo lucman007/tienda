@@ -102,6 +102,7 @@ class CajaController extends Controller
             $caja->credito=$request->credito;
             $caja->extras=$request->extras;
             $caja->gastos=$request->gastos;
+            $caja->otros=$request->otros;
             $caja->efectivo_real=$request->efectivo_real;
             $caja->observacion_c=$request->observacion_c;
             $caja->descuadre=$request->descuadre;
@@ -114,37 +115,9 @@ class CajaController extends Controller
                 Cache::put('caja_abierta','idcaja',0);
                 if($request->notificacion && json_decode(cache('config')['mail_contact'], true)['notificacion_caja']){
 
-                    $ventas = Venta::where('idcaja',$idcaja)
-                        ->where('eliminado',0)
-                        ->whereHas('facturacion', function($query) {
-                            $query->where(function ($query) {
-                                $query->where('codigo_tipo_documento',01)
-                                    ->orWhere('codigo_tipo_documento',03)
-                                    ->orWhere('codigo_tipo_documento',30);
-                            })
-                                ->where(function ($query){
-                                    $query->where('estado','ACEPTADO')
-                                        ->orWhere('estado','PENDIENTE');
-                                })
-                                ->orWhere('estado','-');
-                        })
-                        ->orderby('fecha','asc')
-                        ->get();
-
-                    $suma = 0;
-
-                    foreach ($ventas as $item){
-                        $pago = DataTipoPago::getTipoPago();
-                        $find = array_search($item->tipo_pago, array_column($pago,'num_val'));
-                        $item->tipo_pago = mb_strtoupper($pago[$find]['label']);
-
-                        $suma += $item->total_venta;
-                    }
-
-
                     //PDF RESUMEN VENTAS CAJA
-
-                    $view = view('mail/reporte_caja', ['ventas'=>$ventas, 'total'=>$suma]);
+                    $resumen_ventas = $this->resumen_ventas($idcaja);
+                    $view = view('mail/reporte_caja', $resumen_ventas);
                     $html = $view->render();
 
                     $pdf=new Html2Pdf('P','A4','es');
@@ -164,29 +137,7 @@ class CajaController extends Controller
 
                     //RESUMEN DE PRODUCTOS
 
-                    $productos=$ventas = DB::table('ventas')
-                        ->join('ventas_detalle', 'ventas_detalle.idventa', '=', 'ventas.idventa')
-                        ->join('productos', 'productos.idproducto', '=', 'ventas_detalle.idproducto')
-                        ->join('facturacion', 'ventas.idventa', '=', 'facturacion.idventa')
-                        ->selectRaw('sum(ventas_detalle.cantidad) as vendidos,sum(ventas_detalle.monto * ventas_detalle.cantidad) as monto_total,ventas_detalle.idproducto, productos.nombre, productos.precio, productos.tipo_producto, facturacion.codigo_tipo_documento, facturacion.estado')
-                        ->where('ventas.eliminado', 0)
-                        ->where('ventas.idcaja', $idcaja)
-                        ->where(function($query) {
-                            $query->where(function ($query) {
-                                $query->where('facturacion.codigo_tipo_documento',01)
-                                    ->orWhere('facturacion.codigo_tipo_documento',03)
-                                    ->orWhere('facturacion.codigo_tipo_documento',30);
-                            })
-                                ->where(function ($query){
-                                    $query->where('facturacion.estado','ACEPTADO')
-                                        ->orWhere('facturacion.estado','PENDIENTE');
-                                })
-                                ->orWhere('facturacion.estado','-');
-                        })
-                        ->groupBy('ventas_detalle.idproducto')
-                        ->orderby('vendidos','desc')
-                        ->get();
-
+                    $productos = $this->resumen_productos($idcaja);
                     $view = view('mail/reporte_productos', ['productos'=>$productos]);
                     $html = $view->render();
 
@@ -218,6 +169,64 @@ class CajaController extends Controller
             return $e->getMessage();
         }
 
+    }
+
+    public function resumen_ventas($idcaja){
+        $ventas = Venta::where('idcaja',$idcaja)
+            ->where('eliminado',0)
+            ->whereHas('facturacion', function($query) {
+                $query->where(function ($query) {
+                    $query->where('codigo_tipo_documento',01)
+                        ->orWhere('codigo_tipo_documento',03)
+                        ->orWhere('codigo_tipo_documento',30);
+                })
+                    ->where(function ($query){
+                        $query->where('estado','ACEPTADO')
+                            ->orWhere('estado','PENDIENTE');
+                    })
+                    ->orWhere('estado','-');
+            })
+            ->orderby('fecha','asc')
+            ->get();
+
+        $suma = 0;
+
+        foreach ($ventas as $item){
+            $pago = DataTipoPago::getTipoPago();
+            $find = array_search($item->tipo_pago, array_column($pago,'num_val'));
+            $item->tipo_pago = mb_strtoupper($pago[$find]['label']);
+
+            $suma += $item->total_venta;
+        }
+
+        return ['ventas'=>$ventas, 'total'=> $suma];
+    }
+
+    public function resumen_productos($idcaja){
+        $productos=$ventas = DB::table('ventas')
+            ->join('ventas_detalle', 'ventas_detalle.idventa', '=', 'ventas.idventa')
+            ->join('productos', 'productos.idproducto', '=', 'ventas_detalle.idproducto')
+            ->join('facturacion', 'ventas.idventa', '=', 'facturacion.idventa')
+            ->selectRaw('sum(ventas_detalle.cantidad) as vendidos,sum(ventas_detalle.monto * ventas_detalle.cantidad) as monto_total,ventas_detalle.idproducto, productos.nombre, productos.precio, productos.tipo_producto, facturacion.codigo_tipo_documento, facturacion.estado')
+            ->where('ventas.eliminado', 0)
+            ->where('ventas.idcaja', $idcaja)
+            ->where(function($query) {
+                $query->where(function ($query) {
+                    $query->where('facturacion.codigo_tipo_documento',01)
+                        ->orWhere('facturacion.codigo_tipo_documento',03)
+                        ->orWhere('facturacion.codigo_tipo_documento',30);
+                })
+                    ->where(function ($query){
+                        $query->where('facturacion.estado','ACEPTADO')
+                            ->orWhere('facturacion.estado','PENDIENTE');
+                    })
+                    ->orWhere('facturacion.estado','-');
+            })
+            ->groupBy('ventas_detalle.idproducto')
+            ->orderby('vendidos','desc')
+            ->get();
+
+        return $productos;
     }
 
     public function ver_cache(){
@@ -387,9 +396,17 @@ class CajaController extends Controller
 
         try{
             $caja = Caja::find($id);
-            $view = view('caja/imprimir/cierre',['caja'=>$caja]);
+            $resumen_ventas = $this->resumen_ventas($id);
+            $productos = $this->resumen_productos($id);
+
+            $data['caja']=$caja;
+            $data['productos']=$productos;
+            $data['total']=$resumen_ventas['total'];
+            $data['detallado']=$request->detallado;
+
+            $view = view('caja/imprimir/cierre',$data);
             $html=$view->render();
-            $pdf=new Html2Pdf('P',[72,250],'es');
+            $pdf=new Html2Pdf('P',[72,350],'es');
             $pdf->pdf->SetTitle('Cierre '.$caja->fecha);
             $pdf->writeHTML($html);
 
@@ -406,112 +423,6 @@ class CajaController extends Controller
 
     }
 
-    /*public function gestionar_creditos(Request $request){
 
-        $suma_soles=0;
-        $suma_dolares=0;
-        $consulta=trim($request->get('textoBuscado'));
-
-       $ventas=Venta::where('eliminado', '=', 0)
-           ->whereHas('facturacion', function($query) {
-               $query->where(function ($query) {
-                   $query->where('codigo_tipo_documento',01)
-                       ->orWhere('codigo_tipo_documento',03)
-                       ->orWhere('codigo_tipo_documento',30);
-               })
-                   ->where('estado','ACEPTADO')
-                   ->orWhere('estado','-');
-
-           })
-           ->where(function ($query){
-               $query->where('tipo_pago','2')
-                   ->orWhere('data_credito','!=',null);
-           })
-           ->orderby('idventa','desc')
-           ->paginate(30);
-
-        foreach ($ventas as $item) {
-
-            if($item->data_credito){
-                $data_credito = json_decode($item->data_credito,true);
-                $item->estado = $data_credito['estado'];
-            } else{
-                $item->estado= 'ADEUDA';
-            }
-
-            if($item->facturacion->codigo_moneda=='PEN'){
-                $suma_soles += $item->total_venta;
-            } else{
-                $suma_dolares += $item->total_venta;
-            }
-
-            $ventas->total_soles=$suma_soles==0?'0.00':$suma_soles;
-            $ventas->total_usd=$suma_dolares==0?'0.00':$suma_dolares;
-
-        }
-
-        return view('caja.creditos',['creditos'=>$ventas,'usuario'=>auth()->user()->persona,'textoBuscado'=>$consulta,]);
-    }*/
-
-    /*public function agregar_pago_creditos(Request $request){
-        try{
-
-            $venta=Venta::find($request->idventa);
-
-            //Recuperamos informacion ya guardada
-
-            $guardado=[];
-
-            if($venta){
-                $guardado=json_decode($venta->data_credito, true);
-            }
-
-            //Verificamos si es pago total y cambiamos el tipo de pago de la venta
-
-            if($request->tipo_operacion=='1'){
-                $estado='PAGADO';
-                $venta->tipo_pago=$request->tipo_pago;
-            } else{
-                if($request->suma_cuotas >= $request->total_venta){
-                    $estado='PAGADO';
-                    $venta->tipo_pago=$request->tipo_pago;
-                } else{
-                    $estado='ADEUDA';
-                }
-            }
-
-            $data_credito=[
-                'fecha'=>date('Y-m-d'),
-                'importe'=>$request->importe,
-                'tipo_pago'=>$request->tipo_pago
-            ];
-
-            $guardado['cuotas'][]=$data_credito;
-            $guardado['estado']=$estado;
-            $guardado['tipo_operacion']=$request->tipo_operacion;
-
-            $venta->data_credito=json_encode($guardado);
-            $venta->save();
-
-            return json_encode($data_credito);
-
-        } catch (\Exception $e){
-            return $e;
-        }
-
-    }*/
-
-    /*public function obtener_data_creditos($id){
-        try{
-
-            $venta=Venta::where('idventa',$id)->first()->data_credito;
-
-            return json_encode($venta);
-
-        } catch (\Exception $e){
-            return $e;
-        }
-
-    }*/
 
 }

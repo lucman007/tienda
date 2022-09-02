@@ -29,7 +29,7 @@
                 $suma += $producto->monto_total;
                 @endphp
                 <tr class="items-tr">
-                    <td style="width: 90mm; text-align: left">{{$producto->nombre}}</td>
+                    <td style="width: 115mm; text-align: left">{{$producto->nombre}}</td>
                     <td style="width: 30mm">{{$producto->vendidos}}</td>
                     <td style="width: 30mm">S/{{number_format($producto->monto_total,3)}}</td>
                 </tr>

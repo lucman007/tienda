@@ -17,11 +17,6 @@
     </div>
 </div>
 <div class="col-lg-3 mt-3">
-    <b-form-checkbox v-model="impresion.mostrar_mesa" switch size="lg">
-        <p style="font-size: 1rem;">Mostrar mesa</p>
-    </b-form-checkbox>
-</div>
-<div class="col-lg-3 mt-3">
     <b-form-checkbox v-model="impresion.mostrar_mozo" switch size="lg">
         <p style="font-size: 1rem;">Mostrar vendedor</p>
     </b-form-checkbox>
@@ -29,6 +24,11 @@
 <div class="col-lg-3 mt-3">
     <b-form-checkbox v-model="impresion.ocultar_razon_social" switch size="lg">
         <p style="font-size: 1rem;">Ocultar Razon Social</p>
+    </b-form-checkbox>
+</div>
+<div class="col-lg-3 mt-3">
+    <b-form-checkbox v-model="impresion.mostrar_logo_ticket" switch size="lg">
+        <p style="font-size: 1rem;">Mostrar logo en tickets</p>
     </b-form-checkbox>
 </div>
 <div class="col-lg-12">

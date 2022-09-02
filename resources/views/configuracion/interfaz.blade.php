@@ -24,22 +24,37 @@
     </b-form-checkbox>
 </div>
 <div class="col-lg-4 mt-3">
-    <b-form-checkbox v-model="interfaz.impresion_directa" switch size="lg">
-        <p style="font-size: 1rem;">Impresión directa</p>
-    </b-form-checkbox>
-</div>
-<div class="col-lg-4 mt-3">
     <b-form-checkbox v-model="interfaz.rawbt" switch size="lg">
         <p style="font-size: 1rem;">Usar RawBt App</p>
     </b-form-checkbox>
 </div>
+<div class="col-lg-4 mt-3">
+    <b-form-checkbox v-model="interfaz.emitir_solo_ticket" switch size="lg">
+        <p style="font-size: 1rem;">Emitir solo ticket</p>
+    </b-form-checkbox>
+</div>
+<div class="col-lg-4 mt-3">
+    <b-form-checkbox v-model="interfaz.notificar_caja" switch size="lg">
+        <p style="font-size: 1rem;">Notificar movimientos de caja</p>
+    </b-form-checkbox>
+</div>
+<div class="col-lg-4 mt-3">
+    <b-form-checkbox v-model="interfaz.cierre_detallado" switch size="lg">
+        <p style="font-size: 1rem;">Cierre de caja detallado</p>
+    </b-form-checkbox>
+</div>
 <div class="col-lg-12 mt-3">
     <div class="row">
-        <div class="col-lg-3">
-            <div class="form-group">
-                <label>Color mesa ocupada</label>
-                <input type="text" v-model="interfaz.color_mesa_ocupada" autocomplete="nope" class="form-control">
-            </div>
+        <div class="col-lg-2">
+            <label>Ancho de logo</label>
+            <b-input-group>
+                <input type="number" v-model="interfaz.ancho_logo" autocomplete="nope" class="form-control">
+                <b-input-group-append>
+                    <b-input-group-text>
+                        mm
+                    </b-input-group-text>
+                </b-input-group-append>
+            </b-input-group>
         </div>
     </div>
 </div>
