@@ -43,6 +43,11 @@
         <p style="font-size: 1rem;">Cierre de caja detallado</p>
     </b-form-checkbox>
 </div>
+<div class="col-lg-4 mt-3">
+    <b-form-checkbox v-model="interfaz.buscador_productos_alt" switch size="lg">
+        <p style="font-size: 1rem;">Buscador de productos alternativo</p>
+    </b-form-checkbox>
+</div>
 <div class="col-lg-12 mt-3">
     <div class="row">
         <div class="col-lg-2">

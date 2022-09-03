@@ -1,6 +1,9 @@
 @extends('layouts.main')
 @section('titulo', 'Pedidos')
 @section('contenido')
+    @php
+        $buscador_alternativo = json_decode(cache('config')['interfaz'], true)['buscador_productos_alt']??false;
+    @endphp
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}} interfaz_3">
         <div class="row">
             <div class="col-lg-4">
@@ -217,7 +220,11 @@
                                                 @endif
                                                 <b-button @if(!$agent->isDesktop()) class="col-3 col-md p-md-4"
                                                           @endif :disabled="idpedido == -1"
+                                                          @if($buscador_alternativo)
+                                                          v-b-modal.modal-agregar-producto-alt
+                                                          @else
                                                           v-b-modal.modal-agregar-producto
+                                                          @endif
                                                           @click="productosSeleccionadosAux = [ ...productosSeleccionados ]"
                                                           variant="primary"><i class="fas fa-plus"></i>
                                                     Agregar producto
@@ -287,6 +294,12 @@
             v-on:notificaciones="obtener_notificaciones"
             v-on:limpiar="limpiar">
     </modal-facturacion>
+    @if($buscador_alternativo)
+    <modal-agregar-producto-alt
+            v-on:agregar="agregarProducto"
+            v-on:guardar="guardarPedido">
+    </modal-agregar-producto-alt>
+    @else
     <modal-agregar-producto
             ref="agregarPlato"
             :categorias="{{$categorias}}"
@@ -294,6 +307,7 @@
             v-on:agregar="agregarProducto"
             v-on:guardar="guardarPedido">
     </modal-agregar-producto>
+    @endif
     <modal-entrega
             :idpedido="idpedido"
             v-on:delivery="obtener_delivery">

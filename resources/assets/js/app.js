@@ -32,6 +32,7 @@ Vue.component('pedidos',require('./components/ListaPedidos.vue'));
 Vue.component('modal-facturacion',require('./components/ModalFacturacion.vue'));
 Vue.component('modal-facturacion-ticket',require('./components/ModalFacturacionTicket.vue'));
 Vue.component('modal-agregar-producto',require('./components/ModalAgregarProducto.vue'));
+Vue.component('modal-agregar-producto-alt',require('./components/ModalAgregarProductoAlt.vue'));
 Vue.component('modal-entrega',require('./components/ModalEntrega.vue'));
 Vue.component('modal-whatsapp',require('./components/ModalWhatsapp.vue'));
 Vue.component('modal-detalle',require('./components/ModalDetalle.vue'));

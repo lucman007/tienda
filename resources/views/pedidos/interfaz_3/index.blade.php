@@ -228,7 +228,7 @@
                                                 @endif
                                                 <b-button @if(!$agent->isDesktop()) class="col-3 col-md-2 p-md-4"
                                                           @endif :disabled="idpedido == -1"
-                                                          v-b-modal.modal-agregar-producto
+                                                          v-b-modal.modal-agregar-producto-alt
                                                           @click="productosSeleccionadosAux = [ ...productosSeleccionados ]"
                                                           variant="primary"><i class="fas fa-plus"></i>
                                                     Agregar producto
@@ -292,13 +292,13 @@
             v-on:notificaciones="obtener_notificaciones"
             v-on:limpiar="limpiar">
     </modal-facturacion>
-    <modal-agregar-producto
+    <modal-agregar-producto-alt
             ref="agregarPlato"
             :categorias="{{$categorias}}"
             :isdesktop="{{json_encode($agent->isDesktop())}}"
             v-on:agregar="agregarProducto"
             v-on:guardar="guardarPedido">
-    </modal-agregar-producto>
+    </modal-agregar-producto-alt>
     <modal-entrega
             :idpedido="idpedido"
             v-on:delivery="obtener_delivery">
