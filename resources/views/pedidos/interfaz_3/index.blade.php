@@ -1,0 +1,676 @@
+@extends('layouts.main')
+@section('titulo', 'Pedidos')
+@section('contenido')
+    <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}} interfaz_3">
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-lg-12 mb-1 @if(!$agent->isDesktop()) d-flex @endif">
+                                <b-button @if(!$agent->isDesktop()) style="width: 50%" @endif :disabled="disabledNuevo" alt="Nuevo pedido"  @click="nuevoDelivery" variant="primary"><i class="fas fa-plus"></i> Nueva venta</b-button>
+                                <b-button @if(!$agent->isDesktop()) style="width: 50%" @endif alt="Resumen del día"  variant="primary" class="ml-2" @cannot('Facturación: facturar') class="disabled" disabled @endcannot href="{{action('PedidoController@ventas')}}">
+                                    <i class="fas fa-list-ul"></i> Resumen del día
+                                </b-button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body scroll-mesas">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <table class="table table-striped table-hover table-sm">
+                                    <thead class="bg-custom-green">
+                                    <tr>
+                                        @if($agent->isDesktop())
+                                        <th scope="col"></th>
+                                        @endif
+                                        <th scope="col">N°</th>
+                                        <th scope="col">Vend.</th>
+                                        <th scope="col">Cliente</th>
+                                        <th scope="col">Total</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr class="delivery-item" :class="{'active-order':item.idorden == idpedido}" @click="obtener_data_delivery(item.idorden)" v-for="item, index in ordenes" :key="index">
+                                        @if($agent->isDesktop())
+                                        <td></td>
+                                        @endif
+                                        <td>@{{item.idorden}}</td>
+                                        <td>@{{item.empleado}}</td>
+                                        <td>@{{item.datos_entrega['contacto']}}</td>
+                                        <td>S/ @{{item.total}}</td>
+                                    </tr>
+                                    <tr v-show="ordenes.length == 0" class="text-center">
+                                        <td colspan="9">No hay datos que mostrar</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-8">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="row">
+                                    <div class="col-10 col-md-10">
+                                        <autocomplete :habilitar="idpedido != -1" ref="suggest" v-on:agregar_producto="agregarProducto"></autocomplete>
+                                    </div>
+                                    <div class="col-2 col-md-2">
+                                        <b-button v-b-modal.modal-devolucion class="float-right mr-2" variant="success" title="Devolver">
+                                            <i class="fas fa-undo"></i>
+                                        </b-button>
+                                    </div>
+                                    {{--@if($agent->isDesktop())
+                                    <div class="col-12 col-md-12 col-lg-6">
+                                        <div v-show="idpedido != -1">
+                                            <div class="info_selected_mesa">
+                                                <h4>
+                                                    <span class="numero_mesa" :class="{'transicion':mostrarSpinner}">#@{{ idpedido }}</span>
+                                                </h4>
+                                            </div>
+                                            <div class="info_selected_mesa float-right float-md-left"><h4>Monto: S/ @{{ totalVenta }}</h4></div>
+                                        </div>
+                                    </div>
+                                    @endif--}}
+                                    {{--<div class="col-12 col-md-12 col-lg-6 mt-2 mt-md-0">
+                                        <b-button :disabled="idpedido == -1" v-b-modal.modal-entrega class="float-right mr-2" variant="primary" title="Datos de entrega">
+                                            <i class="fas fa-map-marker-alt"></i> {{!($agent->isTablet()||$agent->isDesktop())?'':'Entrega'}}
+                                        </b-button>
+                                        <div class="float-md-right mr-2 d-inline">
+                                            <select @if($idvendedor != -1) disabled @endif @change="cambiarEmpleado" v-model="idvendedor" style="width: 150px" class="custom-select">
+                                                <option value="-1" style="font-weight: bold">Vendedor:</option>
+                                                <option v-for="empleado in empleados" :value="empleado.idempleado">@{{ empleado.persona.nombre }}</option>
+                                            </select>
+                                        </div>
+                                        <b-button v-b-modal.modal-devolucion class="float-right mr-2" variant="success" title="Datos de entrega">
+                                            <i class="fas fa-undo"></i> {{!($agent->isTablet()||$agent->isDesktop())?'':'Devolución'}}
+                                        </b-button>
+                                    </div>--}}
+                                </div>
+                            </div>
+                            <div class="card-body" style="height: 320px; overflow-y: scroll">
+                                <div class="loader" v-show="mostrarSpinner">
+                                    <b-spinner label="Cargando..." ></b-spinner>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="table-responsive">
+                                            @if($agent->isDesktop())
+                                                <table class="table table-striped table-hover table-sm">
+                                                <thead class="bg-custom-green">
+                                                <tr>
+                                                    <th scope="col" style="width: 10px"></th>
+                                                    <th scope="col" style="width: 290px">Producto</th>
+                                                    <th scope="col" style="width: 350px">Descripción</th>
+                                                    <th scope="col" style="width: 100px">Precio</th>
+                                                    <th scope="col" style="width: 100px">Cantidad</th>
+                                                    <th scope="col" style="width: 100px">Total</th>
+                                                    <th scope="col" style="width: 50px"></th>
+                                                    <th></th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                <tr v-for="(producto,index) in productosSeleccionados" :key="index">
+                                                    <td></td>
+                                                    <td>@{{producto.nombre}}</td>
+
+                                                    <td @click="habilitar(producto.num_item,'d')"><input
+                                                                onblur="app.noFocus(this)"
+                                                                @keyup="actualizarDetalle"
+                                                                :id="producto.num_item+'-d'"
+                                                                class="form-control td-dis" type="text"
+                                                                disabled
+                                                                v-model="producto.presentacion"></td>
+                                                    <td @click="habilitar(producto.num_item,'p')"><input
+                                                                onblur="app.noFocus(this)"
+                                                                onfocus="this.select()"
+                                                                @keyup="actualizarDetalle"
+                                                                :id="producto.num_item+'-p'"
+                                                                class="form-control td-dis" type="number"
+                                                                disabled
+                                                                v-model="producto.precio" @cannot('Pedido: editar precio') readonly @endcannot></td>
+                                                    <td @click="habilitar(producto.num_item,'c')"><input
+                                                                onblur="app.noFocus(this)"
+                                                                onfocus="this.select()"
+                                                                @keyup="actualizarDetalle"
+                                                                :id="producto.num_item+'-c'"
+                                                                class="form-control td-dis" type="number"
+                                                                disabled
+                                                                v-model="producto.cantidad"></td>
+                                                    <td>@{{producto.total}}</td>
+                                                    <td>
+                                                        <span v-show="producto.loading">
+                                                            <b-spinner small label="Loading..." ></b-spinner>
+                                                        </span>
+                                                        <span v-show="producto.warning">
+                                                            <i style="color: orange;" :id="'warning-'+index" class="fas fa-exclamation-triangle"></i>
+                                                            <b-tooltip :target="'warning-'+index" triggers="hover">
+                                                                No se ha podido actualizar el item, intenta recargar la página.
+                                                            </b-tooltip>
+                                                        </span>
+                                                    </td>
+                                                    <td class="" style="width: 120px;">
+                                                        <button @click="borrarItemVenta(index)"
+                                                                :disabled="mostrarSpinner" class="btn btn-danger"
+                                                                title="Borrar item"><i class="fas fa-trash"></i>
+                                                        </button>
+                                                        <button v-show="!!producto.discounts" v-b-modal.modal-producto-descuento @click="editarItem(producto,index)"
+                                                                :disabled="mostrarSpinner" class="btn btn-success"
+                                                                title="Descuento"><i class="fas fa-percentage"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                                <tr class="text-center" v-show="productosSeleccionados.length == 0"><td colspan="8">Ningún producto seleccionado</td></tr>
+                                                </tbody>
+                                            </table>
+                                            @else
+                                                <table class="table table-striped table-hover table-sm">
+                                                    <thead class="bg-custom-green">
+                                                    <tr>
+                                                        <th scope="col" style="width: 350px">Descripción</th>
+                                                        <th scope="col" style="width: 80px">Total</th>
+                                                        <th scope="col" style="width: 50px"></th>
+                                                        <th></th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    <tr v-for="(producto,index) in productosSeleccionados" :key="index" v-b-modal.modal-detalle @click="editarItem(producto)">
+                                                        <td>@{{producto.nombre}} x @{{producto.cantidad}}</td>
+                                                        <td>@{{producto.total}}</td>
+                                                        <td>
+                                                        <span v-show="producto.loading">
+                                                            <b-spinner small label="Loading..." ></b-spinner>
+                                                        </span>
+                                                            <span v-show="producto.warning">
+                                                            <i style="color: orange;" :id="'warning-'+index" class="fas fa-exclamation-triangle"></i>
+                                                            <b-tooltip :target="'warning-'+index" triggers="hover">
+                                                                No se ha podido actualizar el item, intenta recargar la página.
+                                                            </b-tooltip>
+                                                        </span>
+                                                        </td>
+                                                        <td style="width: 20%" @click.stop >
+                                                            <button @click="borrarItemVenta(index)"
+                                                                    :disabled="mostrarSpinner" class="btn btn-danger"
+                                                                    title="Borrar item"><i class="fas fa-trash"></i>
+                                                            </button>
+                                                            <button v-show="!!producto.discounts" v-b-modal.modal-producto-descuento @click="editarItem(producto,index)"
+                                                                    :disabled="mostrarSpinner" class="btn btn-success"
+                                                                    title="Descuento"><i class="fas fa-percentage"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                    <tr class="text-center" v-show="productosSeleccionados.length == 0"><td colspan="8">La mesa está vacía</td></tr>
+                                                    </tbody>
+                                                </table>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <span v-show="idpedido!=-1" class="numero_mesa" style="color:black; float: right"><strong>Venta #@{{ idpedido }}: S/ @{{ totalVenta }}</strong></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-lg-12 buttons-mesa">
+                                        @if(!$agent->isDesktop())
+                                            <div class="row">
+                                                @endif
+                                                <b-button @if(!$agent->isDesktop()) class="col-3 col-md-2 p-md-4"
+                                                          @endif :disabled="idpedido == -1"
+                                                          v-b-modal.modal-agregar-producto
+                                                          @click="productosSeleccionadosAux = [ ...productosSeleccionados ]"
+                                                          variant="primary"><i class="fas fa-plus"></i>
+                                                    Agregar producto
+                                                </b-button>
+                                                <b-button @if(!$agent->isDesktop()) class="col-3 col-md-2 p-md-4"
+                                                          @endif :disabled="idpedido == -1" @click="limpiarMesa"
+                                                          variant="danger"><i class="fas fa-times-circle"></i>
+                                                    Anular venta
+                                                </b-button>
+                                                <b-button @if(!$agent->isDesktop()) class="col-3 col-md-2 p-md-4"
+                                                          @endif :disabled="productosSeleccionados == 0"
+                                                          @click="imprimir('entrega')"
+                                                          variant="secondary"><i class="fas fa-print"></i>
+                                                    Imprimir entrega
+                                                </b-button>
+                                                @can('Pedido: procesar')
+                                                    <b-button @if(!$agent->isDesktop()) class="col-3 col-md-2 p-md-4"
+                                                              @endif :disabled="disabledTicket"
+                                                              v-b-modal.modal-facturar
+                                                              @click="comprobante='30'"
+                                                              variant="info"><i class="fas fa-receipt"></i>
+                                                        Nota de venta
+                                                    </b-button>
+                                                    <b-button
+                                                            @if(!$agent->isDesktop()) class="col-3 col-md-2 p-md-4 order-2 order-lg-1"
+                                                            @endif :disabled="productosSeleccionados == 0"
+                                                            v-b-modal.modal-facturar class="float-right ml-1"
+                                                            @click="comprobante='01'"
+                                                            variant="warning"><i class="fas fa-file-invoice-dollar"></i>
+                                                        Generar factura
+                                                    </b-button>
+                                                    <b-button
+                                                            @if(!$agent->isDesktop()) class="col-3 col-md-2 p-md-4 order-1 order-lg-2"
+                                                            @endif :disabled="productosSeleccionados == 0"
+                                                            v-b-modal.modal-facturar class="float-right"
+                                                            @click="comprobante='03'"
+                                                            variant="warning"><i class="fas fa-file-invoice-dollar"></i>
+                                                        Generar boleta
+                                                    </b-button>
+                                                @endcan
+                                            @if(!$agent->isDesktop())
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <modal-facturacion
+            :tipo_doc="comprobante"
+            :idpedido="idpedido"
+            :total="totalVenta"
+            :origen="'pedidos'"
+            :items="productosSeleccionados"
+            v-on:imprimir="imprimir"
+            v-on:obtener-mesas="obtener_delivery"
+            v-on:notificaciones="obtener_notificaciones"
+            v-on:limpiar="limpiar">
+    </modal-facturacion>
+    <modal-agregar-producto
+            ref="agregarPlato"
+            :categorias="{{$categorias}}"
+            :isdesktop="{{json_encode($agent->isDesktop())}}"
+            v-on:agregar="agregarProducto"
+            v-on:guardar="guardarPedido">
+    </modal-agregar-producto>
+    <modal-entrega
+            :idpedido="idpedido"
+            v-on:delivery="obtener_delivery">
+    </modal-entrega>
+    <modal-detalle
+            :item="item"
+            :can-edit-precio="@can('Pedido: editar precio') true @else false @endcan"
+            v-on:actualizar="actualizarDetalle(null)">
+    </modal-detalle>
+    <modal-producto-descuento :item="item" v-on:agregar="agregarDescuento"></modal-producto-descuento>
+    <modal-devolucion></modal-devolucion>
+@endsection
+@section('script')
+    <script>
+        let app = new Vue({
+                el: '.app',
+                data: {
+                    errorDatosVenta: [],
+                    errorVenta: 0,
+                    ordenes : [],
+                    comprobante: '30',
+                    piso:'1',
+                    idpedido:-1,
+                    idcliente: -1,
+                    mostrarSpinner: false,
+                    totalVenta:0,
+                    productosSeleccionados:[],
+                    productosSeleccionadosAux:[],
+                    numero_mesa:'',
+                    idmesa:-1,
+                    ticket:'',
+                    num_item : -1,
+                    element:'',
+                    timer:null,
+                    disabledTicket:true,
+                    current_val:'',
+                    empleados:[],
+                    idvendedor:"{{$idvendedor}}",
+                    item:{},
+                    disabledNuevo: false,
+                },
+                created(){
+                    this.obtener_delivery();
+                    this.obtenerEmpleados();
+                },
+                methods:{
+                    agregarDescuento(obj){
+                        let producto = this.productosSeleccionados[this.index];
+                        producto['precio'] = obj.precio;
+                        this.actualizarDetalle(null);
+                    },
+                    editarItem(item, index = null){
+                        this.item=item;
+                        this.index = index;
+                        this.num_item = item.num_item;
+                    },
+                    noFocus(input){
+                        if(input.value != this.current_val){
+                            this.actualizarDetalle(null);
+                        }
+                        input.setAttribute('disabled',"");
+                    },
+                    habilitar(num_item, el){
+                        this.num_item = num_item;
+                        this.element = el;
+                        let input = document.getElementById(this.num_item+'-'+this.element)
+                        input.removeAttribute('disabled');
+                        input.focus();
+                        this.current_val=input.value;
+                    },
+                    obtener_delivery(){
+                        axios.get('/pedidos/obtener-delivery/')
+                            .then(response => {
+                                this.ordenes = response.data;
+                            })
+                            .catch(function (error) {
+                                alert('Ha ocurrido un error.');
+                                console.log(error);
+                            });
+                    },
+                    obtener_data_delivery(id){
+                        this.mostrarSpinner = true;
+                        let inputs = document.getElementsByClassName('td-dis');
+                        for(input of inputs){
+                            input.setAttribute('disabled',"");
+                        }
+                        axios.get('/pedidos/obtener-data-mesa/'+id+'?tipo=delivery')
+                            .then(response => {
+                                let data = response.data;
+                                this.idpedido = data.pedido.idorden;
+                                this.productosSeleccionados = data.productos_seleccionados;
+                                this.idvendedor = data.pedido.idvendedor;
+                                this.calcularTotales();
+                                this.mostrarSpinner = false;
+                                if(this.productosSeleccionados == 0){
+                                    this.disabledTicket=true;
+                                } else {
+                                    this.disabledTicket=false;
+                                }
+                            })
+                            .catch(error => {
+                                alert('Ha ocurrido un error.');
+                                console.log(error);
+                                this.mostrarSpinner = false;
+                            });
+                    },
+                    agregarProducto(obj){
+                        let productos = this.productosSeleccionados.push({ ...obj });
+                        let i = productos - 1;
+                        this.$set(this.productosSeleccionados[i], 'num_item', i+1);
+                        this.$set(this.productosSeleccionados[i], 'loading', false);
+                        this.$set(this.productosSeleccionados[i], 'warning', false);
+                        this.$set(this.productosSeleccionados[i], 'cantidad', 1);
+                        this.$set(this.productosSeleccionados[i], 'descuento', '0.00');
+                        this.$set(this.productosSeleccionados[i], 'total', this.productosSeleccionados[i]['precio']);
+                        this.disabledTicket = false;
+                        this.calcularTotales()
+                    },
+                    guardarPedido(){
+                        if(this.productosSeleccionados.length != this.productosSeleccionadosAux.length) {
+                            this.procesar("{{action('PedidoController@update')}}",'editar');
+                        }
+                    },
+                    nuevoDelivery(){
+                        this.totalVenta = '0.00';
+                        this.productosSeleccionados=[];
+                        this.idpedido = -1;
+                        this.ticket = '';
+                        this.disabledTicket = true;
+                        this.procesar("{{action('PedidoController@store')}}", 'nuevo')
+                    },
+                    procesar(accion, tipo){
+
+                        let data = {
+                            'idmesa': this.idmesa,
+                            'idvendedor':this.idvendedor,
+                            'idorden': this.idpedido,
+                            'idcliente': -1,
+                            'total': this.totalVenta,
+                            'moneda': 'S/',
+                            'comprobante': '30',
+                            'observaciones': '',
+                            'igv_incluido': 1,
+                            'numero_mesa': this.numero_mesa,
+                            'items': JSON.stringify(this.productosSeleccionados)
+                        };
+
+                        if(tipo == 'nuevo'){
+                            this.disabledNuevo = true;
+                            data['datos_entrega'] = JSON.stringify({direccion:'',referencia:'',contacto:'-',telefono:'', costo:'0'});
+                        }
+
+                        axios.post(accion, data)
+                            .then(response => {
+                                if (!response.data.idorden) {
+                                    alert('Ha ocurrido un error. Intenta nuevamente.');
+                                } else {
+                                    this.totalVenta = response.data.total;
+                                    this.idpedido = response.data.idorden;
+                                    this.obtener_delivery()
+                                }
+                                this.disabledNuevo = false;
+                            })
+                            .catch(error => {
+                                alert('Ha ocurrido un error.');
+                                this.disabledNuevo = false;
+                                console.log(error);
+                            });
+                    },
+                    calcularTotales(){
+                        let suma = 0;
+                        for (let producto of this.productosSeleccionados) {
+                            producto['total'] = (producto['precio'] * producto['cantidad']).toFixed(2);
+                            suma += Number(producto.total);
+                        }
+                        this.totalVenta = suma.toFixed(2);
+                    },
+                    borrarItemVenta(index){
+                        if(this.productosSeleccionados.length > 1){
+                            this.mostrarSpinner = true;
+                            this.productosSeleccionados.splice(index, 1);
+                            this.calcularTotales();
+                            axios.post('{{action('PedidoController@borrarItemPedido')}}',{
+                                'idorden':this.idpedido,
+                                'total': this.totalVenta,
+                                'items': JSON.stringify(this.productosSeleccionados),
+                            })
+                                .then(response => {
+                                    this.productosSeleccionados = response.data;
+                                    this.obtener_delivery();
+                                    this.mostrarSpinner = false;
+                                })
+                                .catch(error => {
+                                    alert('Ha ocurrido un error.');
+                                    console.log(error);
+                                    this.mostrarSpinner = false;
+                                });
+                        } else {
+                            this.limpiarMesa();
+                        }
+
+                    },
+                    limpiarMesa(){
+                        if(confirm('Se anulará la venta. Confirme la acción.')){
+                            axios.delete('{{url('/pedidos/destroy')}}' + '/' + this.idpedido)
+                                .then(() =>{
+                                    this.limpiar();
+                                })
+                                .catch(error => {
+                                    console.log(error);
+                                });
+                        }
+                    },
+                    actualizarDetalle(event){
+                        if(event ==null || event.code == 'Enter' || event.code == 'NumpadEnter'){
+                            let index = this.num_item - 1;
+                            let producto = this.productosSeleccionados[index];
+                            producto['loading'] = true;
+                            producto['warning'] = false;
+                            this.calcularTotales();
+                            axios.post('{{action('PedidoController@actualizarDetalle')}}',{
+                                'idorden':this.idpedido,
+                                'total':this.totalVenta,
+                                'item':JSON.stringify(producto)
+                            })
+                                .then(response => {
+                                    producto['loading'] = false;
+                                    producto['precio'] = (Number(producto['precio'])).toFixed(2);
+                                    if(response.data == 1){
+                                        this.obtener_delivery();
+                                        let input = document.getElementById(+this.num_item+"-"+this.element);
+                                        if(input){
+                                            input.setAttribute('disabled',"");
+                                        }
+                                    } else {
+                                        producto['warning'] = true;
+                                    }
+                                })
+                                .catch(error => {
+                                    alert('Ha ocurrido un error.');
+                                    producto['loading'] = false;
+                                    producto['warning'] = true;
+                                    console.log(error);
+                                });
+                        }
+                    },
+                    imprimir(file_or_id){
+
+                        let src = '';
+                        switch (file_or_id) {
+                            case 'comanda':
+                                src = "{{url('/pedidos/imprimir').'/'}}" + this.idpedido;
+                                break;
+                            case 'entrega':
+                                src = "{{url('/pedidos/imprimir_entrega/').'/'}}" + this.idpedido;
+                                break;
+                            default:
+                                src = "{{url('/ventas/imprimir/').'/'}}" + file_or_id;
+                        }
+
+                         @if(!$agent->isDesktop())
+
+                            @if(isset(json_decode(cache('config')['interfaz'], true)['rawbt']) && json_decode(cache('config')['interfaz'], true)['rawbt'])
+
+                                axios.get(src+'?rawbt=true')
+                                    .then(response => {
+                                        window.location.href = response.data;
+                                    })
+                                    .catch(error => {
+                                        alert('Ha ocurrido un error al imprimir con RawBT.');
+                                        console.log(error);
+                                    });
+                                /*let  beforeUrl = 'intent:';
+                                afterUrl = '#Intent;package=ru.a402d.rawbtprinter;scheme=rawbt;component=ru.a402d.rawbtprinter.activity.PrintDownloadActivity;end;';
+                                document.location=beforeUrl+encodeURI(src)+afterUrl;*/
+                            @else
+                                window.open(src, '_blank');
+                            @endif
+                        @else
+                            let iframe = document.createElement('iframe');
+                            document.body.appendChild(iframe);
+                            iframe.style.display = 'none';
+                            iframe.onload = function() {
+                                setTimeout(function() {
+                                    iframe.focus();
+                                    iframe.contentWindow.print();
+                                }, 0);
+                            };
+                            iframe.src = src;
+                        @endif
+                    },
+                    limpiar(){
+                        this.totalVenta = '0.00';
+                        this.numero_mesa = '';
+                        this.productosSeleccionados=[];
+                        this.idpedido = -1;
+                        this.ticket = '';
+                        this.idmesa = -1;
+                        this.idvendedor="{{$idvendedor}}";
+                        this.obtener_delivery();
+                        this.disabledTicket = true;
+                    },
+                    obtenerEmpleados(){
+                        axios.get('/pedidos/obtener-empleados')
+                            .then(response => {
+                                this.empleados = response.data.empleados;
+                                this.idvendedor = response.data.idvendedor;
+                            })
+                            .catch(error => {
+                                alert('Ha ocurrido un error.');
+                                console.log(error);
+                            });
+                    },
+                    cambiarEmpleado(e){
+                        if(this.idpedido != -1){
+                            this.mostrarSpinner = true;
+                            axios.post('/pedidos/cambiar-vendedor',{
+                                'idpedido':this.idpedido,
+                                'idvendedor':this.idvendedor
+                            })
+                                .then(response => {
+                                    if(response.data!=1){
+                                        alert('Ha ocurrido un error al actualizar el vendedor');
+                                    }
+                                    this.mostrarSpinner = false;
+                                })
+                                .catch(error => {
+                                    this.mostrarSpinner = false;
+                                    alert('Ha ocurrido un error.');
+                                    console.log(error);
+                                });
+                        }
+                    },
+                    obtener_notificaciones(){
+                        app_menu.$refs['panelNotificacion'].countNotifications();
+                    }
+                }
+            }
+        );
+    </script>
+@endsection
+@section('css')
+    @if(!$agent->isDesktop())
+    <style>
+        #modal-agregar-plato .modal-dialog{
+            height: auto !important;
+            position: relative !important;
+        }
+        .plato-botones, .plato-descripcion{
+            display: none !important;
+        }
+        .plato-botones-alt{
+            display: flex !important;
+            background: #d5d0d0;
+            padding: 10px;
+            margin-top: -17px;
+        }
+        .plato-buscador{
+            display: none;
+        }
+        #modal-agregar-plato .modal-body{
+            padding-right: 0;
+            padding-left: 0;
+        }
+        .buttons-mesa button{
+            border: 2px solid white !important;
+        }
+        .plato-lista-menu .card-body{
+            overflow: auto;
+            height: auto !important;
+            min-height: 580px;
+        }
+    </style>
+    @endif
+@endsection
