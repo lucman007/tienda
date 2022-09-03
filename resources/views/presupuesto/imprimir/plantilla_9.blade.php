@@ -1,4 +1,4 @@
-@php /** Modelo 9 - habilitado**/@endphp
+@php /** Modelo 9 - inhabilitado**/@endphp
 <!doctype html>
 <html lang="{{ config('app.locale') }}">
 <head>
@@ -90,16 +90,16 @@
                         </td>
                     </tr>
                     <tr>
-                        <td style="width: 70mm">Atención: <strong>{{ mb_strtoupper($presupuesto->atencion) }} </strong></td>
+                        <td>Atención: <strong>{{ mb_strtoupper($presupuesto->atencion) }} </strong></td>
                     </tr>
                     <tr>
-                        <td style="width: 70mm">Forma de pago: <strong>{{strtoupper($presupuesto->condicion_pago)}}</strong></td>
+                        <td>Forma de pago: <strong>{{strtoupper($presupuesto->condicion_pago)}}</strong></td>
                     </tr>
                     <tr>
-                        <td style="width: 70mm">Tiempo de entrega: <strong>{{strtoupper($presupuesto->tiempo_entrega)}}</strong></td>
+                        <td>Tiempo de entrega: <strong>{{strtoupper($presupuesto->tiempo_entrega)}}</strong></td>
                     </tr>
                     <tr>
-                        <td style="width: 70mm">Punto de entrega: <strong>{{mb_strtoupper($presupuesto->lugar_entrega)}}</strong></td>
+                        <td>Punto de entrega: <strong>{{mb_strtoupper($presupuesto->lugar_entrega)}}</strong></td>
                     </tr>
                 </table>
             </td>
@@ -113,7 +113,7 @@
 </div>
 <div class="div-table-header">
 </div>
-<div class="body">
+
     @php($i=1)
         <table class="items" cellpadding="0">
             <thead>
@@ -132,7 +132,7 @@
             @foreach($presupuesto['productos'] as $item)
                 <tr class="items-tr">
                     <td style="width: 5mm">{{$i++}}</td>
-                    <td style="width: 65mm"><strong>{{$item->nombre}}</strong>{!!$item->nombre!=''?'<br>':''!!} {!!$item->detalle['descripcion']!!}</td>
+                    <td style="width: 65mm"><strong>{{$item->nombre}}</strong><br> {!!$item->detalle['descripcion']!!}</td>
                     <td style="width: 25mm">@if($item->imagen) <img style="width: 100%; padding-right:5px " src="{{$item->imagen}}" alt="">@endif</td>
                     <td style="width: 20mm;">{{floatval($item->detalle['cantidad'])}}</td>
                     <td style="width: 10mm">{{explode('/',$item->unidad_medida)[1]}}</td>
@@ -146,7 +146,7 @@
                     <td><br></td>
                 </tr>
                 <tr>
-                    <td colspan="8" style="margin-top: 5mm; width: 180mm">
+                    <td colspan="7" style="margin-top: 5mm">
                         Observación: {{$presupuesto->observaciones}}
                     </td>
                 </tr>
@@ -160,7 +160,7 @@
             @endif
             </tbody>
         </table>
-</div>
+
 <table class="footer">
     <tr>
         <td class="footer-l">
@@ -172,17 +172,36 @@
                 @endif
                 <br>
                 @if($presupuesto->exportacion)
-                    <strong>Beneficiario : </strong> LINE TECH EIRL<br>
-                    <strong>Código SWIFT:</strong> BCPLPEPL <br>
-                    <strong>Cuenta N°:</strong> 192-2669185-1-73 <br>
-                    <strong>Banco:</strong> BANCO DE CREDITO DEL PERU <br>
+                    <strong>Beneficiario : </strong> <br>
+                    <strong>Código SWIFT:</strong>  <br>
+                    <strong>Cuenta N°:</strong> <br>
+                    <strong>Banco:</strong><br>
                 @else
-
-                    <strong>Cta. detracciones:</strong> {{$emisor->cuenta_detracciones}} <br>
-                    <strong>Cta. Soles:</strong> {{$emisor->cuenta_1}} <br>
-                    <strong>Cta. Dólares:</strong> {{$emisor->cuenta_2}} <br>
                 @endif
             </p>
+            <table>
+                <tr>
+                    <td><span class="bcp-logo"><img src="{{public_path('images/nyabby/bcp-logo.jpg')}}" alt=""></span></td>
+                    <td colspan="3"><strong>Cta. Soles:</strong> {{$emisor->cuenta_1}}<br><strong>Cta. Dólares:</strong> {{$emisor->cuenta_2}}</td>
+                </tr>
+                <tr>
+                    <td style="padding-top:10px">
+                        <span class="bcp-logo"><img src="{{public_path('images/nyabby/yape-logo.jpg')}}" alt=""></span>
+                    </td>
+                    <td style="padding-top:10px">
+                        <span class="qr-img"><img src="{{public_path('images/nyabby/qr-yape.jpeg')}}" alt=""></span>
+                    </td>
+                    <td style="padding:10px 0 0 10px">
+                        <span class="img-icon"><img src="{{public_path('images/nyabby/whats-logo.jpg')}}" alt="">992 480 966</span> <br>
+                        <span class="img-icon"><img src="{{public_path('images/nyabby/mail-logo.jpg')}}" alt="">ventas@nyabbycorp.com</span> <br>
+                        <span class="img-icon"><img src="{{public_path('images/nyabby/facebook-logo.jpg')}}" alt="">@NyabbyCorp</span> <br>
+                        <span class="img-icon"><img src="{{public_path('images/nyabby/insta-logo.jpg')}}" alt="">/NyabbyCorp</span> <br>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding-top:10px" colspan="3">Más productos en: www.nyabbycorp.com</td>
+                </tr>
+            </table>
         </td>
         <td class="footer-r">
             <table>
@@ -216,6 +235,9 @@
 </body>
 </html>
 <style>
+    body{
+        width: 200mm;
+    }
 
     h3{
         font-size: 13pt;
@@ -231,12 +253,9 @@
     }
 
     .div-table-header{
-        width: 190mm; background: #ffca11; padding: 2mm 5mm; text-align: center; margin-top: 5mm; height: 5mm
-    }
-
-    .line-bottom{
-        border-bottom: 1px solid #CCC;
-        padding: 20px;
+        width: 190mm; background: #ffca11; padding: 4mm 5mm; text-align: center; margin-top: 2mm;
+        position: relative;
+        float: left;
     }
 
     table{
@@ -245,8 +264,8 @@
         border-collapse: collapse;
     }
     .items-tr td{
-        border-bottom: 1px solid #575757;
-        padding: 10px 0;
+        border-bottom: 1px solid #bfbfbf;
+        padding: 6px 0;
     }
     .table-header td{
         margin: 0;
@@ -289,16 +308,11 @@
         top:25mm;
     }
 
-    .body{
-        position: relative;
-        width: 200mm;
-    }
-
-    .body .items {
+    .items {
         width: 200mm;
         position: relative;
         padding: 0 32px 20px 32px;
-        margin-top: -25px;
+        margin-top: -34px;
     }
     .footer{
         width: 220mm;
@@ -314,8 +328,22 @@
         width: 30%;
     }
     .footer-r td{
-        padding: 2mm 3mm;
+        padding: 1mm 3mm;
     }
-
+    .bcp-logo{
+        width: 30px;
+    }
+    .bcp-logo img, .qr-img img, .img-icon img{
+        width: 100%;
+    }
+    .bcp-logo, .cuentas{
+        float: left;
+    }
+    .qr-img{
+        width: 80px;
+    }
+    .img-icon{
+        width: 20px;
+    }
 
 </style>

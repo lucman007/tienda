@@ -18,6 +18,7 @@ use sysfact\Exports\VentasDiariasExport;
 use sysfact\Exports\VentasMensualExport;
 use sysfact\Exports\VentasResumenExport;
 use sysfact\Gastos;
+use sysfact\Http\Controllers\Helpers\DataTipoPago;
 use sysfact\Http\Controllers\Helpers\PdfHelper;
 use sysfact\Producto;
 use sysfact\Venta;
@@ -96,19 +97,10 @@ class ReporteController extends Controller
                         break;
 
                     case 'tipo-de-pago':
-                        switch ($buscar) {
-                            case 'efectivo':
-                                $buscar = '1';
-                                break;
-                            case 'credito':
-                                $buscar = '2';
-                                break;
-                            case 'tarjeta':
-                                $buscar = '3';
-                                break;
-                            case 'otros':
-                                $buscar = '4';
-                        }
+                        $pago = DataTipoPago::getTipoPago();
+                        $find = array_search($buscar, array_column($pago,'text_val'));
+                        $buscar = $pago[$find]['num_val'];
+
                         $filtro = 'tipo_pago';
                         $ventas = Venta::whereBetween('fecha', [$desde . ' 00:00:00', $hasta . ' 23:59:59'])
                             ->where('eliminado', '=', 0)
@@ -210,19 +202,10 @@ class ReporteController extends Controller
                         break;
 
                     case 'tipo-de-pago':
-                        switch ($buscar) {
-                            case 'efectivo':
-                                $buscar = '1';
-                                break;
-                            case 'credito':
-                                $buscar = '2';
-                                break;
-                            case 'tarjeta':
-                                $buscar = '3';
-                                break;
-                            case 'otros':
-                                $buscar = '4';
-                        }
+                        $pago = DataTipoPago::getTipoPago();
+                        $find = array_search($buscar, array_column($pago,'text_val'));
+                        $buscar = $pago[$find]['num_val'];
+
                         $filtro = 'tipo_pago';
                         $ventas = Venta::whereBetween('fecha', [$desde . ' 00:00:00', $hasta . ' 23:59:59'])
                             ->where('eliminado', '=', 0)
@@ -280,19 +263,9 @@ class ReporteController extends Controller
                     $suma_dolares += $item->total_venta;
                 }
 
-                switch ($item->tipo_pago) {
-                    case 1:
-                        $item->tipo_pago = 'EFECTIVO';
-                        break;
-                    case 2:
-                        $item->tipo_pago = 'CRÉDITO';
-                        break;
-                    case 3:
-                        $item->tipo_pago = 'TARJETA';
-                        break;
-                    default:
-                        $item->tipo_pago = 'OTROS';
-                }
+                $pago = DataTipoPago::getTipoPago();
+                $find = array_search($item->tipo_pago, array_column($pago,'num_val'));
+                $item->tipo_pago = mb_strtoupper($pago[$find]['label']);
 
             }
 

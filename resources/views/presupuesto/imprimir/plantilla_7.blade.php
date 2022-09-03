@@ -60,10 +60,10 @@
         @endif
         <br>
         @if($presupuesto->exportacion)
-            <strong>Beneficiario : </strong> LINE TECH EIRL<br>
-            <strong>Código SWIFT:</strong> BCPLPEPL <br>
-            <strong>Cuenta N°:</strong> 192-2669185-1-73 <br>
-            <strong>Banco:</strong> BANCO DE CREDITO DEL PERU <br>
+            <strong>Beneficiario : </strong><br>
+            <strong>Código SWIFT:</strong> <br>
+            <strong>Cuenta N°:</strong> <br>
+            <strong>Banco:</strong> <br>
         @else
 
             <strong>Cta. detracciones:</strong> {{$emisor->cuenta_detracciones}} <br>

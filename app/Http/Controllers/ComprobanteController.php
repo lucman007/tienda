@@ -104,19 +104,10 @@ class ComprobanteController extends Controller
                     break;
 
                 case 'tipo-de-pago':
-                    switch ($buscar) {
-                        case 'efectivo':
-                            $buscar = '1';
-                            break;
-                        case 'credito':
-                            $buscar = '2';
-                            break;
-                        case 'tarjeta':
-                            $buscar = '3';
-                            break;
-                        case 'otros':
-                            $buscar = '4';
-                    }
+                    $pago = DataTipoPago::getTipoPago();
+                    $find = array_search($buscar, array_column($pago,'text_val'));
+                    $buscar = $pago[$find]['num_val'];
+
                     $filtro = 'tipo_pago';
                     $ventas=Venta::whereBetween('fecha',[$desde.' 00:00:00',$hasta.' 23:59:59'])
                         ->where('eliminado','=',0)

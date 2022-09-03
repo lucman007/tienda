@@ -352,7 +352,7 @@ class PedidoController extends Controller
 
         $view = view('pedidos/imprimir_pedido',['orden'=>$pedido]);
         $html=$view->render();
-        $pdf=new Html2Pdf('P',[72,250],'es');
+        $pdf=new Html2Pdf('P',[72,350],'es');
         $pdf->pdf->SetTitle('Pedido N° '.$pedido->idorden);
         $pdf->writeHTML($html);
 

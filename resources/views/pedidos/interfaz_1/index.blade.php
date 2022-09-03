@@ -215,14 +215,14 @@
                                         @if(!$agent->isDesktop())
                                             <div class="row">
                                                 @endif
-                                                <b-button @if(!$agent->isDesktop()) class="col-3 col-md-2 p-md-4"
+                                                <b-button @if(!$agent->isDesktop()) class="col-3 col-md p-md-4"
                                                           @endif :disabled="idpedido == -1"
                                                           v-b-modal.modal-agregar-producto
                                                           @click="productosSeleccionadosAux = [ ...productosSeleccionados ]"
                                                           variant="primary"><i class="fas fa-plus"></i>
                                                     Agregar producto
                                                 </b-button>
-                                                <b-button @if(!$agent->isDesktop()) class="col-3 col-md-2 p-md-4"
+                                                <b-button @if(!$agent->isDesktop()) class="col-3 col-md p-md-4"
                                                           @endif :disabled="idpedido == -1" @click="limpiarMesa"
                                                           variant="danger"><i class="fas fa-times-circle"></i>
                                                     Anular venta
@@ -233,8 +233,13 @@
                                                           variant="secondary"><i class="fas fa-print"></i>
                                                     Imprimir entrega
                                                 </b-button>
+                                                <b-button @if(!$agent->isDesktop()) class="col-3 col-md p-md-4"
+                                                          @endif :disabled="productosSeleccionados == 0" @click="imprimir('pedido')"
+                                                          variant="secondary"><i class="fas fa-box-open"></i>
+                                                    Imprimir pedido
+                                                </b-button>
                                                 @can('Pedido: procesar')
-                                                    <b-button @if(!$agent->isDesktop()) class="col-3 col-md-2 p-md-4"
+                                                    <b-button @if(!$agent->isDesktop()) class="col-3 col-md p-md-4"
                                                               @endif :disabled="disabledTicket"
                                                               v-b-modal.modal-facturar
                                                               @click="comprobante='30'"
@@ -242,7 +247,7 @@
                                                         Nota de venta
                                                     </b-button>
                                                     <b-button
-                                                            @if(!$agent->isDesktop()) class="col-3 col-md-2 p-md-4 order-2 order-lg-1"
+                                                            @if(!$agent->isDesktop()) class="col-3 col-md p-md-4 order-2 order-lg-1"
                                                             @endif :disabled="productosSeleccionados == 0"
                                                             v-b-modal.modal-facturar class="float-right ml-1"
                                                             @click="comprobante='01'"
@@ -250,7 +255,7 @@
                                                         Generar factura
                                                     </b-button>
                                                     <b-button
-                                                            @if(!$agent->isDesktop()) class="col-3 col-md-2 p-md-4 order-1 order-lg-2"
+                                                            @if(!$agent->isDesktop()) class="col-3 col-md p-md-4 order-1 order-lg-2"
                                                             @endif :disabled="productosSeleccionados == 0"
                                                             v-b-modal.modal-facturar class="float-right"
                                                             @click="comprobante='03'"
@@ -539,7 +544,7 @@
 
                         let src = '';
                         switch (file_or_id) {
-                            case 'comanda':
+                            case 'pedido':
                                 src = "{{url('/pedidos/imprimir').'/'}}" + this.idpedido;
                                 break;
                             case 'entrega':
