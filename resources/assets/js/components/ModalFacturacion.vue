@@ -306,8 +306,9 @@
                     for (let pago of this.pago_fraccionado) {
                         suma_pago_fra += Number(pago.monto);
                     }
-                    if (suma_pago_fra > this.total) this.errorDatosVenta.push('*La suma de los pagos fraccionados supera el monto total de la venta');
-                    if (suma_pago_fra < this.total) this.errorDatosVenta.push('*La suma de los pagos fraccionados es inferior al monto total de la venta');
+                    if (suma_pago_fra.toFixed(2) > this.total) this.errorDatosVenta.push('*La suma de los pagos fraccionados supera el monto total de la venta');
+                    if (suma_pago_fra.toFixed(2) < this.total) this.errorDatosVenta.push('*La suma de los pagos fraccionados es inferior al monto total de la venta');
+
                 }
                 if (Object.keys(this.clienteSeleccionado).length == 0) this.errorDatosVenta.push('*Debes ingresar un cliente');
                 if ('nombre_o_razon_social' in this.clienteSeleccionado && this.clienteSeleccionado['nombre_o_razon_social'].length == 0) this.errorDatosVenta.push('*Debes ingresar un cliente');

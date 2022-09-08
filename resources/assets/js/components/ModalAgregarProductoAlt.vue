@@ -178,7 +178,7 @@
                 this.productoSeleccionado = {};
                 this.query='';
                 this.showCategorias = true;
-                this.$refs['modal-agregar-producto'].hide();
+                this.$refs['modal-agregar-producto-alt'].hide();
             },
             agregarProducto(producto){
                 let spinner = document.getElementById("spinner_"+producto.idproducto);
@@ -194,29 +194,19 @@
     }
 </script>
 <style>
-    #modal-agregar-producto .modal-content{
+    #modal-agregar-producto-alt .modal-dialog{
+        max-width: 80%;
+    }
+    #modal-agregar-producto-alt .modal-content{
         background: #eceff1;
     }
 
-    #modal-agregar-producto .menu-categorias{
-        padding: 5px;
-        display: inline-grid;
-        align-items: center;
-    }
-
-    #modal-agregar-producto .menu-categorias span{
-        text-align: center;
-        margin: 0;
-        word-break: break-word;
-        padding: 15px 10px;
-    }
-
-    #modal-agregar-producto .card-body{
+    #modal-agregar-producto-alt .card-body{
         overflow-y: scroll;
     }
 
-    #modal-agregar-producto .categorias-container{
-        height: 500px;
+    #modal-agregar-producto-alt table td{
+        padding: 10px 0;
     }
     .badge {
         font-size: 85%;

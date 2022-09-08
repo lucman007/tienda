@@ -254,8 +254,8 @@
                         suma_pago_fra += Number(pago.monto);
                     }
 
-                    if (suma_pago_fra > total) this.errorDatosVenta.push('*La suma de los pagos fraccionados supera el monto total de la venta');
-                    if (suma_pago_fra < total) this.errorDatosVenta.push('*La suma de los pagos fraccionados es inferior al monto total de la venta');
+                    if (suma_pago_fra.toFixed(2) > total) this.errorDatosVenta.push('*La suma de los pagos fraccionados supera el monto total de la venta');
+                    if (suma_pago_fra.toFixed(2) < total) this.errorDatosVenta.push('*La suma de los pagos fraccionados es inferior al monto total de la venta');
                 }
                 if(this.comprobante == '03' || this.comprobante == '01'){
                     if (Object.keys(this.clienteSeleccionado).length == 0) this.errorDatosVenta.push('*Debes ingresar un cliente');
