@@ -3,6 +3,7 @@
 namespace sysfact\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use sysfact\Emisor;
 use sysfact\Http\Controllers\Helpers\PdfHelper;
 use sysfact\Venta;
@@ -84,9 +85,13 @@ class ConsultaController extends Controller
             $año = substr($fecha,4,4);
 
             $fecha = $año.'-'.$mes.'-'.$dia;
+            Log::info($total);
+            Log::info($correlativo);
+            Log::info($serie);
+            Log::info($tipo_documento);
+            Log::info($fecha);
 
-            $venta=Venta::where('total_venta',$total)
-                ->whereHas('facturacion', function($query) use($correlativo, $serie, $tipo_documento, $fecha) {
+            $venta=Venta::whereHas('facturacion', function($query) use($correlativo, $serie, $tipo_documento, $fecha) {
                     $query->where('serie',$serie)
                         ->where('correlativo',$correlativo)
                         ->where('codigo_tipo_documento',$tipo_documento)

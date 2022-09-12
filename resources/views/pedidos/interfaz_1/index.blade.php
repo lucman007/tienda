@@ -287,6 +287,7 @@
             :idpedido="idpedido"
             :total="totalVenta"
             :origen="'pedidos'"
+            :fecha="'{{date('Y-m-d', strtotime(date('Y-m-d').' + 1 days'))}}'"
             :tipo_de_pago="{{json_encode(\sysfact\Http\Controllers\Helpers\DataTipoPago::getTipoPago())}}"
             :items="productosSeleccionados"
             v-on:imprimir="imprimir"

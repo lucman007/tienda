@@ -329,7 +329,7 @@
                 eliminar(idventa){
                     if (confirm('¿Está seguro de eliminar la venta?')) {
                         axios.get('{{url('ventas/eliminar-venta')}}'+'/'+idventa)
-                            .then(function () {
+                            .then(() => {
                                 window.location.reload();
                             })
                             .catch(error => {

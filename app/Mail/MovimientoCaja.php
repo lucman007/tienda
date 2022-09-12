@@ -34,7 +34,6 @@ class MovimientoCaja extends Mailable
     public function build()
     {
         $mail = $this->from('facsy@facturacion.xyz')
-            ->bcc('ces.des007@gmail.com')
             ->subject('MOVIMIENTO DE CAJA - '.$this->emisor)
             ->view('mail.caja',['caja'=>$this->caja]);
 

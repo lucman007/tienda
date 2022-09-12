@@ -22,12 +22,16 @@
                         <div class="row">
                             <div class="col-lg-4 form-group">
                                 <select v-model="tipoPagoContado" class="custom-select">
-                                    <option v-show="pago['num_val'] != 2" v-for="pago in tipo_pago" v-bind:value="pago['num_val']">{{pago['label']}}</option>
+                                    <option v-for="pago in tipo_pago" v-bind:value="pago['num_val']">{{pago['label']}}</option>
                                 </select>
                             </div>
                             <div class="col-lg-4 form-group">
                                 <b-button v-show="tipoPagoContado==4" v-b-modal.modal-pagofraccionado variant="primary"><i
                                         class="fas fa-plus"></i> Editar pago
+                                </b-button>
+                                <b-button v-show="tipoPagoContado==2"
+                                        @click="abrirCuotas" variant="primary"><i
+                                        class="fas fa-plus"></i> Cuotas ({{cuotas.length}})
                                 </b-button>
                             </div>
                             <div class="col-lg-4">
@@ -37,31 +41,53 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-9 mt-2 order-2 order-md-1">
-                        <label>Razón social</label> <span v-show="clienteSeleccionado.esNuevo" class="badge badge-success"> NUEVO CLIENTE</span>
-                        <input :disabled="disabledCliente" v-model="clienteSeleccionado.nombre_o_razon_social"
-                               type="text" class="form-control">
+                    <div class="col-lg-8 mt-2 order-2 order-md-1">
+                        <span v-show="clienteSeleccionado.esNuevo" class="badge badge-success n-cliente"> NUEVO CLIENTE</span>
+                        <b-input-group>
+                            <b-input-group-prepend>
+                                <b-input-group-text>
+                                    <i class="fas fa-user"></i>
+                                </b-input-group-text>
+                            </b-input-group-prepend>
+                            <input :disabled="disabledCliente" v-model="clienteSeleccionado.nombre_o_razon_social"
+                                   type="text" class="form-control">
+                        </b-input-group>
                     </div>
-                    <div class="col-lg-3 mt-2 order-1 order-md-2">
-                        <label>
-                            DNI / RUC
-                        </label>
-                        <input autocomplete="nope" :disabled="disabledClienteRuc" @keyup="buscarCliente"
-                               v-model="query" ref="focusThis" id="buscar-cliente" maxlength="11" type="number"
-                               class="form-control">
-                        <b-button :disabled="disabledClienteRuc" @click="buscarCliente(null)" variant="primary" class="boton_adjunto">
-                            <i v-show="!mostrarProgreso" class="fas fa-search"></i>
-                            <span v-show="mostrarProgreso"><b-spinner small label="Loading..."></b-spinner></span>
-                        </b-button>
+                    <div class="col-lg-4 mt-2 order-1 order-md-2">
+                        <b-input-group>
+                            <b-input-group-prepend>
+                                <b-input-group-text>
+                                    <i class="fas fa-id-card"></i>
+                                </b-input-group-text>
+                            </b-input-group-prepend>
+                            <input autocomplete="nope" :disabled="disabledClienteRuc" @keyup="buscarCliente"
+                                   v-model="query" ref="focusThis" id="buscar-cliente" maxlength="11" type="number"
+                                   class="form-control">
+                            <b-input-group-append>
+                                <b-button :disabled="disabledClienteRuc" @click="buscarCliente(null)" variant="primary">
+                                    <i v-show="!mostrarProgreso" class="fas fa-search"></i>
+                                    <span v-show="mostrarProgreso"><b-spinner small label="Loading..."></b-spinner></span>
+                                </b-button>
+                            </b-input-group-append>
+                        </b-input-group>
                         <i class="fas fa-times-circle borrarCliente" v-show="disabledClienteRuc"
                            v-on:click="borrarCliente"></i>
                     </div>
                     <div class="col-lg-10 mt-2 order-3">
-                        <label>Dirección</label>
-                        <input :disabled="disabledClienteDireccion" v-model="clienteSeleccionado.direccion" type="text"
-                               class="form-control">
-                        <i v-show="clienteSeleccionado.esNuevo" class="fas fa-edit editarCliente"
-                           v-on:click="disabledClienteDireccion = false"></i>
+                        <b-input-group>
+                            <b-input-group-prepend>
+                                <b-input-group-text>
+                                    <i class="fas fa-home"></i>
+                                </b-input-group-text>
+                            </b-input-group-prepend>
+                            <input :disabled="disabledClienteDireccion" v-model="clienteSeleccionado.direccion" type="text"
+                                   class="form-control">
+                            <b-input-group-append>
+                                <b-button :disabled="!clienteSeleccionado.esNuevo" v-on:click="disabledClienteDireccion = false" variant="primary">
+                                    <i class="fas fa-edit"></i>
+                                </b-button>
+                            </b-input-group-append>
+                        </b-input-group>
                     </div>
                     <div class="col-lg-12">
                         <div v-for="error in errorDatosVenta">
@@ -91,7 +117,7 @@
                         <div class="row">
                             <div class="col-lg-5">
                                 <label>Monto</label>
-                                <input v-model="pago.monto" type="number" class="form-control">
+                                <input v-model="pago.monto" type="number" class="form-control" onfocus="this.select()">
                             </div>
                             <div class="col-lg-6">
                                 <label>Tipo de pago</label>
@@ -110,12 +136,51 @@
             </template>
         </b-modal>
         <!--FIN MODAL PAGO FRACCIONADO -->
+        <!--INICIO MODAL CUOTAS -->
+        <b-modal size="md" id="modal-tipopago" ref="modal-tipopago" @ok="">
+            <template slot="modal-title">
+                Pago a crédito
+            </template>
+            <div class="container">
+                <div class="row">
+                    <div v-for="(cuota,index) in cuotasAux" class="col-lg-12 mb-3" :key="index">
+                        <div class="row">
+                            <div class="col-lg-5">
+                                <label>Cuota {{ index + 1 }} S/</label>
+                                <input v-model="cuota.monto" type="text" class="form-control">
+                            </div>
+                            <div class="col-lg-6">
+                                <label>Fecha de pago:</label>
+                                <input :min="fecha" type="date" v-model="cuota.fecha" name="fechaCuota"
+                                       class="form-control">
+                            </div>
+                            <div class="col-lg-1">
+                                <i @click="borrarCuota(index)" class="fas fa-times-circle btnBorrarCuota"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 mb-4">
+                        <button @click="agregarCuota(null)" class="btn btn-info"><i class="fas fa-plus"></i> Agregar cuota
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <template #modal-footer="{ ok, cancel}">
+                <b-button variant="secondary" @click="cancelarCuotas()">
+                    Cancel
+                </b-button>
+                <b-button variant="primary" @click="agregarCuotasVenta">
+                    OK
+                </b-button>
+            </template>
+        </b-modal>
+        <!--FIN MODAL CUOTAS -->
     </div>
 </template>
 <script>
     export default {
         name: 'modal-facturacion',
-        props: ['idventa','idpedido','origen','tipo_doc','items','total','tipo_de_pago'],
+        props: ['idventa','idpedido','origen','tipo_doc','items','total','tipo_de_pago','fecha'],
         data() {
             return {
                 clienteSeleccionado:{},
@@ -142,7 +207,9 @@
                     },
                 ],
                 tipo_pago:[],
-                num_operacion:''
+                num_operacion:'',
+                cuotas:[],
+                cuotasAux:[],
             }
         },
         methods: {
@@ -171,6 +238,53 @@
                     this.buscarCliente();
                 }
                 this.tipo_pago = this.tipo_de_pago;
+            },
+            abrirCuotas(){
+                this.$refs['modal-tipopago'].show();
+                this.cuotasAux = Object.assign([], this.cuotas);
+                this.agregarCuota(this.total);
+            },
+            agregarCuota(total){
+                let monto = '0.00';
+                if (this.cuotasAux.length > 0 && total) {
+                    return;
+                } else {
+                    if (total) {
+                        monto = Number(total).toFixed(2);
+                    }
+                }
+                this.cuotasAux.push({
+                    monto: monto,
+                    fecha: this.fecha
+                });
+            },
+            borrarCuota(index){
+                this.cuotasAux.splice(index, 1);
+            },
+            agregarCuotasVenta(){
+
+                for (let cuota of this.cuotasAux) {
+                    if ((Number(cuota.monto)) <= 0) {
+                        alert('Solo se admiten casillas con cuotas mayor a 0.00');
+                        return;
+                    }
+                    if (!cuota.fecha) {
+                        alert('Una de las fechas de pago no tiene el formato correcto');
+                        return;
+                    }
+                    if(cuota.fecha < this.fecha){
+                        alert('Las fechas de las cuotas deben ser mayor a la fecha actual');
+                        return;
+                    }
+                }
+
+                this.cuotas = Object.assign([], this.cuotasAux);
+                this.$refs['modal-tipopago'].hide();
+
+            },
+            cancelarCuotas(){
+                this.cuotasAux = [];
+                this.$refs['modal-tipopago'].hide();
             },
             buscarCliente(event){
                 if(event == null || event.code == 'Enter' || event.code == 'NumpadEnter'){
@@ -222,7 +336,8 @@
                     'tipo_pago_contado':this.tipoPagoContado,
                     'cliente':JSON.stringify(this.clienteSeleccionado),
                     'num_operacion':this.num_operacion,
-                    'pago_fraccionado': JSON.stringify(this.pago_fraccionado)
+                    'pago_fraccionado': JSON.stringify(this.pago_fraccionado),
+                    'cuotas': JSON.stringify(this.cuotas),
                 })
                     .then(response => {
                         let data = response.data;
@@ -308,7 +423,6 @@
                     }
                     if (suma_pago_fra.toFixed(2) > this.total) this.errorDatosVenta.push('*La suma de los pagos fraccionados supera el monto total de la venta');
                     if (suma_pago_fra.toFixed(2) < this.total) this.errorDatosVenta.push('*La suma de los pagos fraccionados es inferior al monto total de la venta');
-
                 }
                 if (Object.keys(this.clienteSeleccionado).length == 0) this.errorDatosVenta.push('*Debes ingresar un cliente');
                 if ('nombre_o_razon_social' in this.clienteSeleccionado && this.clienteSeleccionado['nombre_o_razon_social'].length == 0) this.errorDatosVenta.push('*Debes ingresar un cliente');
@@ -350,6 +464,7 @@
 <style>
     .borrarCliente{
         right: 65px;
+        top:9px;
     }
     .editarCliente{
         position: absolute;
@@ -357,5 +472,11 @@
         right: 20px;
         font-size: 18px;
         cursor: pointer;
+    }
+    .n-cliente{
+        position: absolute;
+        z-index: 99;
+        right: 19px;
+        top: 10px;
     }
 </style>

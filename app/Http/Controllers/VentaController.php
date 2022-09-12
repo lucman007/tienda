@@ -1162,7 +1162,17 @@ class VentaController extends Controller
                     $pago->fecha=date('Y-m-d H:i:s');
                     $venta->pago()->save($pago);
                 }
-            } else{
+            } else if ($request->tipo_pago_contado == 2) {
+                $cuotas = json_decode($request->cuotas, TRUE);
+                foreach ($cuotas as $cuota) {
+                    $pago = new Pago();
+                    $pago->monto = $cuota['monto'];
+                    $pago->tipo = 2;
+                    $pago->fecha = $cuota['fecha'];
+                    $venta->pago()->save($pago);
+                }
+            }
+            else{
                 $pago = new Pago();
                 $pago->monto=$pedido->total;
                 $pago->tipo=$request->tipo_pago_contado;
