@@ -20,7 +20,7 @@
                                 <strong>Fecha emisión:</strong> {{date("d/m/Y H:i:s",strtotime($credito->fecha))}}
                                 <hr>
                                 <strong>Moneda:</strong>
-                                @if($credito->facturacion->codigo_moneda=='S/')
+                                @if($credito->facturacion->codigo_moneda=='PEN')
                                     SOLES <hr>
                                 @else
                                     DÓLARES <hr>
@@ -54,7 +54,7 @@
                                     <td>@{{ (Number(cuota.total_pagado)).toFixed(2) }}</td>
                                     <td>@{{ (Number(cuota.total_adeuda)).toFixed(2) }}</td>
                                     <td>
-                                        <button @click="abrir_modal(cuota.idpago)" class="btn btn-success" title="Agregar pago"><i class="fas fa-dollar-sign"></i> Pagar
+                                        <button @click="abrir_modal(cuota.idpago)" class="btn btn-success" title="Agregar pago"><i class="fas fa-money-bill-wave"></i> Pagar
                                         </button>
                                     </td>
                                 </tr>
@@ -89,10 +89,15 @@
             <div class="col-lg-3">
                 <div class="form-group">
                     <label>Método de pago:</label>
+                    @php
+                        $tipo_pago = \sysfact\Http\Controllers\Helpers\DataTipoPago::getTipoPago();
+                    @endphp
                     <select v-model="metodo_pago" class="custom-select">
-                        <option value="1">Efectivo</option>
-                        <option value="2">Tarjeta</option>
-                        <option value="3">Depósito</option>
+                        @foreach($tipo_pago as $pago)
+                            @if($pago['num_val'] != 4)
+                            <option value="{{$pago['num_val']}}">{{$pago['label']}}</option>
+                            @endif
+                        @endforeach
                     </select>
                 </div>
             </div>

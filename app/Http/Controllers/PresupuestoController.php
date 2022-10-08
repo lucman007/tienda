@@ -364,11 +364,30 @@ class PresupuestoController extends Controller
         $presupuesto->leyenda=NumeroALetras::convert($presupuesto->presupuesto, $moneda_letras,true);
         $presupuesto->descuento_global = $presupuesto->tipo_descuento?floatval($presupuesto->porcentaje_descuento).'%':$presupuesto->moneda.' '.$presupuesto->descuento;
 
-        foreach ($presupuesto->productos as $item){
+        /*foreach ($presupuesto->productos as $item){
             $item->monto = $presupuesto->igv_incluido && !$presupuesto->exportacion?round($item->detalle['monto'] / 1.18,3):round($item->detalle['monto'],2);
             $item->monto_descuento=$item->detalle['tipo_descuento']?floatval($item->detalle['porcentaje_descuento']).'%':$item->detalle['descuento'];
             $subtotal = $item->detalle['cantidad']*$item->monto;
             $monto_descuento = $item->detalle['tipo_descuento']?$subtotal*$item->detalle['porcentaje_descuento']/100:$item->detalle['descuento'];
+            $item->total = $subtotal - $monto_descuento;
+        }*/
+
+        foreach ($presupuesto->productos as $item){
+            $item->monto = $item->detalle['monto'];
+            $item->monto_descuento=$item->detalle['tipo_descuento']?floatval($item->detalle['porcentaje_descuento']).'%':$item->detalle['descuento'];
+            $subtotal = $item->detalle['cantidad']*$item->detalle['monto'];
+
+            if($item->detalle['tipo_descuento']){
+                $monto_descuento = $subtotal*$item->detalle['porcentaje_descuento']/100;
+            } else {
+                if($presupuesto->igv_incluido){
+                    $monto_descuento = round($item->detalle['descuento'] * 1.18, 2);
+                } else {
+                    $monto_descuento = $item->detalle['descuento'];
+                }
+
+            }
+
             $item->total = $subtotal - $monto_descuento;
         }
 

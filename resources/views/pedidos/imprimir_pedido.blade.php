@@ -25,16 +25,33 @@
         <thead>
         <tr class="table-header">
             <td><strong>(Cant.) Descripción</strong></td>
+            <td>Total</td>
         </tr>
         </thead>
         <tbody>
+        <tr>
+            <td colspan="2">
+                <hr style="border: 1px dashed black">
+            </td>
+        </tr>
         @foreach($orden->productos as $item)
             <tr>
-                <td style="width: 60mm">
-                    ({{$item->detalle->cantidad}}) {{$item->nombre}} <br>
-                    {!! $item->detalle->descripcion !!}</td>
+                <td style="width: 50mm">
+                    ({{$item->detalle->cantidad}}) <strong>{{$item->nombre}} </strong><br>
+                    {!! $item->detalle->descripcion !!}
+                </td>
+                <td>{{number_format($item->detalle->monto * $item->detalle->cantidad, 2)}}</td>
             </tr>
         @endforeach
+        <tr>
+            <td colspan="2">
+                <hr style="border: 1px dashed black">
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Total:</strong></td>
+            <td><strong>{{$orden->total}}</strong></td>
+        </tr>
         </tbody>
     </table>
 </div>

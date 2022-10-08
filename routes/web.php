@@ -252,6 +252,8 @@ Route::group(['middleware' => ['can:Reportes']], function () {
     Route::get('reportes/ventas/{desde}/{hasta}','ReporteController@reporte_ventas');
     Route::get('reportes/ventas','ReporteController@reporte_ventas');
     Route::get('reportes/ventas/badge/{desde}/{hasta}','ReporteController@reporte_ventas_badge');
+    Route::get('reportes/ventas/mail/{desde}/{hasta}','ReporteController@reporte_ventas_por_email');
+    Route::get('reportes/ventas/imprimir/{desde}/{hasta}','ReporteController@reporte_ventas_imprimir');
 
     Route::get('reportes/gastos/{desde}/{hasta}','ReporteController@reporte_gastos');
     Route::get('reportes/gastos','ReporteController@reporte_gastos');

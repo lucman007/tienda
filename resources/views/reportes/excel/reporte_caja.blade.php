@@ -8,7 +8,12 @@
         <th scope="col">Turno</th>
         <th scope="col">Saldo inic.</th>
         <th scope="col">Efectivo.</th>
-        <th scope="col">Tarjeta</th>
+        <th scope="col">Tarjeta(Visa)</th>
+        <th scope="col">Tarjeta(Mastercard)</th>
+        <th scope="col">Yape</th>
+        <th scope="col">Plin</th>
+        <th scope="col">Transferencia</th>
+        <th scope="col">Otros</th>
         <th scope="col">Crédito</th>
         <th scope="col">Extras</th>
         <th scope="col">Gastos</th>
@@ -31,6 +36,11 @@
             <td>{{$caja->apertura}}</td>
             <td>{{$caja->efectivo}}</td>
             <td>{{$caja->tarjeta}}</td>
+            <td>{{$caja->tarjeta_1}}</td>
+            <td>{{$caja->yape}}</td>
+            <td>{{$caja->plin}}</td>
+            <td>{{$caja->transferencia}}</td>
+            <td>{{$caja->otros}}</td>
             <td>{{$caja->credito}}</td>
             <td>{{$caja->extras}}</td>
             <td>{{$caja->gastos}}</td>

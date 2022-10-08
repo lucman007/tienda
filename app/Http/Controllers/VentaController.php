@@ -271,8 +271,13 @@ class VentaController extends Controller
                 $venta->tipo_pago_contado=1;
             } else{
                 //Si es efectivo u otro tipo
-                $venta->tipo_pago_contado=$venta->tipo_pago;
+                if($venta->tipo_pago == 4){
+                    $venta->tipo_pago_contado=1;
+                } else {
+                    $venta->tipo_pago_contado=$venta->tipo_pago;
+                }
                 $venta->tipo_pago = 1;
+
             }
 
 

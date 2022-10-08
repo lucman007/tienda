@@ -541,9 +541,14 @@
                                     <div v-show="tipoPago==1" class="col-lg-6 form-group">
                                         <select :disabled="mostrarProgresoGuardado || productosSeleccionados.length==0 || comprobante=='07.01' || comprobante=='07.02' || comprobante=='08.01' || comprobante=='08.02'"
                                                 v-model="tipoPagoContado" class="custom-select">
-                                            <option value="1">Efectivo</option>
-                                            <option value="3">Depósito</option>
-                                            <option value="4">Tarjeta</option>
+                                            @php
+                                                $tipo_pago = \sysfact\Http\Controllers\Helpers\DataTipoPago::getTipoPago();
+                                            @endphp
+                                            @foreach($tipo_pago as $pago)
+                                                @if(!($pago['num_val'] == 4 || $pago['num_val'] == 2))
+                                                <option value="{{$pago['num_val']}}">{{$pago['label']}}</option>
+                                                @endif
+                                            @endforeach
                                         </select>
                                     </div>
                                     <div v-show="tipoPago==2" class="col-lg-6 form-group">

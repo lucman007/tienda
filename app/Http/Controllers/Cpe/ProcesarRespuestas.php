@@ -134,7 +134,7 @@ class ProcesarRespuestas
                     foreach ($productos as $item){
                         $inventario = new Inventario();
                         $inventario->idproducto = $item['idproducto'];
-                        $inventario->idempleado = auth()->user()->idempleado;
+                        $inventario->idempleado = auth()->user()->idempleado??-1;
                         $inventario->cantidad = $item->detalle->cantidad;
                         $inventario->saldo = $item->inventario()->first()->saldo + $item->detalle->cantidad;
                         $inventario->operacion = 'DOCUMENTO RECHAZADO - VENTA N ° '. $this->idventa;
@@ -272,7 +272,7 @@ class ProcesarRespuestas
                     foreach ($productos as $item){
                         $inventario = new Inventario();
                         $inventario->idproducto = $item['idproducto'];
-                        $inventario->idempleado = auth()->user()->idempleado;
+                        $inventario->idempleado = auth()->user()->idempleado??-1;
                         $inventario->cantidad = $item->detalle->cantidad;
                         $inventario->saldo = $item->inventario()->first()->saldo + $item->detalle->cantidad;
                         $inventario->operacion = 'NOTA DE CREDITO RECHAZADA - ID '. $this->idventa;
@@ -348,7 +348,7 @@ class ProcesarRespuestas
                             //Actualizar inventario
                             $inventario = new Inventario();
                             $inventario->idproducto = $producto['idproducto'];
-                            $inventario->idempleado = auth()->user()->idempleado;
+                            $inventario->idempleado = auth()->user()->idempleado??-1;
                             $inventario->cantidad = $producto['detalle']['cantidad'];
                             $inventario->saldo = $producto->inventario()->first()->saldo + $producto['detalle']['cantidad'];
                             $inventario->operacion = 'ANULACIÓN DE VENTA N° ' . $venta['idventa'];

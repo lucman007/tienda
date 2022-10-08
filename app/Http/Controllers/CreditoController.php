@@ -4,6 +4,7 @@ namespace sysfact\Http\Controllers;
 
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use sysfact\Http\Controllers\Helpers\DataTipoPago;
 use sysfact\Pago;
 use sysfact\Venta;
 
@@ -153,6 +154,13 @@ class CreditoController extends Controller
                     $detalle = json_decode($pago->detalle, true);
                     foreach ($detalle as $d){
                         $suma += $d['monto'];
+
+                        /*$pago = new Pago();
+                        $pago->idventa = $request->idventa;
+                        $pago->monto = $d['monto'];
+                        $pago->tipo = $d['metodo_pago'];
+                        $pago->fecha = date('Y-m-d H:i:s');
+                        $pago->save();*/
                     }
                 }
                 $pago->total_pagado = $suma;
@@ -174,17 +182,9 @@ class CreditoController extends Controller
         if($pago->detalle){
             $detalle = json_decode($pago->detalle, true);
             foreach ($detalle as $d){
-                switch ($d['metodo_pago']){
-                    case '1':
-                        $d['metodo_pago']='Efectivo';
-                        break;
-                    case '2':
-                        $d['metodo_pago']='Tarjeta';
-                        break;
-                    case '3':
-                        $d['metodo_pago']='Depósito';
-                        break;
-                }
+                $dataTipoPago = DataTipoPago::getTipoPago();
+                $find = array_search($d['metodo_pago'], array_column($dataTipoPago,'num_val'));
+                $d['metodo_pago'] = mb_strtoupper($dataTipoPago[$find]['label']);
                 $d['fecha']=date('d-m-Y',strtotime($d['fecha']));
                 $suma += $d['monto'];
                 $data[] = $d;

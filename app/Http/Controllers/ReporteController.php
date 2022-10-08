@@ -2,10 +2,14 @@
 
 namespace sysfact\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Maatwebsite\Excel\Facades\Excel;
+use Spipu\Html2Pdf\Html2Pdf;
 use sysfact\Caja;
 use sysfact\Emisor;
 use sysfact\Exports\CajaExport;
@@ -20,16 +24,31 @@ use sysfact\Exports\VentasResumenExport;
 use sysfact\Gastos;
 use sysfact\Http\Controllers\Helpers\DataTipoPago;
 use sysfact\Http\Controllers\Helpers\PdfHelper;
+use sysfact\Mail\ReporteResumenVentas;
 use sysfact\Producto;
 use sysfact\Venta;
 
 class ReporteController extends Controller
 {
+    private $hora_inicio;
+    private $hora_fin;
+    private $hasta_offset;
 
 	public function __construct()
 	{
 		$this->middleware('auth');
+		$this->hora_inicio = (json_decode(cache('config')['interfaz'], true)['atencion_inicio']??'00:00').':00';
+		$this->hora_fin = (json_decode(cache('config')['interfaz'], true)['atencion_fin']??'23:59').':59';
 	}
+
+	public function getHasta($hasta){
+        if($this->hora_fin < $this->hora_inicio){
+            $fecha = new Carbon($hasta);
+            $fecha->addDays(1);
+            return $fecha->format('Y-m-d');
+        }
+        return $hasta;
+    }
 
     public function reporte_ventas_data($desde, $hasta, $filtro, $buscar, $esExportable){
         try {
@@ -43,7 +62,7 @@ class ReporteController extends Controller
             if($esExportable == 'true'){
                 switch ($filtro) {
                     case 'fecha':
-                        $ventas = Venta::whereBetween('fecha', [$desde . ' 00:00:00', $hasta . ' 23:59:59'])
+                        $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
                             ->where('eliminado', '=', 0)
                             ->whereHas('facturacion', function($query) {
                                 $query
@@ -79,7 +98,7 @@ class ReporteController extends Controller
                                 $filtro = 'codigo_moneda';
                                 break;
                         }
-                        $ventas = Venta::whereBetween('fecha', [$desde. ' 00:00:00', $hasta. ' 23:59:59'])
+                        $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
                         ->where('eliminado', '=', 0)
                         ->orderby('idventa', 'desc')
                         ->whereHas('facturacion', function ($query) use ($filtro, $buscar) {
@@ -101,10 +120,11 @@ class ReporteController extends Controller
                         $find = array_search($buscar, array_column($pago,'text_val'));
                         $buscar = $pago[$find]['num_val'];
 
-                        $filtro = 'tipo_pago';
-                        $ventas = Venta::whereBetween('fecha', [$desde . ' 00:00:00', $hasta . ' 23:59:59'])
-                            ->where('eliminado', '=', 0)
-                            ->where($filtro, $buscar)
+                        $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
+                            ->where('eliminado', 0)
+                            ->whereHas('pago', function($query) use ($buscar){
+                                $query->where('tipo',$buscar);
+                            })
                             ->whereHas('facturacion', function($query) {
                                 $query->where(function ($query) {
                                     $query->where('codigo_tipo_documento',01)
@@ -122,7 +142,7 @@ class ReporteController extends Controller
                         break;
                     case 'cliente':
                         $filtro = 'nombre';
-                        $ventas = Venta::whereBetween('fecha', [$desde . ' 00:00:00', $hasta . ' 23:59:59'])
+                        $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
                             ->where('eliminado', '=', 0)
                             ->orderby('idventa', 'desc')
                             ->whereHas('persona', function ($query) use ($filtro, $buscar) {
@@ -148,7 +168,7 @@ class ReporteController extends Controller
             else{
                 switch ($filtro) {
                     case 'fecha':
-                        $ventas = Venta::whereBetween('fecha', [$desde . ' 00:00:00', $hasta . ' 23:59:59'])
+                        $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
                             ->where('eliminado', '=', 0)
                             ->whereHas('facturacion', function($query) {
                                 $query
@@ -184,7 +204,7 @@ class ReporteController extends Controller
                                 $filtro = 'codigo_moneda';
                                 break;
                         }
-                        $ventas = Venta::whereBetween('fecha', [$desde. ' 00:00:00', $hasta. ' 23:59:59'])
+                        $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
                             ->where('eliminado', '=', 0)
                             ->orderby('idventa', 'desc')
                             ->whereHas('facturacion', function ($query) use ($filtro, $buscar) {
@@ -206,10 +226,11 @@ class ReporteController extends Controller
                         $find = array_search($buscar, array_column($pago,'text_val'));
                         $buscar = $pago[$find]['num_val'];
 
-                        $filtro = 'tipo_pago';
-                        $ventas = Venta::whereBetween('fecha', [$desde . ' 00:00:00', $hasta . ' 23:59:59'])
-                            ->where('eliminado', '=', 0)
-                            ->where($filtro, $buscar)
+                        $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
+                            ->where('eliminado', 0)
+                            ->whereHas('pago', function($query) use ($buscar){
+                                $query->where('tipo',$buscar);
+                            })
                             ->whereHas('facturacion', function($query) {
                                 $query->where(function ($query) {
                                     $query->where('codigo_tipo_documento',01)
@@ -257,20 +278,25 @@ class ReporteController extends Controller
                 $emisor = new Emisor();
                 $item->nombre_fichero = $emisor->ruc . '-' . $item->facturacion['codigo_tipo_documento'] . '-' . $item->facturacion['serie'] . '-' . $item->facturacion['correlativo'];
 
-                if($item->facturacion->codigo_moneda=='PEN'){
-                    $suma_soles += $item->total_venta;
-                } else{
-                    $suma_dolares += $item->total_venta;
+                $tipo_pago = DataTipoPago::getTipoPago();
+                if($item->tipo_pago == 4 && $filtro == 'tipo-de-pago') {
+                    if($item->facturacion->codigo_moneda=='PEN'){
+                        $suma_soles = 0;
+                        foreach ($item->pago as $pago){
+                            $index = array_search($pago->tipo, array_column($tipo_pago,'num_val'));
+                            if($filtros['buscar'] == $tipo_pago[$index]['text_val']){
+                                $suma_soles += $pago->monto;
+                            }
+                        }
+                        $item->total_venta_aux = $suma_soles;
+                    }
                 }
 
-                $pago = DataTipoPago::getTipoPago();
+                /*$pago = DataTipoPago::getTipoPago();
                 $find = array_search($item->tipo_pago, array_column($pago,'num_val'));
-                $item->tipo_pago = mb_strtoupper($pago[$find]['label']);
-
+                $item->tipo_pago = mb_strtoupper($pago[$find]['label']);*/
             }
 
-            $ventas->total_soles=$suma_soles==0?'0.00':$suma_soles;
-            $ventas->total_usd=$suma_dolares==0?'0.00':$suma_dolares;
 
             return ['ventas'=>$ventas,'filtros'=>$filtros,'usuario'=>auth()->user()->persona];
         } catch (\Exception $e){
@@ -281,6 +307,7 @@ class ReporteController extends Controller
     public function reporte_ventas(Request $request, $desde=null,$hasta=null){
 
         $esExportable = $request->get('export','false');
+        $esMail = $request->get('mail','false');
         $filtro = $request->filtro;
         $buscar = $request->buscar;
 
@@ -293,7 +320,16 @@ class ReporteController extends Controller
         $ventas=$this->reporte_ventas_data($desde,$hasta,$filtro,$buscar,$esExportable);
 
         if($esExportable == 'true'){
-            return Excel::download(new VentasResumenExport($ventas['ventas']), 'reporte_resumen_ventas.xlsx');
+            $otros_reportes = $this->reporte_ventas_badge($request,$desde,$hasta);
+            $tipo_pago = $otros_reportes[2];
+            $total_soles = $otros_reportes[0];
+            $fecha = ['desde'=>$desde, 'hasta'=>$hasta];
+            if($esMail == 'true'){
+                return [$ventas['ventas'], $tipo_pago, $total_soles, $fecha, $buscar];
+            } else {
+                return Excel::download(new VentasResumenExport($ventas['ventas'], $tipo_pago, $total_soles, $fecha), 'reporte_resumen_ventas.xlsx');
+            }
+
         } else {
             return view('reportes.ventas',$ventas);
         }
@@ -335,6 +371,10 @@ class ReporteController extends Controller
         ];
 
         foreach ($ventas as $item){
+
+            if($item->tipo_pago == 4 && $filtro == 'tipo-de-pago'){
+                $item->total_venta = $item->total_venta_aux;
+            }
 
             //costos
             $inventario = $item->inventario;
@@ -392,13 +432,46 @@ class ReporteController extends Controller
             $totales_dolares = null;
         }
 
-        return [$totales_soles,$totales_dolares];
+        $total_por_tipo_pago = $this->obtener_total_tipo_pago($badge_data['ventas'],$filtro, $buscar);
+
+        return [$totales_soles,$totales_dolares, $total_por_tipo_pago];
+
+    }
+
+    public function obtener_total_tipo_pago($ventas, $filtro, $buscar){
+
+        $dataTipoPago = DataTipoPago::getTipoPago();
+        $suma = [];
+        foreach ($ventas as $venta) {
+            foreach ($venta->pago as $pago){
+                $index = array_search($pago->tipo, array_column($dataTipoPago,'num_val'));
+                if($venta->tipo_pago == 4 && $filtro == 'tipo-de-pago' && $buscar != $dataTipoPago[$index]['text_val']){
+                    $pago->monto = 0;
+                }
+                if($venta->facturacion->codigo_moneda=='PEN'){
+
+                    foreach ($dataTipoPago as $item) {
+                        if($pago->tipo == $item['num_val']){
+                            if(!isset($suma[$item['text_val']])){
+                                $suma[$item['text_val']] = $pago->monto;
+                            } else {
+                                $suma[$item['text_val']] += $pago->monto;
+                            }
+                            break;
+                        }
+                    }
+
+                }
+            }
+        }
+
+        return $suma;
 
     }
 
     public function reporte_ventas_diario_data($mes, $moneda, $tipo_cambio){
 
-        $ventas=Venta::whereBetween('fecha',[$mes.'-01 00:00:00',$mes.'-31 23:59:59'])
+        $ventas=Venta::whereBetween('fecha',[$mes.'-01 '.$this->hora_inicio,$mes.'-31 '.$this->hora_fin])
             ->where('eliminado', '=', 0)
             ->orderby('fecha', 'desc')
             ->whereHas('facturacion', function ($query) use ($moneda) {
@@ -536,7 +609,7 @@ class ReporteController extends Controller
 
     public function reporte_ventas_mensual_data($anio, $moneda, $tipo_cambio){
 
-        $ventas=Venta::whereBetween('fecha',[$anio.'-01-01 00:00:00',$anio.'-12-31 23:59:59'])
+        $ventas=Venta::whereBetween('fecha',[$anio.'-01-01 '.$this->hora_inicio,$anio.'-12-31 '.$this->hora_fin])
             ->where('eliminado', '=', 0)
             ->orderby('fecha', 'desc')
             ->whereHas('facturacion', function ($query) use ($moneda) {
@@ -681,14 +754,14 @@ class ReporteController extends Controller
             if($esExportable == 'true'){
                 switch ($filtro) {
                     case 'fecha':
-                        $gastos = Gastos::whereBetween('fecha', [$desde . ' 00:00:00', $hasta . ' 23:59:59'])
+                        $gastos = Gastos::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
                             ->where('eliminado', 0)
                             ->orderby('idgasto', 'desc')
                             ->paginate(30);
                         break;
                     case 'proveedor':
                         $filtro = 'nombre';
-                        $gastos = Gastos::whereBetween('fecha', [$desde . ' 00:00:00', $hasta . ' 23:59:59'])
+                        $gastos = Gastos::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
                             ->where('eliminado', 0)
                             ->orderby('idgasto', 'desc')
                             ->whereHas('persona', function ($query) use ($filtro, $buscar) {
@@ -700,13 +773,13 @@ class ReporteController extends Controller
             } else{
                 switch ($filtro) {
                     case 'fecha':
-                        $gastos = Gastos::whereBetween('fecha', [$desde . ' 00:00:00', $hasta . ' 23:59:59'])
+                        $gastos = Gastos::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
                             ->orderby('idgasto', 'desc')
                             ->paginate(30);
                         break;
                     case 'proveedor':
                         $filtro = 'nombre';
-                        $gastos = Gastos::whereBetween('fecha', [$desde . ' 00:00:00', $hasta . ' 23:59:59'])
+                        $gastos = Gastos::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
                             ->orderby('idgasto', 'desc')
                             ->whereHas('persona', function ($query) use ($filtro, $buscar) {
                                 $query->where($filtro, 'LIKE', '%' . $buscar . '%');
@@ -757,7 +830,7 @@ class ReporteController extends Controller
         $fecha_anterior=null;
         $suma_por_dia=null;
 
-        $gastos=Gastos::whereBetween('fecha',[$mes.'-01 00:00:00',$mes.'-31 23:59:59'])
+        $gastos=Gastos::whereBetween('fecha',[$mes.'-01 '.$this->hora_inicio,$mes.'-31 '.$this->hora_fin])
             ->orderBy('fecha', 'desc')->get();
 
         foreach ($gastos as $item){
@@ -801,7 +874,7 @@ class ReporteController extends Controller
         $fecha_anterior=null;
         $suma_por_mes=null;
 
-        $gastos=Gastos::whereBetween('fecha',[$anio.'-01-01 00:00:00',$anio.'-12-31 23:59:59'])
+        $gastos=Gastos::whereBetween('fecha',[$anio.'-01-01 '.$this->hora_inicio,$anio.'-12-31 '.$this->hora_fin])
             ->orderBy('fecha', 'desc')->get();
 
         foreach ($gastos as $item){
@@ -929,7 +1002,7 @@ class ReporteController extends Controller
             if($esExportable == 'true'){
                 switch ($filtro) {
                     case 'fecha':
-                        $ventas = Venta::whereBetween('fecha', [$desde . ' 00:00:00', $hasta . ' 23:59:59'])
+                        $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
                             ->where('eliminado', '=', 0)
                             ->whereHas('facturacion', function($query) {
                                 $query->where('codigo_tipo_documento',01)
@@ -962,7 +1035,7 @@ class ReporteController extends Controller
                                 break;
                         }
 
-                        $ventas = Venta::whereBetween('fecha', [$desde . ' 00:00:00', $hasta . ' 23:59:59'])
+                        $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
                         ->where('eliminado', '=', 0)
                         ->orderby('fecha', 'desc')
                         ->whereHas('facturacion', function ($query) use ($filtro, $buscar) {
@@ -974,7 +1047,7 @@ class ReporteController extends Controller
             } else{
                 switch ($filtro) {
                     case 'fecha':
-                        $ventas = Venta::whereBetween('fecha', [$desde . ' 00:00:00', $hasta . ' 23:59:59'])
+                        $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
                             ->where('eliminado', '=', 0)
                             ->whereHas('facturacion', function($query) {
                                 $query->where('codigo_tipo_documento',01)
@@ -1007,7 +1080,7 @@ class ReporteController extends Controller
                                 break;
                         }
 
-                        $ventas = Venta::whereBetween('fecha', [$desde . ' 00:00:00', $hasta . ' 23:59:59'])
+                        $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
                             ->where('eliminado', '=', 0)
                             ->orderby('fecha', 'desc')
                             ->whereHas('facturacion', function ($query) use ($filtro, $buscar) {
@@ -1123,11 +1196,11 @@ class ReporteController extends Controller
 
 
             if($esExportable == 'true'){
-                $cajas = Caja::whereBetween('fecha_a', [$desde . ' 00:00:00', $hasta . ' 23:59:59'])
+                $cajas = Caja::whereBetween('fecha_a', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
                     ->orderby('fecha_a', 'desc')
                     ->get();
             } else{
-                $cajas = Caja::whereBetween('fecha_a', [$desde . ' 00:00:00', $hasta . ' 23:59:59'])
+                $cajas = Caja::whereBetween('fecha_a', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
                     ->orderby('fecha_a', 'desc')
                     ->paginate(30);
                 $cajas->appends($_GET)->links();
@@ -1189,6 +1262,56 @@ class ReporteController extends Controller
             }
         }
 
+    }
+
+    public function reporte_ventas_por_email(Request $request, $desde, $hasta){
+        try{
+            $request['mail'] = 'true';
+            $request['export'] = 'true';
+            $data=$this->reporte_ventas($request, $desde, $hasta);
+
+            $view = view('mail/pdf/reporte_resumen_ventas', ['ventas'=>$data[0],'tipo_pago'=> $data[1],'totales'=> $data[2], 'fecha'=>$data[3],'buscar'=>$data[4]]);
+            $html = $view->render();
+
+            $pdf=new Html2Pdf('P','A4','es');
+            $pdf->pdf->SetTitle('RESUMEN DE VENTAS');
+            $pdf->writeHTML($html);
+            $pdf->output(public_path().'/pdf/reporte_resumen_ventas.pdf', 'F');
+
+            $email = $request->email;
+            Mail::to($email)->send(new ReporteResumenVentas());
+            if(file_exists(public_path().'/pdf/reporte_resumen_ventas.pdf')){
+                unlink(public_path().'/pdf/reporte_resumen_ventas.pdf');
+            }
+            return 'Se envió al correo correctamente';
+        } catch (\Exception $e){
+            Log::error($e);
+            return $e->getMessage();
+        }
+    }
+
+    public function reporte_ventas_imprimir(Request $request, $desde, $hasta){
+        try{
+            $data=$this->reporte_ventas_badge($request, $desde, $hasta);
+            $fecha = ['desde'=>$desde, 'hasta'=>$hasta];
+            $view = view('reportes/imprimir/resumen_ventas', ['totales'=>$data[0],'tipo_pago'=> $data[2],'fecha'=>$fecha,'tipo'=>$request->reporte]);
+            $html = $view->render();
+
+            $pdf=new Html2Pdf('P',[72,250],'es');
+            $pdf->pdf->SetTitle('RESUMEN DE VENTAS');
+            $pdf->writeHTML($html);
+
+            if($request->rawbt){
+                $fromFile = $pdf->output('resumen_ventas.pdf','S');
+                return 'rawbt:data:application/pdf;base64,'.base64_encode($fromFile);
+            } else {
+                $pdf->output('resumen_ventas.pdf');
+            }
+
+        } catch (\Exception $e){
+            Log::error($e);
+            return $e->getMessage();
+        }
     }
 
 }
