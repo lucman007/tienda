@@ -261,16 +261,42 @@
                             </div>
                         @endif
                         <div class="col-lg-12 mt-5">
-                            <div class="form-group">
-                                <label>Enviar a correo electrónico:</label>
-                                <input v-model="mail" type="email" class="form-control">
-                                <b-button :disabled="mostrarProgresoMail" @click="enviar_a_correo" variant="primary" class="boton_adjunto">
-                                    <i v-show="!mostrarProgresoMail" class="fas fa-envelope"></i>
-                                    <b-spinner v-show="mostrarProgresoMail" small label="Loading..." ></b-spinner> Enviar
-                                </b-button>
-                                <b-form-checkbox v-model="conCopia" switch size="sm" class="my-2 text-center">
-                                    Enviarme una copia
-                                </b-form-checkbox>
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <b-input-group>
+                                        <b-input-group-prepend>
+                                            <b-input-group-text>
+                                                <i class="fab fa-whatsapp"></i>
+                                            </b-input-group-text>
+                                        </b-input-group-prepend>
+                                        <input v-model="whatsapp" type="number" class="form-control" placeholder="Ejemplo: 51996861131" >
+                                        <b-input-group-append>
+                                            <b-button target="_blank" :disabled="whatsapp.length==0" variant="primary" :href="'{{$agent->isDesktop()?'https://web.whatsapp.com':'https://api.whatsapp.com'}}'+'/send/?phone='+whatsapp+'&text='+'{{$venta->text_whatsapp}}'+'&app_absent=1'">
+                                                <i class="fas fa-paper-plane"></i>
+                                            </b-button>
+                                        </b-input-group-append>
+                                    </b-input-group>
+                                    <p style="color:gray; margin-top:5px">*Ingresa el N° whatsapp incluyendo código de país</p>
+                                </div>
+                                <div class="col-lg-6">
+                                    <b-input-group>
+                                        <b-input-group-prepend>
+                                            <b-input-group-text>
+                                                <i class="fas fa-envelope"></i>
+                                            </b-input-group-text>
+                                        </b-input-group-prepend>
+                                        <input v-model="mail" type="text" class="form-control" placeholder="Enviar por email" >
+                                        <b-input-group-append>
+                                            <b-button :disabled="mail.length==0" @click="enviar_a_correo" variant="primary" >
+                                                <i v-show="!mostrarProgresoMail" class="fas fa-paper-plane"></i>
+                                                <b-spinner v-show="mostrarProgresoMail" small label="Loading..." ></b-spinner>
+                                            </b-button>
+                                        </b-input-group-append>
+                                    </b-input-group>
+                                    <b-form-checkbox v-model="conCopia" switch size="sm" class="my-2 text-center">
+                                        Enviarme una copia
+                                    </b-form-checkbox>
+                                </div>
                             </div>
                         </div>
                         <div class="col-lg-12">
@@ -373,6 +399,7 @@
                 moneda: '<?php echo $venta['codigo_moneda']?>',
                 mail:"<?php echo $venta->persona->correo ?>",
                 conCopia:true,
+                whatsapp: '',
             },
             created(){
                 if('<?php echo $venta->facturacion->estado ?>' == 'PENDIENTE' && ('<?php echo basename(url()->previous()) ?>').includes('facturacion')){
@@ -432,13 +459,19 @@
                         this.mostrarProgresoMail = true;
 
                         let data = {
-                            'factura':file_fact,
-                            'guia':file_guia,
                             'mail':this.mail,
                             'conCopia':this.conCopia,
                             'idventa':'{{$venta->idventa}}',
                             'idguia':'{{$venta->guia_relacionada['idguia']??-1}}'
                         };
+
+                        @if($venta->facturacion->codigo_tipo_documento == 30)
+                            data['recibo'] = '{{$venta->facturacion->serie}}-{{$venta->facturacion->correlativo}}';
+                            this.enviar(data);
+                        @else
+
+                        data['factura']=file_fact;
+                        data['guia']=file_guia;
 
                         axios.post('{{url('ventas/verificar-cdr-mail')}}',data)
                         .then(response => {
@@ -469,6 +502,9 @@
                         .catch(error => {
                             alert('ocurrio un error');
                         })
+
+                        @endif
+
                     } else{
                         this.alerta("El correo electrónico ingresado no es válido");
                     }

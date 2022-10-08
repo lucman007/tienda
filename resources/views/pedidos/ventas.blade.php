@@ -77,7 +77,7 @@
                                                     <b-dropdown-item id="btn_imprimir_{{$item->idventa}}" @click="imprimir('{{$item->idventa}}')"><i class="fas fa-file-invoice-dollar"></i> Imprimir comprobante</b-dropdown-item>
                                                     @endif
                                                     <b-dropdown-item id="btn_anular_{{$item->idventa}}" @click="abrir_modal('anulacion',{{$item}})" @if($item->facturacion->codigo_tipo_documento == '30') disabled @endif><i class="fas fa-times"></i> Anular comprobante</b-dropdown-item>
-                                                    <b-dropdown-item @click="text_whatsapp = '{{$item->text_whatsapp}}'" @if($item->facturacion->codigo_tipo_documento == '30') disabled @else v-b-modal.modal-whatsapp @endif><i style="width: 2em;" class="fab fa-whatsapp"></i> Enviar por whatsapp</b-dropdown-item>
+                                                    <b-dropdown-item @click="text_whatsapp = '{{$item->text_whatsapp}}'" v-b-modal.modal-whatsapp><i style="width: 2em;" class="fab fa-whatsapp"></i> Enviar por whatsapp</b-dropdown-item>
                                                 </b-dropdown>
                                                 <button id="btn_borrar_{{$item->idventa}}" @if($item->facturacion->codigo_tipo_documento!='30') disabled style="opacity: 0.2" @endif @click="eliminar({{$item->idventa}})"
                                                         class="btn btn-danger" title="Eliminar"><i class="fas fa-trash-alt"></i>

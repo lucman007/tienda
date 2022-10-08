@@ -472,13 +472,7 @@ class PedidoController extends Controller
                 $item->estado_orden='ATENDIDO';
                 $item->mesa = $item->orden?$item->orden->mesa->numero:'-';
                 $item->nombre_fichero=$emisor->ruc.'-'.$item->facturacion->codigo_tipo_documento.'-'.$item->facturacion->serie.'-'.$item->facturacion->correlativo;
-
-                $total_venta = str_replace('.','-',$item->total_venta);
-                $url_comp = url('/consulta/descargar-comprobante');
-                $nombre_comp = $emisor->ruc.$item->facturacion->codigo_tipo_documento.$item->facturacion->serie.$item->facturacion->correlativo.date('dmY',strtotime($item->fecha)).$total_venta;
-                $text ='¡Hola! 😃  Descarga tu comprobante aquí: 👇🏻 %0A%0A✅ PDF: '.$url_comp.'/pdf/'.$nombre_comp.'%0A%0A✅ XML: '.$url_comp.'/xml/'.$nombre_comp;
-                $text .= '%0A%0A'.($emisor->nombre_publicitario==""?$emisor->razon_social:$emisor->nombre_publicitario);
-                $item->text_whatsapp = $text;
+                $item->text_whatsapp = MainHelper::texto_whatsap($item,$emisor);
 
                 switch ($item->facturacion->codigo_tipo_documento){
                     case '01':

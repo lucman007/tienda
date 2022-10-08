@@ -146,10 +146,6 @@ class PdfHelper
         $pdf->pdf->SetTitle($nombre_fichero.'.pdf');
         $pdf->writeHTML($html);
 
-        if(file_exists(public_path('images/qr/'.$nombre_fichero.'.png'))){
-            unlink(public_path('images/qr/'.$nombre_fichero.'.png'));
-        }
-
         if($dest){
             if($dest == 'F'){
                 $pdf->output(storage_path().'/app/sunat/pdf/' . $nombre_fichero . '.pdf', $dest);
@@ -165,6 +161,10 @@ class PdfHelper
             } else {
                 $pdf->output($nombre_fichero.'.pdf');
             }
+        }
+
+        if(file_exists(public_path('images/qr/'.$nombre_fichero.'.png'))){
+            unlink(public_path('images/qr/'.$nombre_fichero.'.png'));
         }
 
     }

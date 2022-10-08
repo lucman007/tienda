@@ -68,6 +68,7 @@ class ConsultaController extends Controller
     public function descargar_comprobante($tipo,$consulta){
 
         //2060284886903B001000000021102202230-00
+        //2060284886930TIC-0000005217092022200-00
         $ruc_emisor = substr($consulta,0,11);
         $emisor = new Emisor();
         if($emisor->ruc == $ruc_emisor){
@@ -79,6 +80,7 @@ class ConsultaController extends Controller
             $total = substr($consulta,33,5);
 
             $total = str_replace('-','.',$total);
+            $serie = str_replace('-','',$serie);
 
             $dia = substr($fecha,0,2);
             $mes = substr($fecha,2,2);

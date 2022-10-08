@@ -40,8 +40,8 @@
                                     <th scope="col">N° de cuota</th>
                                     <th scope="col">Monto</th>
                                     <th scope="col">Vencimiento</th>
-                                    <th scope="col">Pagado</th>
-                                    <th scope="col">Saldo</th>
+                                    <th scope="col">Total pagado</th>
+                                    <th scope="col">Saldo por pagar</th>
                                     <th scope="col">Opciones</th>
                                 </tr>
                                 </thead>

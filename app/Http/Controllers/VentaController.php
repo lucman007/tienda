@@ -629,13 +629,7 @@ class VentaController extends Controller
         $emisor=new Emisor();
 
         $venta->nombre_fichero=$emisor->ruc.'-'.$venta->facturacion->codigo_tipo_documento.'-'.$venta->facturacion->serie.'-'.$venta->facturacion->correlativo;
-
-        $total = str_replace('.','-',$venta->total_venta);
-        $url_comp = url('/consulta/descargar-comprobante');
-        $nombre_comp = $emisor->ruc.$venta->facturacion->codigo_tipo_documento.$venta->facturacion->serie.$venta->facturacion->correlativo.date('dmY',strtotime($venta->fecha)).$total;
-        $text ='¡Hola! 😃  Descarga tu comprobante aquí: 👇🏻 %0A%0A✅ PDF: '.$url_comp.'/pdf/'.$nombre_comp.'%0A%0A✅ XML: '.$url_comp.'/xml/'.$nombre_comp;
-        $text .= '%0A%0A'.($emisor->nombre_publicitario==""?$emisor->razon_social:$emisor->nombre_publicitario);
-        $venta->text_whatsapp = $text;
+        $venta->text_whatsapp = MainHelper::texto_whatsap($venta, $emisor);
 
         switch ($venta->facturacion->codigo_tipo_documento) {
             case '03':
@@ -917,6 +911,9 @@ class VentaController extends Controller
             }
             if(file_exists(storage_path() . '/app/sunat/pdf/' . $request->guia . '.pdf')){
                 unlink(storage_path() . '/app/sunat/pdf/' . $request->guia . '.pdf');
+            }
+            if(file_exists(storage_path() . '/app/sunat/pdf/' . $request->recibo . '.pdf')){
+                unlink(storage_path() . '/app/sunat/pdf/' . $request->recibo . '.pdf');
             }
             return 'Se envió el correo con éxito';
         } catch (\Swift_TransportException $e){

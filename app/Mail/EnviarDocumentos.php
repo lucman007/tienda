@@ -12,6 +12,7 @@ class EnviarDocumentos extends Mailable
     use Queueable, SerializesModels;
     public $factura;
     public $guia;
+    public $recibo;
     public $config;
     public $conCopia;
 
@@ -24,6 +25,7 @@ class EnviarDocumentos extends Mailable
     {
         $this->factura = $request->factura;
         $this->guia = $request->guia;
+        $this->recibo = $request->recibo;
         $this->conCopia = $request->conCopia;
 
         $mail = MainHelper::configuracion('mail_send_from');
@@ -57,6 +59,11 @@ class EnviarDocumentos extends Mailable
 
         if(file_exists(storage_path().'/app/sunat/cdr/R-' .$this->factura.'.xml')){
             $mail->attach(storage_path() . '/app/sunat/cdr/R-' . $this->factura . '.xml');
+        }
+
+        if($this->recibo){
+            $mail->subject('Envío de nota de venta - ' . $this->config['remitente'])
+                ->attach(storage_path() . '/app/sunat/pdf/' . $this->recibo . '.pdf');
         }
 
         if($this->conCopia){

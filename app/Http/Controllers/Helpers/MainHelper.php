@@ -413,4 +413,23 @@ class MainHelper extends Controller
         return response()->json($descuentos);
     }
 
+    public static function texto_whatsap($item, $emisor){
+        $total_venta = str_replace('.','-',$item->total_venta);
+        $url_comp = url('/consulta/descargar-comprobante');
+        $serie = $item->facturacion->serie;
+        if(strlen($item->facturacion->serie) == 3){
+            $serie = $serie.'-';
+        }
+        $nombre_comp = $emisor->ruc.$item->facturacion->codigo_tipo_documento.$serie.$item->facturacion->correlativo.date('dmY',strtotime($item->fecha)).$total_venta;
+        if($item->facturacion->codigo_tipo_documento == 30){
+            $text ='¡Hola! 😃  Descarga el detalle de tu compra aquí: 👇🏻 %0A%0A✅ '.$url_comp.'/pdf/'.$nombre_comp;
+            $text .= '%0A%0A'.($emisor->nombre_publicitario==""?$emisor->razon_social:$emisor->nombre_publicitario);
+        } else {
+            $text ='¡Hola! 😃  Descarga tu comprobante aquí: 👇🏻 %0A%0A✅ PDF: '.$url_comp.'/pdf/'.$nombre_comp.'%0A%0A✅ XML: '.$url_comp.'/xml/'.$nombre_comp;
+            $text .= '%0A%0A'.($emisor->nombre_publicitario==""?$emisor->razon_social:$emisor->nombre_publicitario);
+        }
+
+        return $text;
+    }
+
 }
