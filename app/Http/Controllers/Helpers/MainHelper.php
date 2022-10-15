@@ -261,15 +261,25 @@ class MainHelper extends Controller
                         ->get();
             }
         } else {
-            $productos=Producto::where('eliminado',0)
-                ->where(function ($query) use ($consulta) {
-                    $query->where('nombre','LIKE','%'.$consulta.'%')
-                        ->orWhere('cod_producto',$consulta)
-                        ->orWhere('presentacion','like','%'.$consulta.'%');
-                })
-                ->orderby('nombre','asc')
-                ->take(10)
-                ->get();
+            if(is_numeric($search)){
+                $productos=Producto::where('eliminado',0)
+                    ->where(function ($query) use ($consulta) {
+                        $query->orWhere('cod_producto',$consulta);
+                    })
+                    ->orderby('nombre','asc')
+                    ->take(10)
+                    ->get();
+            } else {
+                $productos=Producto::where('eliminado',0)
+                    ->where(function ($query) use ($consulta) {
+                        $query->where('nombre','LIKE','%'.$consulta.'%')
+                            ->orWhere('cod_producto',$consulta)
+                            ->orWhere('presentacion','like','%'.$consulta.'%');
+                    })
+                    ->orderby('nombre','asc')
+                    ->take(10)
+                    ->get();
+            }
         }
 
 

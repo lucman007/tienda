@@ -322,6 +322,11 @@
                 if (this.validarVenta()) {
                     return;
                 }
+
+                if (this.tipoPagoContado == 2 && this.cuotas.length == 0) {
+                    alert('Debes ingresar al menos una cuota con su fecha de vencimiento');
+                    return;
+                }
                 this.mostrarSpinner = true;
                 if(this.clienteSeleccionado.success === false){
                     this.clienteSeleccionado['ruc'] = this.query;
@@ -367,6 +372,8 @@
                                 }
                                 this.$refs['modal-facturar'].hide();
                             }
+                            this.cuotas = [];
+                            this.cuotasAux = [];
                         }
                     })
                     .catch(error => {

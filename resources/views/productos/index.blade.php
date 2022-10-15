@@ -791,16 +791,12 @@
                     return this.errorProducto;
                 },
                 generarCodigo(){
-                    let codigoCaracter = this.nombre.slice(0, 3);
                     let obj = <?php echo $ultimo_id ?>;
                     let codigoNumero = obj['idproducto'];
-                    if (this.nombre <= 3) {
-                        codigoCaracter = this.nombre.trim();
-                    }
                     if (codigoNumero < 100) {
                         codigoNumero = '0' + codigoNumero;
                     }
-                    this.cod_producto = codigoCaracter + codigoNumero;
+                    this.cod_producto = codigoNumero;
                 },
                 importar_productos(){
                     this.mostrarProgresoGuardado=true;
