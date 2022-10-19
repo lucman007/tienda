@@ -31,7 +31,7 @@ class HomeController extends Controller
         $seleccionados=[];
 
         foreach ($productos as $producto){
-            $producto->cantidad=$producto->inventario->first()->saldo;
+            $producto->cantidad=$producto->inventario->first()->saldo??0;
         }
 
         $productos = array_values(array_sort($productos, function ($value) {
@@ -92,7 +92,6 @@ class HomeController extends Controller
 
             $trabajador->dias_restantes=$dias_restantes;
             $trabajador->dia_pago = $dia_de_pago_trabajador.'/'.date('m/Y');
-
         }
 
         $trabajadores = array_values(array_sort($trabajadores, function ($value) {
@@ -107,7 +106,6 @@ class HomeController extends Controller
         }
 
         return $seleccionados;
-
     }
 
     public function obtenerReporte(Request $request){

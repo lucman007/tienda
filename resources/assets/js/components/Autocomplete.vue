@@ -2,7 +2,7 @@
     <div class="autocomplete-component" id="autocomplete-component-id">
         <b-input-group>
             <input autocomplete="off" type="text" id="buscador" onclick="this.select()" @click="autoComplete"
-                   :placeholder="'Buscar producto...'" v-model="query" v-on:keyup="navigate"
+                   placeholder="Buscar producto..." v-model="query" v-on:keyup="navigate"
                    class="form-control"/>
             <b-input-group-append>
                 <b-dropdown :variant="filtro==-1?'secondary':'success'">

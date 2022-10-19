@@ -75,6 +75,7 @@
         <option value="modo_1">Interfaz 1</option>
         <option value="modo_2">Interfaz 2</option>
         <option value="modo_3">Interfaz 3</option>
+        <option value="modo_4">Interfaz 4</option>
     </select>
 </div>
 <div class="col-lg-4 mt-3">

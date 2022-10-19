@@ -195,7 +195,14 @@
                 })
                     .then(response => {
                         if(response.data == '1'){
-                            alert('El cliente ya existe en la base de datos');
+                            this.$swal({
+                                position: 'top',
+                                icon: 'warning',
+                                title: 'El cliente ya existe en la base de datos',
+                                timer: 2000,
+                                showConfirmButton: false,
+                                toast:true
+                            });
                         } else{
                             let obj= response.data;
                             this.$emit('agregar',obj);
@@ -203,9 +210,15 @@
                         }
 
                     })
-                    .catch(function (error) {
-                        alert('Ha ocurrido un error.');
-                        console.log(error);
+                    .catch(error => {
+                        this.$swal({
+                            position: 'top',
+                            icon: 'error',
+                            title: error.response.data.mensaje,
+                            timer: 2000,
+                            showConfirmButton: false,
+                            toast:true
+                        });
                     });
 
             },
