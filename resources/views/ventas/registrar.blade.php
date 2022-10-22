@@ -1,6 +1,7 @@
 @extends('layouts.main')
 @section('titulo', 'Registrar')
 @section('contenido')
+    @php $agent = new \Jenssegers\Agent\Agent() @endphp
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
             <div class="col-sm-12">
@@ -86,6 +87,7 @@
                                     <option value="007/10">Caña de azúcar - 10%</option>
                                     <option value="008/4">Madera - 4%</option>
                                     <option value="009/10">Arena y piedra. - 10%</option>--}}
+				    <option value="010/15">Residuos, subproductos, desechos, recortes y desperdicios - 15%</option>
                                     <option value="019/10">Arrendamiento de bienes muebles - 10%</option>
                                     <option value="020/12">Mantenimiento y reparación de bienes muebles - 12%</option>
                                     <option value="022/12">Otros servicios empresariales - 12%</option>
@@ -380,6 +382,7 @@
                                 </b-form-checkbox>
                             </div>
                         </div>
+                        @if($agent->isDesktop())
                         <div class="table-responsive tabla-gestionar">
                             <table class="table table-striped table-hover table-sm tabla-facturar">
                                 <thead class="bg-custom-green">
@@ -401,8 +404,7 @@
                                 <tbody>
                                 <tr v-for="(producto,index) in productosSeleccionados" :key="producto.num_item">
                                     <td></td>
-                                    <td style="display:none">@{{producto.idproducto}}</td>
-                                    <td>@{{producto.nombre}}</td>
+                                    <td>@{{producto.cod_producto}} - @{{producto.nombre}}</td>
                                     <td><textarea rows="1" @keyup="agregarCaracteristicasSession()" class="form-control" type="text"
                                                   v-model="producto.presentacion"></textarea></td>
                                     <td><input @keyup="calcular(index)" class="form-control" type="text"
@@ -438,11 +440,9 @@
                                     <td class="text-center">@{{producto.igv}}</td>
                                     <td class="text-center">@{{producto.total}}</td>
                                     <td class="">
-                                        <a @click="borrarItemVenta(index)" href="javascript:void(0)">
-                                            <button class="btn btn-danger" title="Borrar item"><i
-                                                        class="fas fa-trash"></i>
-                                            </button>
-                                        </a>
+                                        <button @click="borrarItemVenta(index)" class="btn btn-danger" title="Borrar item"><i
+                                                    class="fas fa-trash"></i>
+                                        </button>
                                     </td>
                                 </tr>
                                 <tr class="text-center" v-show="productosSeleccionados.length == 0">
@@ -451,6 +451,29 @@
                                 </tbody>
                             </table>
                         </div>
+                        @else
+                            <table class="table table-striped table-hover table-sm">
+                                <thead class="bg-custom-green">
+                                <tr>
+                                    <th scope="col" style="width: 350px">Descripción</th>
+                                    <th scope="col" style="width: 80px">Total</th>
+                                    <th scope="col" style="width: 50px"></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr v-for="(producto,index) in productosSeleccionados" :key="index" v-b-modal.modal-detalle @click="editarItem(producto, index)">
+                                    <td>@{{producto.nombre}} x @{{producto.cantidad}}</td>
+                                    <td>@{{producto.total}}</td>
+                                    <td @click.stop >
+                                        <button @click="borrarItemVenta(index)" class="btn btn-danger"
+                                                title="Borrar item"><i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr class="text-center" v-show="productosSeleccionados.length == 0"><td colspan="8">No has agregado productos</td></tr>
+                                </tbody>
+                            </table>
+                        @endif
                         <div>
                             <b-alert :variant="mensajeStock.style" show v-show="mensajeStock.string.length>0">
                                 @{{ mensajeStock.string }}
@@ -765,6 +788,11 @@
             v-bind:tipo_cambio_compra="{{cache('opciones')['tipo_cambio_compra']}}"
             v-on:agregar="agregarProductoNuevo">
     </agregar-producto>
+    <modal-detalle
+            :item="item"
+            :show-precio="true"
+            v-on:actualizar="actualizarDetalle">
+    </modal-detalle>
 @endsection
 @section('script')
     <script>
@@ -846,7 +874,9 @@
                 tipoCambio: <?php echo cache('opciones')['tipo_cambio_compra'] ?>,
                 nombreCliente: "",
                 idventa_modifica:-1,
-                disabledNr:false
+                disabledNr:false,
+                item:{},
+                index:-1
             },
             mounted() {
                 if (localStorage.getItem('productos')) {
@@ -877,6 +907,13 @@
                 }
             },
             methods: {
+                editarItem(item, index){
+                    this.item=item;
+                    this.index = index;
+                },
+                actualizarDetalle(){
+                    this.calcular(this.index);
+                },
                 agregarCuota(total){
                     let monto = '0.00';
                     if (this.cuotasAux.length > 0 && total) {
@@ -1274,7 +1311,7 @@
 
                         suma_descuentos += Number(producto['descuento']);
                         suma_igv += Number(producto['igv']);
-
+                        //suma_igv = Math.round((Number(Number(suma_igv) + Number(producto['igv'])) * 1e12)) / 1e12;
                     }
 
                     this.gravadas = (suma_gravadas - (suma_gravadas * desc_global)).toFixed(2);
@@ -1284,8 +1321,10 @@
                     this.base_descuento_global = suma_gravadas + suma_inafectas + suma_exoneradas;
                     this.monto_descuento_global = ((suma_gravadas + suma_inafectas + suma_exoneradas) * desc_global).toFixed(2);
                     this.descuentos = (suma_descuentos + Number(this.monto_descuento_global)).toFixed(2);
-                    this.igv = (suma_igv - (suma_igv * desc_global)).toFixed(2);
-                    this.totalVenta = (Number(this.gravadas) + Number(this.exoneradas) + Number(this.inafectas) + Number(this.igv)).toFixed(2);
+                    //this.igv = (suma_igv - (suma_igv * desc_global)).toFixed(2);
+                    //this.totalVenta = (Number(this.gravadas) + Number(this.exoneradas) + Number(this.inafectas) + Number(this.igv)).toFixed(2);
+                    this.igv = (this.gravadas * 0.18).toFixed(2);
+                    this.totalVenta = (Number(this.gravadas) + Number(this.igv)).toFixed(2);
                     this.subtotalVenta = total_venta_bruto.toFixed(2);
                     this.calcularDeducciones();
 
@@ -1456,7 +1495,6 @@
                     if (this.comprobante == '01' || this.comprobante == '07.02' || this.comprobante == '08.02') {
                         if (Object.keys(this.clienteSeleccionado).length == 0) errorDatosVenta.push('*Debes ingresar un cliente');
                     }
-
                     if (this.comprobante == '01' || this.comprobante == '07.02' || this.comprobante == '08.02') {
                         if (this.clienteSeleccionado['num_documento'] && this.clienteSeleccionado['num_documento'].length != 11 && this.codigo_tipo_factura == '0101') errorDatosVenta.push('*Ingrese un RUC válido');
                     } else if (this.comprobante == '03' || this.comprobante == '07.01' || this.comprobante == '08.01') {

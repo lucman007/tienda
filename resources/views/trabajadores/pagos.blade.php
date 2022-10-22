@@ -83,24 +83,24 @@
             },
             methods: {
                 obtenerDatos(){
-                    let _this = this;
+
                     this.mostrarMensaje=true;
                     axios.post('/trabajadores/obtener-pagos',{
                         'fecha_in':this.fecha_in,
                         'idempleado':this.idempleado
                     })
-                        .then(function (response) {
+                        .then(response => {
                             let datos = response.data['gastos'];
                             if(datos.length==0){
-                                _this.mensajeTabla='No se han encontrado registros';
+                                this.mensajeTabla='No se han encontrado registros';
                             } else{
-                                _this.lista_gastos=datos;
-                                _this.mostrarMensaje=false;
+                                this.lista_gastos=datos;
+                                this.mostrarMensaje=false;
                             }
-                            _this.total_pagado=(response.data['total_pagado']).toFixed(2);
-                            _this.bonificaciones=(response.data['extras']).toFixed(2);
+                            this.total_pagado=(response.data['total_pagado']).toFixed(2);
+                            this.bonificaciones=(response.data['extras']).toFixed(2);
                         })
-                        .catch(function (error) {
+                        .catch(error => {
                             alert('Ha ocurrido un error al obtener los datos.');
                             console.log(error);
                         });

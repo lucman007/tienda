@@ -37,6 +37,11 @@
         <p style="font-size: 1rem;">Mostrar logo en tickets</p>
     </b-form-checkbox>
 </div>
+<div class="col-lg-3 mt-3">
+    <b-form-checkbox v-model="impresion.tipo_cambio_comprobantes" switch size="lg">
+        <p style="font-size: 1rem;">Mostrar tipo de cambio</p>
+    </b-form-checkbox>
+</div>
 <div class="col-lg-12">
     <b-button @click="guardarConfiguracion('impresion')" class="mr-2 mb-5 float-right" variant="success"><i class="fas fa-save"></i> Guardar</b-button>
 </div>

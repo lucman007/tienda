@@ -1,6 +1,7 @@
 @extends('layouts.main')
 @section('titulo', 'Cotizaciones')
 @section('contenido')
+    @php $agent = new \Jenssegers\Agent\Agent() @endphp
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
             <div class="col-lg-8">
@@ -35,15 +36,15 @@
                                 <tr>
                                     <th scope="col"></th>
                                     <th scope="col"><a href="?orderby=correlativo&order={{$order}}">
-                                            {{str_contains(strtolower($_SERVER['HTTP_USER_AGENT']),'android')?'N°':'Número'}} <span class="icon-hover @if($orderby=='correlativo') icon-hover-active @endif">{!!$order_icon!!}</span></a>
+                                            {{!$agent->isDesktop()?'N°':'Número'}} <span class="icon-hover @if($orderby=='correlativo') icon-hover-active @endif">{!!$order_icon!!}</span></a>
                                     </th>
-                                    @if(!str_contains(strtolower($_SERVER['HTTP_USER_AGENT']),'android'))
+                                    @if($agent->isDesktop())
                                     <th>Vend.</th>
                                     @endif
                                     <th scope="col"><a href="?orderby=fecha&order={{$order}}">Fecha <span class="icon-hover @if($orderby=='fecha') icon-hover-active @endif">{!!$order_icon!!}</span></a></th>
                                     <th scope="col" style="width: 40%"><a href="?orderby=cliente&order={{$order}}">Cliente <span class="icon-hover @if($orderby=='cliente') icon-hover-active @endif">{!!$order_icon!!}</span></a></th>
                                     <th scope="col">Total</th>
-                                    @if(!str_contains(strtolower($_SERVER['HTTP_USER_AGENT']),'android'))
+                                    @if($agent->isDesktop())
                                         <th scope="col"><a href="?orderby=moneda&order={{$order}}">Moneda <span class="icon-hover @if($orderby=='moneda') icon-hover-active @endif">{!!$order_icon!!}</span></a></th>
                                         <th scope="col">Opciones</th>
                                     @else
@@ -57,16 +58,16 @@
                                         <tr>
                                             <td></td>
                                             <td>{{$item->correlativo}}</td>
-                                            @if(!str_contains(strtolower($_SERVER['HTTP_USER_AGENT']),'android'))
+                                            @if($agent->isDesktop())
                                             <td>{{mb_strtoupper($item->empleado->nombre)}}</td>
                                             @endif
-                                            @if(str_contains(strtolower($_SERVER['HTTP_USER_AGENT']),'android'))
+                                            @if(!$agent->isDesktop())
                                                 <td style="width: 20%">{{date("d-m-Y",strtotime($item->fecha))}}</td>
                                             @else
                                                 <td style="width: 20%">{{date("d-m-Y H:i:s",strtotime($item->fecha))}}</td>
                                             @endif
                                             <td>{{$item->cliente->persona->nombre}}</td>
-                                            @if(str_contains(strtolower($_SERVER['HTTP_USER_AGENT']),'android'))
+                                            @if(!$agent->isDesktop())
                                                 <td>{{$item->moneda=='PEN'?'S/':'USD'}} {{$item->presupuesto}}</td>
                                             @else
                                                 <td>{{$item->presupuesto}}</td>

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Mail;
 use sysfact\Categoria;
 use sysfact\Emisor;
 use sysfact\Facturacion;
+use sysfact\Guia;
 use sysfact\Http\Controllers\Cpe\CpeController;
 use sysfact\Http\Controllers\Helpers\DataTipoPago;
 use sysfact\Http\Controllers\Helpers\MainHelper;
@@ -559,10 +560,6 @@ class VentaController extends Controller
                 $pedido->estado='ATENDIDO';
                 $pedido->save();
 
-                $pedido->mesa()->update([
-                    "estado"=>0
-                ]);
-
             }    */
 
             $idguia = -1;
@@ -659,6 +656,21 @@ class VentaController extends Controller
         }
 
         $venta->guia_relacionada=$venta->guia->first();
+
+        //inicio código para version antigua del sistema tabla guia
+        if(!$venta->guia_relacionada){
+            $venta->guia_relacionada = Guia::where('correlativo',$venta->facturacion->guia_relacionada)->first();
+            if(!$venta->guia_relacionada){
+                $correlativo = $venta->facturacion->guia_relacionada;
+                if($correlativo){
+                    $venta->guia_relacionada = ['correlativo'=>$correlativo,'estado'=>$venta->facturacion->estado_guia];
+                } else{
+                    $venta->guia_relacionada=false;
+                }
+            }
+        }
+        //fin código para version antigua del sistema tabla guia
+
 
         switch ($venta->facturacion->estado){
             case 'PENDIENTE':
@@ -901,11 +913,52 @@ class VentaController extends Controller
 
     public function enviar_comprobantes_por_email(Request $request){
         try{
+            $cc = json_decode($request->destinatarios);
             PdfHelper::generarPdf($request->idventa, false, 'F');
             if($request->idguia != -1){
                 PdfHelper::generarPdfGuia($request->idguia, false, 'F');
             }
-            Mail::to($request->mail)->send(new EnviarDocumentos($request));
+            Mail::to($request->mail)->cc($cc)->send(new EnviarDocumentos($request));
+
+            $venta = Venta::find($request->idventa);
+            $data = $venta->datos_adicionales;
+            if(!$data){
+                $mail_data = [
+                    'mail'=>[
+                        [
+                            'direccion'=>$request->mail,
+                            'fecha'=>date('Y-m-d H:i:s')
+                        ]
+                    ]
+                ];
+                if(count($cc)>0){
+                    foreach ($cc as $item){
+                        $mail_data['mail'][] = [
+                            'direccion'=>$item,
+                            'fecha'=>date('Y-m-d H:i:s')
+                        ];
+                    }
+                }
+                $venta->datos_adicionales = json_encode($mail_data);
+                $venta->save();
+            } else {
+                $mail_data = json_decode($data, true)['mail'];
+                $mail_data[] = [
+                    'direccion'=>$request->mail,
+                    'fecha'=>date('Y-m-d H:i:s')
+                ];
+                if(count($cc)>0){
+                    foreach ($cc as $item){
+                        $mail_data[] = [
+                            'direccion'=>$item,
+                            'fecha'=>date('Y-m-d H:i:s')
+                        ];
+                    }
+                }
+                $venta->datos_adicionales = json_encode(['mail'=>$mail_data]);
+                $venta->save();
+            }
+
             if(file_exists(storage_path() . '/app/sunat/pdf/' . $request->factura . '.pdf')){
                 unlink(storage_path() . '/app/sunat/pdf/' . $request->factura . '.pdf');
             }
@@ -1191,11 +1244,6 @@ class VentaController extends Controller
                 $pedido->idventa=$idventa;
                 $pedido->estado='ATENDIDO';
                 $pedido->save();
-
-                $pedido->mesa()->update([
-                    "estado"=>0
-                ]);
-
             }
 
             if($request->comprobante != '30') {

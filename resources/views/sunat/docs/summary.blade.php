@@ -22,7 +22,7 @@
                 <cbc:ID>{{$emisor->ruc}}</cbc:ID>
             </cac:PartyIdentification>
             <cac:PartyName>
-                <cbc:Name>![CDATA[{{$emisor->razon_social}}]]</cbc:Name>
+                <cbc:Name><![CDATA[{{$emisor->razon_social}}]]></cbc:Name>
             </cac:PartyName>
         </cac:SignatoryParty>
         <cac:DigitalSignatureAttachment>

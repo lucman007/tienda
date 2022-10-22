@@ -309,8 +309,8 @@ class ConfiguracionController extends Controller
 
         $producto->num_item = 1;
         $producto->codigo = 'ASD8727';
-        $producto->nombre = 'ARROZ CON POLLO';
-        $producto->descripcion = 'ARROZ CON POLLO';
+        $producto->nombre = 'CONTROLADOR DE TEMPERATURA';
+        $producto->descripcion = 'ENTRADA DE SENSOR UNIVERSAL';
         $producto->cantidad = 5;
         $producto->detalle = $detalle;
         $producto->unidad_medida = 'UND';
@@ -408,6 +408,7 @@ class ConfiguracionController extends Controller
         $cliente->num_documento = '20520679400';
         $cliente->telefono = '996861131';
         $cliente->correo = 'ventas@miempresa.com';
+        $cliente->idcliente = 20;
 
         $producto = new Collection();
         $detalle['descripcion'] = 'ENTRADA DE SENSOR UNIVERSAL';
@@ -422,6 +423,7 @@ class ConfiguracionController extends Controller
         $producto->total = 100;
         $producto->monto = 100;
         $producto->monto_descuento = 0;
+        $producto->imagen = '';
 
         $presupuesto->productos = [$producto];
         $config = MainHelper::configuracion('mail_contact');
@@ -456,34 +458,6 @@ class ConfiguracionController extends Controller
         $artisan = Artisan::call("view:clear");
         $output = Artisan::output();
         return redirect('/configuracion?tab=sistema');
-    }
-
-    public function verificar_totales(){
-        try{
-            $ventas=Venta::where('eliminado','=',0)
-                ->orderby('idventa','desc')
-                ->get();
-
-            foreach ($ventas as $venta) {
-                $monto = 0;
-                $total = $venta->total_venta;
-                $productos = $venta->productos;
-                foreach ($productos as $producto) {
-                    $monto += $producto->detalle->monto * $producto->detalle->cantidad;
-                }
-                $total = round($total,2);
-                $monto = round($monto,2);
-                if($total == $monto){
-                    Log::info('OK -'.$venta->idventa.' - '.$venta->total_venta.' - '.$monto);
-                } else{
-                    Log::info('ERROR -'.$venta->idventa.' - '.$venta->total_venta.' - '.$monto);
-                }
-
-            }
-            return 'success';
-        } catch (\Exception $e){
-            return $e;
-        }
     }
 
 }

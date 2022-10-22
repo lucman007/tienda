@@ -93,12 +93,6 @@
     <table class="footer">
         <tr>
             <td class="footer-l">
-                <p>
-                    <strong>Condición de pago:</strong> {{strtoupper($requerimiento->condicion_pago)}} <br>
-                    <strong>Cta. detracciones:</strong> {{$emisor->cuenta_detracciones}} <br>
-                    <strong>Cta. Soles:</strong> {{$emisor->cuenta_1}} <br>
-                    <strong>Cta. Dólares:</strong> {{$emisor->cuenta_2}} <br>
-                </p>
             </td>
             <td style="width: 1%"></td>
             <td class="footer-r">

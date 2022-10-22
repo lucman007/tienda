@@ -213,7 +213,7 @@ class Util
         if($this->esProduccion){
             $private_key->loadKey(storage_path().'/app/sunat/certificados/private_key.key',true);
         } else{
-            $private_key->loadKey(storage_path().'/app/sunat/certificados/private_key.pem',true);
+            $private_key->loadKey(public_path().'/files/private_key.pem',true);
         }
 
         $dsig=new XMLSecurityDSig();
@@ -224,7 +224,7 @@ class Util
         if($this->esProduccion){
             $dsig->add509Cert(file_get_contents(storage_path().'/app/sunat/certificados/public_key.cer'),true,false,['subjectName' => false]);
         } else{
-            $dsig->add509Cert(file_get_contents(storage_path().'/app/sunat/certificados/public_key.pem'),true,false,['subjectName' => false]);
+            $dsig->add509Cert(file_get_contents(public_path().'/files/public_key.pem'),true,false,['subjectName' => false]);
         }
 
         $dsig->appendSignature($documento->getElementsByTagName('ExtensionContent')->item(0));

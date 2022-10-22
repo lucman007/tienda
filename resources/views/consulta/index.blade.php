@@ -110,7 +110,7 @@
                             this.nombreFichero=response.data.nombre_fichero;
                             this.idventa = response.data.idventa;
                         })
-                        .catch(function (error) {
+                        .catch(error => {
                             alert('Hubo un error al consultar el documento');
                             console.log(error);
                         });

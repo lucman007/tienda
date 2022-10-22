@@ -44,6 +44,33 @@
     </b-form-checkbox>
 </div>
 <div class="col-lg-4 mt-3">
+    <div class="form-group">
+        <label>Impresión:</label>
+        <select v-model="interfaz.tipo_impresion" class="custom-select">
+            <option value="1">Abrir en nueva pestaña</option>
+            <option value="2">Abrir en ventana emergente</option>
+        </select>
+    </div>
+</div>
+<div class="col-lg-4 mt-3">
+    <div class="form-group">
+        <label>Buscador de clientes:</label>
+        <select v-model="interfaz.buscador_clientes" class="custom-select">
+            <option value="1">Casilla autocompletable</option>
+            <option value="2">Ventana emergente</option>
+        </select>
+    </div>
+</div>
+<div class="col-lg-4 mt-3">
+    <div class="form-group">
+        <label>Buscador de productos:</label>
+        <select v-model="interfaz.buscador_productos" class="custom-select">
+            <option value="1">Casilla autocompletable</option>
+            <option value="2">Ventana emergente</option>
+        </select>
+    </div>
+</div>
+<div class="col-lg-4 mt-3">
     <b-form-checkbox v-model="interfaz.buscador_productos_alt" switch size="lg">
         <p style="font-size: 1rem;">Buscador de productos alternativo</p>
     </b-form-checkbox>

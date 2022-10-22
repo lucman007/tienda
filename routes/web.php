@@ -104,7 +104,7 @@ Route::group(['middleware' => ['can:Pedido']], function () {
     Route::get('pedidos/mesa/{numero}','PedidoController@ver_mesa');
     Route::post('pedidos/mesa/verificar','PedidoController@verificar_mesa');
     //Route::get('pedidos/obtener-mesas','PedidoController@obtener_mesas');
-    Route::get('pedidos/obtener-delivery','PedidoController@obtener_delivery');
+    Route::get('pedidos/obtener-pedidos','PedidoController@obtener_pedidos');
     Route::post('pedidos/productos_por_categoria', 'PedidoController@productos_por_categoria');
     Route::get('pedidos/productos/{search}', 'PedidoController@obtenerProductos');
     Route::post('pedidos/store', 'PedidoController@store');
@@ -123,7 +123,7 @@ Route::group(['middleware' => ['can:Pedido']], function () {
     Route::post('pedidos/guardar-producto', 'PedidoController@guardarProducto');
     Route::post('pedidos/nuevo_cliente', 'PedidoController@nuevo_cliente');
     Route::get('pedidos/imprimir-historial', 'PedidoController@imprimir_historial');
-    Route::get('pedidos/obtener-data-mesa/{id}', 'PedidoController@obtener_data_mesa');
+    Route::get('pedidos/obtener-data-pedido/{id}', 'PedidoController@obtener_data_pedido');
     Route::post('pedidos/borrar-item-pedido', 'PedidoController@borrarItemPedido');
     Route::post('pedidos/actualizar-detalle', 'PedidoController@actualizarDetalle');
     Route::get('pedidos/obtener-mesas/{piso}','PedidoController@obtener_mesas');
@@ -325,14 +325,6 @@ Route::group(['middleware' => ['can:Facturación: guía']], function () {
 
 });
 
-Route::group(['middleware' => ['can:Mesas']], function () {
-    Route::get('mesas','MesaController@index');
-    Route::post('mesas/store', 'MesaController@store');
-    Route::post('mesas/update', 'MesaController@update');
-    Route::delete('mesas/destroy/{id}', 'MesaController@destroy');
-    Route::get('mesas/edit/{id}', 'MesaController@edit');
-});
-
 Route::group(['middleware' => ['can:Créditos']], function () {
 
     Route::get('creditos', 'CreditoController@index');
@@ -341,7 +333,6 @@ Route::group(['middleware' => ['can:Créditos']], function () {
     Route::post('creditos/ver_pagos', 'CreditoController@ver_pagos');
 
 });
-
 
 //Ruta para consultar documentos
 Route::get('consulta', 'ConsultaController@index');

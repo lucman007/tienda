@@ -108,8 +108,8 @@
                 tituloModal:'Agregar categoría',
                 accion:'insertar',
                 idcategoria: -1,
-                nombre: '',
-                descripcion: '',
+                nombre: "",
+                descripcion: "",
                 color:'-1',
             },
             methods: {
@@ -124,11 +124,11 @@
                             'descripcion': this.descripcion,
                             'color': this.color
                         })
-                            .then(function (response) {
+                            .then(response => {
                                 window.location.reload(true)
                             })
-                            .catch(function (error) {
-                                alert('Ha ocurrido un error.');
+                            .catch(error => {
+                                this.alerta('Ha ocurrido un error.');
                                 console.log(error);
                             });
                     } else{
@@ -138,11 +138,11 @@
                             'descripcion': this.descripcion,
                             'color': this.color
                         })
-                            .then(function (response) {
+                            .then(response => {
                                 window.location.reload(true)
                             })
-                            .catch(function (error) {
-                                alert('Ha ocurrido un error.');
+                            .catch(error => {
+                                this.alerta('Ha ocurrido un error.');
                                 console.log(error);
                             });
                     }
@@ -160,8 +160,8 @@
                             this.color=datos.color;
                             this.$refs['modal-1'].show();
                         })
-                        .catch(function (error) {
-                            alert('Ha ocurrido un error.');
+                        .catch(error => {
+                            this.alerta('Ha ocurrido un error.');
                             console.log(error);
                         });
 
@@ -170,11 +170,11 @@
                     if(confirm('Realmente desea eliminar la categoria')){
 
                         axios.delete('{{url('/categorias/destroy')}}' + '/' + id)
-                            .then(function (response) {
+                            .then(response => {
                                 window.location.reload(true)
                             })
-                            .catch(function (error) {
-                                alert('No puedes eliminar la categoría porque algunos productos pertenecen a ella.');
+                            .catch(error => {
+                                this.alerta('No puedes eliminar la categoría porque algunos productos pertenecen a ella.');
                                 console.log(error);
                             });
                     }
@@ -195,7 +195,16 @@
                         this.nombre= '';
                         this.descripcion= '';
                         this.color='-1';
-
+                },
+                alerta(texto){
+                    this.$swal({
+                        position: 'top',
+                        icon: 'warning',
+                        title: texto,
+                        timer: 6000,
+                        toast:true,
+                        confirmButtonColor: '#007bff',
+                    });
                 }
             }
 

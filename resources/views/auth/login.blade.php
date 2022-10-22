@@ -15,13 +15,13 @@
                     <form class="form-horizontal" method="POST" action="{{ route('login') }}">
                         {{ csrf_field() }}
 
-                        <div class="form-group">
+                        <div class="form-group{{ $errors->has('usuario') ? ' has-error' : '' }}">
                             <label for="usuario" class="col-md-12 control-label">Usuario</label>
                             <div class="col-md-12">
                                 <input id="usuario" type="text" class="form-control" name="usuario" value="{{ old('usuario') }}" required autofocus>
                             </div>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group{{ $errors->has('password') ? ' has-error' : '' }}">
                             <label for="password" class="col-md-12 control-label">Contraseña</label>
                             <div class="col-md-12">
                                 <input id="password" type="password" class="form-control" name="password" required>

@@ -56,11 +56,14 @@ class LoginController extends Controller
             Auth::login($user,true);
             if(auth()->user()->hasRole('Contabilidad')){
                 return redirect('/reportes/comprobantes');
-            }
-            if(auth()->user()->cannot('Pedido')){
+            }  else if(auth()->user()->hasRole('Preventa')){
+                return redirect('/presupuestos');
+            } else if(auth()->user()->cannot('Pedido')){
                 return redirect('/');
+            } else {
+                return redirect('/pedidos');
             }
-            return redirect('/pedidos');
+
 		} else{
             return redirect('login')
                 ->withInput()

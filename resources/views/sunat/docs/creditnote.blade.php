@@ -99,14 +99,26 @@
             </cac:PartyLegalEntity>
         </cac:Party>
     </cac:AccountingCustomerParty>
-    @if($documento->facturacion->descuento_global>'0.00')
-        <cac:AllowanceCharge>
-            <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
-            <cbc:AllowanceChargeReasonCode>00</cbc:AllowanceChargeReasonCode>
-            <cbc:MultiplierFactorNumeric>{{$documento->facturacion->porcentaje_descuento_global}}</cbc:MultiplierFactorNumeric>
-            <cbc:Amount currencyID="{{$documento->codigo_moneda}}">{{$documento->facturacion->descuento_global}}</cbc:Amount>
-            <cbc:BaseAmount currencyID="{{$documento->codigo_moneda}}">{{$documento->facturacion->base_descuento_global}}</cbc:BaseAmount>
-        </cac:AllowanceCharge>
+    @if($documento->facturacion->tipo_nota_electronica == '13')
+        <cac:PaymentTerms>
+            <cbc:ID>FormaPago</cbc:ID>
+            <cbc:PaymentMeansID>Credito</cbc:PaymentMeansID>
+            <cbc:Amount currencyID="{{$documento->codigo_moneda}}">{{$documento->monto_neto_pendiente_pago}}</cbc:Amount>
+        </cac:PaymentTerms>
+        @php
+            $i=1
+        @endphp
+        @foreach($documento->pago as $pago)
+            <cac:PaymentTerms>
+                <cbc:ID>FormaPago</cbc:ID>
+                <cbc:PaymentMeansID>Cuota{{str_pad($i,3,"0",STR_PAD_LEFT)}}</cbc:PaymentMeansID>
+                <cbc:Amount currencyID="{{$documento->codigo_moneda}}">{{$pago->monto}}</cbc:Amount>
+                <cbc:PaymentDueDate>{{date('Y-m-d',strtotime($pago->fecha))}}</cbc:PaymentDueDate>
+            </cac:PaymentTerms>
+            @php
+                $i++
+            @endphp
+        @endforeach
     @endif
     <cac:TaxTotal>
         <cbc:TaxAmount currencyID="{{$documento->codigo_moneda}}">{{$documento->total_impuestos}}</cbc:TaxAmount>
@@ -178,7 +190,7 @@
             <cac:TaxSubtotal>
                 <cbc:TaxableAmount
                         currencyID="{{$documento->codigo_moneda}}">{{$documento->facturacion->total_gratuitas}}</cbc:TaxableAmount>
-                <cbc:TaxAmount currencyID="{{$documento->codigo_moneda}}">{{round($documento->facturacion->total_gratuitas * 0.18,2)}}</cbc:TaxAmount>
+                <cbc:TaxAmount currencyID="{{$documento->codigo_moneda}}">0.00</cbc:TaxAmount>
                 <cac:TaxCategory>
                     <cbc:ID>Z
                     </cbc:ID>
@@ -224,22 +236,6 @@
         @endif
     </cac:TaxTotal>
     <cac:LegalMonetaryTotal>
-        <cbc:LineExtensionAmount
-                currencyID="{{ $documento->codigo_moneda }}">{{$documento->facturacion->valor_venta_bruto}}</cbc:LineExtensionAmount>
-        <cbc:TaxInclusiveAmount
-                currencyID="{{ $documento->codigo_moneda }}">{{$documento->total_venta}}</cbc:TaxInclusiveAmount>
-        @if ($documento->facturacion->total_descuentos>'0.00')
-            <cbc:AllowanceTotalAmount
-                    currencyID="{{ $documento->codigo_moneda }}">{{$documento->facturacion->total_descuentos}}</cbc:AllowanceTotalAmount>
-        @endif
-        @if ($documento->otros_cargos)
-            <cbc:ChargeTotalAmount
-                    currencyID="{{ $documento->codigo_moneda }}">{{$documento->otros_cargos}}</cbc:ChargeTotalAmount>
-        @endif
-        @if ($documento->anticipos)
-            <cbc:PrepaidAmount
-                    currencyID="{{ $documento->codigo_moneda }}">{{$documento->anticipos}}</cbc:PrepaidAmount>
-        @endif
         <cbc:PayableAmount currencyID="{{$documento->codigo_moneda}}">{{$documento->total_venta}}</cbc:PayableAmount>
     </cac:LegalMonetaryTotal>
     @foreach($items as $item)
@@ -255,24 +251,6 @@
                     <cbc:PriceTypeCode>{{$item->tipo_precio_venta_unitario_por_item}}</cbc:PriceTypeCode>
                 </cac:AlternativeConditionPrice>
             </cac:PricingReference>
-            @if($item->cargos)
-                <cac:AllowanceCharge>
-                    <cbc:ChargeIndicator>true</cbc:ChargeIndicator>
-                    <cbc:AllowanceChargeReasonCode>00</cbc:AllowanceChargeReasonCode>
-                    <cbc:MultiplierFactorNumeric>0.10</cbc:MultiplierFactorNumeric>
-                    <cbc:Amount currencyID="{{$documento->codigo_moneda}}">16610.17</cbc:Amount>
-                    <cbc:BaseAmount currencyID="{{$documento->codigo_moneda}}">166101.69</cbc:BaseAmount>
-                </cac:AllowanceCharge>
-            @endif
-            @if($item->detalle->descuento>'0.00')
-                <cac:AllowanceCharge>
-                    <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
-                    <cbc:AllowanceChargeReasonCode>00</cbc:AllowanceChargeReasonCode>
-                    <cbc:MultiplierFactorNumeric>{{$item->detalle->porcentaje_descuento/100}}</cbc:MultiplierFactorNumeric>
-                    <cbc:Amount currencyID="{{$documento->codigo_moneda}}">{{$item->detalle->descuento}}</cbc:Amount>
-                    <cbc:BaseAmount currencyID="{{$documento->codigo_moneda}}">{{$item->base_descuento}}</cbc:BaseAmount>
-                </cac:AllowanceCharge>
-            @endif
             <cac:TaxTotal>
                 <cbc:TaxAmount currencyID="{{$documento->codigo_moneda}}">{{$item->igv}}</cbc:TaxAmount>
                 <cac:TaxSubtotal>
@@ -291,7 +269,7 @@
                 </cac:TaxSubtotal>
             </cac:TaxTotal>
             <cac:Item>
-                <cbc:Description><![CDATA[{{$item->descripcion}}]]></cbc:Description>
+                <cbc:Description><![CDATA[{{preg_replace("/[\r\n|\n|\r]+/", " ",strip_tags($item->descripcion))}}]]></cbc:Description>
                 <cac:SellersItemIdentification>
                     <cbc:ID>{{$item->codigo}}</cbc:ID>
                 </cac:SellersItemIdentification>
@@ -309,7 +287,7 @@
             @else
                 <cac:Price>
                     <cbc:PriceAmount
-                            currencyID="{{$documento->codigo_moneda}}">{{$item->valor_venta_bruto_unitario}}</cbc:PriceAmount>
+                            currencyID="{{$documento->codigo_moneda}}">{{round($item->valor_venta_unitario_por_item / $item->cantidad,2)}}</cbc:PriceAmount>
                 </cac:Price>
             @endif
         </cac:CreditNoteLine>

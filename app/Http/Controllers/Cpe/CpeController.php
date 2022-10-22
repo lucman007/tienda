@@ -253,24 +253,25 @@ class CpeController extends Controller
         }
     }
 
-    public function descargarArchivo(Request $request, $file_or_id){
+    public function descargarArchivo(Request $request, $file_or_id)
+    {
 
-        if(is_numeric($file_or_id)){
-            if($request->guia){
-                PdfHelper::generarPdfGuia($file_or_id,false, 'D');
+        if (is_numeric($file_or_id)) {
+            if ($request->guia) {
+                PdfHelper::generarPdfGuia($file_or_id, false, 'D');
             } else {
-                PdfHelper::generarPdf($file_or_id,false, 'D');
+                PdfHelper::generarPdf($file_or_id, false, 'D');
             }
 
         } else {
-            $archivo=explode('.',$file_or_id);
-            switch($archivo[1]) {
+            $archivo = explode('.', $file_or_id);
+            switch ($archivo[1]) {
                 case 'xml':
-                    $pathtoFile = storage_path().'/app/sunat/xml/' . $file_or_id;
+                    $pathtoFile = storage_path() . '/app/sunat/xml/' . $file_or_id;
                     return response()->download($pathtoFile);
                     break;
                 case 'cdr':
-                    $pathtoFile = storage_path().'/app/sunat/cdr/' .$archivo[0].'.xml';
+                    $pathtoFile = storage_path() . '/app/sunat/cdr/' . $archivo[0] . '.xml';
                     if (!file_exists($pathtoFile)) {
                         return redirect('/comprobantes/consulta-cdr')->withErrors(['No se ha obtenido el CDR del comprobante. LLena los datos abajo, dale al botón CONSULTAR CDR y vuelve a descargar desde la página anterior.']);
                     }
@@ -280,7 +281,46 @@ class CpeController extends Controller
                     return null;
             }
         }
-
     }
+
+    public function verificar_estado_comprobante($idventa){
+
+        $request = new Request();
+        $facturacion = Facturacion::find($idventa);
+        $request->idventa = $idventa;
+        $request->tipo_consulta='cdr';
+        $request->tipo = $facturacion->codigo_tipo_documento;
+        $request->serie = $facturacion->serie;
+        $request->numero = $facturacion->correlativo;
+        $respuesta = $this->getStatusCdr($request);
+        if(str_contains(strtolower($respuesta),'aceptado') || str_contains(strtolower($respuesta),'aceptada')){
+            $venta = Venta::find($idventa);
+            $venta->facturacion()->update([
+                "estado"=>'ACEPTADO'
+            ]);
+        }
+        return $respuesta;
+    }
+
+    public function verificar_estado_guia($idguia){
+
+        $request = new Request();
+        $guia = Guia::find($idguia);
+        $request->idventa = $idguia;
+        $request->tipo_consulta='cdr';
+        $request->tipo = '09';
+        $request->serie = 'T001';
+        $correlativo = explode('-', $guia->correlativo)[1];
+        $request->numero = $correlativo;
+        $respuesta = $this->getStatusCdr($request);
+        if(str_contains(strtolower($respuesta),'aceptado') || str_contains(strtolower($respuesta),'aceptada')){
+            $venta = Venta::find($idguia);
+            $venta->facturacion()->update([
+                "estado"=>'ACEPTADO'
+            ]);
+        }
+        return $respuesta;
+    }
+
 
 }

@@ -32,16 +32,6 @@
                         @endif
                     </td>
                 </tr>
-                @if(isset(json_decode(cache('config')['impresion'], true)['mostrar_mesa']) && json_decode(cache('config')['impresion'], true)['mostrar_mesa'] && $documento->mesa)
-                    <tr>
-                        @if($documento->mesa == 'DELIVERY')
-                            <td colspan="2" style="width:42mm"><strong>Para llevar</strong></td>
-                        @else
-                            <td><strong>Mesa:</strong></td>
-                            <td style="width:42mm">{{$documento->mesa}}</td>
-                        @endif
-                    </tr>
-                @endif
             </table>
         </div>
         <table class="items" cellpadding="0">

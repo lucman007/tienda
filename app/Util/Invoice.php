@@ -49,17 +49,20 @@ class Invoice {
                     // Si incluir igv es true
                     $item->valor_venta_bruto_unitario = round($item->detalle->monto/1.18,2);//PRECIO UNITARIO DE PRODUCTO SIN IGV
                     $item->base_descuento=round($item->detalle->monto*$item->detalle->cantidad/1.18,2);
-                    $item->valor_referencial=round($item->detalle->monto-$item->descuento,2);
                 } else{
                     // Si incluir igv es false
                     $item->valor_venta_bruto_unitario = $item->detalle->monto;
                     $item->base_descuento=round($item->detalle->monto*$item->detalle->cantidad,2);
-                    $item->valor_referencial=round(($item->detalle->monto-($item->detalle->monto*$porcentaje_descuento))*1.18,2);
                 }
+                $item->valor_referencial=round($item->detalle->total / $item->detalle->cantidad,2);
             } else{
                 // Si tipo de afectación es diferente de gravado
                 $item->valor_venta_bruto_unitario = $item->detalle->monto;
                 $item->base_descuento=round($item->detalle->monto*$item->detalle->cantidad,2);
+                $item->valor_referencial=$item->detalle->monto;
+            }
+
+            if($documento->facturacion->codigo_tipo_factura == '0200'){
                 $item->valor_referencial=$item->detalle->monto;
             }
 
@@ -141,7 +144,36 @@ class Invoice {
             $moneda_letras='DÓLARES';
         }
 
-        $documento->codigo_tipo_factura='0101'; //Catálogo N° 51: Código de tipo de factura
+        //Detracción
+        if($documento->facturacion->codigo_tipo_factura == '1001'){
+            $detraccion = explode('/',$documento->facturacion->tipo_detraccion);
+            $documento->tipo_detraccion = $detraccion[0];
+            $documento->porcentaje_detraccion = number_format($detraccion[1],2);
+            $documento->detraccion = round($documento->total_venta * ($documento->porcentaje_detraccion/100),2);
+            $documento->detraccion_soles = round(($documento->total_venta * ($documento->porcentaje_detraccion/100)*cache('opciones')['tipo_cambio_compra']),2);
+            $documento->monto_menos_detraccion = round($documento->total_venta - $documento->detraccion,2);
+
+            foreach ($documento->pago as $pago){
+                $r = round($pago->monto * ($documento->porcentaje_detraccion/100),2);
+                $pago->monto =  round($pago->monto - $r,2);
+            }
+        }
+
+        //Retención
+        if($documento->facturacion->retencion == 1){
+            $documento->monto_base_retencion = $documento->total_venta;
+            $documento->retencion = round($documento->total_venta * 0.03,2);
+            $documento->monto_menos_retencion = round($documento->total_venta - $documento->retencion,2);
+
+            foreach ($documento->pago as $pago){
+                $r = round($pago->monto * 0.03,2);
+                $pago->monto =  round($pago->monto - $r,2);
+            }
+
+        }
+
+        $documento->codigo_tipo_factura=$documento->facturacion->codigo_tipo_factura; //Catálogo N° 51: Código de tipo de factura
+
         $documento->serie=$documento->facturacion->serie;
         $documento->correlativo=$documento->facturacion->correlativo;
         $documento->fecha_emision=date('Y-m-d', strtotime($documento->fecha));
@@ -156,6 +188,7 @@ class Invoice {
         $documento->total_impuestos=$documento->facturacion->igv+$documento->facturacion->isc+$documento->facturacion->ivap;
         $documento->guias_fisicas=explode(',',$documento->facturacion->guia_fisica);
         $documento->pagos;
+        $documento->facturacion->guia_relacionada = $documento->guia->first()->correlativo??null;
         $usuario->razon_social=$usuario->persona['nombre'];
         $this->nombre_fichero=$emisor->ruc.'-'.$documento->codigo_tipo_documento.'-'.$documento->serie.'-'.$documento->correlativo;
 

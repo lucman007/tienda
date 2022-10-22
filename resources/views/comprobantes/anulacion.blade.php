@@ -144,7 +144,6 @@
             },
             methods: {
                 obtenerComprobantes(){
-                    let _this = this;
                     this.mostrarMensaje = true;
                     this.mensajeTabla = 'Cargando...';
                     axios.post('/comprobantes/obtener-comprobantes?page=' + this.ventas.current_page, {
@@ -152,29 +151,29 @@
                         'fecha_in': this.fecha_in,
                         'fecha_out': this.fecha_in
                     })
-                        .then(function (response) {
+                        .then(response => {
                             let ventas = response.data;
                             let suma_soles = 0;
                             let suma_usd = 0;
-                            _this.ventas = ventas;
+                            this.ventas = ventas;
                             for (let val of ventas.data) {
                                 //Anulado?
-                                if (_this.tipo_comprobante == 40 ||_this.tipo_comprobante == 50) {
-                                    _this.$set(val, 'anular', false);
-                                    _this.$set(val, 'motivo_baja', '');
+                                if (this.tipo_comprobante == 40 ||this.tipo_comprobante == 50) {
+                                    this.$set(val, 'anular', false);
+                                    this.$set(val, 'motivo_baja', '');
                                 }
                             }
 
                             if (ventas.data.length === 0) {
-                                _this.mensajeTabla = 'No se han encontrado registros';
-                                _this.blockResumen = true;
+                                this.mensajeTabla = 'No se han encontrado registros';
+                                this.blockResumen = true;
                             } else {
-                                _this.mostrarMensaje = false;
-                                _this.blockResumen = false;
+                                this.mostrarMensaje = false;
+                                this.blockResumen = false;
                             }
 
                         })
-                        .catch(function (error) {
+                        .catch(error => {
                             alert('Ha ocurrido un error.');
                             console.log(error);
                         });
@@ -188,13 +187,12 @@
                 enviarResumen(){
                     if(confirm('¿Está seguro de enviar los documentos a SUNAT? Recuerde revisar sus datos detalladamente')) {
                         if (this.ventas.data.length !== 0) {
-                            _this = this;
                             axios.get('{{url('ventas/generar/resumenBoletas')}}' + '/' + this.fecha_in)
-                                .then(function (response) {
+                                .then(response => {
                                     alert(response.data);
-                                    _this.obtenerComprobantes();
+                                    this.obtenerComprobantes();
                                 })
-                                .catch(function (error) {
+                                .catch(error => {
                                     alert('Ha ocurrido un error al enviar el resumen.');
                                     console.log(error);
                                 });
@@ -221,20 +219,19 @@
                         }
 
                         if (items.length > 0) {
-                            if (confirm('Esta operación no se puede revertir ¿Está seguro de anular los comprobantes?')) {
-                                _this = this;
+                            if (confirm('Esta operación no se puede revertir ¿Está seguro de anular los documentos?')) {
                                 this.mostrarProgreso=true;
                                 axios.post('{{url('comprobantes/anular-facturas')}}', {
                                     'items': JSON.stringify(items)
                                 })
-                                    .then(function (response) {
+                                    .then(response => {
                                         alert(response.data);
-                                        _this.mostrarProgreso=false;
-                                        _this.obtenerComprobantes();
+                                        this.mostrarProgreso=false;
+                                        this.obtenerComprobantes();
                                     })
-                                    .catch(function (error) {
+                                    .catch(error => {
                                         alert('Ha ocurrido un error al procesar la operación.');
-                                        _this.mostrarProgreso=false;
+                                        this.mostrarProgreso=false;
                                         console.log(error);
                                     });
                             }
@@ -252,19 +249,18 @@
                         }
                         if (items.length > 0) {
                             if (confirm('Esta operación no se puede revertir ¿Está seguro de anular los documentos?')) {
-                                _this = this;
                                 this.mostrarProgreso=true;
                                 axios.post('{{url('comprobantes/anular-boletas')}}', {
                                     'items': JSON.stringify(items)
                                 })
-                                    .then(function (response) {
+                                    .then(response => {
                                         alert(response.data);
-                                        _this.mostrarProgreso=false;
-                                        _this.obtenerComprobantes();
+                                        this.mostrarProgreso=false;
+                                        this.obtenerComprobantes();
                                     })
-                                    .catch(function (error) {
+                                    .catch(error => {
                                         alert('Ha ocurrido un error al procesar la operación.');
-                                        _this.mostrarProgreso=false;
+                                        this.mostrarProgreso=false;
                                         console.log(error);
                                     });
                             }

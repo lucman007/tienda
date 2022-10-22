@@ -546,7 +546,8 @@ class PresupuestoController extends Controller
         $pdf['file']->output(storage_path() . '/app/' .$pdf['name'],'F');
 
         try{
-            Mail::to($request->mail)->send(new EnviarPresupuesto($request->mensaje,$pdf['name'],$request->conCopia));
+            $cc = json_decode($request->destinatarios);
+            Mail::to($request->mail)->cc($cc)->send(new EnviarPresupuesto($request->mensaje,$pdf['name'],$request->conCopia));
             unlink(storage_path() . '/app/' .$pdf['name']);
 
             $presupuesto = Presupuesto::find($request->idpresupuesto);
@@ -560,6 +561,14 @@ class PresupuestoController extends Controller
                         ]
                     ]
                 ];
+                if(count($cc)>0){
+                    foreach ($cc as $item){
+                        $mail_data['mail'][] = [
+                            'direccion'=>$item,
+                            'fecha'=>date('Y-m-d H:i:s')
+                        ];
+                    }
+                }
                 $presupuesto->datos_adicionales = json_encode($mail_data);
                 $presupuesto->save();
             } else {
@@ -568,6 +577,14 @@ class PresupuestoController extends Controller
                     'direccion'=>$request->mail,
                     'fecha'=>date('Y-m-d H:i:s')
                 ];
+                if(count($cc)>0){
+                    foreach ($cc as $item){
+                        $mail_data[] = [
+                            'direccion'=>$item,
+                            'fecha'=>date('Y-m-d H:i:s')
+                        ];
+                    }
+                }
                 $presupuesto->datos_adicionales = json_encode(['mail'=>$mail_data]);
                 $presupuesto->save();
             }

@@ -34,7 +34,7 @@
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    <tr class="delivery-item" :class="{'active-order':item.idorden == idpedido}" @click="obtener_data_delivery(item.idorden)" v-for="item, index in ordenes" :key="index">
+                                    <tr class="delivery-item" :class="{'active-order':item.idorden == idpedido}" @click="obtener_data_pedido(item.idorden)" v-for="item, index in ordenes" :key="index">
                                         @if($agent->isDesktop())
                                         <td></td>
                                         @endif
@@ -198,7 +198,7 @@
                                                             </button>
                                                         </td>
                                                     </tr>
-                                                    <tr class="text-center" v-show="productosSeleccionados.length == 0"><td colspan="8">La mesa está vacía</td></tr>
+                                                    <tr class="text-center" v-show="productosSeleccionados.length == 0"><td colspan="8">Ningún producto seleccionado</td></tr>
                                                     </tbody>
                                                 </table>
                                             @endif
@@ -230,7 +230,7 @@
                                                     Agregar producto
                                                 </b-button>
                                                 <b-button @if(!$agent->isDesktop()) class="col-3 col-md p-md-4"
-                                                          @endif :disabled="idpedido == -1" @click="limpiarMesa"
+                                                          @endif :disabled="idpedido == -1" @click="limpiarPedido"
                                                           variant="danger"><i class="fas fa-times-circle"></i>
                                                     Anular venta
                                                 </b-button>
@@ -291,7 +291,7 @@
             :tipo_de_pago="{{json_encode(\sysfact\Http\Controllers\Helpers\DataTipoPago::getTipoPago())}}"
             :items="productosSeleccionados"
             v-on:imprimir="imprimir"
-            v-on:obtener-mesas="obtener_delivery"
+            v-on:obtener-mesas="obtener_pedidos"
             v-on:notificaciones="obtener_notificaciones"
             v-on:limpiar="limpiar">
     </modal-facturacion>
@@ -311,10 +311,11 @@
     @endif
     <modal-entrega
             :idpedido="idpedido"
-            v-on:delivery="obtener_delivery">
+            v-on:delivery="obtener_pedidos">
     </modal-entrega>
     <modal-detalle
             :item="item"
+            :show-precio="true"
             :can-edit-precio="@can('Pedido: editar precio') true @else false @endcan"
             v-on:actualizar="actualizarDetalle(null)">
     </modal-detalle>
@@ -337,8 +338,6 @@
                     totalVenta:0,
                     productosSeleccionados:[],
                     productosSeleccionadosAux:[],
-                    numero_mesa:'',
-                    idmesa:-1,
                     ticket:'',
                     num_item : -1,
                     element:'',
@@ -351,7 +350,7 @@
                     disabledNuevo: false,
                 },
                 created(){
-                    this.obtener_delivery();
+                    this.obtener_pedidos();
                     this.obtenerEmpleados();
                 },
                 methods:{
@@ -379,8 +378,8 @@
                         input.focus();
                         this.current_val=input.value;
                     },
-                    obtener_delivery(){
-                        axios.get('/pedidos/obtener-delivery/')
+                    obtener_pedidos(){
+                        axios.get('/pedidos/obtener-pedidos/')
                             .then(response => {
                                 this.ordenes = response.data;
                             })
@@ -389,13 +388,13 @@
                                 console.log(error);
                             });
                     },
-                    obtener_data_delivery(id){
+                    obtener_data_pedido(id){
                         this.mostrarSpinner = true;
                         let inputs = document.getElementsByClassName('td-dis');
                         for(input of inputs){
                             input.setAttribute('disabled',"");
                         }
-                        axios.get('/pedidos/obtener-data-mesa/'+id+'?tipo=delivery')
+                        axios.get('/pedidos/obtener-data-pedido/'+id)
                             .then(response => {
                                 let data = response.data;
                                 this.idpedido = data.pedido.idorden;
@@ -443,7 +442,6 @@
                     procesar(accion, tipo){
 
                         let data = {
-                            'idmesa': this.idmesa,
                             'idvendedor':this.idvendedor,
                             'idorden': this.idpedido,
                             'idcliente': -1,
@@ -452,7 +450,6 @@
                             'comprobante': '30',
                             'observaciones': '',
                             'igv_incluido': 1,
-                            'numero_mesa': this.numero_mesa,
                             'items': JSON.stringify(this.productosSeleccionados)
                         };
 
@@ -468,7 +465,7 @@
                                 } else {
                                     this.totalVenta = response.data.total;
                                     this.idpedido = response.data.idorden;
-                                    this.obtener_delivery()
+                                    this.obtener_pedidos()
                                 }
                                 this.disabledNuevo = false;
                             })
@@ -498,7 +495,7 @@
                             })
                                 .then(response => {
                                     this.productosSeleccionados = response.data;
-                                    this.obtener_delivery();
+                                    this.obtener_pedidos();
                                     this.mostrarSpinner = false;
                                 })
                                 .catch(error => {
@@ -507,11 +504,11 @@
                                     this.mostrarSpinner = false;
                                 });
                         } else {
-                            this.limpiarMesa();
+                            this.limpiarPedido();
                         }
 
                     },
-                    limpiarMesa(){
+                    limpiarPedido(){
                         if(confirm('Se anulará la venta. Confirme la acción.')){
                             axios.delete('{{url('/pedidos/destroy')}}' + '/' + this.idpedido)
                                 .then(() =>{
@@ -538,7 +535,7 @@
                                     producto['loading'] = false;
                                     producto['precio'] = (Number(producto['precio'])).toFixed(2);
                                     if(response.data == 1){
-                                        this.obtener_delivery();
+                                        this.obtener_pedidos();
                                         let input = document.getElementById(+this.num_item+"-"+this.element);
                                         if(input){
                                             input.setAttribute('disabled',"");
@@ -602,13 +599,11 @@
                     },
                     limpiar(){
                         this.totalVenta = '0.00';
-                        this.numero_mesa = '';
                         this.productosSeleccionados=[];
                         this.idpedido = -1;
                         this.ticket = '';
-                        this.idmesa = -1;
                         this.idvendedor="{{$idvendedor}}";
-                        this.obtener_delivery();
+                        this.obtener_pedidos();
                         this.disabledTicket = true;
                     },
                     obtenerEmpleados(){

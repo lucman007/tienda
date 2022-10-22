@@ -22,8 +22,11 @@
     @if($documento->tipo_pago==2)
         <cbc:DueDate>{{$documento->fecha_vencimiento}}</cbc:DueDate>
     @endif
-    <cbc:InvoiceTypeCode listID="0101">{{$documento->codigo_tipo_documento}}</cbc:InvoiceTypeCode>
+    <cbc:InvoiceTypeCode listID="{{$documento->codigo_tipo_factura}}">{{$documento->codigo_tipo_documento}}</cbc:InvoiceTypeCode>
     <cbc:Note languageLocaleID="{{$documento->codigo_leyenda}}">{{$documento->leyenda}}</cbc:Note>
+    @if($documento->facturacion->codigo_tipo_factura == '1001')
+        <cbc:Note languageLocaleID="2006"><![CDATA[Operación sujeta a detracción]]></cbc:Note>
+    @endif
     <cbc:DocumentCurrencyCode>{{$documento->codigo_moneda}}</cbc:DocumentCurrencyCode>
     @if($documento->codigo_tipo_documento==01)
     <cbc:LineCountNumeric>{{count($items)}}</cbc:LineCountNumeric>
@@ -101,18 +104,39 @@
     <cac:AccountingCustomerParty>
         <cac:Party>
             <cac:PartyIdentification>
-                <cbc:ID schemeID="{{ $usuario->tipo_documento }}">{{ $usuario->num_documento }}</cbc:ID>
+                <cbc:ID schemeID="{{ $documento->codigo_tipo_factura == '0200'?0:$usuario->tipo_documento}}">{{ $usuario->num_documento }}</cbc:ID>
             </cac:PartyIdentification>
             <cac:PartyLegalEntity>
                 <cbc:RegistrationName><![CDATA[{{ $usuario->razon_social }}]]></cbc:RegistrationName>
             </cac:PartyLegalEntity>
         </cac:Party>
     </cac:AccountingCustomerParty>
+    @if($documento->facturacion->codigo_tipo_factura == '1001')
+        <cac:PaymentMeans>
+            <cbc:ID>Detraccion</cbc:ID>
+            <cbc:PaymentMeansCode>001</cbc:PaymentMeansCode>
+            <cac:PayeeFinancialAccount>
+                <cbc:ID>{{$emisor->cuenta_detracciones}}</cbc:ID>
+            </cac:PayeeFinancialAccount>
+        </cac:PaymentMeans>
+        <cac:PaymentTerms>
+            <cbc:ID>Detraccion</cbc:ID>
+            <cbc:PaymentMeansID>{{$documento->tipo_detraccion}}</cbc:PaymentMeansID>
+            <cbc:PaymentPercent>{{$documento->porcentaje_detraccion}}</cbc:PaymentPercent>
+            <cbc:Amount currencyID="PEN">{{$documento->detraccion}}</cbc:Amount>
+        </cac:PaymentTerms>
+    @endif
     @if($documento->tipo_pago==2)
         <cac:PaymentTerms>
             <cbc:ID>FormaPago</cbc:ID>
             <cbc:PaymentMeansID>Credito</cbc:PaymentMeansID>
-            <cbc:Amount currencyID="{{$documento->codigo_moneda}}">{{$documento->total_venta}}</cbc:Amount>
+            @if($documento->facturacion->codigo_tipo_factura == '1001')
+                <cbc:Amount currencyID="{{$documento->codigo_moneda}}">{{$documento->monto_menos_detraccion}}</cbc:Amount>
+                @elseif($documento->facturacion->retencion == 1)
+                <cbc:Amount currencyID="{{$documento->codigo_moneda}}">{{$documento->monto_menos_retencion}}</cbc:Amount>
+                @else
+                <cbc:Amount currencyID="{{$documento->codigo_moneda}}">{{$documento->total_venta}}</cbc:Amount>
+            @endif
         </cac:PaymentTerms>
         @php
             $i=1
@@ -134,138 +158,169 @@
             <cbc:PaymentMeansID>Contado</cbc:PaymentMeansID>
         </cac:PaymentTerms>
     @endif
+    @if($documento->facturacion->retencion == 1)
+        <cac:AllowanceCharge>
+            <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+            <cbc:AllowanceChargeReasonCode>62</cbc:AllowanceChargeReasonCode>
+            <cbc:MultiplierFactorNumeric>0.03</cbc:MultiplierFactorNumeric>
+            <cbc:Amount currencyID="{{$documento->codigo_moneda}}">{{$documento->retencion}}</cbc:Amount>
+            <cbc:BaseAmount currencyID="{{$documento->codigo_moneda}}">{{$documento->monto_base_retencion}}</cbc:BaseAmount>
+        </cac:AllowanceCharge>
+    @endif
     @if($documento->facturacion->descuento_global>'0.00')
         <cac:AllowanceCharge>
             <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
-            <cbc:AllowanceChargeReasonCode>00</cbc:AllowanceChargeReasonCode>
+            <cbc:AllowanceChargeReasonCode>02</cbc:AllowanceChargeReasonCode>
             <cbc:MultiplierFactorNumeric>{{$documento->facturacion->porcentaje_descuento_global}}</cbc:MultiplierFactorNumeric>
             <cbc:Amount currencyID="{{$documento->codigo_moneda}}">{{$documento->facturacion->descuento_global}}</cbc:Amount>
             <cbc:BaseAmount currencyID="{{$documento->codigo_moneda}}">{{$documento->facturacion->base_descuento_global}}</cbc:BaseAmount>
         </cac:AllowanceCharge>
     @endif
-    <cac:TaxTotal>
-        <cbc:TaxAmount currencyID="{{$documento->codigo_moneda}}">{{$documento->total_impuestos}}</cbc:TaxAmount>
-        @if($documento->facturacion->igv>'0.00')
+    @if($documento->codigo_tipo_factura == '0200')
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="{{$documento->codigo_moneda}}">0.00</cbc:TaxAmount>
             <cac:TaxSubtotal>
                 <cbc:TaxableAmount
                         currencyID="{{$documento->codigo_moneda}}">{{$documento->facturacion->total_gravadas}}</cbc:TaxableAmount>
-                <cbc:TaxAmount currencyID="{{$documento->codigo_moneda}}">{{$documento->facturacion->igv}}</cbc:TaxAmount>
+                <cbc:TaxAmount currencyID="{{$documento->codigo_moneda}}">0</cbc:TaxAmount>
                 <cac:TaxCategory>
-                    <cbc:ID>S
-                    </cbc:ID>
                     <cac:TaxScheme>
-                        <cbc:ID>1000</cbc:ID>
-                        <cbc:Name>IGV</cbc:Name>
-                        <cbc:TaxTypeCode>VAT</cbc:TaxTypeCode>
-                    </cac:TaxScheme>
-                </cac:TaxCategory>
-            </cac:TaxSubtotal>
-        @endif
-        @if($documento->facturacion->isc>'0.00')
-            <cac:TaxSubtotal>
-                <cbc:TaxableAmount
-                        currencyID="{{$documento->codigo_moneda}}">{{$documento->total_gravadas_isc}}</cbc:TaxableAmount>
-                <cbc:TaxAmount currencyID="{{$documento->codigo_moneda}}">{{$documento->facturacion->isc}}</cbc:TaxAmount>
-                <cac:TaxCategory>
-                    <cbc:ID>S
-                    </cbc:ID>
-                    <cac:TaxScheme>
-                        <cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">2000</cbc:ID>
-                        <cbc:Name>ISC</cbc:Name>
-                        <cbc:TaxTypeCode>EXC</cbc:TaxTypeCode>
-                    </cac:TaxScheme>
-                </cac:TaxCategory>
-            </cac:TaxSubtotal>
-        @endif
-        @if($documento->facturacion->total_inafectas>'0.00')
-            <cac:TaxSubtotal>
-                <cbc:TaxableAmount
-                        currencyID="{{$documento->codigo_moneda}}">{{$documento->facturacion->total_inafectas}}</cbc:TaxableAmount>
-                <cbc:TaxAmount currencyID="{{$documento->codigo_moneda}}">0.00</cbc:TaxAmount>
-                <cac:TaxCategory>
-                    <cbc:ID>O
-                    </cbc:ID>
-                    <cac:TaxScheme>
-                        <cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">9998</cbc:ID>
-                        <cbc:Name>INA</cbc:Name>
+                        <cbc:ID>9995</cbc:ID>
+                        <cbc:Name>EXP</cbc:Name>
                         <cbc:TaxTypeCode>FRE</cbc:TaxTypeCode>
                     </cac:TaxScheme>
                 </cac:TaxCategory>
             </cac:TaxSubtotal>
-        @endif
-        @if($documento->facturacion->total_exoneradas>'0.00')
-            <cac:TaxSubtotal>
-                <cbc:TaxableAmount
-                        currencyID="{{$documento->codigo_moneda}}">{{$documento->facturacion->total_exoneradas}}</cbc:TaxableAmount>
-                <cbc:TaxAmount currencyID="{{$documento->codigo_moneda}}">0.00</cbc:TaxAmount>
-                <cac:TaxCategory>
-                    <cbc:ID>E
-                    </cbc:ID>
-                    <cac:TaxScheme>
-                        <cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">9997</cbc:ID>
-                        <cbc:Name>EXO</cbc:Name>
-                        <cbc:TaxTypeCode>VAT</cbc:TaxTypeCode>
-                    </cac:TaxScheme>
-                </cac:TaxCategory>
-            </cac:TaxSubtotal>
-        @endif
-        @if($documento->facturacion->total_gratuitas>'0.00')
-            <cac:TaxSubtotal>
-                <cbc:TaxableAmount
-                        currencyID="{{$documento->codigo_moneda}}">{{$documento->facturacion->total_gratuitas}}</cbc:TaxableAmount>
-                <cbc:TaxAmount currencyID="{{$documento->codigo_moneda}}">{{round($documento->facturacion->total_gratuitas * 0.18,2)}}</cbc:TaxAmount>
-                <cac:TaxCategory>
-                    <cbc:ID>Z
-                    </cbc:ID>
-                    <cac:TaxScheme>
-                        <cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">9996</cbc:ID>
-                        <cbc:Name>GRA</cbc:Name>
-                        <cbc:TaxTypeCode>FRE</cbc:TaxTypeCode>
-                    </cac:TaxScheme>
-                </cac:TaxCategory>
-            </cac:TaxSubtotal>
-        @endif
-        @if($documento->otros_cargos)
-            <cac:TaxSubtotal>
-                <cbc:TaxableAmount
-                        currencyID="{{$documento->codigo_moneda}}">{{$documento->total_monto_otros}}</cbc:TaxableAmount>
-                <cbc:TaxAmount currencyID="{{$documento->codigo_moneda}}">{{$documento->otros_cargos}}</cbc:TaxAmount>
-                <cac:TaxCategory>
-                    <cbc:ID>S
-                    </cbc:ID>
-                    <cac:TaxScheme>
-                        <cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">9999</cbc:ID>
-                        <cbc:Name>OTR</cbc:Name>
-                        <cbc:TaxTypeCode>OTH</cbc:TaxTypeCode>
-                    </cac:TaxScheme>
-                </cac:TaxCategory>
-            </cac:TaxSubtotal>
-        @endif
-        @if($documento->icbper)
-            <cac:TaxSubtotal>
-                <cbc:TaxableAmount
-                        currencyID="{{$documento->codigo_moneda}}">{{$documento->total_monto_icbper}}</cbc:TaxableAmount>
-                <cbc:TaxAmount currencyID="{{$documento->codigo_moneda}}">{{$documento->icbper}}</cbc:TaxAmount>
-                <cac:TaxCategory>
-                    <cbc:ID>S
-                    </cbc:ID>
-                    <cac:TaxScheme>
-                        <cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">7152</cbc:ID>
-                        <cbc:Name>ICBPER</cbc:Name>
-                        <cbc:TaxTypeCode>OTH</cbc:TaxTypeCode>
-                    </cac:TaxScheme>
-                </cac:TaxCategory>
-            </cac:TaxSubtotal>
-        @endif
-    </cac:TaxTotal>
+        </cac:TaxTotal>
+    @else
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="{{$documento->codigo_moneda}}">{{$documento->total_impuestos}}</cbc:TaxAmount>
+            @if($documento->facturacion->igv>'0.00')
+                <cac:TaxSubtotal>
+                    <cbc:TaxableAmount
+                            currencyID="{{$documento->codigo_moneda}}">{{$documento->facturacion->total_gravadas}}</cbc:TaxableAmount>
+                    <cbc:TaxAmount currencyID="{{$documento->codigo_moneda}}">{{$documento->facturacion->igv}}</cbc:TaxAmount>
+                    <cac:TaxCategory>
+                        <cbc:ID>S
+                        </cbc:ID>
+                        <cac:TaxScheme>
+                            <cbc:ID>1000</cbc:ID>
+                            <cbc:Name>IGV</cbc:Name>
+                            <cbc:TaxTypeCode>VAT</cbc:TaxTypeCode>
+                        </cac:TaxScheme>
+                    </cac:TaxCategory>
+                </cac:TaxSubtotal>
+            @endif
+            @if($documento->facturacion->isc>'0.00')
+                <cac:TaxSubtotal>
+                    <cbc:TaxableAmount
+                            currencyID="{{$documento->codigo_moneda}}">{{$documento->total_gravadas_isc}}</cbc:TaxableAmount>
+                    <cbc:TaxAmount currencyID="{{$documento->codigo_moneda}}">{{$documento->facturacion->isc}}</cbc:TaxAmount>
+                    <cac:TaxCategory>
+                        <cbc:ID>S
+                        </cbc:ID>
+                        <cac:TaxScheme>
+                            <cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">2000</cbc:ID>
+                            <cbc:Name>ISC</cbc:Name>
+                            <cbc:TaxTypeCode>EXC</cbc:TaxTypeCode>
+                        </cac:TaxScheme>
+                    </cac:TaxCategory>
+                </cac:TaxSubtotal>
+            @endif
+            @if($documento->facturacion->total_inafectas>'0.00')
+                <cac:TaxSubtotal>
+                    <cbc:TaxableAmount
+                            currencyID="{{$documento->codigo_moneda}}">{{$documento->facturacion->total_inafectas}}</cbc:TaxableAmount>
+                    <cbc:TaxAmount currencyID="{{$documento->codigo_moneda}}">0.00</cbc:TaxAmount>
+                    <cac:TaxCategory>
+                        <cbc:ID>O
+                        </cbc:ID>
+                        <cac:TaxScheme>
+                            <cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">9998</cbc:ID>
+                            <cbc:Name>INA</cbc:Name>
+                            <cbc:TaxTypeCode>FRE</cbc:TaxTypeCode>
+                        </cac:TaxScheme>
+                    </cac:TaxCategory>
+                </cac:TaxSubtotal>
+            @endif
+            @if($documento->facturacion->total_exoneradas>'0.00')
+                <cac:TaxSubtotal>
+                    <cbc:TaxableAmount
+                            currencyID="{{$documento->codigo_moneda}}">{{$documento->facturacion->total_exoneradas}}</cbc:TaxableAmount>
+                    <cbc:TaxAmount currencyID="{{$documento->codigo_moneda}}">0.00</cbc:TaxAmount>
+                    <cac:TaxCategory>
+                        <cbc:ID>E
+                        </cbc:ID>
+                        <cac:TaxScheme>
+                            <cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">9997</cbc:ID>
+                            <cbc:Name>EXO</cbc:Name>
+                            <cbc:TaxTypeCode>VAT</cbc:TaxTypeCode>
+                        </cac:TaxScheme>
+                    </cac:TaxCategory>
+                </cac:TaxSubtotal>
+            @endif
+            @if($documento->facturacion->total_gratuitas>'0.00')
+                <cac:TaxSubtotal>
+                    <cbc:TaxableAmount
+                            currencyID="{{$documento->codigo_moneda}}">{{$documento->facturacion->total_gratuitas}}</cbc:TaxableAmount>
+                    <cbc:TaxAmount currencyID="{{$documento->codigo_moneda}}">{{round($documento->facturacion->total_gratuitas * 0.18,2)}}</cbc:TaxAmount>
+                    <cac:TaxCategory>
+                        <cbc:ID>Z
+                        </cbc:ID>
+                        <cac:TaxScheme>
+                            <cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">9996</cbc:ID>
+                            <cbc:Name>GRA</cbc:Name>
+                            <cbc:TaxTypeCode>FRE</cbc:TaxTypeCode>
+                        </cac:TaxScheme>
+                    </cac:TaxCategory>
+                </cac:TaxSubtotal>
+            @endif
+            @if($documento->otros_cargos)
+                <cac:TaxSubtotal>
+                    <cbc:TaxableAmount
+                            currencyID="{{$documento->codigo_moneda}}">{{$documento->total_monto_otros}}</cbc:TaxableAmount>
+                    <cbc:TaxAmount currencyID="{{$documento->codigo_moneda}}">{{$documento->otros_cargos}}</cbc:TaxAmount>
+                    <cac:TaxCategory>
+                        <cbc:ID>S
+                        </cbc:ID>
+                        <cac:TaxScheme>
+                            <cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">9999</cbc:ID>
+                            <cbc:Name>OTR</cbc:Name>
+                            <cbc:TaxTypeCode>OTH</cbc:TaxTypeCode>
+                        </cac:TaxScheme>
+                    </cac:TaxCategory>
+                </cac:TaxSubtotal>
+            @endif
+            @if($documento->icbper)
+                <cac:TaxSubtotal>
+                    <cbc:TaxableAmount
+                            currencyID="{{$documento->codigo_moneda}}">{{$documento->total_monto_icbper}}</cbc:TaxableAmount>
+                    <cbc:TaxAmount currencyID="{{$documento->codigo_moneda}}">{{$documento->icbper}}</cbc:TaxAmount>
+                    <cac:TaxCategory>
+                        <cbc:ID>S
+                        </cbc:ID>
+                        <cac:TaxScheme>
+                            <cbc:ID schemeID="UN/ECE 5153" schemeAgencyID="6">7152</cbc:ID>
+                            <cbc:Name>ICBPER</cbc:Name>
+                            <cbc:TaxTypeCode>OTH</cbc:TaxTypeCode>
+                        </cac:TaxScheme>
+                    </cac:TaxCategory>
+                </cac:TaxSubtotal>
+            @endif
+        </cac:TaxTotal>
+    @endif
     <cac:LegalMonetaryTotal>
-        <cbc:LineExtensionAmount
-                currencyID="{{ $documento->codigo_moneda }}">{{$documento->facturacion->valor_venta_bruto}}</cbc:LineExtensionAmount>
-        <cbc:TaxInclusiveAmount
-                currencyID="{{ $documento->codigo_moneda }}">{{$documento->total_venta}}</cbc:TaxInclusiveAmount>
+        @if($documento->codigo_tipo_factura == '0200')
+            <cbc:LineExtensionAmount
+                    currencyID="{{ $documento->codigo_moneda }}">{{$documento->facturacion->total_gravadas}}</cbc:LineExtensionAmount>
+           @else
+            <cbc:LineExtensionAmount
+                    currencyID="{{ $documento->codigo_moneda }}">{{$documento->facturacion->base_descuento_global - $documento->facturacion->descuento_global}}</cbc:LineExtensionAmount>
+        @endif
+            <cbc:TaxInclusiveAmount currencyID="{{ $documento->codigo_moneda }}">{{$documento->total_venta}}</cbc:TaxInclusiveAmount>
         @if ($documento->facturacion->total_descuentos>'0.00')
             <cbc:AllowanceTotalAmount
-                    currencyID="{{ $documento->codigo_moneda }}">{{$documento->facturacion->total_descuentos}}</cbc:AllowanceTotalAmount>
+                    currencyID="{{ $documento->codigo_moneda }}">0</cbc:AllowanceTotalAmount>
         @endif
         @if ($documento->otros_cargos)
             <cbc:ChargeTotalAmount
@@ -308,23 +363,43 @@
                     <cbc:BaseAmount currencyID="{{$documento->codigo_moneda}}">{{$item->base_descuento}}</cbc:BaseAmount>
                 </cac:AllowanceCharge>
             @endif
-            <cac:TaxTotal>
-                <cbc:TaxAmount currencyID="{{$documento->codigo_moneda}}">{{$item->igv}}</cbc:TaxAmount>
-                <cac:TaxSubtotal>
-                    <cbc:TaxableAmount
-                            currencyID="{{$documento->codigo_moneda}}">{{$item->detalle->subtotal}}</cbc:TaxableAmount>
+            @if($documento->codigo_tipo_factura == '0200')
+                <cac:TaxTotal>
+                    <cbc:TaxAmount currencyID="{{$documento->codigo_moneda}}">0.00</cbc:TaxAmount>
+                    <cac:TaxSubtotal>
+                        <cbc:TaxableAmount
+                                currencyID="{{$documento->codigo_moneda}}">{{$item->detalle->subtotal}}</cbc:TaxableAmount>
+                        <cbc:TaxAmount currencyID="{{$documento->codigo_moneda}}">0.00</cbc:TaxAmount>
+                        <cac:TaxCategory>
+                            <cbc:Percent>0</cbc:Percent>
+                            <cbc:TaxExemptionReasonCode>40</cbc:TaxExemptionReasonCode>
+                            <cac:TaxScheme>
+                                <cbc:ID>9995</cbc:ID>
+                                <cbc:Name>EXP</cbc:Name>
+                                <cbc:TaxTypeCode>FRE</cbc:TaxTypeCode>
+                            </cac:TaxScheme>
+                        </cac:TaxCategory>
+                    </cac:TaxSubtotal>
+                </cac:TaxTotal>
+            @else
+                <cac:TaxTotal>
                     <cbc:TaxAmount currencyID="{{$documento->codigo_moneda}}">{{$item->igv}}</cbc:TaxAmount>
-                    <cac:TaxCategory>
-                        <cbc:Percent>{{$item->porcentaje_igv}}</cbc:Percent>
-                        <cbc:TaxExemptionReasonCode>{{$item->tipo_afectacion_igv}}</cbc:TaxExemptionReasonCode>
-                        <cac:TaxScheme>
-                            <cbc:ID>{{$item->tax_code}}</cbc:ID>
-                            <cbc:Name>{{$item->tax_siglas}}</cbc:Name>
-                            <cbc:TaxTypeCode>{{$item->tax_name_code}}</cbc:TaxTypeCode>
-                        </cac:TaxScheme>
-                    </cac:TaxCategory>
-                </cac:TaxSubtotal>
-            </cac:TaxTotal>
+                    <cac:TaxSubtotal>
+                        <cbc:TaxableAmount
+                                currencyID="{{$documento->codigo_moneda}}">{{$item->detalle->subtotal}}</cbc:TaxableAmount>
+                        <cbc:TaxAmount currencyID="{{$documento->codigo_moneda}}">{{$item->igv}}</cbc:TaxAmount>
+                        <cac:TaxCategory>
+                            <cbc:Percent>{{$item->porcentaje_igv}}</cbc:Percent>
+                            <cbc:TaxExemptionReasonCode>{{$item->tipo_afectacion_igv}}</cbc:TaxExemptionReasonCode>
+                            <cac:TaxScheme>
+                                <cbc:ID>{{$item->tax_code}}</cbc:ID>
+                                <cbc:Name>{{$item->tax_siglas}}</cbc:Name>
+                                <cbc:TaxTypeCode>{{$item->tax_name_code}}</cbc:TaxTypeCode>
+                            </cac:TaxScheme>
+                        </cac:TaxCategory>
+                    </cac:TaxSubtotal>
+                </cac:TaxTotal>
+            @endif
             <cac:Item>
                 <cbc:Description><![CDATA[{{preg_replace("/[\r\n|\n|\r]+/", " ",strip_tags($item->descripcion))}}]]></cbc:Description>
                 <cac:SellersItemIdentification>
@@ -342,10 +417,17 @@
                             currencyID="{{$documento->codigo_moneda}}">0.00</cbc:PriceAmount>
                 </cac:Price>
             @else
-                <cac:Price>
-                    <cbc:PriceAmount
-                            currencyID="{{$documento->codigo_moneda}}">{{$item->valor_venta_bruto_unitario}}</cbc:PriceAmount>
-                </cac:Price>
+                @if($documento->codigo_tipo_factura == '0200')
+                    <cac:Price>
+                        <cbc:PriceAmount
+                                currencyID="{{$documento->codigo_moneda}}">{{$item->valor_referencial}}</cbc:PriceAmount>
+                    </cac:Price>
+                @else
+                    <cac:Price>
+                        <cbc:PriceAmount
+                                currencyID="{{$documento->codigo_moneda}}">{{$item->valor_venta_bruto_unitario}}</cbc:PriceAmount>
+                    </cac:Price>
+                @endif
             @endif
         </cac:InvoiceLine>
     @endforeach

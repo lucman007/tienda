@@ -1,6 +1,7 @@
 @extends('layouts.main')
 @section('titulo', 'Nueva cotización')
 @section('contenido')
+    @php $agent = new \Jenssegers\Agent\Agent() @endphp
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
             <div class="col-sm-12">
@@ -147,7 +148,7 @@
                             </div>
                         </div>
                         <div class="table-responsive tabla-gestionar">
-                            @if(!str_contains(strtolower($_SERVER['HTTP_USER_AGENT']),'android'))
+                            @if($agent->isDesktop())
                             <table class="table table-striped table-hover table-sm">
                                 <thead class="bg-custom-green">
                                 <tr>
@@ -209,7 +210,7 @@
                                             </button>
                                         </td>
                                     </tr>
-                                    <tr class="text-center" v-show="productosSeleccionados.length == 0"><td colspan="8">Agrega productos desde el buscador</td></tr>
+                                    <tr class="text-center" v-show="productosSeleccionados.length == 0"><td colspan="8">No has agregado productos</td></tr>
                                     </tbody>
                                 </table>
                             @endif
@@ -333,6 +334,8 @@
     ></modal-descuento>
     <modal-detalle
             :item="item"
+            :show-precio="true"
+            :can-edit-precio="true"
             v-on:actualizar="actualizarDetalle">
     </modal-detalle>
 @endsection
@@ -416,11 +419,7 @@
                         this.esDstoGlobal = true;
                     }
                 },
-                actualizarDetalle(obj){
-                    let producto = this.productosSeleccionados[this.index];
-                    producto['cantidad']=obj['cantidad'];
-                    producto['precio']=obj['precio'];
-                    producto['presentacion']=obj['presentacion'];
+                actualizarDetalle(){
                     this.calcular(this.index);
                 },
                 actualizarDescuento(obj){

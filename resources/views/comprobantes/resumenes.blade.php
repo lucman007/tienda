@@ -14,6 +14,7 @@
                         <label><i class="far fa-list-alt"></i> Acciones</label>
                         <b-dropdown variant="primary" text="Consulta anulación">
                             <b-dropdown-item href="{{action('ComprobanteController@comprobantes')}}"><i class="fas fa-file-alt"></i> Comprobantes</b-dropdown-item>
+                            <b-dropdown-item href="{{action('ComprobanteController@anular')}}"><i class="fas fa-ban"></i> Anulaciones</b-dropdown-item>
                             <b-dropdown-item href="{{action('ComprobanteController@consulta')}}"><i class="fas fa-external-link-square-alt"></i> Consulta CDR</b-dropdown-item>
                             <b-dropdown-item href="{{action('ComprobanteController@resumenes_enviados')}}"><i class="fas fa-external-link-square-alt"></i> Consulta anulación</b-dropdown-item>
                             <b-dropdown-item href="{{action('ReporteController@reporte_ventas')}}"><i class="fas fa-chart-line"></i> Reporte de ventas</b-dropdown-item>
@@ -148,30 +149,27 @@
             },
             methods:{
                 obtenerResumen(){
-                    _this=this;
                     axios.post('/comprobantes/obtener-resumen?page=' + this.resumen.current_page, {
                         'tipo_resumen': this.tipo_resumen,
                         'fecha_in': this.fecha_in,
                         'fecha_out': this.fecha_out
                     })
-                        .then(function (response) {
-                            _this.resumen = response.data;
+                        .then(response => {
+                            this.resumen = response.data;
                         })
-                        .catch(function (error) {
-                            alert('Ha ocurrido un error.');
+                        .catch(error => {
+                            this.alerta('Ha ocurrido un error.');
                             console.log(error);
                         });
                 },
                 detalle_resumen(id){
-                    _this=this;
                     this.$refs['modal-detalle'].show();
                     axios.get('/comprobantes/detalle-resumen' +'/'+id)
-                        .then(function (response) {
-                            _this.listaComprobantes = response.data;
-                            console.log(_this.listaComprobantes);
+                        .then(response => {
+                            this.listaComprobantes = response.data;
                         })
-                        .catch(function (error) {
-                            alert('Ha ocurrido un error.');
+                        .catch(error => {
+                            this.alerta('Ha ocurrido un error.');
                             console.log(error);
                         });
                 },
@@ -179,14 +177,13 @@
                     location.href='/ventas/descargar'+'/'+file;
                 },
                 getStatus(ticket,nombre){
-                    _this=this;
                     axios.get('/ventas/getstatus' +'/'+ticket+'/'+nombre)
-                        .then(function (response) {
-                            alert(response.data);
-                            _this.obtenerResumen();
+                        .then(response => {
+                            this.alerta(response.data);
+                            this.obtenerResumen();
                         })
-                        .catch(function (error) {
-                            alert('Ha ocurrido un error al consultar estado de resumen.');
+                        .catch(error => {
+                            this.alerta('Ha ocurrido un error al consultar estado de resumen.');
                             console.log(error);
                         });
                 },
@@ -196,6 +193,16 @@
                         '_blank'
                     );
                 },
+                alerta(texto){
+                    this.$swal({
+                        position: 'top',
+                        icon: 'warning',
+                        title: texto,
+                        timer: 6000,
+                        toast:true,
+                        confirmButtonColor: '#007bff',
+                    });
+                }
             }
 
         });

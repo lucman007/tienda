@@ -1,4 +1,4 @@
-@php /** Modelo 9 - inhabilitado**/@endphp
+@php /** Modelo 9 - habilitado**/@endphp
 <!doctype html>
 <html lang="{{ config('app.locale') }}">
 <head>

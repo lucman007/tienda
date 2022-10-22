@@ -20,7 +20,6 @@ class Orden extends Model
         'moneda',
         'igv_incluido',
         'idventa',
-        'idmesa',
         'datos_entrega'
 	];
 
@@ -43,11 +42,6 @@ class Orden extends Model
     public function cliente()
     {
         return $this->hasOne(Cliente::class, 'idcliente', 'idcliente');
-    }
-
-    public function mesa()
-    {
-        return $this->hasOne(Mesa::class,'idmesa', 'idmesa');
     }
 
     public function vendedor()

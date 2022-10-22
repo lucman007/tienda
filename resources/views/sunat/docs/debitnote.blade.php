@@ -182,7 +182,7 @@
             <cac:TaxSubtotal>
                 <cbc:TaxableAmount
                         currencyID="{{$documento->codigo_moneda}}">{{$documento->facturacion->total_gratuitas}}</cbc:TaxableAmount>
-                <cbc:TaxAmount currencyID="{{$documento->codigo_moneda}}">{{round($documento->facturacion->total_gratuitas * 0.18,2)}}</cbc:TaxAmount>
+                <cbc:TaxAmount currencyID="{{$documento->codigo_moneda}}">0.00</cbc:TaxAmount>
                 <cac:TaxCategory>
                     <cbc:ID>Z
                     </cbc:ID>
@@ -280,7 +280,7 @@
                 </cac:TaxSubtotal>
             </cac:TaxTotal>
             <cac:Item>
-                <cbc:Description><![CDATA[{{$item->descripcion}}]]></cbc:Description>
+                <cbc:Description><![CDATA[{{preg_replace("/[\r\n|\n|\r]+/", " ",strip_tags($item->descripcion))}}]]></cbc:Description>
                 <cac:SellersItemIdentification>
                     <cbc:ID>{{$item->codigo}}</cbc:ID>
                 </cac:SellersItemIdentification>

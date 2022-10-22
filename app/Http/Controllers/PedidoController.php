@@ -84,17 +84,15 @@ class PedidoController extends Controller
         }
     }
 
-    public function obtener_delivery(){
+    public function obtener_pedidos(){
         if(auth()->user()->getRoleNames()->first() == 'Vendedor'){
             $ordenes= Orden::where('estado','EN COLA')
-                ->where('idmesa',-1)
                 ->where('idempleado',auth()->user()->idempleado)
                 ->orderby('orden.idorden', 'desc')
                 ->take(30)
                 ->get();
         } else {
             $ordenes= Orden::where('estado','EN COLA')
-                ->where('idmesa',-1)
                 ->orderby('orden.idorden', 'desc')
                 ->take(30)
                 ->get();
@@ -204,7 +202,6 @@ class PedidoController extends Controller
             $orden->igv_incluido=$request->igv_incluido;
             $orden->comprobante=$request->comprobante;
             $orden->estado='EN COLA';
-            $orden->idmesa = -1;
 
             if(isset($request->datos_entrega)){
                 $datos_entrega = json_decode($request->datos_entrega, TRUE);
@@ -470,7 +467,6 @@ class PedidoController extends Controller
             foreach ($ventas as $item){
                 $item->badge_class='badge-success';
                 $item->estado_orden='ATENDIDO';
-                $item->mesa = $item->orden?$item->orden->mesa->numero:'-';
                 $item->nombre_fichero=$emisor->ruc.'-'.$item->facturacion->codigo_tipo_documento.'-'.$item->facturacion->serie.'-'.$item->facturacion->correlativo;
                 $item->text_whatsapp = MainHelper::texto_whatsap($item,$emisor);
 
@@ -502,7 +498,7 @@ class PedidoController extends Controller
         }
     }
 
-    public function obtener_data_mesa(Request $request,$id){
+    public function obtener_data_pedido(Request $request,$id){
 
         $orden = Orden::where('idorden',$id)->first();
 

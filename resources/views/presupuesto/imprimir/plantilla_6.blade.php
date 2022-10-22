@@ -85,6 +85,18 @@
                     $i++;
                 @endphp
             @endforeach
+            @if($presupuesto->exportacion)
+                <tr>
+                    <td style="border-right: 0.5px solid black" colspan="4"></td>
+                    <td style="border: 1px solid black;">FLETE:</td>
+                    <td style="text-align: right; border: 1px solid black">{{$presupuesto->moneda}} {{number_format($presupuesto->flete,2)}}</td>
+                </tr>
+                <tr>
+                    <td style="border-right: 0.5px solid black" colspan="4"></td>
+                    <td style="border: 1px solid black;">SEGURO:</td>
+                    <td style="text-align: right; border: 1px solid black">{{$presupuesto->moneda}} {{number_format($presupuesto->seguro,2)}}</td>
+                </tr>
+            @else
             <tr>
                 <td style="border: 1px solid black;" colspan="4"><strong>SON: {{$presupuesto->leyenda}}</strong></td>
                 <td style="border: 1px solid black; border-left: 1px solid black">SUBTOTAL</td>
@@ -95,6 +107,7 @@
                 <td style="border: 1px solid black">IGV 18%</td>
                 <td style="text-align: right; border: 1px solid black">{{$presupuesto->moneda}} {{number_format($presupuesto->presupuesto-($presupuesto->presupuesto/1.18),2)}}</td>
             </tr>
+            @endif
             <tr>
                 <td style="border-right: 0.5px solid black" colspan="4"></td>
                 <td  style="border: 1px solid black">TOTAL</td>
@@ -133,9 +146,19 @@
                     <strong>Lugar de entrega:</strong> {{$presupuesto->lugar_entrega}} <br>
                     <strong>Contacto:</strong> {{$presupuesto->contacto}} <br>
                     <strong>Teléfonos:</strong> {{$presupuesto->telefonos}} <br><br>
-                    <strong>Cta. BBVA CONTINENTAL:</strong> {{$emisor->cuenta_1}} <br>
-                    <strong>Cta. BCP:</strong> {{$emisor->cuenta_2}}  <br>
-                    <strong>Cta. detracciones:</strong> {{$emisor->cuenta_detracciones}}
+                    @if($presupuesto->exportacion)
+                        <strong>Tipo venta:</strong> Exportación <br>
+                        <strong>Incoterm:</strong> {{$presupuesto->incoterm}}<br>
+                    @endif
+                    @if($presupuesto->exportacion)
+                        <strong>Cta. BBVA CONTINENTAL:</strong> {{$emisor->cuenta_1}} <br>
+                        <strong>Cta. BCP:</strong> {{$emisor->cuenta_2}}  <br>
+                        <strong>Cta. detracciones:</strong> {{$emisor->cuenta_detracciones}}
+                    @else
+                        <strong>Cta. BBVA CONTINENTAL:</strong> {{$emisor->cuenta_1}} <br>
+                        <strong>Cta. BCP:</strong> {{$emisor->cuenta_2}}  <br>
+                        <strong>Cta. detracciones:</strong> {{$emisor->cuenta_detracciones}}
+                    @endif
                 </p>
             </td>
             <td style="width: 1%"></td>

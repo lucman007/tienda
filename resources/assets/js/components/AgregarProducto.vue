@@ -220,15 +220,29 @@
                     'moneda_compra' : this.moneda_compra,
                     'tipo_cambio_compra' : this.tipo_cambio_compra,
                 })
-                    .then(() => {
-                        this.$emit('agregar',nombre);
-                        this.$refs['modal-nuevo-producto'].hide();
+                    .then((response) => {
+                        this.$swal({
+                            position: 'top',
+                            icon: 'success',
+                            title: response.data.mensaje,
+                            timer: 2000,
+                            showConfirmButton: false,
+                            toast:true
+                        }).then(() => {
+                            this.$emit('agregar',nombre);
+                            this.$refs['modal-nuevo-producto'].hide();
+                        });
                     })
-                    .catch(() => {
-                        alert('Ha ocurrido un error.');
-                        console.log(error);
+                    .catch(error => {
+                        this.$swal({
+                            position: 'top',
+                            icon: 'error',
+                            title: error.response.data.mensaje,
+                            timer: 2000,
+                            showConfirmButton: false,
+                            toast:true
+                        });
                     });
-
             },
             generarCodigo(){
                 let codigoCaracter=this.nombre.slice(0,3);

@@ -61,17 +61,15 @@ class EnviarPresupuesto extends Mailable
             'emisor'=>new Emisor()
         ];
 
-        if($this->conCopia){
-            return $this->from($this->mail_send_from['email'])
-                ->bcc($this->mail_send_from['email'])
-                ->subject('COTIZACION '.mb_strtoupper($this->mail_send_from['remitente']))
-                ->view('mail.presupuesto',$data)
-                ->attach(storage_path().'/app/'.$this->cotizacion);
-        }
-        return $this->from($this->mail_send_from['email'])
+        $mail = $this->from($this->mail_send_from['email'])
             ->subject('COTIZACION '.mb_strtoupper($this->mail_send_from['remitente']))
             ->view('mail.presupuesto',$data)
             ->attach(storage_path().'/app/'.$this->cotizacion);
 
+        if($this->conCopia){
+            $mail->bcc($this->mail_send_from['email']);
+        }
+
+        return $mail;
     }
 }

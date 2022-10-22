@@ -124,7 +124,7 @@
                 <cbc:LineID>{{$item->num_item}}</cbc:LineID>
             </cac:OrderLineReference>
             <cac:Item>
-                <cbc:Name><![CDATA[{{ $item->descripcion }}]]></cbc:Name>
+                <cbc:Name><![CDATA[{{ preg_replace("/[\r\n|\n|\r]+/", " ",strip_tags($item->descripcion)) }}]]></cbc:Name>
                 <cac:SellersItemIdentification>
                     <cbc:ID>{{ $item->codigo }}</cbc:ID>
                 </cac:SellersItemIdentification>

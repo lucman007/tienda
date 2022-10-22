@@ -3,9 +3,11 @@
 @section('contenido')
     <div class="header">
         <div class="borde info-emisor">
-            <div class="logo">
-                <img src="images/logo.png">
-            </div>
+            @if($emisor->logo)
+                <div class="logo">
+                    <img src="{{'images/'.$emisor->logo}}">
+                </div>
+            @endif
             <div class="texto">
                 <h3><span>{{$emisor->nombre_publicitario}}</span></h3>
                 <p><strong>{{$emisor->razon_social}}</strong> <br> {{$emisor->direccion}}, {{$emisor->provincia}},
@@ -42,7 +44,11 @@
                         <td style="width: 10mm">{{$item->unidad_medida}}</td>
                         <td style="width: 20mm; text-align: right">{{$item->precio}}</td>
                         <td style="width: 20mm; text-align: right">{{$item->descuento}}</td>
-                        <td style="width: 20mm; text-align: right">{{$item->total_item}}</td>
+                        @if($documento->igv_incluido == 1)
+                            <td style="width: 20mm; text-align: right">{{$item->detalle->total}}</td>
+                        @else
+                            <td style="width: 20mm; text-align: right">{{$item->detalle->subtotal}}</td>
+                        @endif
                     </tr>
                 @endforeach
                 @if($documento->facturacion->descuento_global > '0.00')

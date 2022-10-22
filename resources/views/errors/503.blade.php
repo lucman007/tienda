@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>No se ha encontrado la ruta</title>
+    <title>En mantenimiento</title>
 
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
@@ -50,12 +50,9 @@
 </head>
 <body>
 <div class="flex-center position-ref full-height">
-    <div class="code">
-        404
-    </div>
-
-    <div class="message" style="padding: 10px;">
-        La ruta donde intenta acceder no existe o se ha eliminado. <a href="{{url()->previous()}}"> Regresar</a>
+    <div class="message" style="padding: 10px; width: 50%">
+        <h1>¡Pronto volveremos!</h1>
+        Lo sentimos, estamos realizando mantenimiento y limpieza del sistema en estos momentos. Intenta en unos minutos.
     </div>
 
 </div>

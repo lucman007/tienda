@@ -111,10 +111,10 @@
                 borrarCliente(id){
                     if(confirm('Realmente desea eliminar el cliente')){
                         axios.delete('{{url('/clientes/destroy')}}' + '/' + id)
-                            .then(function () {
+                            .then(() => {
                                 window.location.reload(true)
                             })
-                            .catch(function (error) {
+                            .catch(error => {
                                 console.log(error);
                             });
                     }
@@ -126,7 +126,7 @@
                     let settings = { headers: { 'content-type': 'multipart/form-data' } };
 
                     axios.post('{{url('/clientes/importar-clientes')}}', data, settings)
-                        .then(function (response) {
+                        .then(response => {
                             if(response.data===1){
                                 alert('Importación realizada con éxito');
                                 window.location.reload(true)
@@ -136,7 +136,7 @@
                                 alert("El archivo no cumple las condiciones de importación. Verifique los datos ingresados.")
                             }
                         })
-                        .catch(function (error) {
+                        .catch(error => {
                             alert('Ha ocurrido un error.');
                             console.log(error);
                         });

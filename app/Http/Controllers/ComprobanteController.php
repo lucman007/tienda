@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use sysfact\Emisor;
 use sysfact\Facturacion;
+use sysfact\Guia;
 use sysfact\Http\Controllers\Cpe\CpeController;
 use sysfact\Http\Controllers\Helpers\DataTipoPago;
 use sysfact\Http\Controllers\Helpers\MainHelper;
@@ -40,10 +41,10 @@ class ComprobanteController extends Controller
             $hasta=date('Y-m-d');
         }
 
-        $ventas=$this->comprobantes_data($desde, $hasta, $filtro, $buscar);
-
         if(json_decode(MainHelper::configuracion('interfaz_pedidos'),true)['solo_comprobantes']){
             $ventas = $this->comprobantes_data_sin_recibos($desde, $hasta, $filtro, $buscar);
+        } else {
+            $ventas=$this->comprobantes_data($desde, $hasta, $filtro, $buscar);
         }
 
         return view('comprobantes.index',$ventas);
@@ -171,6 +172,20 @@ class ComprobanteController extends Controller
                 }
 
                 $item->guia_relacionada=$item->guia->first();
+
+                //inicio código para version antigua del sistema tabla guia
+                if(!$item->guia_relacionada){
+                    $item->guia_relacionada = Guia::where('correlativo',$item->facturacion->guia_relacionada)->first();
+                    if(!$item->guia_relacionada){
+                        $correlativo = $item->facturacion->guia_relacionada;
+                        if($correlativo){
+                            $item->guia_relacionada = ['correlativo'=>$correlativo,'estado'=>$item->facturacion->estado_guia];
+                        } else{
+                            $item->guia_relacionada=false;
+                        }
+                    }
+                }
+                //fin código para version antigua del sistema tabla guia
 
                 switch ($item->guia_relacionada['estado']){
                     case 'PENDIENTE':
@@ -352,6 +367,20 @@ class ComprobanteController extends Controller
 
                 $item->guia_relacionada=$item->guia->first();
 
+                //inicio código para version antigua del sistema tabla guia
+                if(!$item->guia_relacionada){
+                    $item->guia_relacionada = Guia::where('correlativo',$item->facturacion->guia_relacionada)->first();
+                    if(!$item->guia_relacionada){
+                        $correlativo = $item->facturacion->guia_relacionada;
+                        if($correlativo){
+                            $item->guia_relacionada = ['correlativo'=>$correlativo,'estado'=>$item->facturacion->estado_guia];
+                        } else{
+                            $item->guia_relacionada=false;
+                        }
+                    }
+                }
+                //fin código para version antigua del sistema tabla guia
+
                 switch ($item->guia_relacionada['estado']){
                     case 'PENDIENTE':
                         $item->badge_class_guia='badge-warning';
@@ -392,6 +421,106 @@ class ComprobanteController extends Controller
     public function anular()
     {
         return view('comprobantes.anulacion', ['usuario' => auth()->user()->persona]);
+    }
+
+    public function obtenerComprobantes(Request $request){
+
+        try{
+
+            $ventas=null;
+            $fecha_in=$request->fecha_in;
+            $fecha_out=$request->fecha_out;
+
+            switch ($request->tipo_comprobante){
+
+                case -1:
+
+                    $ventas=Venta::whereBetween('fecha',[$request->fecha_in.' 00:00:00',$request->fecha_out.' 23:59:59'])
+                        ->where('eliminado','=',0)
+                        ->orderby('idventa','desc')
+                        ->whereHas('facturacion', function($query) use($request) {
+                            $query->where('codigo_tipo_documento', '!=',20);
+                        })
+                        ->paginate(25);
+                    break;
+
+                case '01':
+                case '03':
+                case '07':
+                case '08':
+                case '20':
+                case '30':
+                    $ventas=Venta::with('facturacion')
+                        ->whereBetween('fecha',[$fecha_in.' 00:00:00',$fecha_out.' 23:59:59'])
+                        ->where('eliminado','=',0)
+                        ->whereHas('facturacion', function($query) use($request) {
+                            $query->where('codigo_tipo_documento', '=',$request->tipo_comprobante);
+                        })
+                        ->orderby('idventa','desc')
+                        ->paginate(25);
+                    break;
+
+                case '10':
+                    $fecha_out=$request->fecha_in;
+                    $ventas=Venta::with('facturacion')
+                        ->whereBetween('fecha',[$fecha_in.' 00:00:00',$fecha_out.' 23:59:59'])
+                        ->where('eliminado','=',0)
+                        ->whereHas('facturacion', function($query) use($request) {
+                            $query->where('serie', 'LIKE','B%')->where('estado','PENDIENTE');
+                        })
+                        ->orderby('idventa','desc')
+                        ->paginate(100);
+                    break;
+
+                case '40':
+                    $fecha_out=$request->fecha_in;
+                    $ventas=Venta::whereBetween('fecha',[$request->fecha_in.' 00:00:00',$request->fecha_out.' 23:59:59'])
+                        ->where('eliminado','=',0)
+                        ->whereHas('facturacion', function($query) use($request) {
+                            $query->where('serie', 'LIKE','F%')->where('estado','ACEPTADO');
+                        })
+                        ->orderby('idventa','desc')
+                        ->paginate(100);
+                    break;
+                case '50':
+                    $fecha_out=$request->fecha_in;
+                    $ventas=Venta::with('facturacion')
+                        ->whereBetween('fecha',[$fecha_in.' 00:00:00',$fecha_out.' 23:59:59'])
+                        ->where('eliminado','=',0)
+                        ->whereHas('facturacion', function($query) use($request) {
+                            $query->where('serie', 'LIKE','B%');
+                        })
+                        ->orderby('idventa','desc')
+                        ->paginate(100);
+                    break;
+            }
+
+            foreach ($ventas as $item){
+                $item->facturacion;
+                $item->cliente->persona;
+                $emisor=new Emisor();
+                $item->nombre_fichero=$emisor->ruc.'-'.$item->facturacion['codigo_tipo_documento'].'-'.$item->facturacion['serie'].'-'.$item->facturacion['correlativo'];
+                switch ($item->tipo_pago){
+                    case 1:
+                        $item->tipo_pago='EFECTIVO';
+                        break;
+                    case 2:
+                        $item->tipo_pago='CRÉDITO';
+                        break;
+                    case 3:
+                        $item->tipo_pago='DEPÓSITO';
+                        break;
+                    default:
+                        $item->tipo_pago='OTROS';
+                }
+            }
+
+            return $ventas;
+
+        } catch (\Exception $e){
+            return $e;
+        }
+
     }
 
     public function resumenes_enviados(){

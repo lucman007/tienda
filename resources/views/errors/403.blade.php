@@ -55,7 +55,7 @@
     </div>
 
     <div class="message" style="padding: 10px;">
-        No tienes permiso para este módulo del sistema
+        No tienes permiso para este módulo del sistema. <a href="{{url()->previous()}}"> Regresar</a>
     </div>
 </div>
 </body>

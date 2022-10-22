@@ -13,7 +13,8 @@ class Pago extends Model
         'idventa',
         'tipo',
         'monto',
-        'fecha'
+        'fecha',
+        'detalle'
     ];
 
     public function venta(){

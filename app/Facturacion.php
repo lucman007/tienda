@@ -39,6 +39,8 @@ class Facturacion extends Model
         'descuento_global',
         'base_descuento_global',
         'motivo_baja',
-        'idresumen'
+        'idresumen',
+        'retencion',
+        'tipo_detraccion'
     ];
 }

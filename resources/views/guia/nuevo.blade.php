@@ -1,6 +1,7 @@
 @extends('layouts.main')
 @section('titulo', 'Registrar guía')
 @section('contenido')
+    @php $agent = new \Jenssegers\Agent\Agent() @endphp
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
             <div class="col-sm-12">
@@ -200,6 +201,7 @@
                             @endif
                         </div>
                         <div class="table-responsive tabla-gestionar">
+                            @if($agent->isDesktop())
                             <table class="table table-striped table-hover table-sm tabla-facturar">
                                 <thead class="bg-custom-green">
                                 <tr>
@@ -227,6 +229,29 @@
                                 </tr>
                                 </tbody>
                             </table>
+                            @else
+                                <table class="table table-striped table-hover table-sm">
+                                    <thead class="bg-custom-green">
+                                    <tr>
+                                        <th scope="col" style="width: 350px">Descripción</th>
+                                        <th scope="col" style="width: 80px">Cantidad</th>
+                                        <th scope="col" style="width: 50px"></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr v-for="(producto,index) in productosSeleccionados" :key="index" v-b-modal.modal-detalle @click="editarItem(producto, index)">
+                                        <td>@{{producto.nombre}}</td>
+                                        <td>@{{producto.cantidad}}</td>
+                                        <td @click.stop >
+                                            <button @click="borrarItemVenta(index)" class="btn btn-danger"
+                                                    title="Borrar item"><i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr class="text-center" v-show="productosSeleccionados.length == 0"><td colspan="8">No has agregado productos</td></tr>
+                                    </tbody>
+                                </table>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -328,6 +353,11 @@
             v-bind:tipo_cambio_compra="{{cache('opciones')['tipo_cambio_compra']}}"
             v-on:agregar="agregarProductoNuevo">
     </agregar-producto>
+    <modal-detalle
+            :item="item"
+            :show-precio="false"
+            v-on:actualizar="">
+    </modal-detalle>
 @endsection
 @section('script')
     <script>
@@ -369,6 +399,8 @@
                     tipo_transporte:<?php echo json_encode(json_decode(cache('config')['guia'], true)['tipo_transporte']) ?>,
                 },
                 tipo_busqueda:"",
+                item:{},
+                index:-1,
             },
             created(){
                 this.obtenerCorrelativo();
@@ -386,6 +418,11 @@
                             this.alerta('No hay venta registrada. Ingresa el correlativo manualmente');
                             console.log(error);
                         });
+                },
+                editarItem(item, index = null){
+                    this.item=item;
+                    this.index = index;
+                    this.num_item = item.num_item;
                 },
                 agregarCliente(obj){
                     this.clienteSeleccionado = obj;

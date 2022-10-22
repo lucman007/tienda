@@ -50,10 +50,8 @@
                             </div>
                             <div class="col-lg-4">
                                 @if($venta->facturacion->codigo_tipo_documento != '30')
-                                <strong>Estado de {{$venta->facturacion['comprobante']}}:</strong> <span class="badge" :class="{'badge-warning':estado=='PENDIENTE',
-                                   'badge-success' : estado=='ACEPTADO',
-                                   'badge-dark' : estado=='ANULADO',
-                                   'badge-danger' :estado=='RECHAZADO'}">@{{estado}}</span><br>
+                                <strong>Estado de {{$venta->facturacion['comprobante']}}:</strong> <span class="badge {{$venta->badge_class}}">@{{estado}}</span>
+                                <hr>
                                 @endif
                                     @if($venta->guia_relacionada)
                                         <strong>Guía:</strong>
@@ -218,7 +216,6 @@
                                 </svg>
                                 Imprimir recibo
                             </b-button>
-
                         </div>
                         @if($venta->guia_relacionada)
                             <div  class="form-group text-center">
@@ -293,6 +290,16 @@
                                             </b-button>
                                         </b-input-group-append>
                                     </b-input-group>
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <button @click="agregarCC" class="btn btn-primary float-right mt-2"><i class="fas fa-user-plus"></i></button>
+                                        </div>
+                                        <div class="col-lg-12 mt-2" v-for="item,index in cc" :key="index">
+                                            <div class="form-group mb-2">
+                                                <input v-model="item.email" type="email" class="form-control" placeholder="Con copia a...">
+                                            </div>
+                                        </div>
+                                    </div>
                                     <b-form-checkbox v-model="conCopia" switch size="sm" class="my-2 text-center">
                                         Enviarme una copia
                                     </b-form-checkbox>
@@ -400,6 +407,7 @@
                 mail:"<?php echo $venta->persona->correo ?>",
                 conCopia:true,
                 whatsapp: '',
+                cc:[],
             },
             created(){
                 if('<?php echo $venta->facturacion->estado ?>' == 'PENDIENTE' && ('<?php echo basename(url()->previous()) ?>').includes('facturacion')){
@@ -409,6 +417,11 @@
 
             },
             methods: {
+                agregarCC(){
+                    this.cc.push({
+                        email: '',
+                    });
+                },
                 reenviar(idventa,nombre_comprobante, doc_relacionado){
                     this.mostrarProgreso = true;
                     axios.get('{{url('ventas/reenviar')}}' + '/' + idventa + '/' + nombre_comprobante + '/' + doc_relacionado)
@@ -452,6 +465,26 @@
                         });
                 },
                 enviar_a_correo(){
+
+                    let mails = [];
+                    let i = 0;
+                    let error = 0;
+                    this.cc.map((item) => {
+                        if(item['email'].length > 0){
+                            if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(item['email'])){
+                                mails[i]= item['email'];
+                                i++;
+                            } else{
+                                this.alerta("Hay casillas con dirección de email no válidos");
+                                error = 1;
+                            }
+                        }
+                    });
+
+                    if(error){
+                        return;
+                    }
+
                     if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(this.mail)){
                         let file_fact= '<?php echo $venta->nombre_fichero ?>';
                         let file_guia='<?php echo $venta->nombre_guia ?>';
@@ -461,6 +494,7 @@
                         let data = {
                             'mail':this.mail,
                             'conCopia':this.conCopia,
+                            'destinatarios':JSON.stringify(mails),
                             'idventa':'{{$venta->idventa}}',
                             'idguia':'{{$venta->guia_relacionada['idguia']??-1}}'
                         };

@@ -6,6 +6,9 @@
             <div class="col-lg-6 offset-lg-3">
                 <h3 class="titulo-admin-1">Consulta CDR</h3>
             </div>
+            <div class="col-lg-6 offset-lg-3">
+                <p>*Para obtener el CDR en caso de no haberse generado, debes seleccionar el tipo de comprobante, llenar el correlativo y dar al botón Obtener CDR</p>
+            </div>
         </div>
         <div class="row">
             <div class="col-lg-6 mt-4 mb-3 offset-lg-3">
@@ -24,6 +27,7 @@
                                 <option value="01">Factura</option>
                                 <option value="07">Nota de crédito</option>
                                 <option value="08">Nota de débito</option>
+                                <option value="09">Guía de remisión</option>
                             </select>
                         </div>
                         <div class="col-lg-12 form-group">
@@ -40,10 +44,10 @@
                                 <b-spinner v-show="mostrarSpinnerCon" small label="Loading..."></b-spinner>
                                 Consultar estado
                             </b-button>
-                            <b-button @click="consultarCdr('cdr')" class="mb-4" variant="primary"><i class="fas fa-search-plus"
+                            <b-button @click="consultarCdr('cdr')" class="mb-4" variant="success"><i class="fas fa-search-plus"
                                                                                                      v-show="!mostrarSpinnerCdr"></i>
                                 <b-spinner v-show="mostrarSpinnerCdr" small label="Loading..."></b-spinner>
-                                Consultar CDR
+                                Obtener CDR
                             </b-button>
                         </div>
                     </div>

@@ -1,6 +1,7 @@
 @extends('layouts.main')
 @section('titulo', 'Cotización')
 @section('contenido')
+    @php $agent = new \Jenssegers\Agent\Agent() @endphp
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
             <div class="col-sm-12">
@@ -172,7 +173,7 @@
                             </div>
                         </div>
                         <div class="table-responsive tabla-gestionar">
-                            @if(!str_contains(strtolower($_SERVER['HTTP_USER_AGENT']),'android'))
+                            @if($agent->isDesktop())
                             <table class="table table-striped table-hover table-sm">
                                 <thead class="bg-custom-green">
                                 <tr>
@@ -252,7 +253,7 @@
                                         <td>@{{(Number(producto.total)).toFixed(2)}}</td>
                                         <td></td>
                                     </tr>
-                                    <tr class="text-center" v-show="productosSeleccionados.length == 0"><td colspan="8">No hay datos para mostrar</td></tr>
+                                    <tr class="text-center" v-show="productosSeleccionados.length == 0"><td colspan="8">No has agregado productos</td></tr>
                                     </tbody>
                                 </table>
                             @endif
@@ -352,7 +353,7 @@
                             </svg>
                             Cancelar edición
                         </b-button>
-                        @if(!str_contains(strtolower($_SERVER['HTTP_USER_AGENT']),'android'))
+                        @if($agent->isDesktop())
                                 <b-button title="Imprimir"  :disabled="editar" class="mb-2"
                                           @if(json_decode(cache('config')['interfaz'], true)['tipo_impresion'] == 1)
                                           target="_blank" href="{{url('presupuestos/imprimir').'/'.$presupuesto['idpresupuesto']}}"
@@ -393,9 +394,17 @@
                                         <input v-model="mensaje" class="form-control mb-2" placeholder="Nombre del destinatario" type="text">
                                     </div>
                                 </div>
-                                <div class="col-lg-8">
+                                <div class="col-lg-7">
                                     <div class="form-group mb-2">
                                         <input v-model="mail" type="email" class="form-control" placeholder="Correo electrónico">
+                                    </div>
+                                </div>
+                                <div class="col-lg-1">
+                                    <button @click="agregarCC" class="btn btn-primary"><i class="fas fa-user-plus"></i></button>
+                                </div>
+                                <div class="offset-lg-4 col-lg-7" v-for="item in cc" :key="index">
+                                    <div class="form-group mb-2">
+                                        <input v-model="item.email" type="email" class="form-control" placeholder="Con copia a...">
                                     </div>
                                 </div>
                             </div>
@@ -466,6 +475,8 @@
     ></modal-descuento>
     <modal-detalle
             :item="item"
+            :show-precio="true"
+            :can-edit-precio="true"
             v-on:actualizar="actualizarDetalle">
     </modal-detalle>
 @endsection
@@ -520,13 +531,19 @@
                 esDstoGlobal: false,
                 dataDescuento:{},
                 referencia: '<?php echo $presupuesto->referencia ?>',
-                disabledNr:false
+                disabledNr:false,
+                cc:[],
             },
             created(){
                 this.calcularTotalPorItem();
                 this.expandirTextarea();
             },
             methods: {
+                agregarCC(){
+                    this.cc.push({
+                        email: '',
+                    });
+                },
                 editarItem(item, index){
                     if(item){
                         this.item=item;
@@ -546,11 +563,7 @@
                         this.esDstoGlobal = true;
                     }
                 },
-                actualizarDetalle(obj){
-                    let producto = this.productosSeleccionados[this.index];
-                    producto['cantidad']=obj['cantidad'];
-                    producto['precio']=obj['precio'];
-                    producto['presentacion']=obj['presentacion'];
+                actualizarDetalle(){
                     this.calcular(this.index);
                 },
                 actualizarDescuento(obj){
@@ -791,11 +804,32 @@
                     this.referencia='';
                 },
                 enviar_a_correo(){
+
+                    let mails = [];
+                    let i = 0;
+                    let error = 0;
+                    this.cc.map((item) => {
+                        if(item['email'].length > 0){
+                            if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(item['email'])){
+                                mails[i]= item['email'];
+                                i++;
+                            } else{
+                                this.alerta("Hay casillas con dirección de email no válidos");
+                                error = 1;
+                            }
+                        }
+                    });
+
+                    if(error){
+                        return;
+                    }
+
                     if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(this.mail))
                     {
                         this.mostrarProgresoMail = true;
                         axios.post('{{url('presupuestos/mail')}}',{
                             'mail':this.mail,
+                            'destinatarios':JSON.stringify(mails),
                             'mensaje':this.mensaje,
                             'idpresupuesto':this.idpresupuesto,
                             'conCopia':this.conCopia

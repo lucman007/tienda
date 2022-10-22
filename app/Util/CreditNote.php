@@ -49,13 +49,12 @@ class CreditNote {
                     // Si incluir igv es true
                     $item->valor_venta_bruto_unitario = round($item->detalle->monto/1.18,2);//PRECIO UNITARIO DE PRODUCTO SIN IGV
                     $item->base_descuento=round($item->detalle->monto*$item->detalle->cantidad/1.18,2);
-                    $item->valor_referencial=round($item->detalle->monto-$item->descuento,2);
                 } else{
                     // Si incluir igv es false
                     $item->valor_venta_bruto_unitario = $item->detalle->monto;
                     $item->base_descuento=round($item->detalle->monto*$item->detalle->cantidad,2);
-                    $item->valor_referencial=round(($item->detalle->monto-($item->detalle->monto*$porcentaje_descuento))*1.18,2);
                 }
+                $item->valor_referencial=round($item->detalle->total / $item->detalle->cantidad,2);
             } else{
                 // Si tipo de afectación es diferente de gravado
                 $item->valor_venta_bruto_unitario = $item->detalle->monto;
@@ -166,6 +165,9 @@ class CreditNote {
             case '10':
                 $documento->leyenda_nota = 'Otros Conceptos';
                 break;
+            case '13':
+                $documento->leyenda_nota = 'Ajustes – montos y/o fechas de pago';
+                break;
         }
 
         if($documento->facturacion->codigo_moneda=='PEN'){
@@ -174,12 +176,19 @@ class CreditNote {
             $moneda_letras='DÓLARES';
         }
 
+        $mnpp = 0;
+
+        foreach($documento->pago as $pago){
+            $mnpp += $pago->monto;
+        }
+
+        $documento->monto_neto_pendiente_pago = round($mnpp,2);
         $documento->codigo_tipo_factura='0101'; //Catálogo N° 51: Código de tipo de factura
         $documento->serie=$documento->facturacion->serie;
         $documento->correlativo=$documento->facturacion->correlativo;
         $documento->fecha_emision=date('Y-m-d', strtotime($documento->fecha));
         $documento->hora_emision=date('H:i:s', strtotime($documento->fecha));
-        $documento->fecha_vencimiento=date('Y-m-d', strtotime($documento->fecha_vencimiento));
+        $documento->fecha_vencimiento=date('Y-m-d', strtotime($documento->fecha));
         $documento->codigo_tipo_documento=$documento->facturacion->codigo_tipo_documento; //Catálago N° 01: Código tipo de documento
         //Generar leyenda
         $documento->leyenda=NumeroALetras::convert($documento->total_venta, $moneda_letras,true);

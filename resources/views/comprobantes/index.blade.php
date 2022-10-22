@@ -143,6 +143,7 @@
                                     <th scope="col">Importe</th>
                                     <th scope="col">Moneda</th>
                                     <th scope="col">Pago</th>
+                                    <th scope="col">Ord. Compra</th>
                                     <th scope="col" style="width: 12%">Comprobante</th>
                                     <th scope="col">Estado</th>
                                     <th scope="col">Opciones</th>
@@ -159,6 +160,7 @@
                                             <td>{{$venta->total_venta}}</td>
                                             <td>{{$venta->facturacion->codigo_moneda}}</td>
                                             <td>{{$venta->tipo_pago}}</td>
+                                            <td>{{$venta->facturacion->oc_relacionada}}</td>
                                             <td><span class="badge {{$venta->badge_class_documento}} badge_doc">{{$venta->facturacion->serie}}-{{$venta->facturacion->correlativo}}</span><br>
                                                 <span class="badge badge-info badge_doc">{{$venta->guia_relacionada['correlativo']}}</span>
                                             </td>

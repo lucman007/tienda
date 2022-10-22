@@ -6,7 +6,7 @@
             </template>
             <div class="container">
                 <div class="row">
-                    <div class="col-6">
+                    <div class="col-6" v-show="showPrecio">
                         <div class="form-group">
                             <label>Precio</label>
                             <input v-model="precio" :disabled="!canEditPrecio" placeholder="0.00" type="number" class="form-control" onfocus="this.select()">
@@ -28,8 +28,8 @@
                     </div>
                     <div class="col-lg-12">
                         <div class="form-group">
-                            <label>Observación</label>
-                            <input v-model="presentacion" placeholder="" type="text" class="form-control">
+                            <label>Características</label>
+                            <textarea v-model="presentacion" class="form-control"></textarea>
                         </div>
                     </div>
                     <div class="col-lg-12">
@@ -50,7 +50,7 @@
 <script>
     export default {
         name: 'modal-detalle',
-        props: ['item','canEditPrecio'],
+        props: ['item','canEditPrecio', 'show-precio'],
         data() {
             return {
                 error:0,
@@ -65,12 +65,6 @@
                 this.cantidad = this.item.cantidad;
                 this.precio = this.item.precio;
                 this.presentacion = this.item.presentacion;
-                console.log(this.canEditPrecio)
-            },
-            limpiar(){
-                this.cantidad = 1;
-                this.precio = 1;
-                this.presentacion = '';
             },
             guardarDatos(){
                 if (this.validar()) {
@@ -89,7 +83,12 @@
                 if(this.item.precio<0) this.errorDatos.push('No se aceptan precios menores a 0');
                 if (this.errorDatos.length) this.error = 1;
                 return this.error;
-            }
+            },
+            limpiar(){
+                this.cantidad = 1;
+                this.precio = 1;
+                this.presentacion = '';
+            },
         }
     }
 </script>

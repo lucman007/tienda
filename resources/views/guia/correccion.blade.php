@@ -5,7 +5,7 @@
         <div class="row">
             <div class="col-sm-12">
                 <h3 class="titulo-admin-1">
-                    <a href="{{url('guia')}}"><i class="fas fa-arrow-circle-left"></i></a>
+                    <a href="{{url()->previous()}}"><i class="fas fa-arrow-circle-left"></i></a>
                     Corregir guía {{$guia->correlativo}}
                 </h3>
             </div>

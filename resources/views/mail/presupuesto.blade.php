@@ -20,7 +20,7 @@
     <p style="white-space: break-spaces">{!! $cuerpo_mensaje !!}</p>
     <br>
 @else
-    <br><br>
+    <br>
     Es grato dirigirme a usted, para saludarle cordialmente y a la vez aprovechar la oportunidad para hacerle llegar nuestra cotización, estamos para resolverle cualquier consulta o duda.
     <br><br>
     Agradeciendo su atención, reiteramos nuestro compromiso de ofrecerle siempre el mejor servicio que usted merece.
@@ -29,7 +29,9 @@
     <br><br>
     Área de ventas <br>
 @endif
-Email: {{$config['email']}} <br>
-Telf.: {{$config['telefono']}} <br>
-Página web: {{$config['website']}} <br>
+<span style="color: #109340;font-weight: 600;">&#9990;</span> Email: {{$config['email']}} <br>
+<span style="color: #109340;font-weight: 600;">&#9993;</span> Telf.: {{$config['telefono']}} <br>
+<span style="color: #109340;font-weight: 600;">&#10003;</span> Página web: {{$config['website']}} <br>
+<img src="{!! url('images/'.$emisor->logo) !!}" alt="Logo">
+
 

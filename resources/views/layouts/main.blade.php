@@ -250,6 +250,7 @@
     })
 </script>
 <script src="{{asset('js/phpjsdate.js')}}"></script>
+<script src="{{asset('js/helpers.js')}}"></script>
 <script type="text/javascript">
     // live clock
     function clockTick() {
@@ -264,6 +265,8 @@
         now.setTime(now.getTime() + 1000);
         document.getElementById('liveclock').innerHTML = phpjsDate('d/m/Y h:i:s A',);
     }
+
+    navigation();
 
 </script>
 @yield('css')

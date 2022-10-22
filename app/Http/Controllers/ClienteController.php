@@ -61,12 +61,13 @@ class ClienteController extends Controller
 
     public function store(Request $request)
     {
-        if(Cliente::where('num_documento', $request->num_documento)
-            ->where('eliminado',0)
-            ->exists()
-        ){
-            return 1;
-        }
+        try{
+            if(Cliente::where('num_documento', $request->num_documento)
+                ->where('eliminado',0)
+                ->exists()
+            ){
+                return 1;
+            }
 
 	    $persona=new Persona();
 	    $persona->nombre=mb_strtoupper($request->nombre);
@@ -90,7 +91,11 @@ class ClienteController extends Controller
             "nombre"=>$request->nombre,
             "persona"=>["nombre"=>$request->nombre],
             "num_documento"=>$request->num_documento??$codigo
-        ]);
+        ],200);
+
+        } catch (\Exception $e){
+            return response(['mensaje'=>'Ha ocurrido un error al guardar el cliente'], 500);
+        }
     }
 
     public function edit(Request $request,$id)

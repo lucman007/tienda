@@ -4,8 +4,10 @@
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
             <div class="col-lg-9">
-                <h3 class="titulo-admin-1">Gestionar accesos: {{$trabajador->persona['nombre'].' '.$trabajador->persona['apellidos']}}</h3>
-                <b-button href="{{action('TrabajadorController@index')}}" class="mr-2"  variant="secondary"><i class="fas fa-arrow-left"></i> Regresar</b-button>
+                <h3 class="titulo-admin-1">
+                    <a href="{{url('trabajadores')}}"><i class="fas fa-arrow-circle-left"></i></a>
+                    Gestionar accesos: {{$trabajador->persona['nombre'].' '.$trabajador->persona['apellidos']}}
+                </h3>
             </div>
         </div>
         <div class="row">
@@ -119,31 +121,31 @@
                         axios.post('{{action('TrabajadorController@verificarUsuario')}}', {
                             'usuario': this.usuario
                         })
-                            .then(function (response) {
+                            .then(response => {
                                 if (response.data){
                                     alert('*El usuario ya existe en la base de datos');
                                 }
                                 else{
                                     axios.post('{{action('TrabajadorController@guardar_credenciales')}}', dataset)
-                                        .then(function () {
+                                        .then(() => {
                                             window.location.href = "/trabajadores"
                                         })
-                                        .catch(function (error) {
+                                        .catch(error => {
                                             alert('Ha ocurrido un error al guardar los datos.');
                                             console.log(error);
                                         });
                                 }
                             })
-                            .catch(function (error) {
+                            .catch(error => {
                                 alert('Ha ocurrido un error al verificar el usuario.');
                                 console.log(error);
                             });
                     } else{
                         axios.post('{{action('TrabajadorController@guardar_credenciales')}}', dataset)
-                            .then(function () {
+                            .then(() => {
                                 window.location.href = "/trabajadores"
                             })
-                            .catch(function (error) {
+                            .catch(error => {
                                 alert('Ha ocurrido un error al guardar los datos.');
                                 console.log(error);
                             });
@@ -179,10 +181,10 @@
                             };
 
                             axios.post('{{action('TrabajadorController@eliminar_credenciales')}}', dataset)
-                                .then(function () {
+                                .then(() => {
                                     window.location.href = "/trabajadores"
                                 })
-                                .catch(function (error) {
+                                .catch(error => {
                                     alert('Ha ocurrido un error al guardar los datos.');
                                     console.log(error);
                                 });

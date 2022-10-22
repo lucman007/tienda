@@ -1,3 +1,4 @@
+@if(auth()->user()->hasRole('Superusuario'))
 <div class="col-lg-6">
     <div class="row">
         <div class="col-lg-12">
@@ -17,6 +18,7 @@
         </div>
     </div>
 </div>
+@endif
 <div class="col-lg-6">
     <div class="row">
         <div class="col-lg-12">

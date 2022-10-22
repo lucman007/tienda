@@ -5,6 +5,7 @@ namespace sysfact\Mail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
+use sysfact\Emisor;
 use sysfact\Http\Controllers\Helpers\MainHelper;
 
 class EnviarDocumentos extends Mailable
@@ -13,8 +14,9 @@ class EnviarDocumentos extends Mailable
     public $factura;
     public $guia;
     public $recibo;
-    public $config;
+    public $mail_send_from = [];
     public $conCopia;
+    public $mail_contact = [];
 
     /**
      * Create a new message instance.
@@ -28,8 +30,9 @@ class EnviarDocumentos extends Mailable
         $this->recibo = $request->recibo;
         $this->conCopia = $request->conCopia;
 
-        $mail = MainHelper::configuracion('mail_send_from');
-        $this->config = json_decode($mail, true);
+        $conf = MainHelper::configuracion(['mail_send_from','mail_contact']);
+        $this->mail_contact = json_decode($conf['mail_contact'], true);
+        $this->mail_send_from = json_decode($conf['mail_send_from'], true);
     }
 
     /**
@@ -39,10 +42,16 @@ class EnviarDocumentos extends Mailable
      */
     public function build()
     {
-        $mail = $this->from($this->config['email'])->view('mail.docs');
+
+        $data = [
+            'config'=>$this->mail_contact,
+            'emisor'=>new Emisor()
+        ];
+
+        $mail = $this->from($this->mail_send_from['email'])->view('mail.docs', $data);
 
         if($this->guia){
-            $mail->subject('Envío de guia electrónica - ' . $this->config['remitente'])
+            $mail->subject('Envío de guia electrónica - ' . mb_strtoupper($this->mail_send_from['remitente']))
                 ->attach(storage_path() . '/app/sunat/pdf/' . $this->guia . '.pdf')
                 ->attach(storage_path() . '/app/sunat/xml/' . $this->guia . '.xml');
         }
@@ -52,7 +61,7 @@ class EnviarDocumentos extends Mailable
         }
 
         if($this->factura){
-            $mail->subject('Envío de comprobantes electrónicos - ' . $this->config['remitente'])
+            $mail->subject('Envío de comprobantes electrónicos - ' . mb_strtoupper($this->mail_send_from['remitente']))
                 ->attach(storage_path() . '/app/sunat/pdf/' . $this->factura . '.pdf')
                 ->attach(storage_path() . '/app/sunat/xml/' . $this->factura . '.xml');
         }
@@ -62,12 +71,12 @@ class EnviarDocumentos extends Mailable
         }
 
         if($this->recibo){
-            $mail->subject('Envío de nota de venta - ' . $this->config['remitente'])
+            $mail->subject('Envío de nota de venta - ' . mb_strtoupper($this->mail_send_from['remitente']))
                 ->attach(storage_path() . '/app/sunat/pdf/' . $this->recibo . '.pdf');
         }
 
         if($this->conCopia){
-            $mail->bcc($this->config['email']);
+            $mail->bcc($this->mail_send_from['email']);
         }
 
         return $mail;
