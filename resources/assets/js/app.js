@@ -30,7 +30,6 @@ Vue.component('autocomplete',require('./components/Autocomplete.vue'));
 Vue.component('autocomplete-cliente',require('./components/AutocompleteCliente.vue'));
 Vue.component('pedidos',require('./components/ListaPedidos.vue'));
 Vue.component('modal-facturacion',require('./components/ModalFacturacion.vue'));
-Vue.component('modal-facturacion-ticket',require('./components/ModalFacturacionTicket.vue'));
 Vue.component('modal-agregar-producto',require('./components/ModalAgregarProducto.vue'));
 Vue.component('modal-agregar-producto-alt',require('./components/ModalAgregarProductoAlt.vue'));
 Vue.component('modal-entrega',require('./components/ModalEntrega.vue'));

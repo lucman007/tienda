@@ -1142,13 +1142,13 @@ class VentaController extends Controller
             $facturacion->valor_venta_bruto = $subtotal;
             $facturacion->porcentaje_descuento_global = 0;
             $facturacion->descuento_global = 0;
-            $facturacion->base_descuento_global = 0;
+            $facturacion->base_descuento_global = $subtotal;
             $facturacion->estado = 'PENDIENTE';
             if($request->comprobante==30)$facturacion->estado = '-';
             $facturacion->num_doc_relacionado = '';
             $facturacion->descripcion_nota = '';
             $facturacion->tipo_doc_relacionado = -1;
-            $facturacion->tipo_nota_electronica = $request->tipo_nota_electronica;
+            $facturacion->tipo_nota_electronica = '01';
             $facturacion->oc_relacionada='';
             $facturacion->guia_relacionada='';
             $facturacion->guia_fisica='';
