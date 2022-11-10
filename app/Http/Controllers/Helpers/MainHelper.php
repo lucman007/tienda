@@ -357,10 +357,6 @@ class MainHelper extends Controller
         $formato = json_decode($config, true)['formato'];
         $ruta_formato = $formato;
         switch ($formato){
-            case 'A4_2':
-            case 'A4_5':
-                $formato_impresion = 'A4';
-                break;
             case 'A5_1':
                 $formato_impresion = 'A5';
                 break;
@@ -374,7 +370,7 @@ class MainHelper extends Controller
                 $formato_impresion = [45,250];
                 break;
             default:
-                $formato_impresion = [72,250];
+                $formato_impresion = 'A4';
         }
         return ['ruta'=>$ruta_formato,'medidas'=>$formato_impresion];
     }

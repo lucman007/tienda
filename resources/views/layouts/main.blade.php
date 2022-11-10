@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="{{asset('css/admin.css?v='.filemtime('css/admin.css'))}}">
     <link rel="stylesheet" href="{{asset('css/OverlayScrollbars.min.css')}}">
     <title>Facsy | @yield('titulo') </title>
+    @laravelPWA
     <script>
         window.Laravel = {!! json_encode([
             'csrfToken' => csrf_token(),
@@ -22,6 +23,9 @@
     </script>
 </head>
 <body @if(isset($idbody)) id="{{$idbody}}" @endif>
+@php
+    $color = json_decode(cache('config')['interfaz'], true)['text_top_header_style']??'';
+@endphp
 <div class="app_menu" v-cloak>
     <header class="fixed-top">
         <div class="top-header" style="{{json_decode(cache('config')['interfaz'], true)['top_header_style']}}">
@@ -29,10 +33,10 @@
                 <div class="row no-gutters">
                     <div class="col-sm-12">
                         <div class="float-left">
-                            <p id="liveclock"></p>
+                            <p id="liveclock" style="{{$color}}"></p>
                             @php $agent = new \Jenssegers\Agent\Agent() @endphp
                             @if(!$agent->isMobile())
-                            <tipo-cambio :cambio="{{json_encode(cache('opciones'))}}"></tipo-cambio>
+                            <tipo-cambio :cambio="{{json_encode(cache('opciones'))}}" :color="'{{$color}}'"></tipo-cambio>
                             @endif
                         </div>
                         @if(!(json_decode(cache('config')['conexion'], true)['esProduccion']))
@@ -43,7 +47,7 @@
                         <div class="float-left float-md-right d-flex">
                             <b-dropdown id="dropdown-1" text="Dropdown Button" variant="outline-secondary" class="m-md-2 float-right btn-admin">
                                 <template v-slot:button-content>
-                                    ¡Hola! {{$usuario->nombre}} <i class="fas fa-user-circle"></i>
+                                    <span style="{{$color}}">¡Hola! {{$usuario->nombre}} <i class="fas fa-user-circle"></i></span>
                                 </template>
                                 <b-dropdown-item href="{{url('logout')}}"><i class="fas fa-power-off"></i> Cerrar sesión</b-dropdown-item>
                             </b-dropdown>

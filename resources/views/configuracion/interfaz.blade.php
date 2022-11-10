@@ -1,16 +1,22 @@
 <div class="col-lg-12">
     <h4>Interfaz:</h4>
 </div>
-<div class="col-lg-6">
+<div class="col-lg-4">
     <div class="form-group">
-        <label>Estilo cabecera superior</label>
+        <label>Color cabecera superior</label>
         <input type="text" v-model="interfaz.top_header_style" autocomplete="nope" class="form-control">
     </div>
 </div>
-<div class="col-lg-6">
+<div class="col-lg-4">
     <div class="form-group">
-        <label>Estilo cabecera inferior</label>
+        <label>Color cabecera inferior</label>
         <input type="text" v-model="interfaz.bottom_header_style" autocomplete="nope" class="form-control">
+    </div>
+</div>
+<div class="col-lg-4">
+    <div class="form-group">
+        <label>Color texto cabecera superior</label>
+        <input type="text" v-model="interfaz.text_top_header_style" autocomplete="nope" class="form-control">
     </div>
 </div>
 <div class="col-lg-4 mt-3">
