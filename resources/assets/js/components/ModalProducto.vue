@@ -22,7 +22,6 @@
                                     <th style="width: 250px" scope="col">Nombre</th>
                                     <th style="width: 350px" scope="col">Características</th>
                                     <th scope="col">Stock</th>
-                                    <th scope="col">Estado</th>
                                     <th scope="col">Precio</th>
                                     <th scope="col"></th>
                                 </tr>
@@ -32,20 +31,9 @@
                                     <td>{{producto.cod_producto}}</td>
                                     <td>{{producto.nombre}}</td>
                                     <td>{{producto.presentacion}}</td>
-                                    <td v-show="producto.tipo_producto===1">{{producto.stock}}</td>
+                                    <td v-show="producto.tipo_producto===1"><span :class="'badge '+producto.badge_stock">{{producto.stock+producto.unidad}}</span></td>
                                     <td v-show="producto.tipo_producto==2">-</td>
-                                    <td v-show="producto.tipo_producto===1">
-                                    <span class="badge"
-                                          :class="{'badge-warning':producto.stock <= producto.stock_bajo,
-                                   'badge-success' : producto.stock >= producto.stock_bajo,
-                                   'badge-danger' : producto.stock <= 0}">
-                                        <span v-if="producto.stock <= 0">Sin stock</span>
-                                        <span v-else-if="producto.stock <= producto.stock_bajo">Stock bajo</span>
-                                        <span v-else-if="producto.stock >= producto.stock_bajo">Stock</span>
-                                    </span>
-                                    </td>
-                                    <td v-show="producto.tipo_producto==2">-</td>
-                                    <td>{{producto.precio}}</td>
+                                    <td>{{producto.moneda}}{{producto.precio}}</td>
                                     <td style="width: 5%" class="botones-accion">
                                         <button @click="agregar(index)"
                                                 :disabled="stock && producto.stock <= 0 && producto.tipo_producto===1"

@@ -240,7 +240,7 @@ class Util
         $zip->open($fichero_zip,\ZipArchive::CREATE);
         $zip->addFile(storage_path().'/app/sunat/xml/'.$nombre.'.xml',$nombre.'.xml');
         $zip->close();
-        return ['nombre'=>$nombre,'contenido'=>base64_encode(file_get_contents($fichero_zip))];
+        return ['nombre'=>$nombre,'contenido'=>base64_encode(file_get_contents($fichero_zip)),'hash'=>hash_file('sha256',$fichero_zip)];
 
     }
 

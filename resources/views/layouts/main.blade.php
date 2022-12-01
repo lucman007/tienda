@@ -11,6 +11,7 @@
     <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
     <!-- app.css -->
     <link rel="stylesheet" href="{{asset('css/app.css')}}">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css">
     <!-- CSS personalizado -->
     <link rel="stylesheet" href="{{asset('css/admin.css?v='.filemtime('css/admin.css'))}}">
     <link rel="stylesheet" href="{{asset('css/OverlayScrollbars.min.css')}}">
@@ -78,11 +79,6 @@
                                             Comprobantes
                                         </template>
                                         <b-dropdown-item @cannot('Facturación: comprobantes') class="disabled" disabled @endcannot href="{{action('ComprobanteController@comprobantes')}}"><i class="fas fa-file-invoice-dollar"></i> Comprobantes emitidos</b-dropdown-item>
-                                        @can('Facturación: guía física')
-{{--
-                                            <b-dropdown-item href="{{action('OrdenController@index')}}"><i class="fas fa-truck"></i> Guía de remisión física</b-dropdown-item>
---}}
-                                        @endcan
                                         <b-dropdown-item @cannot('Facturación: guía') class="disabled" disabled @endcannot href="{{action('GuiaController@index')}}"><i class="fas fa-shipping-fast"></i> Guía de remisión electrónica</b-dropdown-item>
                                     </b-nav-item-dropdown>
                                     <b-nav-item @cannot('Cotizaciones') class="disabled" disabled @endcannot href="{{action('PresupuestoController@index')}}">

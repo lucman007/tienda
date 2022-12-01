@@ -63,11 +63,20 @@
                                         @else
                                             {{$venta->guia_relacionada['correlativo']}}
                                         @endif
-                                        <span class="badge {{$venta->badge_class_guia}}">{{$venta->guia_relacionada['estado']}}</span>
+                                        <span class="badge" :class="{'badge-warning':estado_guia=='PENDIENTE',
+                                   'badge-success' : estado_guia=='ACEPTADO',
+                                   'badge-dark' : estado_guia=='ANULADO',
+                                   'badge-danger' :estado_guia=='RECHAZADO'}">@{{estado_guia}}</span>
                                         @if($venta->guia_relacionada['estado']=='PENDIENTE')
                                             <a href="/guia/correccion/{{$venta->guia_relacionada['idguia']}}"><span class="badge badge-primary"><i class="fas fa-edit"></i> CORREGIR</span></a>
                                         @endif
                                         <hr>
+                                        @if($venta->guia_relacionada->estado=='PENDIENTE')
+                                            <strong>Mensaje:</strong> @{{mensaje}}  <hr>
+                                        @endif
+                                        @if($venta->guia_relacionada->estado=='ACEPTADO' && $venta->guia_relacionada->nota)
+                                            <strong>Observación:</strong> {{$venta->guia_relacionada->nota}}  <hr>
+                                        @endif
                                     @endif
                             </div>
                             <div class="col-lg-8">
@@ -232,6 +241,12 @@
                                     </svg>
                                     Corregir guía
                                 </b-button>
+                                    <b-button v-show="estado=='PENDIENTE'" class="mb-2" @click="enviar_guia('{{$venta->guia_relacionada->ticket}}','{{$venta->guia_relacionada->idguia}}')"
+                                              variant="success">
+                                        <i v-show="!mostrarProgresoEnvio" class="fas fa-paper-plane"></i>
+                                        <b-spinner v-show="mostrarProgresoEnvio" small label="Loading..." ></b-spinner>
+
+                                    </b-button>
                                 @endif
                                 <b-button class="mb-2" href="{{url('ventas/descargar').'/'.$venta->guia_relacionada['idguia'].'?guia=true'}}" title="Descargar PDF" variant="warning">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-pdf" viewBox="0 0 16 16">
@@ -411,11 +426,18 @@
                 conCopia:true,
                 whatsapp: '',
                 cc:[],
+                mensaje:'<?php echo html_entity_decode($venta->guia_relacionada->response??'') ?>',
+                mostrarProgresoEnvio:false
             },
             created(){
                 if('<?php echo $venta->facturacion->estado ?>' == 'PENDIENTE' && ('<?php echo basename(url()->previous()) ?>').includes('facturacion')){
-
                     this.enviar_documentos(<?php echo $venta->idventa ?> ,"<?php echo $venta->nombre_fichero ?>","<?php echo $venta->facturacion->num_doc_relacionado?$venta->facturacion->num_doc_relacionado:'0'?>");
+                    if('<?php echo $venta->guia_relacionada?>'){
+                        this.enviar_guia("<?php echo $venta->guia_relacionada['ticket'] ?>",<?php echo $venta->guia_relacionada['idguia'] ?>);
+                    }
+                }
+                if(('<?php echo url()->previous() ?>').includes('correccion')){
+                    this.enviar_guia("<?php echo $venta->guia_relacionada['ticket'] ?>",<?php echo $venta->guia_relacionada['idguia'] ?>);
                 }
 
             },
@@ -465,6 +487,29 @@
                             alert('error');
                             console.log(error);
                             this.mostrarProgreso = false;
+                        });
+                },
+                enviar_guia(ticket, idguia){
+                    this.mostrarProgresoEnvio = true;
+                    axios.post('{{url('guia/consultar-ticket')}}',{
+                        'ticket':ticket,
+                        'idguia':idguia,
+                        'file':"<?php echo $venta->nombre_guia ?>",
+                    })
+                        .then(response =>  {
+                            this.$bvToast.toast(response.data[0], {
+                                title: 'Envío de guía',
+                                variant: 'primary',
+                                solid: true
+                            });
+                            this.estado_guia = response.data[1];
+                            this.mensaje = response.data[0];
+                            this.mostrarProgresoEnvio = false;
+                        })
+                        .catch(error =>  {
+                            alert('error');
+                            console.log(error);
+                            this.mostrarProgresoEnvio = false;
                         });
                 },
                 enviar_a_correo(){

@@ -10,6 +10,7 @@ use sysfact\Emisor;
 use sysfact\Facturacion;
 use sysfact\Guia;
 use sysfact\Http\Controllers\Cpe\CpeController;
+use sysfact\Http\Controllers\Helpers\DataGuia;
 use sysfact\Http\Controllers\Helpers\PdfHelper;
 use sysfact\Presupuesto;
 use sysfact\Producto;
@@ -163,46 +164,22 @@ class GuiaController extends Controller
             $datos_guia['direccion'] = mb_strtoupper(trim($datos_guia['direccion']));
             $datos_guia['ubigeo'] = trim($datos_guia['ubigeo']);
             $datos_guia['peso'] = trim($datos_guia['peso']);
-            //$datos_guia['motivo_traslado']
             $datos_guia['bultos'] = trim($datos_guia['bultos']);
-            //$datos_guia['tipo_transporte'] = trim($datos_guia['tipo_transporte']);
-            //$datos_guia['tipo_doc_transportista'] = trim($datos_guia['tipo_doc_transportista']);
             $datos_guia['num_doc_transportista'] = trim($datos_guia['num_doc_transportista']);
             $datos_guia['razon_social_transportista'] = strtoupper(trim($datos_guia['razon_social_transportista']));
             $datos_guia['placa_vehiculo'] = strtoupper(trim($datos_guia['placa_vehiculo']));
-            //$datos_guia['doc_relacionado'] = trim($datos_guia['doc_relacionado']);
             $datos_guia['num_doc_relacionado'] = strtoupper(trim($datos_guia['num_doc_relacionado']));
             $datos_guia['dni_conductor'] = trim($datos_guia['dni_conductor']);
+            $datos_guia['licencia_conductor'] = trim($datos_guia['licencia_conductor']);
             $datos_guia['fecha_traslado'] = $datos_guia['fecha_traslado'] . ' ' . date('H:i:s');
             $datos_guia['oc'] = $request->num_oc;
 
-            switch ($datos_guia['codigo_traslado']){
-                case '14':
-                    $datos_guia['motivo_traslado']='VENTA SUJETA A CONFIRMACION DEL COMPRADOR';
+            $motivo_traslado = DataGuia::getMotivoTraslado();
+            foreach ($motivo_traslado as $motivo){
+                if($datos_guia['codigo_traslado'] == $motivo['num_val']){
+                    $datos_guia['motivo_traslado'] = strtoupper($motivo['label']);
                     break;
-                case '02':
-                    $datos_guia['motivo_traslado']='COMPRA';
-                    break;
-                case '04':
-                    $datos_guia['motivo_traslado']='TRASLADO ENTRE ESTABLECIMIENTOS DE LA MISMA EMPRESA';
-                    break;
-                case '18':
-                    $datos_guia['motivo_traslado']='TRASLADO EMISOR ITINERANTE CP';
-                    break;
-                case '08':
-                    $datos_guia['motivo_traslado']='IMPORTACION';
-                    break;
-                case '09':
-                    $datos_guia['motivo_traslado']='EXPORTACION';
-                    break;
-                case '19':
-                    $datos_guia['motivo_traslado']='TRASLADO A ZONA PRIMARIA';
-                    break;
-                case '13':
-                    $datos_guia['motivo_traslado']='OTROS';
-                    break;
-                default:
-                    $datos_guia['motivo_traslado']='VENTA';
+                }
             }
 
             $guia->guia_datos_adicionales = json_encode($datos_guia);
@@ -252,7 +229,7 @@ class GuiaController extends Controller
                 $ultima_venta->guia_relacionada='';
                 $ultima_venta->save();
             }
-            return json_encode(['idguia' => -1, 'respuesta' => 'Ha ocurrido un error al procesar la guia']);
+            return json_encode(['idguia' => -1, 'respuesta' => $e->getMessage()]);
         }
 
     }
@@ -277,45 +254,21 @@ class GuiaController extends Controller
             $datos_guia['direccion'] = mb_strtoupper(trim($datos_guia['direccion']));
             $datos_guia['ubigeo'] = trim($datos_guia['ubigeo']);
             $datos_guia['peso'] = trim($datos_guia['peso']);
-            //$datos_guia['motivo_traslado']
             $datos_guia['bultos'] = trim($datos_guia['bultos']);
-            //$datos_guia['tipo_transporte'] = trim($datos_guia['tipo_transporte']);
-            //$datos_guia['tipo_doc_transportista'] = trim($datos_guia['tipo_doc_transportista']);
             $datos_guia['num_doc_transportista'] = trim($datos_guia['num_doc_transportista']);
             $datos_guia['razon_social_transportista'] = strtoupper(trim($datos_guia['razon_social_transportista']));
             $datos_guia['placa_vehiculo'] = strtoupper(trim($datos_guia['placa_vehiculo']));
-            //$datos_guia['doc_relacionado'] = trim($datos_guia['doc_relacionado']);
             $datos_guia['num_doc_relacionado'] = strtoupper(trim($datos_guia['num_doc_relacionado']));
             $datos_guia['dni_conductor'] = trim($datos_guia['dni_conductor']);
+            $datos_guia['licencia_conductor'] = trim($datos_guia['licencia_conductor']);
             $datos_guia['fecha_traslado'] = $datos_guia['fecha_traslado'] . ' ' . date('H:i:s');
 
-            switch ($datos_guia['codigo_traslado']){
-                case '14':
-                    $datos_guia['motivo_traslado']='VENTA SUJETA A CONFIRMACION DEL COMPRADOR';
+            $motivo_traslado = DataGuia::getMotivoTraslado();
+            foreach ($motivo_traslado as $motivo){
+                if($datos_guia['codigo_traslado'] == $motivo['num_val']){
+                    $datos_guia['motivo_traslado'] = strtoupper($motivo['label']);
                     break;
-                case '02':
-                    $datos_guia['motivo_traslado']='COMPRA';
-                    break;
-                case '04':
-                    $datos_guia['motivo_traslado']='TRASLADO ENTRE ESTABLECIMIENTOS DE LA MISMA EMPRESA';
-                    break;
-                case '18':
-                    $datos_guia['motivo_traslado']='TRASLADO EMISOR ITINERANTE CP';
-                    break;
-                case '08':
-                    $datos_guia['motivo_traslado']='IMPORTACION';
-                    break;
-                case '09':
-                    $datos_guia['motivo_traslado']='EXPORTACION';
-                    break;
-                case '19':
-                    $datos_guia['motivo_traslado']='TRASLADO A ZONA PRIMARIA';
-                    break;
-                case '13':
-                    $datos_guia['motivo_traslado']='OTROS';
-                    break;
-                default:
-                    $datos_guia['motivo_traslado']='VENTA';
+                }
             }
 
             $guia->guia_datos_adicionales = json_encode($datos_guia);
@@ -506,6 +459,7 @@ class GuiaController extends Controller
         $guia->motivo_traslado=$datos_adicionales['motivo_traslado'];
         $guia->num_doc_relacionado=$datos_adicionales['num_doc_relacionado'];
         $guia->fecha_traslado=date('Y-m-d', strtotime($datos_adicionales['fecha_traslado']));
+        $guia->ticket = json_decode($guia->ticket, true)['numTicket']??0;
 
         $guia->nombre_fichero = $emisor->ruc . '-09-' . $guia->correlativo;
 
@@ -526,6 +480,15 @@ class GuiaController extends Controller
                 break;
             case 'RECHAZADO':
                 $guia->badge_class='badge-danger';
+        }
+
+
+        /*LEER EL CDR*/
+        $file_xml=storage_path().'/app/sunat/cdr/R-'.$guia->nombre_fichero.'.xml';
+        if(file_exists($file_xml)){
+            $cdr_xml = simplexml_load_file($file_xml);
+            $Note=$cdr_xml->xpath('//cbc:Note');
+            $guia->nota = $Note[0]??false;
         }
 
         return view('guia.visualizar', ['guia' => $guia, 'usuario' => auth()->user()->persona]);
@@ -564,6 +527,9 @@ class GuiaController extends Controller
         $guia->razon_social_transportista=$datos_adicionales['razon_social_transportista'];
         $guia->placa_vehiculo=$datos_adicionales['placa_vehiculo'];
         $guia->dni_conductor=$datos_adicionales['dni_conductor'];
+        $guia->licencia_conductor=$datos_adicionales['licencia_conductor']??'';
+        $guia->nombre_conductor=$datos_adicionales['nombre_conductor']??'';
+        $guia->apellido_conductor=$datos_adicionales['apellido_conductor']??'';
         $guia->direccion_llegada=$datos_adicionales['direccion'];
         $guia->ubigeo_direccion_llegada=$datos_adicionales['ubigeo'];
         $guia->motivo_traslado=$datos_adicionales['motivo_traslado'];
@@ -571,33 +537,12 @@ class GuiaController extends Controller
         $guia->num_doc_relacionado=$datos_adicionales['num_doc_relacionado'];
         $guia->fecha_traslado=date('Y-m-d', strtotime($datos_adicionales['fecha_traslado']));
 
-        switch ($guia->motivo_traslado){
-            case 'VENTA SUJETA A CONFIRMACION DEL COMPRADOR':
-                $guia->motivo_traslado='14';
+        $motivo_traslado = DataGuia::getMotivoTraslado();
+        foreach ($motivo_traslado as $motivo){
+            if($guia->motivo_traslado == strtoupper($motivo['label'])){
+                $guia->motivo_traslado = $motivo['num_val'];
                 break;
-            case 'COMPRA':
-                $guia->motivo_traslado='02';
-                break;
-            case 'TRASLADO ENTRE ESTABLECIMIENTOS DE LA MISMA EMPRESA':
-                $guia->motivo_traslado='04';
-                break;
-            case 'TRASLADO EMISOR ITINERANTE CP':
-                $guia->motivo_traslado='18';
-                break;
-            case 'IMPORTACION':
-                $guia->motivo_traslado='08';
-                break;
-            case 'EXPORTACION':
-                $guia->motivo_traslado='09';
-                break;
-            case 'TRASLADO A ZONA PRIMARIA':
-                $guia->motivo_traslado='19';
-                break;
-            case 'OTROS':
-                $guia->motivo_traslado='13';
-                break;
-            default:
-                $guia->motivo_traslado='01';
+            }
         }
 
         $emisor=new Emisor();

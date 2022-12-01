@@ -462,7 +462,7 @@
 
                     this.$set(producto, 'prev_precio', (producto['precio']));
 
-                    if(producto['moneda']=='PEN' && this.moneda=='USD'){
+                    if(producto['moneda']=='S/' && this.moneda=='USD'){
                         producto['precio']=(producto['precio'] / this.tipoCambio).toFixed(2);
                     } else if(producto['moneda']=='USD' && this.moneda=='S/'){
                             producto['precio']=(producto['precio'] * this.tipoCambio).toFixed(2)

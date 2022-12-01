@@ -32,13 +32,13 @@
                             <div class="col-lg-3 form-group">
                                 <label>Documento relacionado</label>
                                 <select v-model="guia_datos_adicionales.doc_relacionado" name="cargo" class="custom-select">
+                                    @php
+                                        $doc_relacionado = \sysfact\Http\Controllers\Helpers\DataGuia::getDocumentoRelacionado();
+                                    @endphp
                                     <option value="-1">Ninguno</option>
-                                    <option value="01">Numeración DAN</option>
-                                    <option value="02">N° de orden de entrega</option>
-                                    <option value="03">N° SCOP</option>
-                                    <option value="04">N° de maniefiesto de carga</option>
-                                    <option value="05">N° de constancia de detracción</option>
-                                    <option value="06">Otros</option>
+                                    @foreach($doc_relacionado as $item)
+                                        <option value="{{$item['num_val']}}">{{$item['label']}}</option>
+                                    @endforeach
                                 </select>
                             </div>
                             <div v-show="guia_datos_adicionales.doc_relacionado!='-1'" class="col-lg-3 form-group">
@@ -48,16 +48,29 @@
                             </div>
                             <div class="col-lg-6 form-group">
                                 <label>Dirección de llegada</label>
-                                <input maxlength="100" type="text" v-model="guia_datos_adicionales.direccion" name="direccion"
-                                       class="form-control" placeholder="*Máximo 100 caracteres">
+                                <div class="row">
+                                    <div class="col-lg-4">
+                                        <b-form-checkbox @change="cambiarDireccionGuia" v-model="domicilioFiscalCliente" switch size="sm">
+                                            Domicilio fiscal cliente
+                                        </b-form-checkbox>
+                                    </div>
+                                    <div class="col-lg-8">
+                                        <input :disabled="domicilioFiscalCliente" maxlength="100" type="text" v-model="guia_datos_adicionales.direccion"
+                                               name="direccion"
+                                               class="form-control" placeholder="*Máximo 100 caracteres">
+                                    </div>
+                                </div>
                             </div>
                             <div class="col-lg-2 form-group">
                                 <label>Ubigeo</label>
-                                <input disabled type="text" v-model="guia_datos_adicionales.ubigeo" class="form-control">
-                                <b-button v-b-modal.modal-ubigeo variant="primary"
-                                          class="buscar_documento boton_adjunto">
-                                    <i class="fas fa-search"></i>
-                                </b-button>
+                                <b-input-group>
+                                    <input disabled type="text" v-model="guia_datos_adicionales.ubigeo" class="form-control">
+                                    <b-input-group-append>
+                                        <b-button v-b-modal.modal-ubigeo variant="primary">
+                                            <i class="fas fa-search"></i>
+                                        </b-button>
+                                    </b-input-group-append>
+                                </b-input-group>
                             </div>
                             <div class="col-lg-2 form-group">
                                 <label>Peso (KG)</label>
@@ -79,19 +92,21 @@
                             <div class="col-lg-10" v-show="guia_datos_adicionales.tipo_transporte == '01'">
                                 <div class="row">
                                     <div class="col-lg-3 form-group">
-                                        <label>Tipo documento transportista</label>
-                                        <select v-model="guia_datos_adicionales.tipo_doc_transportista" name="cargo" class="custom-select" id="tipo_transporte">
-                                            <option value="6">RUC</option>
-                                            <option value="1">DNI</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-lg-3 form-group">
-                                        <label>Número doc. tranportista</label>
-                                        <input :maxlength="guia_datos_adicionales.tipo_doc_transportista==1? 8 : 11" type="text" v-model="guia_datos_adicionales.num_doc_transportista"
-                                               class="form-control">
+                                        <label>Ruc de transportista</label>
+                                        <b-input-group>
+                                            <input @keyup.enter="consultaRucDni(guia_datos_adicionales.tipo_doc_transportista,guia_datos_adicionales.num_doc_transportista)" maxlength="11" type="text" v-model="guia_datos_adicionales.num_doc_transportista"
+                                                   class="form-control">
+                                            <b-input-group-append>
+                                                <b-button :disabled="guia_datos_adicionales.num_doc_transportista.length==0" @click="consultaRucDni(guia_datos_adicionales.tipo_doc_transportista,guia_datos_adicionales.num_doc_transportista)" variant="primary" >
+                                                    <span v-show="!spinnerRuc"><i class="fas fa-search"></i></span>
+                                                    <b-spinner v-show="spinnerRuc" small label="Loading..." ></b-spinner>
+                                                </b-button>
+                                            </b-input-group-append>
+                                        </b-input-group>
+
                                     </div>
                                     <div class="col-lg-6 form-group">
-                                        <label>Razón social tranportista</label>
+                                        <label>Razón social transportista</label>
                                         <input type="text" v-model="guia_datos_adicionales.razon_social_transportista"
                                                class="form-control">
                                     </div>
@@ -99,30 +114,50 @@
                             </div>
                             <div class="col-lg-10" v-show="guia_datos_adicionales.tipo_transporte == '02'">
                                 <div class="row">
-                                    <div class="col-lg-3 form-group">
+                                    <div class="col-lg-2 form-group">
                                         <label>Placa del vehículo</label>
                                         <input type="text" v-model="guia_datos_adicionales.placa_vehiculo"
                                                class="form-control">
                                     </div>
-                                    <div class="col-lg-3 form-group">
+                                    <div class="col-lg-2 form-group">
+                                        <label>Licencia de conducir</label>
+                                        <input type="text" v-model="guia_datos_adicionales.licencia_conductor"
+                                               class="form-control">
+                                    </div>
+                                    <div class="col-lg-2 form-group">
                                         <label>DNI del conductor</label>
-                                        <input maxlength="8" type="text" v-model="guia_datos_adicionales.dni_conductor"
+                                        <b-input-group>
+                                            <input @keyup.enter="consultaRucDni(1,guia_datos_adicionales.dni_conductor)" maxlength="8" type="text" v-model="guia_datos_adicionales.dni_conductor"
+                                                   class="form-control">
+                                            <b-input-group-append>
+                                                <b-button :disabled="guia_datos_adicionales.dni_conductor.length==0" @click="consultaRucDni(1,guia_datos_adicionales.dni_conductor)" variant="primary" >
+                                                    <span v-show="!spinnerRuc"><i class="fas fa-search"></i></span>
+                                                    <b-spinner v-show="spinnerRuc" small label="Loading..." ></b-spinner>
+                                                </b-button>
+                                            </b-input-group-append>
+                                        </b-input-group>
+                                    </div>
+                                    <div class="col-lg-3 form-group">
+                                        <label>Nombres</label>
+                                        <input type="text" v-model="guia_datos_adicionales.nombre_conductor"
+                                               class="form-control">
+                                    </div>
+                                    <div class="col-lg-3 form-group">
+                                        <label>Apellidos</label>
+                                        <input type="text" v-model="guia_datos_adicionales.apellido_conductor"
                                                class="form-control">
                                     </div>
                                 </div>
                             </div>
                             <div class="col-lg-4 form-group">
                                 <label>Motivo de traslado</label>
-                                <select v-model="guia_datos_adicionales.codigo_traslado" name="cargo" class="custom-select">
-                                    <option value="01">Venta</option>
-                                    <option value="14">Venta sujeta a confirmacion del comprador</option>
-                                    <option value="02">Compra</option>
-                                    <option value="04">Traslado entre establecimientos de la misma empresa</option>
-                                    <option value="18">Traslado emisor itinerante cp</option>
-                                    <option value="08">Importación</option>
-                                    <option value="09">Exportación</option>
-                                    <option value="19">Traslado a zona primaria</option>
-                                    <option value="13">Otros</option>
+                                <select v-model="guia_datos_adicionales.codigo_traslado" class="custom-select">
+                                    @php
+                                        $motivo_traslado = \sysfact\Http\Controllers\Helpers\DataGuia::getMotivoTraslado();
+                                    @endphp
+                                    @foreach($motivo_traslado as $item)
+                                        <option value="{{$item['num_val']}}">{{$item['label']}}</option>
+                                    @endforeach
                                 </select>
                             </div>
                             <div class="col-lg-2 form-group">
@@ -356,8 +391,12 @@
     <modal-detalle
             :item="item"
             :show-precio="false"
+            :can-edit-precio="true"
             v-on:actualizar="">
     </modal-detalle>
+    @php
+        $guia_data = json_decode(cache('config')['guia'], true);
+    @endphp
 @endsection
 @section('script')
     <script>
@@ -390,8 +429,11 @@
                     tipo_doc_transportista:"6",
                     num_doc_transportista:"",
                     razon_social_transportista:"",
-                    placa_vehiculo:<?php echo json_encode(json_decode(cache('config')['guia'], true)['placa']) ?>,
-                    dni_conductor:<?php echo json_encode(json_decode(cache('config')['guia'], true)['num_doc']) ?>,
+                    placa_vehiculo:"<?php echo $guia_data['placa']??'' ?>",
+                    dni_conductor:"<?php echo $guia_data['num_doc']??'' ?>",
+                    licencia_conductor:"<?php echo $guia_data['licencia']??'' ?>",
+                    nombre_conductor:"<?php echo $guia_data['nombre']??'' ?>",
+                    apellido_conductor:"<?php echo $guia_data['apellido']??'' ?>",
                     codigo_traslado:"01",
                     fecha_traslado: "{{date("Y-m-d")}}",
                     doc_relacionado:"-1",
@@ -401,6 +443,8 @@
                 tipo_busqueda:"",
                 item:{},
                 index:-1,
+                spinnerRuc:false,
+                domicilioFiscalCliente:true
             },
             created(){
                 this.obtenerCorrelativo();
@@ -409,6 +453,42 @@
                 }
             },
             methods: {
+                consultaRucDni(tipo, numero){
+                    if(tipo == 6 && numero.length != 11){
+                        this.alerta('Ingresa un ruc válido de 11 dígitos');
+                        return;
+                    }
+                    if(tipo == 1 && numero.length != 8){
+                        this.alerta('Ingresa un dni válido de 8 dígitos');
+                        return;
+                    }
+                    this.spinnerRuc=true;
+                    axios.post('/helper/buscar-ruc', {
+                        'num_doc': numero,
+                        'tipo_doc': tipo,
+                    })
+                        .then(response => {
+                            let data=response.data;
+                            if(!data || data.length == 0 || !data['success']){
+                                this.alerta('No se obtuvieron resultados, ingresa el nombre o razón social manualmente.');
+                            } else {
+                                if(this.guia_datos_adicionales.tipo_transporte === '01'){
+                                    this.guia_datos_adicionales.razon_social_transportista = data.nombre_o_razon_social;
+                                } else {
+                                    let ex = data.nombre_o_razon_social.split(' ');
+                                    this.guia_datos_adicionales.nombre_conductor = ex[ex.length - 1];
+                                    this.guia_datos_adicionales.apellido_conductor = ex[0];
+                                }
+
+                            }
+                            this.spinnerRuc=false;
+                        })
+                        .catch(error => {
+                            this.spinnerRuc=false;
+                            this.alerta('Ocurrió un error al obtener el dni');
+                            console.log(error);
+                        });
+                },
                 obtenerCorrelativo(){
                     axios.get('/guia/obtenerCorrelativo')
                         .then(response => {
@@ -427,6 +507,9 @@
                 agregarCliente(obj){
                     this.clienteSeleccionado = obj;
                     this.nombreCliente = this.clienteSeleccionado['num_documento']+' - '+this.clienteSeleccionado['nombre'];
+                    if(this.domicilioFiscalCliente){
+                        this.guia_datos_adicionales.direccion = this.clienteSeleccionado['direccion']
+                    }
                 },
                 borrarCliente(){
                     this.clienteSeleccionado = {};
@@ -477,8 +560,11 @@
                             this.productosSeleccionados = datos.productos;
 
                             if(datos.guia_datos_adicionales){
-                                this.guia_datos_adicionales = datos.guia_datos_adicionales
+                                this.guia_datos_adicionales = datos.guia_datos_adicionales;
                                 this.guia_datos_adicionales.fecha_traslado='{{date('Y-m-d')}}'
+                                this.guia_datos_adicionales.licencia_conductor='';
+                                this.guia_datos_adicionales.nombre_conductor='';
+                                this.guia_datos_adicionales.apellido_conductor='';
                             } else {
                                 this.guia_datos_adicionales={
                                     direccion:'',
@@ -490,6 +576,9 @@
                                     razon_social_transportista:'',
                                     placa_vehiculo:'',
                                     dni_conductor:'',
+                                    licencia_conductor:'',
+                                    nombre_conductor:'',
+                                    apellido_conductor:'',
                                     codigo_traslado:'01',
                                     fecha_traslado: '{{date('Y-m-d')}}',
                                     doc_relacionado:'-1',
@@ -568,8 +657,8 @@
                                 'items': JSON.stringify(this.productosSeleccionados)
                             })
                                 .then(response => {
-                                    if(isNaN(response.data.idguia)){
-                                        this.alerta('Ha ocurrido un error al procesar la guía','error');
+                                    if(isNaN(response.data.idguia) || response.data.idguia == -1){
+                                        this.alerta('Ha ocurrido un error al procesar la : '+response.data.respuesta,'error');
                                         this.mostrarProgresoGuardado = false;
                                     } else{
                                         this.$swal({
@@ -614,6 +703,9 @@
                     } else{
                         if (this.guia_datos_adicionales.placa_vehiculo.length == 0) errorDatosVenta.push('*El campo placa vehículo no puede estar vacío');
                         if (this.guia_datos_adicionales.dni_conductor.length == 0) errorDatosVenta.push('*El campo dni de conductor no puede estar vacío');
+                        if (this.guia_datos_adicionales.licencia_conductor.length == 0) errorDatosVenta.push('*El campo licencia de conductor no puede estar vacío');
+                        if (this.guia_datos_adicionales.nombre_conductor.length == 0) errorDatosVenta.push('*El campo nombres de conductor no puede estar vacío');
+                        if (this.guia_datos_adicionales.apellido_conductor.length == 0) errorDatosVenta.push('*El campo apellidos de conductor no puede estar vacío');
                         if (isNaN(this.guia_datos_adicionales.dni_conductor)) errorDatosVenta.push('*El campo dni de conductor debe ser un número sin letras ni espacios');
                         if (this.guia_datos_adicionales.dni_conductor.length != 8) errorDatosVenta.push('*El campo dni de conductor debe contener 8 dígitos');
                     }
@@ -674,15 +766,27 @@
                         razon_social_transportista:'',
                         placa_vehiculo:'',
                         dni_conductor:'',
+                        licencia_conductor:'',
+                        nombre_conductor:'',
+                        apellido_conductor:'',
                         codigo_traslado:'01',
                         fecha_traslado: '{{date('Y-m-d')}}',
                         doc_relacionado:'-1',
                         num_doc_relacionado:'',
                         tipo_transporte:'01'
                     };
-
+                    this.domicilioFiscalCliente = true;
                     this.tipo_busqueda='';
                     this.obtenerCorrelativo();
+                },
+                cambiarDireccionGuia(){
+                    this.$nextTick(() => {
+                        if(this.domicilioFiscalCliente){
+                            this.guia_datos_adicionales.direccion = this.clienteSeleccionado['direccion']
+                        } else {
+                            this.guia_datos_adicionales.direccion = '';
+                        }
+                    });
                 },
                 alerta(texto, icon){
                     this.$swal({

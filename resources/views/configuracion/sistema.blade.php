@@ -4,19 +4,31 @@
 <div class="col-lg-4">
     <div class="form-group">
         <label for="dir">Usuario secundario</label>
-        <input placeholder="Ejm: BCP: 00045465465" type="text"  v-model="conexion.usuario" autocomplete="nope" class="form-control">
+        <input type="text"  v-model="conexion.usuario" autocomplete="nope" class="form-control">
     </div>
 </div>
 <div class="col-lg-4">
     <div class="form-group">
         <label for="dir">Contraseña:</label>
-        <input placeholder="Ejm: 0000454545" type="text"  v-model="conexion.clave" autocomplete="nope" class="form-control">
+        <input type="text"  v-model="conexion.clave" autocomplete="nope" class="form-control">
     </div>
 </div>
 <div class="col-lg-4 mt-3">
     <b-form-checkbox v-model="conexion.esProduccion" switch size="lg">
         <p style="font-size: 1rem;">Modo producción</p>
     </b-form-checkbox>
+</div>
+<div class="col-lg-4">
+    <div class="form-group">
+        <label for="dir">Client ID:</label>
+        <input type="text"  v-model="conexion.client_id" autocomplete="nope" class="form-control">
+    </div>
+</div>
+<div class="col-lg-4">
+    <div class="form-group">
+        <label for="dir">Client secret:</label>
+        <input type="text"  v-model="conexion.client_secret" autocomplete="nope" class="form-control">
+    </div>
 </div>
 <div class="col-lg-12">
     <b-button @click="guardarConfiguracion('conexion')" class="mr-2 mb-5 float-right" variant="success"><i class="fas fa-save"></i> Guardar</b-button>

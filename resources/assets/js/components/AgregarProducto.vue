@@ -53,10 +53,13 @@
                                 <option value="KGM/KG">Kilogramo</option>
                                 <option value="GRM/G">Gramo</option>
                                 <option value="LTR/L">Litro</option>
+                                <option value="NIU/PZA">Pieza</option>
                                 <option value="MTK/M2">Metro cuadrado</option>
                                 <option value="MTQ/M3">Metro cúbico</option>
                                 <option value="PK/PQ">Paquete</option>
                                 <option value="BX/CJ">Caja</option>
+                                <option value="NIU/JG">Juego</option>
+                                <option value="NIU/PR">Par</option>
                                 <option value="BE/BE">Fardo</option>
                                 <option value="BG/BG">Bolsa</option>
                                 <option value="BJ/BJ">Balde</option>
@@ -174,6 +177,17 @@
                 moneda: 'PEN',
                 moneda_compra:'PEN',
                 descuentos: [],
+                almacen:[],
+                idalmacen:1,
+                ubicacion:[],
+                idubicacion:1,
+                marca:'',
+                modelo:'',
+                param_1:'',
+                param_2:'',
+                param_3:'',
+                param_4:'0.00',
+                param_5:'PEN',
             }
         },
         mounted(){
@@ -219,6 +233,15 @@
                     'descuentos': JSON.stringify(this.descuentos),
                     'moneda_compra' : this.moneda_compra,
                     'tipo_cambio_compra' : this.tipo_cambio_compra,
+                    'idalmacen': this.idalmacen,
+                    'idubicacion': this.idubicacion,
+                    'marca': this.marca,
+                    'modelo': this.modelo,
+                    'param_1': this.param_1,
+                    'param_2': this.param_2,
+                    'param_3': this.param_3,
+                    'param_4': this.param_4,
+                    'param_5': this.param_5,
                 })
                     .then((response) => {
                         this.$swal({

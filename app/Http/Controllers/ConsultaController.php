@@ -87,11 +87,6 @@ class ConsultaController extends Controller
             $año = substr($fecha,4,4);
 
             $fecha = $año.'-'.$mes.'-'.$dia;
-            Log::info($total);
-            Log::info($correlativo);
-            Log::info($serie);
-            Log::info($tipo_documento);
-            Log::info($fecha);
 
             $venta=Venta::whereHas('facturacion', function($query) use($correlativo, $serie, $tipo_documento, $fecha) {
                     $query->where('serie',$serie)

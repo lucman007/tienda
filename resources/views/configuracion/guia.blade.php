@@ -10,16 +10,34 @@
         </select>
     </div>
 </div>
-<div class="col-lg-4">
+<div class="col-lg-3">
+    <div class="form-group">
+        <label>Placa:</label>
+        <input type="text" v-model="guia.placa" autocomplete="nope" class="form-control">
+    </div>
+</div>
+<div class="col-lg-3">
     <div class="form-group">
         <label>Dni/ruc:</label>
         <input type="text" v-model="guia.num_doc" autocomplete="nope" class="form-control">
     </div>
 </div>
+<div class="col-lg-3">
+    <div class="form-group">
+        <label>Licencia:</label>
+        <input type="text" v-model="guia.licencia" autocomplete="nope" class="form-control">
+    </div>
+</div>
 <div class="col-lg-4">
     <div class="form-group">
-        <label>Placa:</label>
-        <input type="text" v-model="guia.placa" autocomplete="nope" class="form-control">
+        <label>Nombre conductor:</label>
+        <input type="text" v-model="guia.nombre" autocomplete="nope" class="form-control">
+    </div>
+</div>
+<div class="col-lg-4">
+    <div class="form-group">
+        <label>Apellidos conductor:</label>
+        <input type="text" v-model="guia.apellido" autocomplete="nope" class="form-control">
     </div>
 </div>
 <div class="col-lg-12">

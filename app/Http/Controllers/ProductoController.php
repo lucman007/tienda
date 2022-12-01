@@ -5,6 +5,7 @@ namespace sysfact\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 use Milon\Barcode\DNS1D;
 use Milon\Barcode\DNS2D;
@@ -88,6 +89,7 @@ class ProductoController extends Controller
 
                 foreach ($productos as $producto){
                     $producto->cantidad=$producto->inventario->first()->saldo;
+                    $producto->presentacion = Str::words($producto->presentacion,10,'...');
                     $almacen = DB::table('almacen_productos')->where('idproducto', $producto->idproducto)->orderby('fecha','asc')->first();
                     if($almacen){
                         $ubicacion = Ubicacion::find($almacen->idubicacion);
@@ -314,72 +316,76 @@ class ProductoController extends Controller
 
     public function update(Request $request)
     {
-        $producto=Producto::find($request->idproducto);
-        $producto->cod_producto=mb_strtoupper($request->cod_producto);
-        $producto->nombre=mb_strtoupper($request->nombre);
-        $presentacion=preg_replace("/[\r\n|\n|\r]+/", " ", $request->presentacion);
-        $producto->presentacion=mb_strtoupper($presentacion);
-        $producto->precio=$request->precio;
-        $producto->costo=$request->costo;
-        $producto->moneda_compra = $request->moneda_compra;
-        $producto->tipo_cambio = $request->tipo_cambio_compra;
-        $producto->stock_bajo=$request->stock_bajo;
-        $producto->moneda=$request->moneda;
-        $producto->marca=strtoupper($request->marca);
-        $producto->modelo=strtoupper($request->modelo);
-        $producto->param_1=strtoupper($request->param_1);
-        $producto->param_2=strtoupper($request->param_2);
-        $producto->param_3=strtoupper($request->param_3);
-        $producto->param_4=$request->param_4;
-        $producto->param_5=$request->param_5;
-        if($request->tipo_producto==2){
-            $producto->stock_bajo=0;
-        }
-		$producto->idcategoria=$request->idcategoria;
-        $producto->tipo_producto=$request->tipo_producto;
-		$producto->unidad_medida=$request->medida;
-        $descuentos = json_decode($request->descuentos, TRUE);
-        if($descuentos){
-            $producto->discounts = 1;
-        } else {
-            $producto->discounts = 0;
-        }
-		$producto->save();
-
-		if($request->cantidad!=$request->cantidad_aux){
-            $inventario=new Inventario();
-            $inventario->idempleado=auth()->user()->idempleado;
-            $inventario->cantidad=$request->cantidad-$request->cantidad_aux;
-            $inventario->saldo = $request->cantidad;
-            $inventario->fecha=date('Y-m-d H:i:m');
+        try{
+            $producto=Producto::find($request->idproducto);
+            $producto->cod_producto=mb_strtoupper($request->cod_producto);
+            $producto->nombre=mb_strtoupper($request->nombre);
+            $presentacion=preg_replace("/[\r\n|\n|\r]+/", " ", $request->presentacion);
+            $producto->presentacion=mb_strtoupper($presentacion);
+            $producto->precio=$request->precio;
+            $producto->costo=$request->costo;
+            $producto->moneda_compra = $request->moneda_compra;
+            $producto->tipo_cambio = $request->tipo_cambio_compra;
+            $producto->stock_bajo=$request->stock_bajo;
+            $producto->moneda=$request->moneda;
+            $producto->marca=strtoupper($request->marca);
+            $producto->modelo=strtoupper($request->modelo);
+            $producto->param_1=strtoupper($request->param_1);
+            $producto->param_2=strtoupper($request->param_2);
+            $producto->param_3=strtoupper($request->param_3);
+            $producto->param_4=$request->param_4;
+            $producto->param_5=$request->param_5;
             if($request->tipo_producto==2){
-                $inventario->cantidad=0;
-                $inventario->saldo = 0;
+                $producto->stock_bajo=0;
             }
-            $inventario->costo = $request->costo;
-            $inventario->moneda = $request->moneda_compra;
-            $inventario->tipo_cambio = $request->tipo_cambio_compra;
-            $inventario->operacion='EDICIÓN MANUAL';
-            $inventario->descripcion=$request->observacion;
-
-            $producto->inventario()->save($inventario);
-        }
-
-        DB::table('almacen_productos')
-            ->where('idproducto',$request->idproducto)
-            ->update([
-            'idalmacen'=>$request->idalmacen,
-            'idubicacion'=>$request->idubicacion
-        ]);
-
-        DB::table('descuentos')->where('idproducto',$request->idproducto)->delete();
-        if($request->tipo_producto == 1){
-            foreach ($descuentos as $item){
-                $descuento=new Descuento();
-                $descuento->cantidad_min=$item['cantidad'];
-                $descuento->monto_desc=$item['precio'];
-                $producto->descuento()->save($descuento);
+            $producto->idcategoria=$request->idcategoria;
+            $producto->tipo_producto=$request->tipo_producto;
+            $producto->unidad_medida=$request->medida;
+            $descuentos = json_decode($request->descuentos, TRUE);
+            if($descuentos){
+                $producto->discounts = 1;
+            } else {
+                $producto->discounts = 0;
             }
+            $producto->save();
+
+            if($request->cantidad!=$request->cantidad_aux){
+                $inventario=new Inventario();
+                $inventario->idempleado=auth()->user()->idempleado;
+                $inventario->cantidad=$request->cantidad-$request->cantidad_aux;
+                $inventario->saldo = $request->cantidad;
+                $inventario->fecha=date('Y-m-d H:i:m');
+                if($request->tipo_producto==2){
+                    $inventario->cantidad=0;
+                    $inventario->saldo = 0;
+                }
+                $inventario->costo = $request->costo;
+                $inventario->moneda = $request->moneda_compra;
+                $inventario->tipo_cambio = $request->tipo_cambio_compra;
+                $inventario->operacion='EDICIÓN MANUAL';
+                $inventario->descripcion=$request->observacion;
+
+                $producto->inventario()->save($inventario);
+            }
+
+            DB::table('almacen_productos')
+                ->where('idproducto',$request->idproducto)
+                ->update([
+                    'idalmacen'=>$request->idalmacen,
+                    'idubicacion'=>$request->idubicacion
+                ]);
+
+            DB::table('descuentos')->where('idproducto',$request->idproducto)->delete();
+            if($request->tipo_producto == 1){
+                foreach ($descuentos as $item){
+                    $descuento=new Descuento();
+                    $descuento->cantidad_min=$item['cantidad'];
+                    $descuento->monto_desc=$item['precio'];
+                    $producto->descuento()->save($descuento);
+                }
+            }
+        } catch (\Exception $e){
+            return $e->getMessage();
         }
 
 	}
@@ -559,11 +565,13 @@ class ProductoController extends Controller
             $productos = Producto::all();
 
             foreach ($productos as $producto) {
-                $producto->almacen()->attach(1, [
-                    'idubicacion'=>1,
-                ]);
+                $almacen = $producto->almacen;
+                if(count($almacen) == 0){
+                    $producto->almacen()->attach(1, [
+                        'idubicacion'=>1,
+                    ]);
+                }
             }
-
 
             DB::commit();
             return 'success';

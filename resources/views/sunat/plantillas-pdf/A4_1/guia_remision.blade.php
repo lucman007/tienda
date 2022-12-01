@@ -133,6 +133,9 @@
         <table class="footer">
             <tr>
                 <td class="footer-l">
+                    @if($documento->qr)
+                    <img class="qr" src="images/qr/{{$documento->qr}}">
+                    @endif
                     <p>Representación Impresa de la {{$documento->titulo_doc}} Electrónica <br>
                         Código Hash: {{$documento->hash}} <br>
                         Para consultar el comprobante ingresar a : {{url('consulta')}}</p>

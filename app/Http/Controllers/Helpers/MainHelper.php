@@ -276,7 +276,7 @@ class MainHelper extends Controller
                             ->orWhere('cod_producto',$consulta)
                             ->orWhere('presentacion','like','%'.$consulta.'%');
                     })
-                    ->orderby('nombre','asc')
+                    ->orderby('idproducto','asc')
                     ->take(10)
                     ->get();
             }
@@ -289,6 +289,7 @@ class MainHelper extends Controller
             $producto->moneda = $producto->moneda=='PEN'?'S/':'USD';
             $producto->unidad = explode('/',$producto->unidad_medida)[1];
             $producto->descripcion = Str::words($producto->presentacion,10,'...');
+            $producto->presentacion = Str::words($producto->presentacion,10,'...');
 
             $descuento=$producto->descuento()->orderby('monto_desc','asc')->first();
             $producto->precioPorMayor = $descuento['monto_desc'];
@@ -433,6 +434,31 @@ class MainHelper extends Controller
         } else {
             $text ='¡Hola! 😃  Descarga tu comprobante aquí: 👇🏻 %0A%0A✅ PDF: '.$url_comp.'/pdf/'.$nombre_comp.'%0A%0A✅ XML: '.$url_comp.'/xml/'.$nombre_comp;
             $text .= '%0A%0A'.($emisor->nombre_publicitario==""?$emisor->razon_social:$emisor->nombre_publicitario);
+        }
+
+        return $text;
+    }
+
+    public static function extracto($text, $max_length = 100, $cut_off = '...', $keep_word = false)
+    {
+        if(strlen($text) <= $max_length) {
+            return $text;
+        }
+
+        if(strlen($text) > $max_length) {
+            if($keep_word) {
+                $text = substr($text, 0, $max_length + 1);
+
+                if($last_space = strrpos($text, ' ')) {
+                    $text = substr($text, 0, $last_space);
+                    $text = rtrim($text);
+                    $text .=  $cut_off;
+                }
+            } else {
+                $text = substr($text, 0, $max_length);
+                $text = rtrim($text);
+                $text .=  $cut_off;
+            }
         }
 
         return $text;

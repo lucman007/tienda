@@ -9,10 +9,13 @@
 namespace sysfact\Http\Controllers\Cpe;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use sysfact\Emisor;
+use sysfact\Guia;
 use sysfact\Http\Controllers\Controller;
 use sysfact\Http\Controllers\Helpers\MainHelper;
 use sysfact\Http\Controllers\Helpers\PdfHelper;
+use sysfact\Opciones;
 use sysfact\Venta;
 
 class CpeController extends Controller
@@ -65,7 +68,9 @@ class CpeController extends Controller
     //Guia de remisión
     public function sendGuia($idguia){
 
-        //Generar archivos
+        return $this->enviarGuiaApi($idguia);
+
+        /*//Generar archivos
         $util=new Util($this->config['esProduccion']);
         $xml=$util->generarXmlGuia($idguia);
         $zip=$util->generarZip($xml);
@@ -78,7 +83,7 @@ class CpeController extends Controller
 
         //Procesar respuesta de sunat
         $resp=new ProcesarRespuestas($idguia);
-        return $resp->mensaje($respuesta,$zip['nombre']);
+        return $resp->mensaje($respuesta,$zip['nombre']);*/
     }
 
     //Resumen diario de boletas
@@ -320,6 +325,205 @@ class CpeController extends Controller
             ]);
         }
         return $respuesta;
+    }
+
+    public function generarTockenGRE(){
+        try{
+            $config = $this->getConexionData();
+            $cliente_id = $config['client_id']??'';
+            $client_secret = $config['client_secret']??'';
+            $url = 'https://api-seguridad.sunat.gob.pe/v1/clientessol/'.$cliente_id.'/oauth2/token/';
+            $scope = 'https://api-cpe.sunat.gob.pe';
+            $username = $this->config['usuario'];
+            $password = $this->config['clave'];
+
+            $expire = date('Y-m-d H:i:s', (strtotime(date('Y-m-d H:i:s')) + 3400));
+            $opcion = Opciones::where('nombre_opcion','expire_tocken')->first();
+
+            if(!$opcion || date('Y-m-d H:i:s') >= date('Y-m-d H:i:s', strtotime($opcion->valor))){
+
+                $curl = curl_init();
+                $data = [
+                    "grant_type" => "password",
+                    "scope" => $scope,
+                    "client_id" => $cliente_id,
+                    "client_secret" => $client_secret,
+                    "username" => $username,
+                    "password" => $password
+                ];
+
+                curl_setopt_array($curl, array(
+                    CURLOPT_URL => $url,
+                    CURLOPT_HEADER => false,
+                    CURLOPT_HTTPHEADER => ['application/x-www-form-urlencoded'],
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_CUSTOMREQUEST => "POST",
+                    CURLOPT_POSTFIELDS => http_build_query($data),
+                ));
+
+                if(env('APP_ENV') == 'local'){
+                    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+                    curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+                }
+
+                $response = curl_exec($curl);
+                //$err = curl_error($curl);
+
+                curl_close($curl);
+                if(!$opcion){
+                    $opcion = new Opciones();
+                    $opcion->nombre_opcion = 'expire_tocken';
+                }
+                $opcion->valor = $expire;
+                $opcion->valor_json = $response;
+                $opcion->save();
+                $tocken = json_decode($response, true);
+            } else {
+                $tocken = json_decode($opcion->valor_json, true);
+            }
+
+            return $tocken;
+
+        } catch (\Exception $e){
+            return $e->getMessage();
+        }
+    }
+
+    public function enviarGuiaApi($idguia){
+
+        //Generar archivos
+        $util=new Util($this->config['esProduccion']);
+        $xml=$util->generarXmlGuia($idguia);
+        $zip=$util->generarZip($xml);
+
+        //Obtener tocken
+        $tocken = $this->generarTockenGRE();
+
+        $curl = curl_init();
+        $url = 'https://api-cpe.sunat.gob.pe/v1/contribuyente/gem/comprobantes/'.$zip['nombre'];
+        $data = [
+            "archivo"=>[
+            "nomArchivo" => $zip['nombre'].'.zip',
+            "arcGreZip" => $zip['contenido'],
+            "hashZip" => $zip['hash']
+            ]
+        ];
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => $url,
+            CURLOPT_HTTPHEADER => [
+                'Authorization: Bearer '.$tocken['access_token'],
+                'Content-Type: application/json'
+            ],
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => json_encode($data),
+
+        ));
+
+        if(env('APP_ENV') == 'local'){
+            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+        }
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+        $guia = Guia::find($idguia);
+        $guia->ticket = $response;
+        $guia->save();
+        Log::info($idguia.' - '.$response);
+        return 'Número de ticket Sunat: '.json_decode($response, true)['numTicket']??'-';
+    }
+
+    public function consultarGRE(Request $request)    {
+
+        //Obtener tocken
+        $tocken = $this->generarTockenGRE();
+        $url = 'https://api-cpe.sunat.gob.pe/v1/contribuyente/gem/comprobantes/envios/'.$request->ticket;
+
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET',
+            CURLOPT_HTTPHEADER => [
+                'Authorization: Bearer '.$tocken['access_token']
+            ],
+        ));
+
+        if(env('APP_ENV') == 'local'){
+            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+        }
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+        Log::info('ticket: '.$request->ticket);
+        Log::info('tocken: '.$tocken['access_token']);
+        Log::info('response: '.$response);
+
+        $response = json_decode($response, true);
+
+        switch ($response['codRespuesta']){
+            case '0':
+                $respuesta = 'La guía se ha enviado correctamente';
+                $estado = 'ACEPTADO';
+                unlink(storage_path('/app/sunat/zip/').$request->file.'.zip');
+                break;
+            case '98':
+                $respuesta = 'Código:98 - El envío de la guía está en proceso';
+                $estado = 'PENDIENTE';
+                break;
+            case '99':
+                $respuesta = 'Código:99 - La guía contiene errores. ';
+                $respuesta .= $response['error']['numError'].' - '.$response['error']['desError'];
+                $estado = 'PENDIENTE';
+                break;
+            default:
+                $respuesta = '';
+                $estado = 'PENDIENTE';
+        }
+
+        if($response['codRespuesta'] != 98 && $response['indCdrGenerado']=='1'){
+            /*CONVERTIR A ZIP */
+            $cdr=base64_decode($response['arcCdr']);
+            $zip_cdr = fopen(storage_path().'/app/sunat/cdr/'.$request->file.'.zip','w+');
+            fputs($zip_cdr,$cdr);
+            fclose($zip_cdr);
+
+            /*EXTRAER EL ZIP*/
+            $file = storage_path().'/app/sunat/cdr/'.$request->file.'.zip';
+            if (file_exists($file)) {
+                $zip_cdr = new \ZipArchive();
+                if ($zip_cdr->open($file)=== TRUE) {
+                    $zip_cdr->extractTo(storage_path().'/app/sunat/cdr/');
+                    $zip_cdr->close();
+                    unlink($file);
+                } else {
+                    return 'Error al descomprimir el CDR';
+                }
+            } else {
+                Log::info($request->idguia.' Error: No se ha recibido CDR desde sunat');
+                return 'No se ha recibido CDR desde sunat';
+            }
+
+        }
+
+        $guia = Guia::find($request->idguia);
+        $guia->response = $respuesta;
+        $guia->estado = $estado;
+        $guia->save();
+
+
+        return [$respuesta,$estado];
+
     }
 
 
