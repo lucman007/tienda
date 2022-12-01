@@ -258,6 +258,9 @@
                             </svg>
                             Cancelar edición
                         </b-button>
+                        <b-button :disabled="editar" class="mb-2" href="{{url('facturacion?produccion').'='.$produccion->idproduccion}}" variant="warning">
+                            <i class="fas fa-file-invoice-dollar"></i> Crear factura
+                        </b-button>
                         <b-button :disabled="editar" class="mb-2" target="_blank"
                                   href="{{url('produccion/imprimir').'/'.$produccion['idproduccion']}}"
                                   variant="warning">

@@ -19,6 +19,7 @@ use sysfact\Mail\EnviarDocumentos;
 use sysfact\Orden;
 use sysfact\Pago;
 use sysfact\Presupuesto;
+use sysfact\Produccion;
 use sysfact\Producto;
 use sysfact\Serie;
 use sysfact\Venta;
@@ -767,24 +768,22 @@ class VentaController extends Controller
 
         try{
 
-            $guia = Orden::find($request->idventa);
+            $guia = Guia::find($request->idventa);
             $productos=$guia->productos;
             $guia->cliente->persona;
             $suma_total=0;
 
             foreach ($productos as $producto) {
-                $subtotal=round($producto->detalle->monto * $producto->detalle->cantidad,2);
-                $total = round($producto->detalle->monto * $producto->detalle->cantidad*1.18, 2);
+                $subtotal=round($producto->precio * $producto->detalle->cantidad,2);
+                $total = round($producto->precio * $producto->detalle->cantidad*1.18, 2);
                 $producto->tipoAfectacion = '10';
                 $producto->porcentaje_descuento = '0';
                 $producto->descuento = '0.00';
-                $producto->precio = $producto->detalle->monto;
                 $producto->cantidad = $producto->detalle->cantidad;
                 $producto->presentacion = strip_tags($producto->detalle->descripcion);
                 $producto->subtotal = $subtotal;
                 $producto->igv = round($total - $subtotal,2);
                 $producto->total=$total;
-                $producto->stock = $producto->inventario()->first()->saldo;
                 $suma_total+=$total;
             }
 
@@ -869,6 +868,59 @@ class VentaController extends Controller
 
 
             return json_encode($orden);
+
+        }catch (\Exception $e){
+            return $e;
+        }
+
+    }
+
+    public function copiarProduccion(Request $request)
+    {
+
+        try{
+
+            $guia = Produccion::find($request->idventa);
+            $productos=$guia->productos;
+            $guia->cliente->persona;
+            $suma_total=0;
+
+            foreach ($productos as $producto) {
+                $subtotal=round($producto->precio * $producto->detalle->cantidad,2);
+                $total = round($producto->precio * $producto->detalle->cantidad*1.18, 2);
+                $producto->tipoAfectacion = '10';
+                $producto->porcentaje_descuento = '0';
+                $producto->descuento = '0.00';
+                $producto->cantidad = $producto->detalle->cantidad;
+                $producto->presentacion = strip_tags($producto->detalle->descripcion);
+                $producto->subtotal = $subtotal;
+                $producto->igv = round($total - $subtotal,2);
+                $producto->total=$total;
+                $suma_total+=$total;
+            }
+
+            $guia->cliente->nombre=$guia->cliente->persona->nombre;
+            $guia->cliente->direccion=$guia->cliente->persona->direccion;
+            $guia->facturacion=new Facturacion();
+            $guia->facturacion->porcentaje_descuento_global='0.00';
+            $guia->facturacion->valor_venta_bruto=round($suma_total/1.18,2);
+            $guia->facturacion->total_exoneradas='0.00';
+            $guia->facturacion->total_inafectas='0.00';
+            $guia->facturacion->total_gratuitas='0.00';
+            $guia->facturacion->total_gravadas=round($suma_total/1.18,2);
+            $guia->facturacion->total_descuentos='0.00';
+            $guia->facturacion->igv=round($suma_total-($suma_total/1.18),2);
+            $guia->facturacion->codigo_moneda='PEN';
+            $guia->facturacion->codigo_tipo_documento='30';
+            $guia->facturacion->oc_relacionada=$guia->num_oc;
+            $guia->facturacion->guia_relacionada=$guia->num_guia;
+            $guia->facturacion->codigo_tipo_documento='01';
+            $guia->total_venta=round($suma_total,2);
+            $guia->tipo_pago=1;
+            $guia->tipo_pago_contado=1;
+
+
+            return json_encode($guia);
 
         }catch (\Exception $e){
             return $e;

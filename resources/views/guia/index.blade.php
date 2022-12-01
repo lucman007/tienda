@@ -76,6 +76,7 @@
                                     <th scope="col">Fecha</th>
                                     <th scope="col">Cliente</th>
                                     <th scope="col" style="width: 12%">Comprobante</th>
+                                    <th scope="col" style="width: 12%">Num OC</th>
                                     <th scope="col">Estado</th>
                                     <th scope="col">Opciones</th>
                                 </tr>
@@ -89,6 +90,7 @@
                                             <td style="width: 15%">{{$guia->fecha_emision}}</td>
                                             <td>{{$guia->cliente->persona->nombre}}</td>
                                             <td>{{$guia->correlativo}}</td>
+                                            <td>{{json_decode($guia->guia_datos_adicionales,true)['oc']??''}}</td>
                                             <td><span class="badge {{$guia->badge_class}}">{{$guia->estado}}</span></td>
                                             <td class="botones-accion" style="width: 10%">
                                                 <a href="{{url('guia/emision/').'/'.$guia->idguia}}">
@@ -106,7 +108,7 @@
                                     @endforeach
                                 @else
                                     <tr class="text-center">
-                                        <td colspan="7">No hay datos que mostrar</td>
+                                        <td colspan="8">No hay datos que mostrar</td>
                                     </tr>
                                 @endif
                                 </tbody>

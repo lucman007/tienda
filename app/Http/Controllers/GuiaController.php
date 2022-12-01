@@ -174,6 +174,7 @@ class GuiaController extends Controller
             $datos_guia['num_doc_relacionado'] = strtoupper(trim($datos_guia['num_doc_relacionado']));
             $datos_guia['dni_conductor'] = trim($datos_guia['dni_conductor']);
             $datos_guia['fecha_traslado'] = $datos_guia['fecha_traslado'] . ' ' . date('H:i:s');
+            $datos_guia['oc'] = $request->num_oc;
 
             switch ($datos_guia['codigo_traslado']){
                 case '14':

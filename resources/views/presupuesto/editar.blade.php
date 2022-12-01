@@ -378,9 +378,6 @@
                             <b-dropdown :disabled="editar" class="mb-2" id="dropdown-1" text="Opciones" variant="warning">
                                 <b-dropdown-item href="{{url('facturacion?presupuesto').'='.$presupuesto['idpresupuesto']}}"><i class="fas fa-file-alt"></i> Crear factura</b-dropdown-item>
                                 <b-dropdown-item href="{{url('guia/nuevo?presupuesto').'='.$presupuesto['idpresupuesto']}}"><i class="fas fa-shipping-fast"></i> Generar guia electrónica</b-dropdown-item>
-                                @can('Facturación: guía física')
-                                <b-dropdown-item href="{{url('guias/nuevo?presupuesto').'='.$presupuesto['idpresupuesto']}}"><i class="fas fa-truck"></i> Generar guia física</b-dropdown-item>
-                                @endcan
                                 @can('Producción')
                                 <b-dropdown-item href="{{url('produccion/nuevo?presupuesto').'='.$presupuesto['idpresupuesto']}}"><i class="fas fa-tools"></i> Orden de producción</b-dropdown-item>
                                 @endcan

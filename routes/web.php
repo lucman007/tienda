@@ -183,6 +183,7 @@ Route::group(['middleware' => ['can:Facturación: facturar']], function () {
     Route::post('facturacion/copiar-presupuesto','VentaController@copiarPresupuesto');
     Route::post('facturacion/copiar-guia','VentaController@copiarGuia');
     Route::post('facturacion/copiar-orden', 'VentaController@copiarOrden');
+    Route::post('facturacion/copiar-produccion','VentaController@copiarProduccion');
     Route::get('facturacion/documento/{id}', 'VentaController@show');
     Route::get('ventas/obtenerCorrelativo/{id}', 'VentaController@obtenerCorrelativo');
     Route::post('ventas/obtenerClientes', 'VentaController@obtenerClientes')->name('ventasObtenerClientes');
@@ -325,6 +326,28 @@ Route::group(['middleware' => ['can:Facturación: guía']], function () {
 
 });
 
+Route::group(['middleware' => ['can:Producción']], function () {
+//Rutan orden de producción
+    Route::get('produccion/duplicar/{id}','ProduccionController@duplicar');
+    Route::get('produccion/nuevo','ProduccionController@nueva_produccion');
+    Route::get('produccion/editar/{id}','ProduccionController@editar');
+    Route::get('produccion/obtener-correlativo','ProduccionController@obtenerCorrelativo');
+    Route::delete('produccion/destroy/{id}','ProduccionController@destroy');
+    Route::post('produccion/productos','ProduccionController@obtenerProductos');
+    Route::post('produccion/obtenerClientes','ProduccionController@obtenerClientes');
+    Route::post('produccion/store','ProduccionController@store');
+    Route::post('produccion/update','ProduccionController@update');
+    Route::get('produccion/editar/{id}','ProduccionController@editar');
+    Route::get('produccion/imprimir/{id}','ProduccionController@imprimir');
+    Route::delete('produccion/destroy/{id}','ProduccionController@destroy');
+    Route::post('produccion/agregar-imagen', 'ProduccionController@agregar_imagen');
+    Route::get('produccion/descargar-adjunto/{file}', 'ProduccionController@descargar_adjunto');
+    Route::get('produccion/marcar-completado/{id}', 'ProduccionController@marcar_completado');
+    Route::get('produccion/marcar-pendiente/{id}', 'ProduccionController@marcar_pendiente');
+    Route::get('produccion/{estado}','ProduccionController@index');
+    Route::get('produccion/nuevo-desde-cotizacion/{id}','ProduccionController@nuevo_desde_cotizacion');
+});
+
 Route::group(['middleware' => ['can:Créditos']], function () {
 
     Route::get('creditos', 'CreditoController@index');
@@ -392,6 +415,11 @@ Route::get('tenant/mostrar-tenants', 'TenantController@mostrarTenants');
 Route::get('tenant/config-cache', 'TenantController@guardarConfigTenant');
 
 Route::get('logout', 'Auth\LoginController@logout')->name('logout');
+
+
+Route::get('facturacion/generar-resumen/{anular}', 'Cpe\CpeController@generar_resumen_boletas');
+Route::get('facturacion/status/{ticket}', 'Cpe\CpeController@getStatusResumenBoletas');
+Route::get('facturacion/generar-boletas', 'Cpe\CpeController@generar_xml_boletas');
 
 Route::group(['middleware' => ['auth']], function () {
     Route::get('logs', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'index']);

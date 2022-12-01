@@ -94,6 +94,9 @@
                                 </svg>
                                 XML
                             </b-button>
+                            <b-button class="mb-2" href="{{url('facturacion?guia').'='.$guia->idguia}}" variant="warning">
+                                <i class="fas fa-file-invoice-dollar"></i> Crear factura
+                            </b-button>
                             <b-button class="mb-2"
                                       @if(json_decode(cache('config')['interfaz'], true)['tipo_impresion'] == 1 && $agent->isDesktop())
                                       target="_blank" href="{{url('guia/imprimir').'/'.$guia->idguia}}"

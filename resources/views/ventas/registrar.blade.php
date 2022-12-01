@@ -802,6 +802,7 @@
             data: {
                 idpresupuesto: '<?php echo isset($_GET['presupuesto']) ? $_GET['presupuesto'] : null ?>',
                 idguia: '<?php echo isset($_GET['guia']) ? $_GET['guia'] : null ?>',
+                idproduccion: '<?php echo isset($_GET['produccion']) ? $_GET['produccion'] : null ?>',
                 accion: 'insertar',
                 mostrarProgresoGuardado: false,
                 numeroGuia: '',
@@ -900,10 +901,13 @@
                 this.calcularTotalVenta();
                 this.obtenerCorrelativo();
                 if (this.idpresupuesto !== '') {
-                    this.agregarDocumento(this.idpresupuesto, true, false);
+                    this.agregarDocumento(this.idpresupuesto, true, false, false);
                 }
                 if (this.idguia !== '') {
-                    this.agregarDocumento(this.idguia, false, true);
+                    this.agregarDocumento(this.idguia, false, true, false);
+                }
+                if (this.idproduccion !== '') {
+                    this.agregarDocumento(this.idproduccion, false, false, true);
                 }
             },
             methods: {
@@ -1044,7 +1048,7 @@
                             console.log(error);
                         });
                 },
-                agregarDocumento(idventa, esDesdePresupuesto, esDesdeGuia){
+                agregarDocumento(idventa, esDesdePresupuesto, esDesdeGuia, esDesdeProduccion){
 
                     let post_action = '{{action('VentaController@copiarVenta')}}';
 
@@ -1054,6 +1058,10 @@
 
                     if (esDesdeGuia) {
                         post_action = '{{action('VentaController@copiarGuia')}}'
+                    }
+
+                    if (esDesdeProduccion) {
+                        post_action = '{{action('VentaController@copiarProduccion')}}'
                     }
 
                     axios.post(post_action, {
