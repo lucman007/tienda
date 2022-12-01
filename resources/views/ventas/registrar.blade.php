@@ -158,12 +158,14 @@
                             </div>
                             <div class="col-lg-2 form-group">
                                 <label>Ubigeo</label>
-                                <input disabled type="text" v-model="guia_datos_adicionales.ubigeo"
-                                       class="form-control">
-                                <b-button v-b-modal.modal-ubigeo variant="primary"
-                                          class="buscar_documento boton_adjunto">
-                                    <i class="fas fa-search"></i>
-                                </b-button>
+                                <b-input-group>
+                                    <input disabled type="text" v-model="guia_datos_adicionales.ubigeo" class="form-control">
+                                    <b-input-group-append>
+                                        <b-button v-b-modal.modal-ubigeo variant="primary">
+                                            <i class="fas fa-search"></i>
+                                        </b-button>
+                                    </b-input-group-append>
+                                </b-input-group>
                             </div>
                             <div class="col-lg-2 form-group">
                                 <label>Peso (KG)</label>
@@ -194,13 +196,21 @@
                                         </select>
                                     </div>
                                     <div class="col-lg-3 form-group">
-                                        <label>Número doc. tranportista</label>
-                                        <input :maxlength="guia_datos_adicionales.tipo_doc_transportista==1? 8 : 11"
-                                               type="text" v-model="guia_datos_adicionales.num_doc_transportista"
-                                               class="form-control">
+                                        <label>Num. doc. transportista</label>
+                                        <b-input-group>
+                                            <input @keyup.enter="consultaRucDni(guia_datos_adicionales.tipo_doc_transportista,guia_datos_adicionales.num_doc_transportista)" :maxlength="guia_datos_adicionales.tipo_doc_transportista==1? 8 : 11" type="text" v-model="guia_datos_adicionales.num_doc_transportista"
+                                                   class="form-control">
+                                            <b-input-group-append>
+                                                <b-button :disabled="guia_datos_adicionales.num_doc_transportista.length==0" @click="consultaRucDni(guia_datos_adicionales.tipo_doc_transportista,guia_datos_adicionales.num_doc_transportista)" variant="primary" >
+                                                    <span v-show="!spinnerRuc"><i class="fas fa-search"></i></span>
+                                                    <b-spinner v-show="spinnerRuc" small label="Loading..." ></b-spinner>
+                                                </b-button>
+                                            </b-input-group-append>
+                                        </b-input-group>
+
                                     </div>
                                     <div class="col-lg-6 form-group">
-                                        <label>Razón social tranportista</label>
+                                        <label>Razón social transportista</label>
                                         <input type="text" v-model="guia_datos_adicionales.razon_social_transportista"
                                                class="form-control">
                                     </div>
@@ -208,31 +218,51 @@
                             </div>
                             <div class="col-lg-10" v-show="guia_datos_adicionales.tipo_transporte == '02'">
                                 <div class="row">
-                                    <div class="col-lg-3 form-group">
+                                    <div class="col-lg-2 form-group">
                                         <label>Placa del vehículo</label>
                                         <input type="text" v-model="guia_datos_adicionales.placa_vehiculo"
                                                class="form-control">
                                     </div>
-                                    <div class="col-lg-3 form-group">
+                                    <div class="col-lg-2 form-group">
+                                        <label>Licencia de conducir</label>
+                                        <input type="text" v-model="guia_datos_adicionales.licencia_conductor"
+                                               class="form-control">
+                                    </div>
+                                    <div class="col-lg-2 form-group">
                                         <label>DNI del conductor</label>
-                                        <input maxlength="8" type="text" v-model="guia_datos_adicionales.dni_conductor"
+                                        <b-input-group>
+                                            <input @keyup.enter="consultaRucDni(1,guia_datos_adicionales.dni_conductor)" maxlength="8" type="text" v-model="guia_datos_adicionales.dni_conductor"
+                                                   class="form-control">
+                                            <b-input-group-append>
+                                                <b-button :disabled="guia_datos_adicionales.dni_conductor.length==0" @click="consultaRucDni(1,guia_datos_adicionales.dni_conductor)" variant="primary" >
+                                                    <span v-show="!spinnerRuc"><i class="fas fa-search"></i></span>
+                                                    <b-spinner v-show="spinnerRuc" small label="Loading..." ></b-spinner>
+                                                </b-button>
+                                            </b-input-group-append>
+                                        </b-input-group>
+                                    </div>
+                                    <div class="col-lg-3 form-group">
+                                        <label>Nombres</label>
+                                        <input type="text" v-model="guia_datos_adicionales.nombre_conductor"
+                                               class="form-control">
+                                    </div>
+                                    <div class="col-lg-3 form-group">
+                                        <label>Apellidos</label>
+                                        <input type="text" v-model="guia_datos_adicionales.apellido_conductor"
                                                class="form-control">
                                     </div>
                                 </div>
                             </div>
                             <div class="col-lg-4 form-group">
                                 <label>Motivo de traslado</label>
-                                <select v-model="guia_datos_adicionales.codigo_traslado" name="cargo"
+                                <select v-model="guia_datos_adicionales.codigo_traslado"
                                         class="custom-select">
-                                    <option value="01">Venta</option>
-                                    <option value="14">Venta sujeta a confirmacion del comprador</option>
-                                    <option value="02">Compra</option>
-                                    <option value="04">Traslado entre establecimientos de la misma empresa</option>
-                                    <option value="18">Traslado emisor itinerante cp</option>
-                                    <option value="08">Importación</option>
-                                    <option value="09">Exportación</option>
-                                    <option value="19">Traslado a zona primaria</option>
-                                    <option value="13">Otros</option>
+                                    @php
+                                        $motivo_traslado = \sysfact\Http\Controllers\Helpers\DataGuia::getMotivoTraslado();
+                                    @endphp
+                                    @foreach($motivo_traslado as $item)
+                                        <option value="{{$item['num_val']}}">{{$item['label']}}</option>
+                                    @endforeach
                                 </select>
                             </div>
                             <div class="col-lg-2 form-group">
@@ -858,6 +888,9 @@
                     razon_social_transportista: '',
                     placa_vehiculo:<?php echo json_encode(json_decode(cache('config')['guia'], true)['placa']) ?>,
                     dni_conductor:<?php echo json_encode(json_decode(cache('config')['guia'], true)['num_doc']) ?>,
+                    licencia_conductor:"",
+                    nombre_conductor:"",
+                    apellido_conductor:"",
                     codigo_traslado: '01',
                     fecha_traslado: '{{date('Y-m-d')}}',
                     doc_relacionado: '-1',
@@ -876,7 +909,8 @@
                 idventa_modifica:-1,
                 disabledNr:false,
                 item:{},
-                index:-1
+                index:-1,
+                spinnerRuc:false
             },
             mounted() {
                 if (localStorage.getItem('productos')) {
@@ -907,6 +941,42 @@
                 }
             },
             methods: {
+                consultaRucDni(tipo, numero){
+                    if(tipo == 6 && numero.length != 11){
+                        this.alerta('Ingresa un ruc válido de 11 dígitos');
+                        return;
+                    }
+                    if(tipo == 1 && numero.length != 8){
+                        this.alerta('Ingresa un dni válido de 8 dígitos');
+                        return;
+                    }
+                    this.spinnerRuc=true;
+                    axios.post('/helper/buscar-ruc', {
+                        'num_doc': numero,
+                        'tipo_doc': tipo,
+                    })
+                        .then(response => {
+                            let data=response.data;
+                            if(!data || data.length == 0 || !data['success']){
+                                this.alerta('No se obtuvieron resultados, ingresa el nombre o razón social manualmente.');
+                            } else {
+                                if(this.guia_datos_adicionales.tipo_transporte === '01'){
+                                    this.guia_datos_adicionales.razon_social_transportista = data.nombre_o_razon_social;
+                                } else {
+                                    let ex = data.nombre_o_razon_social.split(' ');
+                                    this.guia_datos_adicionales.nombre_conductor = ex[ex.length - 1];
+                                    this.guia_datos_adicionales.apellido_conductor = ex[0];
+                                }
+
+                            }
+                            this.spinnerRuc=false;
+                        })
+                        .catch(error => {
+                            this.spinnerRuc=false;
+                            this.alerta('Ocurrió un error al obtener el dni');
+                            console.log(error);
+                        });
+                },
                 editarItem(item, index){
                     this.item=item;
                     this.index = index;
@@ -1321,10 +1391,10 @@
                     this.base_descuento_global = suma_gravadas + suma_inafectas + suma_exoneradas;
                     this.monto_descuento_global = ((suma_gravadas + suma_inafectas + suma_exoneradas) * desc_global).toFixed(2);
                     this.descuentos = (suma_descuentos + Number(this.monto_descuento_global)).toFixed(2);
-                    //this.igv = (suma_igv - (suma_igv * desc_global)).toFixed(2);
-                    //this.totalVenta = (Number(this.gravadas) + Number(this.exoneradas) + Number(this.inafectas) + Number(this.igv)).toFixed(2);
-                    this.igv = (this.gravadas * 0.18).toFixed(2);
-                    this.totalVenta = (Number(this.gravadas) + Number(this.igv)).toFixed(2);
+                    this.igv = (suma_igv - (suma_igv * desc_global)).toFixed(2);
+                    this.totalVenta = (Number(this.gravadas) + Number(this.exoneradas) + Number(this.inafectas) + Number(this.igv)).toFixed(2);
+                    //this.igv = (this.gravadas * 0.18).toFixed(2);
+                    //this.totalVenta = (Number(this.gravadas) + Number(this.igv)).toFixed(2);
                     this.subtotalVenta = total_venta_bruto.toFixed(2);
                     this.calcularDeducciones();
 
@@ -1543,6 +1613,9 @@
                         } else {
                             if (this.guia_datos_adicionales.placa_vehiculo.length == 0) errorDatosVenta.push('*El campo placa vehículo no puede estar vacío');
                             if (this.guia_datos_adicionales.dni_conductor.length == 0) errorDatosVenta.push('*El campo dni de conductor no puede estar vacío');
+                            if (this.guia_datos_adicionales.licencia_conductor.length == 0) errorDatosVenta.push('*El campo licencia de conductor no puede estar vacío');
+                            if (this.guia_datos_adicionales.nombre_conductor.length == 0) errorDatosVenta.push('*El campo nombres de conductor no puede estar vacío');
+                            if (this.guia_datos_adicionales.apellido_conductor.length == 0) errorDatosVenta.push('*El campo apellidos de conductor no puede estar vacío');
                             if (isNaN(this.guia_datos_adicionales.dni_conductor)) errorDatosVenta.push('*El campo dni de conductor debe ser un número sin letras ni espacios');
                             if (this.guia_datos_adicionales.dni_conductor.length != 8) errorDatosVenta.push('*El campo dni de conductor debe contener 8 dígitos');
                         }
@@ -1661,6 +1734,9 @@
                         razon_social_transportista: '',
                         placa_vehiculo: '',
                         dni_conductor: '',
+                        licencia_conductor:'',
+                        nombre_conductor:'',
+                        apellido_conductor:'',
                         codigo_traslado: '01',
                         fecha_traslado: '{{date('Y-m-d')}}',
                         doc_relacionado: '-1',

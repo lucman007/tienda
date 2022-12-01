@@ -44,7 +44,7 @@ class PedidoController extends Controller
         switch ($this->interfaz['tipo']){
             case 'modo_4':
                 $data['idbody']='pedidos-style';
-                return view('pedidos.interfaz_4.index',$data);
+                return redirect('/');
             case 'modo_3':
                 $data['idbody']='pedidos-style';
                 return view('pedidos.interfaz_3.index',$data);

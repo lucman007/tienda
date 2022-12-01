@@ -9,6 +9,7 @@
 namespace sysfact\Http\Controllers\Helpers;
 
 
+use Illuminate\Support\Facades\Log;
 use Luecano\NumeroALetras\NumeroALetras;
 use Spipu\Html2Pdf\Html2Pdf;
 use sysfact\Emisor;
@@ -191,6 +192,20 @@ class PdfHelper
         $documento->hash=$digest->nodeValue;
         $documento->titulo_doc = 'Guia de Remisión Remitente';
 
+        //GENERAR QR
+        $file_xml=storage_path().'/app/sunat/cdr/R-'.$nombre_fichero.'.xml';
+        if(file_exists($file_xml)){
+            $cdr_xml = simplexml_load_file($file_xml);
+            $qr_response=$cdr_xml->xpath('//cbc:DocumentDescription');
+            $data = $qr_response[0]??false;
+            if($data){
+                $data = $data."";
+                $qr = new QrCodeGenerador($data);
+                $documento->qr = $nombre_fichero.'.png';
+                $qr->generar($nombre_fichero);
+            }
+        }
+
         $datos = ['documento' => $documento, 'usuario' => $documento->cliente, 'items' => $documento->productos, 'emisor' => $documento->emisor];
         $view = view('sunat/plantillas-pdf/'.self::$ruta_formato.'/guia_remision', $datos);
         $html = $view->render();
@@ -213,5 +228,10 @@ class PdfHelper
                 $pdf->output($nombre_fichero.'.pdf');
             }
         }
+
+        if(file_exists(public_path('images/qr/'.$nombre_fichero.'.png'))){
+            unlink(public_path('images/qr/'.$nombre_fichero.'.png'));
+        }
+
     }
 }

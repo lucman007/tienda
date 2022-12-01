@@ -31,9 +31,17 @@
                                 <strong>Estado de guía:</strong> <span class="badge {{$guia->badge_class}}">{{$guia->estado}}</span>
                                 @if($guia->estado=='PENDIENTE')
                                     <a href="/guia/correccion/{{$guia->idguia}}"><span class="badge badge-primary"><i class="fas fa-edit"></i> CORREGIR</span></a><hr>
+                                @else
+                                    <hr>
                                 @endif
                                 @if($guia->num_doc_relacionado)
                                     <strong>Documento relacionado:</strong> {{$guia->num_doc_relacionado}}<hr>
+                                @endif
+                                @if($guia->estado=='PENDIENTE')
+                                <strong>Mensaje:</strong> @{{mensaje}}  <hr>
+                                @endif
+                                @if($guia->estado=='ACEPTADO' && $guia->nota)
+                                    <strong>Observación:</strong> {{$guia->nota}}  <hr>
                                 @endif
                             </div>
                             <div class="col-lg-8">
@@ -79,6 +87,12 @@
                                       variant="primary">
                                 <i v-show="!mostrarProgreso" class="fas fa-edit"></i>
                                 <b-spinner v-show="mostrarProgreso" small label="Loading..." ></b-spinner> Corregir guía
+
+                            </b-button>
+                            <b-button v-if="estado=='PENDIENTE'" class="mb-2" @click="enviar_guia('{{$guia->ticket}}','{{$guia->idguia}}')"
+                                      variant="success">
+                                <i v-show="!mostrarProgresoEnvio" class="fas fa-paper-plane"></i>
+                                <b-spinner v-show="mostrarProgresoEnvio" small label="Loading..." ></b-spinner>
 
                             </b-button>
                             <b-button class="mb-2"  href="{{url('ventas/descargar').'/'.$guia->idguia.'?guia=true'}}" title="Descargar PDF" variant="warning">
@@ -132,8 +146,9 @@
                 accion: 'insertar',
                 mostrarProgreso: false,
                 mostrarProgresoMail: false,
+                mostrarProgresoEnvio: false,
                 fecha: '{{date('Y-m-d')}}',
-                estado: '<?php echo$guia->estado?>',
+                estado: '<?php echo $guia->estado?>',
                 clienteSeleccionado: {},
                 nombreCliente: '',
                 buscar: '',
@@ -142,6 +157,13 @@
                 mostrarSpinnerProducto: false,
                 comprobanteReferencia:'',
                 mail:"<?php echo $guia->persona->correo ?>",
+                mensaje:'<?php echo $guia->response ?>'
+            },
+            created(){
+                if('<?php echo $guia->estado ?>' == 'PENDIENTE' && (('<?php echo basename(url()->previous()) ?>').includes('nuevo') || ('<?php echo url()->previous() ?>').includes('correccion'))){
+
+                    this.enviar_guia(<?php echo '"'.$guia->ticket.'",'.$guia->idguia ?>);
+                }
             },
             methods: {
                 enviar_a_correo(){
@@ -195,6 +217,29 @@
                     };
                     iframe.src = src;
                     @endif
+                },
+                enviar_guia(ticket, idguia){
+                    this.mostrarProgresoEnvio = true;
+                    axios.post('{{url('guia/consultar-ticket')}}',{
+                        'ticket':ticket,
+                        'idguia':idguia,
+                        'file':"<?php echo $guia->nombre_fichero ?>",
+                    })
+                        .then(response =>  {
+                            this.$bvToast.toast(response.data[0], {
+                                title: 'Envío de guía',
+                                variant: 'primary',
+                                solid: true
+                            });
+                            this.estado = response.data[1];
+                            this.mensaje = response.data[0];
+                            this.mostrarProgresoEnvio = false;
+                        })
+                        .catch(error =>  {
+                            alert('error');
+                            console.log(error);
+                            this.mostrarProgresoEnvio = false;
+                        });
                 },
                 alerta(texto, icon){
                     this.$swal({

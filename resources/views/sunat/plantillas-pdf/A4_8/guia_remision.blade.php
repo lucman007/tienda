@@ -3,8 +3,8 @@
 @section('contenido')
     <div class="header">
         <div class="header-ruc">
-            <h3 style="color: yellow;text-transform: uppercase">{{$documento->titulo_doc}}<br><span>ELECTRÓNICA</span></h3>
-            <h4 style="color: yellow">{{$documento->correlativo}}</h4>
+            <h3 style="color: white;text-transform: uppercase">{{$documento->titulo_doc}}<br><span>ELECTRÓNICA</span></h3>
+            <h4 style="color: white">{{$documento->correlativo}}</h4>
         </div>
         @if($emisor->logo)
             <div class="logo" style="">
@@ -154,18 +154,20 @@
             padding: 0;
         }
         strong{
-            color: black;
+            color: #ff4809;
         }
         .header{
             width: 180mm;
             margin-bottom: 5mm;
+            background: #e9e9e9;
             padding: 20px;
-            border-top: 15px solid #ffca11;
+            border-radius: 5px;
+            border:3px solid #7c8083;
         }
         .header-ruc{
             width: 260px;
             text-align: center;
-            background: black;
+            background: #ff4809;
             padding: 10px;
             float: left;
             display: inline;
@@ -202,7 +204,7 @@
             margin-bottom: 3mm;
         }
         .div-table-header{
-            width: 190mm; background: #ffca11; padding: 2mm 5mm; text-align: center; height: 5mm
+            width: 190mm; background: #ff4809; padding: 2mm 5mm; text-align: center; border-radius: 5px 5px 0 0; height: 5mm
         }
         .items {
             width: 200mm;
@@ -223,7 +225,7 @@
         }
         .table-header strong{
             font-style: normal;
-            color: black;
+            color: white;
         }
         .cuotas_table{
             width:100mm;

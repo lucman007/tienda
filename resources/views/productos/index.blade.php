@@ -88,7 +88,7 @@
                                                                 class="fas fa-edit"></i></button>
                                                 </a>
                                                 <b-dropdown id="dropdown-1" text="Más" class="m-md-2 " variant="warning">
-                                                    <b-dropdown-item @can('Inventario: kardex') href="{{url('productos/inventario').'/'.$producto->idproducto}}" @endcan><i class="fas fa-list"></i> Ver kardex</b-dropdown-item>
+                                                    <b-dropdown-item @can('Inventario: kardex') href="{{url('productos/inventario').'/'.$producto->idproducto}}" @else disabled @endcan><i class="fas fa-list"></i> Ver kardex</b-dropdown-item>
     {{--
                                                     <b-dropdown-item @cannot('Inventario: gestionar producto') disabled @endcannot @click="borrarProducto({{$producto->idproducto}})"><i class="fas fa-exchange-alt"></i> Trasladar</b-dropdown-item>
     --}}

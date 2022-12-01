@@ -17,6 +17,8 @@ class Guia extends Model
         'fecha_emision',
         'nota',
         'estado',
+        'ticket',
+        'response',
         'guia_datos_adicionales',
     ];
 

@@ -582,7 +582,7 @@ class VentaController extends Controller
                         $response_guia = 'La guía no ha podido ser procesada.';
                     }
 
-                    $response_guia = ' / '.$response_guia;
+                    $response_guia = ' / Se ha procesado la guia con '.$response_guia;
 
                 }
             }
@@ -593,7 +593,7 @@ class VentaController extends Controller
                 $texto = 'la nota';
             }
 
-            $respuesta_sunat='Se ha procesado '.$texto.' correctamente: '.$request->serie.'-'.$correlativo.' '.$response_guia;
+            $respuesta_sunat='Se ha guardado '.$texto.' correctamente: '.$request->serie.'-'.$correlativo.' '.$response_guia;
 
             return json_encode(['idventa' => $idventa, 'respuesta' => $respuesta_sunat]);
 
@@ -656,9 +656,12 @@ class VentaController extends Controller
         }
 
         $venta->guia_relacionada=$venta->guia->first();
+        if($venta->guia_relacionada){
+            $venta->guia_relacionada['ticket'] = json_decode($venta->guia_relacionada['ticket'], true)['numTicket']??0;
+        }
 
         //inicio código para version antigua del sistema tabla guia
-        if(!$venta->guia_relacionada){
+        /*if(!$venta->guia_relacionada){
             $venta->guia_relacionada = Guia::where('correlativo',$venta->facturacion->guia_relacionada)->first();
             if(!$venta->guia_relacionada){
                 $correlativo = $venta->facturacion->guia_relacionada;
@@ -668,7 +671,7 @@ class VentaController extends Controller
                     $venta->guia_relacionada=false;
                 }
             }
-        }
+        }*/
         //fin código para version antigua del sistema tabla guia
 
 

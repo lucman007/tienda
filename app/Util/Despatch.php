@@ -51,6 +51,10 @@ class Despatch {
         $documento->razon_social_transportista=$datos_adicionales['razon_social_transportista'];
         $documento->placa_vehiculo=$datos_adicionales['placa_vehiculo'];
         $documento->dni_conductor=$datos_adicionales['dni_conductor'];
+        $documento->licencia_conductor=$datos_adicionales['licencia_conductor']??'000000';
+        $documento->nombre_conductor=$datos_adicionales['nombre_conductor']??'';
+        $documento->apellido_conductor=$datos_adicionales['apellido_conductor']??'';
+        $documento->registro_mtc=$datos_adicionales['registro_mtc']??'000000';
         $documento->direccion_llegada=$datos_adicionales['direccion'];
         $documento->ubigeo_direccion_llegada=$datos_adicionales['ubigeo'];
         $documento->motivo_traslado=$datos_adicionales['motivo_traslado'];
@@ -63,7 +67,8 @@ class Despatch {
 		$this->nombre_fichero=$emisor->ruc.'-09-'.$documento->correlativo;
 
         if($render) {
-            $view = view('sunat/docs/despatch', ['documento' => $documento, 'usuario' => $usuario, 'items' => $detalle, 'emisor' => $emisor]);
+            //$view = view('sunat/docs/despatch', ['documento' => $documento, 'usuario' => $usuario, 'items' => $detalle, 'emisor' => $emisor]);
+            $view = view('sunat/docs/despatch_v2', ['documento' => $documento, 'usuario' => $usuario, 'items' => $detalle, 'emisor' => $emisor]);
             return $view->render();
         }
 

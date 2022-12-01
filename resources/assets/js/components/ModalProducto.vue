@@ -45,7 +45,7 @@
                                     </span>
                                     </td>
                                     <td v-show="producto.tipo_producto==2">-</td>
-                                    <td>{{producto.precio}}</td>
+                                    <td>{{producto.moneda}}{{producto.precio}}</td>
                                     <td style="width: 5%" class="botones-accion">
                                         <button @click="agregar(index)"
                                                 :disabled="stock && producto.stock <= 0 && producto.tipo_producto===1"

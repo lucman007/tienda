@@ -18,7 +18,7 @@ class DataTipoPago
             ['num_val'=>'7','text_val'=>'mastercard','label'=>'Tarjeta Mastercard'],
             ['num_val'=>'5','text_val'=>'yape','label'=>'Yape'],
             ['num_val'=>'6','text_val'=>'plin','label'=>'Plin'],
-            ['num_val'=>'9','text_val'=>'transferencia','label'=>'Transferencia'],
+            ['num_val'=>'9','text_val'=>'transferencia','label'=>'Transferencia/depósito'],
             ['num_val'=>'4','text_val'=>'otros','label'=>'Fraccionado'],
             ['num_val'=>'2','text_val'=>'credito','label'=>'Crédito'],
             ['num_val'=>'8','text_val'=>'otros','label'=>'Otros'],

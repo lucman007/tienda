@@ -212,6 +212,8 @@ Route::group(['middleware' => ['can:Facturación: facturar']], function () {
     Route::get('ventas/descargar/{file}', 'Cpe\CpeController@descargarArchivo');
     Route::get('ventas/getstatus/{ticket}/{nombre}', 'Cpe\CpeController@getStatus');
     Route::post('ventas/getStatusCdr', 'Cpe\CpeController@getStatusCdr');
+    Route::get('cpe/generar-tocken-guia', 'Cpe\CpeController@generarTockenGRE');
+    Route::get('cpe/enviar-guia-api/{id}', 'Cpe\CpeController@enviarGuiaApi');
 });
 
 Route::group(['middleware' => ['can:Facturación: comprobantes']], function () {
@@ -322,6 +324,7 @@ Route::group(['middleware' => ['can:Facturación: guía']], function () {
     Route::get('guia/descargar/{file}', 'Cpe\CpeController@descargarArchivo');
     Route::get('guia/{desde}/{hasta}','GuiaController@index');
     Route::get('guia','GuiaController@index');
+    Route::post('guia/consultar-ticket','Cpe\CpeController@consultarGRE');
 
 });
 
