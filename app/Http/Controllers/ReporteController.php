@@ -25,6 +25,7 @@ use sysfact\Gastos;
 use sysfact\Http\Controllers\Helpers\DataTipoPago;
 use sysfact\Http\Controllers\Helpers\PdfHelper;
 use sysfact\Mail\ReporteResumenVentas;
+use sysfact\Opciones;
 use sysfact\Producto;
 use sysfact\Venta;
 
@@ -577,6 +578,10 @@ class ReporteController extends Controller
 
         }
 
+        usort($totales_del_dia, function ($a, $b) {
+            return strtotime($a['fecha']) - strtotime($b['fecha']);
+        });
+
         return $totales_del_dia;
     }
 
@@ -630,6 +635,10 @@ class ReporteController extends Controller
 
             })
             ->orderBy('fecha', 'desc')->get();
+
+        if($ventas && count($ventas) > 6000){
+            return [];
+        }
 
         $ventas_brutas=0;
         $costos = 0;
@@ -714,6 +723,10 @@ class ReporteController extends Controller
 
         }
 
+        usort($totales_del_mes, function ($a, $b) {
+            return strtotime($a['fecha']) - strtotime($b['fecha']);
+        });
+
         return $totales_del_mes;
     }
 
@@ -727,7 +740,44 @@ class ReporteController extends Controller
             $anio=date('Y');
         }
 
-        $ventas=$this->reporte_ventas_mensual_data($anio, $moneda, $tipo_cambio);
+        $totales_del_mes = [];
+
+        //if(json_decode(cache('config')['interfaz'], true)['reporte_mensual_manual']??false){
+        if(true){
+
+            $opcion = Opciones::where('nombre_opcion','reporte-mensual-'.$anio)->orderby('valor','desc')->get();
+            if(count($opcion) == 0){
+                for($i=0; $i < 12;$i++) {
+                    $mes = str_pad($i + 1, 2, '0', STR_PAD_LEFT);
+                    $totales_del_mes[$i]['fecha'] = date("M Y", strtotime($anio . '-' . $mes . '-01'));
+                    $totales_del_mes[$i]['ventas_brutas'] = 0;
+                    $totales_del_mes[$i]['costos'] = 0;
+                    $totales_del_mes[$i]['utilidad'] = 0;
+                    $totales_del_mes[$i]['impuestos'] = 0;
+                    $totales_del_mes[$i]['ventas_netas'] = 0;
+
+                    $opt = new Opciones();
+                    $opt->nombre_opcion = 'reporte-mensual-'.$anio;
+                    $opt->valor = $mes;
+                    $opt->valor_json = json_encode($totales_del_mes[$i]);
+                    $opt->save();
+
+                }
+
+            } else {
+                foreach ($opcion as $item) {
+                    $totales_del_mes[] = json_decode($item->valor_json, true);
+                }
+
+            }
+
+            $ventas = $totales_del_mes;
+            $manual = 1;
+
+        } else {
+            $ventas=$this->reporte_ventas_mensual_data($anio, $moneda, $tipo_cambio);
+            $manual = 0;
+        }
 
         if($esExportable == 'true'){
             return Excel::download(new VentasMensualExport($this->reporte_ventas_mensual_data($anio, $moneda, $tipo_cambio),$moneda), 'ventas_mensual.xlsx');
@@ -738,9 +788,31 @@ class ReporteController extends Controller
                     'ventas'=>$ventas,
                     'moneda'=>$moneda,
                     'anio'=>$anio,
+                    'manual'=>$manual,
                     'usar_tipo_cambio'=>$tipo_cambio
                 ]);
         }
+    }
+
+    public function reporte_ventas_mensual_alt(Request $request, $mes=null){
+        $moneda = $request->moneda??'PEN';
+        $tipo_cambio = $request->tc??'fecha-actual';
+
+        $ex = explode('-',$mes);
+        $anio = $ex[0];
+        $valor_mes = $ex[1];
+
+        $ventas=$this->reporte_ventas_diario_data($mes, $moneda, $tipo_cambio);
+        $ventas[0]['fecha'] = date("M Y",strtotime($ventas[0]['fecha']));
+        Opciones::where('nombre_opcion','reporte-mensual-'.$anio)
+            ->where('valor',$valor_mes)
+            ->update([
+                'valor_json'=>json_encode($ventas[0])
+
+        ]);
+
+        return redirect('/reportes/ventas/mensual/'.date('Y', strtotime($mes)));
+
     }
 
     //funciones para reporte de gastos

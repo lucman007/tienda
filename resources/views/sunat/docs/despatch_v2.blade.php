@@ -3,6 +3,7 @@
                 xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
                 xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
                 xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+                xmlns:sac="urn:sunat:names:specification:ubl:peru:schema:xsd:SunatAggregateComponents-1"
                 xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
     <ext:UBLExtensions>
         <ext:UBLExtension>
@@ -93,35 +94,39 @@
         @if($documento->codigo_traslado=='08' || $documento->codigo_traslado=='09')
             <cbc:TotalTransportHandlingUnitQuantity>{{$documento->cantidad_bultos}}</cbc:TotalTransportHandlingUnitQuantity>
         @endif
-        <cbc:SplitConsignmentIndicator>{{ $documento->indicador_transbordo_programado }}</cbc:SplitConsignmentIndicator>
+        @if($documento->categoria_vehiculo == 'M1_L')
+            <cbc:SpecialInstructions>SUNAT_Envio_IndicadorTrasladoVehiculoM1L</cbc:SpecialInstructions>
+        @endif
         <cac:ShipmentStage>
             <cbc:TransportModeCode listAgencyName="PE:SUNAT" listName="Modalidad de traslado"
                                    listURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo18">{{$documento->codigo_transporte}}</cbc:TransportModeCode>
             <cac:TransitPeriod>
                 <cbc:StartDate>{{ $documento->fecha_traslado }}</cbc:StartDate>
             </cac:TransitPeriod>
-            @if($documento->codigo_transporte == '01')
-                <cac:CarrierParty>
-                    <cac:PartyIdentification>
-                        <cbc:ID schemeID="6" schemeName="Documento de Identidad" schemeAgencyName="PE:SUNAT"
-                                schemeURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo06">{{ $documento->num_doc_transportista }}</cbc:ID>
-                    </cac:PartyIdentification>
-                    <cac:PartyLegalEntity>
-                        <cbc:RegistrationName><![CDATA[{{ $documento->razon_social_transportista }}]]></cbc:RegistrationName>
-                        <cbc:CompanyID>{{ $documento->registro_mtc }}</cbc:CompanyID>
-                    </cac:PartyLegalEntity>
-                </cac:CarrierParty>
-            @elseif($documento->codigo_transporte == '02')
-                <cac:DriverPerson>
-                    <cbc:ID schemeID="1" schemeName="Documento de Identidad" schemeAgencyName="PE:SUNAT"
-                            schemeURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo06">{{ $documento->dni_conductor }}</cbc:ID>
-                    <cbc:FirstName>{{ $documento->nombre_conductor }}</cbc:FirstName>
-                    <cbc:FamilyName>{{ $documento->apellido_conductor }}</cbc:FamilyName>
-                    <cbc:JobTitle>Principal</cbc:JobTitle>
-                    <cac:IdentityDocumentReference>
-                        <cbc:ID>{{ $documento->licencia_conductor }}</cbc:ID>
-                    </cac:IdentityDocumentReference>
-                </cac:DriverPerson>
+            @if($documento->categoria_vehiculo != 'M1_L')
+                @if($documento->codigo_transporte == '01')
+                    <cac:CarrierParty>
+                        <cac:PartyIdentification>
+                            <cbc:ID schemeID="6" schemeName="Documento de Identidad" schemeAgencyName="PE:SUNAT"
+                                    schemeURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo06">{{ $documento->num_doc_transportista }}</cbc:ID>
+                        </cac:PartyIdentification>
+                        <cac:PartyLegalEntity>
+                            <cbc:RegistrationName><![CDATA[{{ $documento->razon_social_transportista }}]]></cbc:RegistrationName>
+                            <cbc:CompanyID>{{ $documento->registro_mtc }}</cbc:CompanyID>
+                        </cac:PartyLegalEntity>
+                    </cac:CarrierParty>
+                @elseif($documento->codigo_transporte == '02')
+                    <cac:DriverPerson>
+                        <cbc:ID schemeID="1" schemeName="Documento de Identidad" schemeAgencyName="PE:SUNAT"
+                                schemeURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo06">{{ $documento->dni_conductor }}</cbc:ID>
+                        <cbc:FirstName>{{ $documento->nombre_conductor }}</cbc:FirstName>
+                        <cbc:FamilyName>{{ $documento->apellido_conductor }}</cbc:FamilyName>
+                        <cbc:JobTitle>Principal</cbc:JobTitle>
+                        <cac:IdentityDocumentReference>
+                            <cbc:ID>{{ $documento->licencia_conductor }}</cbc:ID>
+                        </cac:IdentityDocumentReference>
+                    </cac:DriverPerson>
+                @endif
             @endif
         </cac:ShipmentStage>
         <cac:Delivery>

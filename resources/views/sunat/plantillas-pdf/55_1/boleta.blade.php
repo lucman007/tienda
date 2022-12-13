@@ -11,10 +11,11 @@
             <div class="texto">
                 <p>
                     <strong>{{$emisor->nombre_comercial?$emisor->nombre_comercial:$emisor->nombre_publicitario}}</strong><br>
-                    {{$emisor->razon_social}}<br>R.U.C. {{$emisor->ruc}}<br><br>{{$emisor->direccion}}, {{$emisor->urbanizacion==''?'':$emisor->urbanizacion.','}} {{$emisor->provincia}},
+                    {{json_decode(cache('config')['impresion'], true)['ocultar_razon_social']?'':$emisor->razon_social}}<br>R.U.C. {{$emisor->ruc}}<br><br>{{$emisor->direccion}}, {{$emisor->urbanizacion==''?'':$emisor->urbanizacion.','}} {{$emisor->provincia}},
                     {{$emisor->departamento}}, {{$emisor->distrito}} <br> {{$emisor->telefono_1}} / {{$emisor->telefono_2==''?'':$emisor->telefono_2.' / '}}{{$emisor->email}} <br>
                     {{$emisor->texto_publicitario}} <br><br>
-                    <strong>{{mb_strtoupper($documento->titulo_doc)}} ELECTRÓNICA {{$documento->serie}}-{{$documento->correlativo}}</strong>
+                    <strong>{{mb_strtoupper($documento->titulo_doc)}} ELECTRÓNICA {{$documento->serie}}-{{$documento->correlativo}}</strong><br>
+                    {{ date('d/m/Y h:i:s A',strtotime($documento->fecha)) }}
                 </p>
             </div>
         </div>
@@ -22,9 +23,6 @@
     <div class="body">
         <div class="info-usuario">
             <table cellpadding="0" style="width: 20mm">
-                <tr>
-                    <td colspan="2">{{ date('d/m/Y h:i:s A',strtotime($documento->fecha)) }}</td>
-                </tr>
                 <tr>
                     <td><strong>Cliente:</strong></td>
                     <td>{{$usuario->razon_social}}</td>

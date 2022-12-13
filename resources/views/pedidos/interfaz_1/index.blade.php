@@ -15,6 +15,7 @@
                                 <b-button @if(!$agent->isDesktop()) style="width: 50%" @endif alt="Resumen del día"  variant="primary" class="ml-2" @cannot('Facturación: facturar') class="disabled" disabled @endcannot href="{{action('PedidoController@ventas')}}">
                                     <i class="fas fa-list-ul"></i> Resumen del día
                                 </b-button>
+                                <b-button @click="reloadPage" class="ml-2" variant="warning" title="Actualizar"><i class="fas fa-sync"></i></b-button>
                             </div>
                         </div>
                     </div>
@@ -100,10 +101,10 @@
                                                 <tr>
                                                     <th scope="col" style="width: 10px"></th>
                                                     <th scope="col" style="width: 290px">Producto</th>
-                                                    <th scope="col" style="width: 350px">Descripción</th>
+                                                    <th scope="col" style="width: 300px">Descripción</th>
                                                     <th scope="col" style="width: 100px">Precio</th>
-                                                    <th scope="col" style="width: 100px">Cantidad</th>
-                                                    <th scope="col" style="width: 100px">Total</th>
+                                                    <th scope="col" style="width: 150px">Cantidad</th>
+                                                    <th scope="col" style="width: 50px">Total</th>
                                                     <th scope="col" style="width: 50px"></th>
                                                     <th></th>
                                                 </tr>
@@ -128,14 +129,28 @@
                                                                 class="form-control td-dis" type="number"
                                                                 disabled
                                                                 v-model="producto.precio" @cannot('Pedido: editar precio') readonly @endcannot></td>
-                                                    <td @click="habilitar(producto.num_item,'c')"><input
-                                                                onblur="app.noFocus(this)"
-                                                                onfocus="this.select()"
-                                                                @keyup="actualizarDetalle"
-                                                                :id="producto.num_item+'-c'"
-                                                                class="form-control td-dis" type="number"
-                                                                disabled
-                                                                v-model="producto.cantidad"></td>
+                                                    <td @click="habilitar(producto.num_item,'c')">
+                                                        <b-input-group>
+                                                            <b-input-group-prepend>
+                                                                <b-button @click="cambiarCantidad(index,'-')"
+                                                                          variant="primary">-
+                                                                </b-button>
+                                                            </b-input-group-prepend>
+                                                            <input
+                                                                    onblur="app.noFocus(this)"
+                                                                    onfocus="this.select()"
+                                                                    @keyup="actualizarDetalle"
+                                                                    :id="producto.num_item+'-c'"
+                                                                    class="form-control td-dis" type="number"
+                                                                    disabled
+                                                                    v-model="producto.cantidad">
+                                                            <b-input-group-append>
+                                                                <b-button @click="cambiarCantidad(index,'+')"
+                                                                          variant="primary">+
+                                                                </b-button>
+                                                            </b-input-group-append>
+                                                        </b-input-group>
+                                                    </td>
                                                     <td>@{{producto.total}}</td>
                                                     <td>
                                                         <span v-show="producto.loading">
@@ -354,6 +369,9 @@
                     this.obtenerEmpleados();
                 },
                 methods:{
+                    reloadPage() {
+                        window.location.reload();
+                    },
                     agregarDescuento(obj){
                         let producto = this.productosSeleccionados[this.index];
                         producto['precio'] = obj.precio;
@@ -639,7 +657,23 @@
                     },
                     obtener_notificaciones(){
                         app_menu.$refs['panelNotificacion'].countNotifications();
-                    }
+                    },
+                    cambiarCantidad(index, tipo){
+                        let producto = this.productosSeleccionados[index];
+                        if(tipo == '+'){
+                            producto.cantidad++;
+                        } else {
+                            producto.cantidad--;
+                        }
+                        if (this.timer) {
+                            clearTimeout(this.timer);
+                            this.timer = null;
+                        }
+                        this.timer = setTimeout(() => {
+                            this.actualizarDetalle(null)
+                        }, 500);
+
+                    },
                 }
             }
         );

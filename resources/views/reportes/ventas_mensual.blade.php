@@ -91,6 +91,12 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="col-lg-12 mt-3 text-center">
+                                <h4 style="color:#119527">El volumen de ventas es demasiado grande para ser analizado.</h4>
+                                <p>Genera el reporte de cada mes manualmente haciendo click en el botón <strong>GENERAR</strong> a la derecha de cada mes en la tabla inferior.
+                                    <br> No tendrás que hacerlo siempre, pues se guardará en la base de datos. Solo vuelve a generarlo
+                                    <br> si eliminas o editas ventas de algún mes en específico</p>
+                            </div>
                             <div class="col-lg-12 mt-3">
                                 <div class="card no-shadow">
                                     <div class="card-body">
@@ -104,6 +110,7 @@
                                                     <th scope="col">Ventas netas</th>
                                                     <th scope="col">Costo de bienes</th>
                                                     <th scope="col">Utilidad bruta</th>
+                                                    <th scope="col">Generar reporte</th>
                                                 </tr>
                                                 </thead>
                                                 <tbody>
@@ -116,11 +123,12 @@
                                                             <td>S/{{number_format($item['ventas_netas'],2)}}</td>
                                                             <td>S/{{number_format($item['costos'],2)}}</td>
                                                             <td style="color:{{$item['utilidad']<0?'red':'inherit'}}">S/{{number_format($item['utilidad'],2)}}</td>
+                                                            <td><b-button href="/reportes/ventas/generar-mes/{{date('Y-m', strtotime($item['fecha']))}}" style="padding: 4px 10px;" class="btn btn-warning">Generar</b-button></td>
                                                         </tr>
                                                     @endforeach
                                                 @else
                                                     <tr>
-                                                        <td colspan="6" class="text-center">No hay datos para mostrar</td>
+                                                        <td colspan="7" class="text-center">No hay datos para mostrar</td>
                                                     </tr>
                                                 @endif
                                                 </tbody>
@@ -165,11 +173,11 @@
                         }
                         this.chartValues=[
                             {
-                                data: datos.reverse(),
+                                data: datos,
                                 type: 'line'
                             }
                         ];
-                        this.labels = labels.reverse();
+                        this.labels = labels;
                     }
 
                 },

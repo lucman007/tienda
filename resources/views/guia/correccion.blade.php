@@ -60,14 +60,28 @@
                                 </b-input-group>
                             </div>
                             <div class="col-lg-2 form-group">
-                                <label>Peso (KG)</label>
-                                <input type="text" v-model="guia_datos_adicionales.peso" name="peso"
-                                       class="form-control">
+                                <label>Peso</label>
+                                <b-input-group>
+                                    <input type="number" v-model="guia_datos_adicionales.peso" name="peso"
+                                           class="form-control">
+                                    <b-input-group-append>
+                                        <b-input-group-text>
+                                            KG
+                                        </b-input-group-text>
+                                    </b-input-group-append>
+                                </b-input-group>
                             </div>
                             <div class="col-lg-2 form-group">
-                                <label>N° de bultos</label>
-                                <input type="text" v-model="guia_datos_adicionales.bultos" name="bultos"
-                                       class="form-control">
+                                <label>Bultos</label>
+                                <b-input-group>
+                                    <input type="number" v-model="guia_datos_adicionales.bultos" name="bultos"
+                                           class="form-control">
+                                    <b-input-group-append>
+                                        <b-input-group-text>
+                                            UND
+                                        </b-input-group-text>
+                                    </b-input-group-append>
+                                </b-input-group>
                             </div>
                             <div class="col-lg-2 form-group">
                                 <label>Tipo de transporte</label>
@@ -76,12 +90,24 @@
                                     <option value="02">Privado</option>
                                 </select>
                             </div>
-                            <div class="col-lg-10" v-show="guia_datos_adicionales.tipo_transporte == '01'">
+                            <div class="col-lg-2 form-group">
+                                <label>Categoría</label>
+                                <select v-model="guia_datos_adicionales.categoria_vehiculo" class="custom-select">
+                                    <option value="M1_L">Vehículo M1 o L (De 2 ó 3 ruedas, o menor a 8 asientos)</option>
+                                    <option value="otros">Otros</option>
+                                </select>
+                            </div>
+                            <div v-show="guia_datos_adicionales.tipo_transporte == '02'" class="col-lg-1 form-group">
+                                <label>Placa</label>
+                                <input type="text" v-model="guia_datos_adicionales.placa_vehiculo"
+                                       class="form-control">
+                            </div>
+                            <div class="col-lg-8" v-show="guia_datos_adicionales.tipo_transporte == '01' && guia_datos_adicionales.categoria_vehiculo != 'M1_L'">
                                 <div class="row">
                                     <div class="col-lg-3 form-group">
-                                        <label>Ruc tranportista</label>
+                                        <label>Ruc de transportista</label>
                                         <b-input-group>
-                                            <input @keyup.enter="consultaRucDni(guia_datos_adicionales.tipo_doc_transportista,guia_datos_adicionales.num_doc_transportista)" maxlength="11" type="text" v-model="guia_datos_adicionales.num_doc_transportista"
+                                            <input @keyup.enter="consultaRucDni(guia_datos_adicionales.tipo_doc_transportista,guia_datos_adicionales.num_doc_transportista)" type="number" v-model="guia_datos_adicionales.num_doc_transportista"
                                                    class="form-control">
                                             <b-input-group-append>
                                                 <b-button :disabled="guia_datos_adicionales.num_doc_transportista.length==0" @click="consultaRucDni(guia_datos_adicionales.tipo_doc_transportista,guia_datos_adicionales.num_doc_transportista)" variant="primary" >
@@ -93,28 +119,23 @@
 
                                     </div>
                                     <div class="col-lg-6 form-group">
-                                        <label>Razón social tranportista</label>
+                                        <label>Razón social transportista</label>
                                         <input type="text" v-model="guia_datos_adicionales.razon_social_transportista"
                                                class="form-control">
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-lg-10" v-show="guia_datos_adicionales.tipo_transporte == '02'">
+                            <div class="col-lg-7" v-show="guia_datos_adicionales.tipo_transporte == '02' && guia_datos_adicionales.categoria_vehiculo != 'M1_L'">
                                 <div class="row">
-                                    <div class="col-lg-2 form-group">
-                                        <label>Placa del vehículo</label>
-                                        <input type="text" v-model="guia_datos_adicionales.placa_vehiculo"
-                                               class="form-control">
-                                    </div>
-                                    <div class="col-lg-2 form-group">
-                                        <label>Licencia de conducir</label>
+                                    <div class="col-lg-3 form-group">
+                                        <label>Licencia de cond.</label>
                                         <input type="text" v-model="guia_datos_adicionales.licencia_conductor"
                                                class="form-control">
                                     </div>
-                                    <div class="col-lg-2 form-group">
+                                    <div class="col-lg-3 form-group">
                                         <label>DNI del conductor</label>
                                         <b-input-group>
-                                            <input @keyup.enter="consultaRucDni(1,guia_datos_adicionales.dni_conductor)" maxlength="8" type="text" v-model="guia_datos_adicionales.dni_conductor"
+                                            <input @keyup.enter="consultaRucDni(1,guia_datos_adicionales.dni_conductor)" type="number" v-model="guia_datos_adicionales.dni_conductor"
                                                    class="form-control">
                                             <b-input-group-append>
                                                 <b-button :disabled="guia_datos_adicionales.dni_conductor.length==0" @click="consultaRucDni(1,guia_datos_adicionales.dni_conductor)" variant="primary" >
@@ -252,6 +273,7 @@
                     licencia_conductor:"{{$guia->licencia_conductor}}",
                     nombre_conductor:"{{$guia->nombre_conductor}}",
                     apellido_conductor:"{{$guia->apellido_conductor}}",
+                    categoria_vehiculo:"<?php echo $guia_data['categoria_vehiculo']??'M1_L' ?>",
                     codigo_traslado:"{{$guia->motivo_traslado}}",
                     fecha_traslado: "{{date("Y-m-d",strtotime($guia->fecha_traslado))}}",
                     doc_relacionado:"{{$guia->doc_relacionado}}",
@@ -379,26 +401,21 @@
                     let errorString = '';
                     if (this.fecha.length == 0) errorDatosVenta.push('*La fecha no puede estar vacia');
                     if (this.guia_datos_adicionales.direccion.length == 0) errorDatosVenta.push('*El campo direccion de la guia no puede estar vacío');
-                    if (this.guia_datos_adicionales.ubigeo.length!=6) errorDatosVenta.push('*El campo ubigeo debe contener un código de 6 dígitos');
-                    if (isNaN(this.guia_datos_adicionales.ubigeo)) errorDatosVenta.push('*El campo ubigeo debe ser un número');
                     if (this.guia_datos_adicionales.peso.length == 0) errorDatosVenta.push('*El campo peso no puede estar vacío');
-                    if (isNaN(this.guia_datos_adicionales.peso)) errorDatosVenta.push('*El campo peso debe ser un número');
                     if (this.guia_datos_adicionales.bultos.length == 0) errorDatosVenta.push('*El campo N° de bultos no puede estar vacío');
-                    if (isNaN(this.guia_datos_adicionales.bultos)) errorDatosVenta.push('*El campo N° de bultos debe ser un número');
-                    if(this.guia_datos_adicionales.tipo_transporte=='01'){
-                        if (this.guia_datos_adicionales.num_doc_transportista.length == 0) errorDatosVenta.push('*El campo número de documento de transportista no puede estar vacío');
-                        if (isNaN(this.guia_datos_adicionales.num_doc_transportista)) errorDatosVenta.push('*El campo número de documento de transportista debe ser un número sin letras ni espacios');
-                        if (!(this.guia_datos_adicionales.num_doc_transportista.length === 11) && this.guia_datos_adicionales.tipo_doc_transportista == '6') errorDatosVenta.push('*El campo número documento de transportista debe contener 11 dígitos');
-                        if (!(this.guia_datos_adicionales.num_doc_transportista.length == 8) && this.guia_datos_adicionales.tipo_doc_transportista == '1') errorDatosVenta.push('*El campo número documento de transportista debe contener 8 dígitos');
-                        if (this.guia_datos_adicionales.razon_social_transportista.length == 0) errorDatosVenta.push('*El campo razón social de transportista no puede estar vacío');
-                    } else{
-                        if (this.guia_datos_adicionales.placa_vehiculo.length == 0) errorDatosVenta.push('*El campo placa vehículo no puede estar vacío');
-                        if (this.guia_datos_adicionales.dni_conductor.length == 0) errorDatosVenta.push('*El campo dni de conductor no puede estar vacío');
-                        if (this.guia_datos_adicionales.licencia_conductor.length == 0) errorDatosVenta.push('*El campo licencia de conductor no puede estar vacío');
-                        if (this.guia_datos_adicionales.nombre_conductor.length == 0) errorDatosVenta.push('*El campo nombres de conductor no puede estar vacío');
-                        if (this.guia_datos_adicionales.apellido_conductor.length == 0) errorDatosVenta.push('*El campo apellidos de conductor no puede estar vacío');
-                        if (isNaN(this.guia_datos_adicionales.dni_conductor)) errorDatosVenta.push('*El campo dni de conductor debe ser un número sin letras ni espacios');
-                        if (this.guia_datos_adicionales.dni_conductor.length != 8) errorDatosVenta.push('*El campo dni de conductor debe contener 8 dígitos');
+                    if(this.guia_datos_adicionales.categoria_vehiculo != 'M1_L'){
+                        if(this.guia_datos_adicionales.tipo_transporte=='01'){
+                            if (this.guia_datos_adicionales.num_doc_transportista.length == 0) errorDatosVenta.push('*El campo número de documento de transportista no puede estar vacío');
+                            if (!(this.guia_datos_adicionales.num_doc_transportista.length === 11) && this.guia_datos_adicionales.tipo_doc_transportista == '6') errorDatosVenta.push('*El campo número documento de transportista debe contener 11 dígitos');
+                            if (this.guia_datos_adicionales.razon_social_transportista.length == 0) errorDatosVenta.push('*El campo razón social de transportista no puede estar vacío');
+                        } else{
+                            if (this.guia_datos_adicionales.placa_vehiculo.length == 0) errorDatosVenta.push('*El campo placa vehículo no puede estar vacío');
+                            if (this.guia_datos_adicionales.dni_conductor.length == 0) errorDatosVenta.push('*El campo dni de conductor no puede estar vacío');
+                            if (this.guia_datos_adicionales.licencia_conductor.length == 0) errorDatosVenta.push('*El campo licencia de conductor no puede estar vacío');
+                            if (this.guia_datos_adicionales.nombre_conductor.length == 0) errorDatosVenta.push('*El campo nombres de conductor no puede estar vacío');
+                            if (this.guia_datos_adicionales.apellido_conductor.length == 0) errorDatosVenta.push('*El campo apellidos de conductor no puede estar vacío');
+                            if (this.guia_datos_adicionales.dni_conductor.length != 8) errorDatosVenta.push('*El campo dni de conductor debe contener 8 dígitos');
+                        }
                     }
                     if(this.guia_datos_adicionales.doc_relacionado!='-1' && this.guia_datos_adicionales.num_doc_relacionado.length == 0)errorDatosVenta.push('*El campo número de documento relacionado no puede estar vacío');
 
@@ -409,19 +426,20 @@
 
                     //Validar motivo de traslado
                     switch (this.guia_datos_adicionales.codigo_traslado) {
-                        case '01':
-                            if (this.clienteSeleccionado['num_documento'] == <?php echo $ruc_emisor ?>) errorDatosVenta.push('*El destinatario no debe ser igual al remitente');
-                            break;
-                        case '02':
-                        case '04':
-                        case '18':
-                            if (this.clienteSeleccionado['num_documento'] != <?php echo $ruc_emisor ?>) errorDatosVenta.push('*Para el motivo de traslado ingresado el destinatario debe ser igual al remitente');
-                            break;
-                        case '08':
-                        case '09':
-                            if (this.guia_datos_adicionales.doc_relacionado != '01') errorDatosVenta.push('*Para importación / exportación debes ingresar el número DAN');
+                            case '01':
+                                if (this.clienteSeleccionado['num_documento'] == <?php echo $ruc_emisor ?>) errorDatosVenta.push('*El destinatario no debe ser igual al remitente');
+                                break;
+                            case '02':
+                            case '04':
+                            case '18':
+                                if (this.clienteSeleccionado['num_documento'] != <?php echo $ruc_emisor ?>) errorDatosVenta.push('*Para el motivo de traslado ingresado el destinatario debe ser igual al remitente');
+                                break;
+                            case '08':
+                            case '09':
+                                if (this.guia_datos_adicionales.doc_relacionado != '01') errorDatosVenta.push('*Para importación / exportación debes ingresar el número DAN');
 
                     }
+
 
                     if (errorDatosVenta.length) {
                         errorVenta = 1;

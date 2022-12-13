@@ -528,6 +528,7 @@ class GuiaController extends Controller
         $guia->placa_vehiculo=$datos_adicionales['placa_vehiculo'];
         $guia->dni_conductor=$datos_adicionales['dni_conductor'];
         $guia->licencia_conductor=$datos_adicionales['licencia_conductor']??'';
+        $guia->categoria_vehiculo=$datos_adicionales['categoria_vehiculo']??'';
         $guia->nombre_conductor=$datos_adicionales['nombre_conductor']??'';
         $guia->apellido_conductor=$datos_adicionales['apellido_conductor']??'';
         $guia->direccion_llegada=$datos_adicionales['direccion'];
