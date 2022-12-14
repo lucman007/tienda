@@ -33,12 +33,9 @@
                                    'badge-success' : estado=='ACEPTADO',
                                    'badge-dark' : estado=='ANULADO',
                                    'badge-danger' :estado=='RECHAZADO'}">@{{estado}}</span>
-                                @if($guia->estado=='PENDIENTE')
-                                    <a href="/guia/correccion/{{$guia->idguia}}"><span class="badge badge-primary"><i class="fas fa-edit"></i> CORREGIR</span></a><hr>
-                                @else
-                                    <hr>
-                                @endif
-                                @if($guia->num_doc_relacionado)
+                                <a href="/guia/correccion/{{$guia->idguia}}" v-show="estado=='PENDIENTE'"><span class="badge badge-primary"><i class="fas fa-edit"></i> CORREGIR</span></a><hr>
+
+                            @if($guia->num_doc_relacionado)
                                     <strong>Documento relacionado:</strong> {{$guia->num_doc_relacionado}}<hr>
                                 @endif
                                 @if($guia->estado=='PENDIENTE')
@@ -93,7 +90,7 @@
                                 <b-spinner v-show="mostrarProgreso" small label="Loading..." ></b-spinner> Corregir guía
 
                             </b-button>
-                            <b-button v-if="estado=='PENDIENTE'" class="mb-2" @click="enviar_guia('{{$guia->ticket}}','{{$guia->idguia}}')"
+                            <b-button v-if="estado=='PENDIENTE'" class="mb-2" @click="consultar_guia('{{$guia->ticket}}','{{$guia->idguia}}')"
                                       variant="success">
                                 <i v-show="!mostrarProgresoEnvio" class="fas fa-paper-plane"></i>
                                 <b-spinner v-show="mostrarProgresoEnvio" small label="Loading..." ></b-spinner>
@@ -169,7 +166,7 @@
             created(){
                 if('<?php echo $guia->estado ?>' == 'PENDIENTE' && (('<?php echo basename(url()->previous()) ?>').includes('nuevo') || ('<?php echo url()->previous() ?>').includes('correccion'))){
 
-                    this.enviar_guia(<?php echo '"'.$guia->ticket.'",'.$guia->idguia ?>);
+                    this.consultar_guia(<?php echo '"'.$guia->ticket.'",'.$guia->idguia ?>);
                 }
             },
             methods: {
@@ -225,7 +222,7 @@
                     iframe.src = src;
                     @endif
                 },
-                enviar_guia(ticket, idguia){
+                consultar_guia(ticket, idguia){
                     this.mostrarProgresoEnvio = true;
                     axios.post('{{url('guia/consultar-ticket')}}',{
                         'ticket':ticket,

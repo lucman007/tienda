@@ -1,5 +1,5 @@
 <template>
-    <p style="margin-left:20px" :style="color"><i class="fas fa-dollar-sign"></i> Compra {{compra}} / Venta: {{venta}}</p>
+    <p style="margin-left:20px" :style="color"><i class="fas fa-dollar-sign color-dollar"></i> Compra {{compra}} / Venta: {{venta}}</p>
 </template>
 <script>
     export default {
@@ -23,7 +23,7 @@
     }
 </script>
 <style>
-    .fa-dollar-sign{
+    .color-dollar{
         background: #187c0c;
         padding: 3px;
         border-radius: 5px;

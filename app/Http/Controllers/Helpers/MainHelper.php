@@ -276,7 +276,7 @@ class MainHelper extends Controller
                             ->orWhere('cod_producto',$consulta)
                             ->orWhere('presentacion','like','%'.$consulta.'%');
                     })
-                    ->orderby('idproducto','asc')
+                    ->orderby('idproducto','desc')
                     ->take(10)
                     ->get();
             }

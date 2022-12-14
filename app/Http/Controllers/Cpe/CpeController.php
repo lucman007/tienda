@@ -432,9 +432,16 @@ class CpeController extends Controller
 
         curl_close($curl);
         $guia = Guia::find($idguia);
-        $guia->ticket = $response;
+        if($guia->ticket){
+            $array_ticket = json_decode($guia->ticket, true);
+            $new_ticket = json_decode($response, true);
+            array_push($array_ticket, $new_ticket);
+            $guia->ticket = $array_ticket;
+        } else {
+            $guia->ticket = '['.$response.']';
+        }
+
         $guia->save();
-        Log::info($idguia.' - '.$response);
         return 'Número de ticket Sunat: '.json_decode($response, true)['numTicket']??'-';
     }
 
@@ -466,7 +473,6 @@ class CpeController extends Controller
 
         curl_close($curl);
         Log::info('ticket: '.$request->ticket);
-        Log::info('tocken: '.$tocken['access_token']);
         Log::info('response: '.$response);
 
         $response = json_decode($response, true);
@@ -475,16 +481,30 @@ class CpeController extends Controller
             case '0':
                 $respuesta = 'La guía se ha enviado correctamente';
                 $estado = 'ACEPTADO';
-                unlink(storage_path('/app/sunat/zip/').$request->file.'.zip');
+                $file = storage_path('/app/sunat/zip/') . $request->file . '.zip';
+                if (file_exists($file)) {
+                    unlink($file);
+                }
                 break;
             case '98':
                 $respuesta = 'Código:98 - El envío de la guía está en proceso';
                 $estado = 'PENDIENTE';
                 break;
             case '99':
-                $respuesta = 'Código:99 - La guía contiene errores. ';
+                $respuesta = 'Código:99 - Error:';
                 $respuesta .= $response['error']['numError'].' - '.$response['error']['desError'];
                 $estado = 'PENDIENTE';
+
+                if($response['error']['numError'] == '1033'){
+                    $estado = 'ACEPTADO';
+                    $respuesta = 'La guía se ha enviado correctamente';
+                    $guia = Guia::find($request->idguia);
+                    $num_ticket = json_decode($guia->ticket,true);
+                    $penultimo_ticket = count($num_ticket)-2;
+                    $request->ticket = $num_ticket[$penultimo_ticket]['numTicket'];
+                    $this->consultarGRE($request);
+                }
+
                 break;
             default:
                 $respuesta = '';

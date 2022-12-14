@@ -239,7 +239,7 @@ Route::group(['middleware' => ['can:Reportes']], function () {
 //Rutas para reportes
     Route::get('reportes/ventas/diario/{mes}','ReporteController@reporte_ventas_diario');
     Route::get('reportes/ventas/mensual/{anio}','ReporteController@reporte_ventas_mensual');
-    Route::get('reportes/ventas/generar-mes/{mes}','ReporteController@reporte_ventas_mensual_alt');
+    Route::get('reportes/ventas/generar-mes/{mes}','ReporteController@reporte_mensual_generar_mes');
 
     Route::get('reportes/gastos/diario/{mes}','ReporteController@reporte_gastos_diario');
     Route::get('reportes/gastos/mensual/{anio}','ReporteController@reporte_gastos_mensual');

@@ -760,7 +760,7 @@
                     </div>
                     <div class="col-lg-6">
                         <label>Fecha de pago:</label>
-                        <input min="{{date('Y-m-d')}}" type="date" v-model="cuota.fecha" name="fechaCuota"
+                        <input min="{{date('Y-m-d', strtotime(date('Y-m-d').' + 1 days'))}}" type="date" v-model="cuota.fecha" name="fechaCuota"
                                class="form-control">
                     </div>
                     <div class="col-lg-1">
@@ -1023,7 +1023,7 @@
                     }
                     this.cuotasAux.push({
                         monto: monto,
-                        fecha: '{{date('Y-m-d')}}',
+                        fecha: '{{date('Y-m-d', strtotime(date('Y-m-d').' + 1 days'))}}',
                     });
                 },
                 borrarCuota(index){

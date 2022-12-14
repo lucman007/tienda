@@ -651,7 +651,7 @@ class ReporteController extends Controller
             //costos
             $inventario = $item->inventario;
             $costo = 0;
-            $tc = $tipo_cambio=='fecha-actual'?cache('opciones')['tipo_cambio_compra']:$item->tipo_cambio;
+            $tc = $tipo_cambio=='fecha-actual'?round(cache('opciones')['tipo_cambio_compra'],2):$item->tipo_cambio;
 
             foreach ($inventario as $inv){
                 if($inv->moneda == 'USD'){
@@ -696,6 +696,7 @@ class ReporteController extends Controller
                     'costos'=>$costos,
                     'utilidad'=>$utilidad,
                     'impuestos'=>$impuestos,
+                    'tipo_cambio'=>$tc,
                 ];
                 $fecha_anterior=date("M Y",strtotime($item->fecha));
 
@@ -718,6 +719,7 @@ class ReporteController extends Controller
                 $totales_del_mes[count($totales_del_mes)-1]['utilidad']=$utilidad;
                 $totales_del_mes[count($totales_del_mes)-1]['impuestos']=$impuestos;
                 $totales_del_mes[count($totales_del_mes)-1]['ventas_netas']=$ventas_netas;
+                $totales_del_mes[count($totales_del_mes)-1]['tipo_cambio']=$tc;
 
             }
 
@@ -735,6 +737,7 @@ class ReporteController extends Controller
         $esExportable = $request->get('export','false');
         $moneda = $request->moneda??'PEN';
         $tipo_cambio = $request->tc??'fecha-actual';
+        $reporte_ventas_manual = json_decode(cache('config')['interfaz'], true)['reporte_ventas_manual']??false;
 
         if(!$anio){
             $anio=date('Y');
@@ -742,10 +745,9 @@ class ReporteController extends Controller
 
         $totales_del_mes = [];
 
-        //if(json_decode(cache('config')['interfaz'], true)['reporte_mensual_manual']??false){
-        if(true){
+        if($reporte_ventas_manual){
 
-            $opcion = Opciones::where('nombre_opcion','reporte-mensual-'.$anio)->orderby('valor','desc')->get();
+            $opcion = Opciones::where('nombre_opcion','reporte-mensual-'.$anio.'-'.$moneda)->orderby('valor','asc')->get();
             if(count($opcion) == 0){
                 for($i=0; $i < 12;$i++) {
                     $mes = str_pad($i + 1, 2, '0', STR_PAD_LEFT);
@@ -755,9 +757,10 @@ class ReporteController extends Controller
                     $totales_del_mes[$i]['utilidad'] = 0;
                     $totales_del_mes[$i]['impuestos'] = 0;
                     $totales_del_mes[$i]['ventas_netas'] = 0;
+                    $totales_del_mes[$i]['tipo_cambio'] = 0;
 
                     $opt = new Opciones();
-                    $opt->nombre_opcion = 'reporte-mensual-'.$anio;
+                    $opt->nombre_opcion = 'reporte-mensual-'.$anio.'-'.$moneda;
                     $opt->valor = $mes;
                     $opt->valor_json = json_encode($totales_del_mes[$i]);
                     $opt->save();
@@ -780,7 +783,7 @@ class ReporteController extends Controller
         }
 
         if($esExportable == 'true'){
-            return Excel::download(new VentasMensualExport($this->reporte_ventas_mensual_data($anio, $moneda, $tipo_cambio),$moneda), 'ventas_mensual.xlsx');
+            return Excel::download(new VentasMensualExport($ventas,$moneda), 'ventas_mensual.xlsx');
         } else {
             return view('reportes.ventas_mensual',
                 [
@@ -794,7 +797,7 @@ class ReporteController extends Controller
         }
     }
 
-    public function reporte_ventas_mensual_alt(Request $request, $mes=null){
+    public function reporte_mensual_generar_mes(Request $request, $mes=null){
         $moneda = $request->moneda??'PEN';
         $tipo_cambio = $request->tc??'fecha-actual';
 
@@ -803,15 +806,43 @@ class ReporteController extends Controller
         $valor_mes = $ex[1];
 
         $ventas=$this->reporte_ventas_diario_data($mes, $moneda, $tipo_cambio);
-        $ventas[0]['fecha'] = date("M Y",strtotime($ventas[0]['fecha']));
-        Opciones::where('nombre_opcion','reporte-mensual-'.$anio)
-            ->where('valor',$valor_mes)
-            ->update([
-                'valor_json'=>json_encode($ventas[0])
 
-        ]);
+        if(count($ventas) > 0){
 
-        return redirect('/reportes/ventas/mensual/'.date('Y', strtotime($mes)));
+            $data = [];
+            $ventas_brutas = 0;
+            $costos = 0;
+            $utilidad=0;
+            $impuestos=0;
+            $ventas_netas=0;
+            $tipo_cambio=0;
+
+            foreach ($ventas as $venta){
+                $ventas_brutas += $venta['ventas_brutas'];
+                $costos += $venta['costos'];
+                $utilidad += $venta['utilidad'];
+                $impuestos += $venta['impuestos'];
+                $ventas_netas += $venta['ventas_netas'];
+                $tipo_cambio += $venta['tipo_cambio'];
+            }
+
+            $data['fecha'] = date("M Y", strtotime($mes));
+            $data['ventas_brutas'] = $ventas_brutas;
+            $data['costos'] = $costos;
+            $data['utilidad'] = $utilidad;
+            $data['impuestos'] = $impuestos;
+            $data['ventas_netas'] = $ventas_netas;
+            $data['tipo_cambio'] = $tipo_cambio;
+
+            Opciones::where('nombre_opcion','reporte-mensual-'.$anio.'-'.$moneda)
+                ->where('valor',$valor_mes)
+                ->update([
+                    'valor_json'=>json_encode($data)
+
+                ]);
+        }
+
+        return redirect('/reportes/ventas/mensual/'.date('Y', strtotime($mes)).'?moneda='.$moneda);
 
     }
 

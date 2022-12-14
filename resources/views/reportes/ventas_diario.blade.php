@@ -104,7 +104,7 @@
                                                             <td>{{ $item['fecha']}}</td>
                                                             <td>{{$moneda=='PEN'?'S/':'USD '}}{{number_format($item['ventas_brutas'],2)}}</td>
                                                             @if($moneda=='USD')
-                                                                <td>{{$item['tipo_cambio']}}</td>
+                                                                <td>x {{$item['tipo_cambio']}}</td>
                                                             @endif
                                                             <td>S/{{number_format($item['impuestos'],2)}}</td>
                                                             <td>S/{{number_format($item['ventas_netas'],2)}}</td>

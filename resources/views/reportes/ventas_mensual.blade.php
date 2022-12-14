@@ -91,12 +91,14 @@
                                     </div>
                                 </div>
                             </div>
+                            @if($manual)
                             <div class="col-lg-12 mt-3 text-center">
                                 <h4 style="color:#119527">El volumen de ventas es demasiado grande para ser analizado.</h4>
-                                <p>Genera el reporte de cada mes manualmente haciendo click en el botón <strong>GENERAR</strong> a la derecha de cada mes en la tabla inferior.
+                                <p>Genera el reporte de cada mes manualmente haciendo click en el botón <strong>ACTUALIZAR</strong> a la derecha de cada mes en la tabla inferior.
                                     <br> No tendrás que hacerlo siempre, pues se guardará en la base de datos. Solo vuelve a generarlo
                                     <br> si eliminas o editas ventas de algún mes en específico</p>
                             </div>
+                            @endif
                             <div class="col-lg-12 mt-3">
                                 <div class="card no-shadow">
                                     <div class="card-body">
@@ -106,11 +108,16 @@
                                                 <tr>
                                                     <th scope="col">Fecha</th>
                                                     <th scope="col">Ventas brutas</th>
+                                                    @if($moneda == 'USD')
+                                                    <th scope="col">Tipo de cambio</th>
+                                                    @endif
                                                     <th scope="col">Impuestos</th>
                                                     <th scope="col">Ventas netas</th>
                                                     <th scope="col">Costo de bienes</th>
                                                     <th scope="col">Utilidad bruta</th>
-                                                    <th scope="col">Generar reporte</th>
+                                                    @if($manual)
+                                                    <th scope="col">Reporte</th>
+                                                    @endif
                                                 </tr>
                                                 </thead>
                                                 <tbody>
@@ -119,11 +126,16 @@
                                                         <tr>
                                                             <td>{{ $item['fecha']}}</td>
                                                             <td>{{$moneda=='PEN'?'S/':'USD '}}{{number_format($item['ventas_brutas'],2)}}</td>
+                                                            @if($moneda == 'USD')
+                                                                <td>x {{$item['tipo_cambio']}}</td>
+                                                            @endif
                                                             <td>S/{{number_format($item['impuestos'],2)}}</td>
                                                             <td>S/{{number_format($item['ventas_netas'],2)}}</td>
                                                             <td>S/{{number_format($item['costos'],2)}}</td>
                                                             <td style="color:{{$item['utilidad']<0?'red':'inherit'}}">S/{{number_format($item['utilidad'],2)}}</td>
-                                                            <td><b-button href="/reportes/ventas/generar-mes/{{date('Y-m', strtotime($item['fecha']))}}" style="padding: 4px 10px;" class="btn btn-warning">Generar</b-button></td>
+                                                            @if($manual)
+                                                            <td><b-button href="/reportes/ventas/generar-mes/{{date('Y-m', strtotime($item['fecha']))}}?moneda={{$moneda}}&tc={{$usar_tipo_cambio}}" style="padding: 4px 10px;" class="btn btn-warning"><i class="fas fa-sync"></i> Actualizar</b-button></td>
+                                                            @endif
                                                         </tr>
                                                     @endforeach
                                                 @else

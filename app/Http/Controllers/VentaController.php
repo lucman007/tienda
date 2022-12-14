@@ -658,7 +658,8 @@ class VentaController extends Controller
 
         $venta->guia_relacionada=$venta->guia->first();
         if($venta->guia_relacionada){
-            $venta->guia_relacionada['ticket'] = json_decode($venta->guia_relacionada['ticket'], true)['numTicket']??0;
+            $ticket_json = json_decode($venta->guia_relacionada['ticket'], true);
+            $venta->guia_relacionada['ticket'] = $ticket_json[count($ticket_json) - 1]['numTicket']??0;
         }
 
         //inicio código para version antigua del sistema tabla guia
@@ -674,6 +675,15 @@ class VentaController extends Controller
             }
         }*/
         //fin código para version antigua del sistema tabla guia
+
+
+        /*LEER EL CDR*/
+        $file_xml=storage_path().'/app/sunat/cdr/R-'.$venta->nombre_fichero.'.xml';
+        if(file_exists($file_xml)){
+            $cdr_xml = simplexml_load_file($file_xml);
+            $Description=$cdr_xml->xpath('//cbc:Description');
+            $venta->motivo_rechazo = $Description[0]??false;
+        }
 
 
         switch ($venta->facturacion->estado){

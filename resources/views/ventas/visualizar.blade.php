@@ -56,7 +56,12 @@
                                    'badge-danger' :estado=='RECHAZADO'}">@{{estado}}</span>
                                 <hr>
                                 @endif
-                                    @if($venta->guia_relacionada)
+                                @if($venta->motivo_rechazo)
+                                        <span v-show="estado=='RECHAZADO'"><strong>Motivo de rechazo:</strong> {{$venta->motivo_rechazo}}
+                                        <hr>
+                                         </span>
+                                @endif
+                                @if($venta->guia_relacionada)
                                         <strong>Guía:</strong>
                                         @if(isset($venta->guia_relacionada['idguia']))
                                             <a href="/guia/emision/{{$venta->guia_relacionada['idguia']}}">  {{$venta->guia_relacionada['correlativo']}}</a>

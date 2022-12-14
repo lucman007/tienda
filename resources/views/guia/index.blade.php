@@ -99,9 +99,10 @@
                                                     </button>
                                                 </a>
                                                 <button class="btn btn-success" v-if="'{{$guia->estado}}'=='PENDIENTE'"
-                                                        @click="enviar({{$guia->idguia}},'guia')"
+                                                        @click="consultar_guia('{{$guia->ticket}}',{{$guia->idguia}},'{{$guia->nombre_fichero}}')"
                                                         title="Enviar a Sunat">
-                                                    <i class="fas fa-paper-plane"></i>
+                                                    <i :id="'icon_{{$guia->idguia}}'" class="fas fa-paper-plane d-inline-block"></i>
+                                                    <span :id="'spinner_{{$guia->idguia}}'" class="d-none"><b-spinner small label="Loading..." ></b-spinner></span>
                                                 </button>
                                             </td>
                                         </tr>
@@ -153,18 +154,27 @@
                             break;
                     }
                 },
-                enviar(idguia, tipo){
-                    if(confirm('¿Está seguro de enviar la guía a SUNAT?')){
-                        axios.get('{{url('ventas/enviar')}}' + '/' + tipo + '/' + idguia)
-                            .then(response => {
-                                alert(response.data);
-                                window.location.reload();
-                            })
-                            .catch(error => {
-                                alert('Ha ocurrido un error al enviar el documento.');
-                                console.log(error);
-                            });
-                    }
+                consultar_guia(ticket, idguia, file){
+                    let icon = document.getElementById("icon_"+idguia);
+                    icon.classList.remove('d-inline-block');
+                    icon.classList.add('d-none');
+
+                    let spinner = document.getElementById("spinner_"+idguia);
+                    spinner.classList.remove('d-none');
+                    spinner.classList.add('d-inline-block');
+
+                    axios.post('{{url('guia/consultar-ticket')}}',{
+                        'ticket':ticket,
+                        'idguia':idguia,
+                        'file':file,
+                    })
+                        .then(response =>  {
+                            window.location.reload(true);
+                        })
+                        .catch(error =>  {
+                            alert('error');
+                            console.log(error);
+                        });
                 },
 
             },

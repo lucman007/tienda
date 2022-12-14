@@ -19,37 +19,47 @@
         <input type="text" v-model="interfaz.text_top_header_style" autocomplete="nope" class="form-control">
     </div>
 </div>
-<div class="col-lg-4 mt-3">
+<div class="col-lg-3 mt-3">
     <b-form-checkbox v-model="interfaz.layout" switch size="lg">
-        <p style="font-size: 1rem;">Ancho completo</p>
+        <p style="font-size: 14px;">Ancho completo</p>
     </b-form-checkbox>
 </div>
-<div class="col-lg-4 mt-3">
+<div class="col-lg-3 mt-3">
     <b-form-checkbox v-model="interfaz.igv_incluido" switch size="lg">
-        <p style="font-size: 1rem;">Igv incluido</p>
+        <p style="font-size: 14px;">Igv incluido</p>
     </b-form-checkbox>
 </div>
-<div class="col-lg-4 mt-3">
+<div class="col-lg-3 mt-3">
     <b-form-checkbox v-model="interfaz.rawbt" switch size="lg">
-        <p style="font-size: 1rem;">Usar RawBt App</p>
+        <p style="font-size: 14px;">Usar RawBt App</p>
     </b-form-checkbox>
 </div>
-<div class="col-lg-4 mt-3">
+<div class="col-lg-3 mt-3">
     <b-form-checkbox v-model="interfaz.emitir_solo_ticket" switch size="lg">
-        <p style="font-size: 1rem;">Emitir solo ticket</p>
+        <p style="font-size: 14px;">Emitir solo ticket</p>
     </b-form-checkbox>
 </div>
-<div class="col-lg-4 mt-3">
+<div class="col-lg-3 mt-3">
     <b-form-checkbox v-model="interfaz.notificar_caja" switch size="lg">
-        <p style="font-size: 1rem;">Notificar movimientos de caja</p>
+        <p style="font-size: 14px;">Notificar movimientos de caja</p>
     </b-form-checkbox>
 </div>
-<div class="col-lg-4 mt-3">
+<div class="col-lg-3 mt-3">
     <b-form-checkbox v-model="interfaz.cierre_detallado" switch size="lg">
-        <p style="font-size: 1rem;">Cierre de caja detallado</p>
+        <p style="font-size: 14px;">Cierre de caja detallado</p>
     </b-form-checkbox>
 </div>
-<div class="col-lg-4 mt-3">
+<div class="col-lg-3 mt-3">
+    <b-form-checkbox v-model="interfaz.reporte_ventas_manual" switch size="lg">
+        <p style="font-size: 14px;">Reporte de ventas manual (Alto volumen)</p>
+    </b-form-checkbox>
+</div>
+<div class="col-lg-3 mt-3">
+    <b-form-checkbox v-model="interfaz.buscador_productos_alt" switch size="lg">
+        <p style="font-size: 14px;">Buscador de productos alternativo</p>
+    </b-form-checkbox>
+</div>
+<div class="col-lg-3 mt-3">
     <div class="form-group">
         <label>Impresión:</label>
         <select v-model="interfaz.tipo_impresion" class="custom-select">
@@ -58,7 +68,7 @@
         </select>
     </div>
 </div>
-<div class="col-lg-4 mt-3">
+<div class="col-lg-3 mt-3">
     <div class="form-group">
         <label>Buscador de clientes:</label>
         <select v-model="interfaz.buscador_clientes" class="custom-select">
@@ -67,7 +77,7 @@
         </select>
     </div>
 </div>
-<div class="col-lg-4 mt-3">
+<div class="col-lg-3 mt-3">
     <div class="form-group">
         <label>Buscador de productos:</label>
         <select v-model="interfaz.buscador_productos" class="custom-select">
@@ -75,11 +85,6 @@
             <option value="2">Ventana emergente</option>
         </select>
     </div>
-</div>
-<div class="col-lg-4 mt-3">
-    <b-form-checkbox v-model="interfaz.buscador_productos_alt" switch size="lg">
-        <p style="font-size: 1rem;">Buscador de productos alternativo</p>
-    </b-form-checkbox>
 </div>
 <div class="col-lg-12 mt-3">
     <div class="row">
@@ -113,7 +118,7 @@
 </div>
 <div class="col-lg-4 mt-3">
     <b-form-checkbox v-model="interfaz_pedidos.solo_comprobantes" switch size="lg">
-        <p style="font-size: 1rem;">Ver solo comprobantes</p>
+        <p style="font-size: 14px;">Ver solo comprobantes</p>
     </b-form-checkbox>
 </div>
 <div class="col-lg-12">

@@ -74,6 +74,8 @@ class GuiaController extends Controller
                 $item->cliente->persona;
                 $emisor = new Emisor();
                 $item->nombre_fichero = $emisor->ruc . '-09-' . $item->correlativo;
+                $ticket_json = json_decode($item->ticket, true);
+                $item->ticket = $ticket_json[count($ticket_json) - 1]['numTicket']??0;
 
                 switch ($item->estado) {
                     case 'PENDIENTE':
@@ -459,7 +461,8 @@ class GuiaController extends Controller
         $guia->motivo_traslado=$datos_adicionales['motivo_traslado'];
         $guia->num_doc_relacionado=$datos_adicionales['num_doc_relacionado'];
         $guia->fecha_traslado=date('Y-m-d', strtotime($datos_adicionales['fecha_traslado']));
-        $guia->ticket = json_decode($guia->ticket, true)['numTicket']??0;
+        $ticket_json = json_decode($guia->ticket, true);
+        $guia->ticket = $ticket_json[count($ticket_json) - 1]['numTicket']??0;
 
         $guia->nombre_fichero = $emisor->ruc . '-09-' . $guia->correlativo;
 
