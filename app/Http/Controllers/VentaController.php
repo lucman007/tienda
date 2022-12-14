@@ -658,7 +658,7 @@ class VentaController extends Controller
 
         $venta->guia_relacionada=$venta->guia->first();
         if($venta->guia_relacionada){
-            $ticket_json = json_decode($venta->guia_relacionada['ticket'], true);
+            $ticket_json = json_decode($venta->guia_relacionada['ticket'], true)??[];
             $venta->guia_relacionada['ticket'] = $ticket_json[count($ticket_json) - 1]['numTicket']??0;
         }
 

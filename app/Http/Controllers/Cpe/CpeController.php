@@ -473,7 +473,6 @@ class CpeController extends Controller
 
         curl_close($curl);
         Log::info('ticket: '.$request->ticket);
-        Log::info('response: '.$response);
 
         $response = json_decode($response, true);
 

@@ -82,27 +82,34 @@
         <div class="borde info-usuario" style="margin-top: 3mm; height: 10mm">
             <table cellpadding="0">
                 <tr>
-                    <td>TRANSPORTE:</td>
+                    <td>TRANSPORTE: {{$documento->categoria_vehiculo}}</td>
                 </tr>
-                @if($documento->codigo_transporte == '01')
-                <tr>
-                    <td style="width: 170px"><strong>Razón social:</strong></td>
-                    <td style="width: 170px">{{$documento->razon_social_transportista}}</td>
-                </tr>
-                <tr>
-                    <td style="width: 170px"><strong>Ruc:</strong></td>
-                    <td style="width: 170px">{{ $documento->num_doc_transportista }}</td>
-                </tr>
-                @elseif($documento->codigo_transporte == '02')
-                <tr>
-                    <td><strong>Vehículo:</strong></td>
-                    <td style="width:150mm">{{$documento->placa_vehiculo}}</td>
-                </tr>
-                <tr>
-                    <td><strong>DNI Conductor:</strong></td>
-                    <td style="width:150mm">{{$documento->dni_conductor}}</td>
-                </tr>
-                 @endif
+                @if($documento->categoria_vehiculo != 'M1_L')
+                    @if($documento->codigo_transporte == '01')
+                    <tr>
+                        <td style="width: 170px"><strong>Razón social:</strong></td>
+                        <td style="width: 170px">{{$documento->razon_social_transportista}}</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 170px"><strong>Ruc:</strong></td>
+                        <td style="width: 170px">{{ $documento->num_doc_transportista }}</td>
+                    </tr>
+                    @elseif($documento->codigo_transporte == '02')
+                    <tr>
+                        <td><strong>Vehículo:</strong></td>
+                        <td style="width:150mm">{{$documento->placa_vehiculo}}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>DNI Conductor:</strong></td>
+                        <td style="width:150mm">{{$documento->dni_conductor}}</td>
+                    </tr>
+                    @endif
+                @else
+                    <tr>
+                        <td><strong>Indicador de traslado en vehículos de categoría M1 o L:</strong></td>
+                        <td style="width:150mm">SÍ</td>
+                    </tr>
+                @endif
             </table>
         </div>
         <div class="tabla-alto-fijo">

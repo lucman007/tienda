@@ -62,7 +62,7 @@ class Despatch {
         $documento->num_doc_relacionado=$datos_adicionales['num_doc_relacionado'];
         $documento->doc_relacionado=$datos_adicionales['doc_relacionado'];
         $documento->fecha_traslado=date('Y-m-d', strtotime($datos_adicionales['fecha_traslado']));
-        $documento->categoria_vehiculo = $datos_adicionales['categoria_vehiculo']??'M1_L';
+        $documento->categoria_vehiculo = $datos_adicionales['categoria_vehiculo']??'otros';
 
 		$usuario->razon_social=$usuario->persona['nombre'];
 		$this->nombre_fichero=$emisor->ruc.'-09-'.$documento->correlativo;
