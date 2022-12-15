@@ -114,29 +114,29 @@
     </div>
     <div class="div-table-header">
     </div>
+    <table class="items" cellpadding="0">
+        <thead>
+        <tr class="table-header">
+            <td><strong>#</strong></td>
+            <td><strong>CÓD.</strong></td>
+            <td><strong>DESCRIPCIÓN</strong></td>
+            <td><strong>UND</strong></td>
+            <td><strong>CANTIDAD</strong></td>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach($items as $item)
+            <tr class="items-tr">
+                <td style="width: 5mm">{{$item->num_item}}</td>
+                <td style="width: 20mm">{{$item->codigo}}</td>
+                <td style="width: 115mm">{!! $item->descripcion !!}</td>
+                <td style="width: 20mm">{{$item->unidad_medida}}</td>
+                <td style="width: 18mm">{{$item->cantidad}}</td>
+            </tr>
+        @endforeach
+        </tbody>
+    </table>
     <div class="body">
-        <table class="items" cellpadding="0">
-            <thead>
-                <tr class="table-header">
-                    <td><strong>#</strong></td>
-                    <td><strong>CÓD.</strong></td>
-                    <td><strong>DESCRIPCIÓN</strong></td>
-                    <td><strong>UND</strong></td>
-                    <td><strong>CANTIDAD</strong></td>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($items as $item)
-                    <tr class="items-tr">
-                        <td style="width: 5mm">{{$item->num_item}}</td>
-                        <td style="width: 20mm">{{$item->codigo}}</td>
-                        <td style="width: 115mm">{!! $item->descripcion !!}</td>
-                        <td style="width: 20mm">{{$item->unidad_medida}}</td>
-                        <td style="width: 18mm">{{$item->cantidad}}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
         <table class="footer">
             <tr>
                 <td class="footer-l">

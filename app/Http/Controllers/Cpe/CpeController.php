@@ -500,8 +500,10 @@ class CpeController extends Controller
                     $guia = Guia::find($request->idguia);
                     $num_ticket = json_decode($guia->ticket,true);
                     $penultimo_ticket = count($num_ticket)-2;
-                    $request->ticket = $num_ticket[$penultimo_ticket]['numTicket'];
-                    $this->consultarGRE($request);
+                    if($penultimo_ticket >= 0){
+                        $request->ticket = $num_ticket[$penultimo_ticket]['numTicket'];
+                        $this->consultarGRE($request);
+                    }
                 }
 
                 break;

@@ -63,46 +63,46 @@
     </div>
     <div class="div-table-header">
     </div>
+    <table class="items" cellpadding="0">
+        <thead>
+        <tr class="table-header">
+            <td><strong>#</strong></td>
+            <td><strong>CONCEPTO</strong></td>
+            <td><strong>CANT.</strong></td>
+            <td><strong>UND</strong></td>
+            <td><strong>P. UNITARIO</strong></td>
+            <td><strong>DSCTO</strong></td>
+            <td><strong>IMPORTE</strong></td>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach($items as $item)
+            <tr class="items-tr">
+                <td style="width: 5mm">{{$item->num_item}}</td>
+                <td style="width: 88mm">{!! $item->descripcion !!}</td>
+                <td style="width: 12mm">{{$item->cantidad}}</td>
+                <td style="width: 10mm">{{$item->unidad_medida}}</td>
+                <td style="width: 20mm; text-align: right">{{$item->precio}}</td>
+                <td style="width: 15mm; text-align: right">{{floatval($item->detalle->porcentaje_descuento)}}%</td>
+                @if($documento->igv_incluido == 1)
+                    <td style="width: 20mm; text-align: right">{{$item->detalle->total}}</td>
+                @else
+                    <td style="width: 20mm; text-align: right">{{$item->detalle->subtotal}}</td>
+                @endif
+            </tr>
+        @endforeach
+        @if($documento->facturacion->descuento_global > '0.00')
+            <tr>
+                <td><br></td>
+            </tr>
+            <tr>
+                <td colspan="7">Descuento global ({{$documento->facturacion->porcentaje_descuento_global*100}}%):
+                    {{$documento->codigo_moneda}} {{$documento->facturacion->descuento_global}}</td>
+            </tr>
+        @endif
+        </tbody>
+    </table>
     <div class="body">
-        <table class="items" cellpadding="0">
-            <thead>
-                <tr class="table-header">
-                    <td><strong>#</strong></td>
-                    <td><strong>CONCEPTO</strong></td>
-                    <td><strong>CANT.</strong></td>
-                    <td><strong>UND</strong></td>
-                    <td><strong>P. UNITARIO</strong></td>
-                    <td><strong>DSCTO</strong></td>
-                    <td><strong>IMPORTE</strong></td>
-                </tr>
-            </thead>
-            <tbody>
-            @foreach($items as $item)
-                <tr class="items-tr">
-                    <td style="width: 5mm">{{$item->num_item}}</td>
-                    <td style="width: 88mm">{!! $item->descripcion !!}</td>
-                    <td style="width: 12mm">{{$item->cantidad}}</td>
-                    <td style="width: 10mm">{{$item->unidad_medida}}</td>
-                    <td style="width: 20mm; text-align: right">{{$item->precio}}</td>
-                    <td style="width: 15mm; text-align: right">{{floatval($item->detalle->porcentaje_descuento)}}%</td>
-                    @if($documento->igv_incluido == 1)
-                        <td style="width: 20mm; text-align: right">{{$item->detalle->total}}</td>
-                    @else
-                        <td style="width: 20mm; text-align: right">{{$item->detalle->subtotal}}</td>
-                    @endif
-                </tr>
-            @endforeach
-            @if($documento->facturacion->descuento_global > '0.00')
-                <tr>
-                    <td><br></td>
-                </tr>
-                <tr>
-                    <td colspan="7">Descuento global ({{$documento->facturacion->porcentaje_descuento_global*100}}%):
-                        {{$documento->codigo_moneda}} {{$documento->facturacion->descuento_global}}</td>
-                </tr>
-            @endif
-            </tbody>
-        </table>
         <table class="footer" style="border: 3px solid #b1b1b1; padding: 10px 23px">
             <tr>
                 <td class="footer-l">

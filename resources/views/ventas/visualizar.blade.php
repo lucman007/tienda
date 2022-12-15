@@ -480,10 +480,32 @@
                     this.mostrarProgreso = true;
                     axios.get('{{url('ventas/reenviar')}}' + '/' + idventa + '/' + nombre_comprobante + '/' + doc_relacionado)
                         .then(response =>  {
-                            this.$bvToast.toast(response.data[0], {
-                                title: 'Envío de comprobantes',
-                                variant: 'primary',
-                                solid: true
+
+                            let mensaje = response.data[0];
+                            let titulo;
+                            let color;
+                            let tiempo;
+                            if((mensaje.toLowerCase()).includes('aceptada') || (mensaje.toLowerCase()).includes('aceptado')){
+                                titulo = 'Comprobante enviado con éxito';
+                                color = 'primary';
+                                tiempo = 5000;
+                            } else if((mensaje.toLowerCase()).includes('rechazado')) {
+                                titulo = 'El comprobante ha sido rechazado y no es válido';
+                                color = 'danger';
+                                tiempo = 10000;
+                                this.$emit('notificaciones');
+                            } else {
+                                titulo = 'Comprobante pendiente de envío';
+                                color = 'warning';
+                                tiempo = 10000;
+                                this.$emit('notificaciones');
+                            }
+
+                            this.$bvToast.toast(mensaje, {
+                                title: titulo,
+                                variant: color,
+                                solid: true,
+                                autoHideDelay: tiempo,
                             });
                             this.estado = response.data[1];
                             this.mostrarProgreso = false;

@@ -57,7 +57,7 @@ class NotificacionesSistema extends Notification
     {
         return [
             'idventa' => $this->comprobante->idventa,
-            'comprobante' => $this->comprobante->serie.'-'.$this->comprobante->correlativo,
+            'comprobante' => $this->comprobante->facturacion->serie.'-'.$this->comprobante->facturacion->correlativo,
             'estado' => $this->comprobante->estado,
             'mensaje'=>$this->comprobante->mensaje
         ];

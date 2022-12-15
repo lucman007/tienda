@@ -314,7 +314,7 @@
                 this.clienteSeleccionado = {};
                 this.disabledClienteRuc = false;
                 this.query = '';
-                this.$nextTick(function () {
+                this.$nextTick(() => {
                     this.$refs.focusThis.focus()
                 })
             },
@@ -389,20 +389,20 @@
                         let titulo;
                         let color;
                         let tiempo;
-                        if((mensaje.toLowerCase()).includes('error')){
-                            titulo = 'El comprobante contiene errores';
-                            color = 'warning';
-                            tiempo = 10000;
-                            this.$emit('notificaciones');
+                        if((mensaje.toLowerCase()).includes('aceptada') || (mensaje.toLowerCase()).includes('aceptado')){
+                            titulo = 'Comprobante enviado con éxito';
+                            color = 'primary';
+                            tiempo = 5000;
                         } else if((mensaje.toLowerCase()).includes('rechazado')) {
                             titulo = 'El comprobante ha sido rechazado y no es válido';
                             color = 'danger';
                             tiempo = 10000;
                             this.$emit('notificaciones');
                         } else {
-                            titulo = 'Comprobante enviado con éxito';
-                            color = 'primary';
-                            tiempo = 5000;
+                            titulo = 'Comprobante pendiente de envío';
+                            color = 'warning';
+                            tiempo = 10000;
+                            this.$emit('notificaciones');
                         }
 
                         this.$bvToast.toast(mensaje, {

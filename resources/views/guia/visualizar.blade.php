@@ -15,16 +15,20 @@
                     <div class="card-header">
                         Detalle
                     </div>
+                    @php
+                        $datos_adicionales = json_decode($guia->guia_datos_adicionales,TRUE);
+                        $categoria_vehiculo = $datos_adicionales['categoria_vehiculo']??'otros';
+                    @endphp
                     <div class="card-body">
                         <div class="row">
                             <div class="col-lg-4">
-                                <strong>Fecha:</strong> {{date("d/m/Y H:i:s",strtotime($guia->fecha_emision))}}<hr>
-                                <strong>Dirección de llegada:</strong> {{$guia->direccion_llegada}}<hr>
+                                <strong>Fecha emisión:</strong> {{date("d/m/Y",strtotime($guia->fecha_emision))}} <hr>
                                 <strong>Fecha de traslado:</strong> {{date("d/m/Y",strtotime($guia->fecha_traslado))}} <hr>
+                                <strong>Motivo de traslado:</strong> {{$guia->motivo_traslado}}  <hr>
                             </div>
                             <div class="col-lg-4">
                                 <strong>Transporte: </strong>{{$guia->tipo_transporte}}  <hr>
-                                <strong>Motivo de traslado:</strong> {{$guia->motivo_traslado}}  <hr>
+                                <strong>Vehículo de categoría M1 o L:</strong> {{$categoria_vehiculo == 'M1_L'?'SÍ':'NO'}}  <hr>
                                 <strong>Peso y bultos: </strong>{{$guia->peso_bruto.' KG / '.$guia->cantidad_bultos.' UND'}}<hr>
                             </div>
                             <div class="col-lg-4">
@@ -47,6 +51,7 @@
                             </div>
                             <div class="col-lg-8">
                                 <strong>Cliente:</strong> {{$guia->cliente['num_documento']}} - {{$guia->persona['nombre']}} <hr>
+                                <strong>Dirección de llegada:</strong> {{$guia->direccion_llegada}}<hr>
                             </div>
                         </div>
                         <div class="table-responsive tabla-gestionar">

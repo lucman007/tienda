@@ -16,6 +16,13 @@ class TenantController extends Controller
     public function crearTenant(Request $request) {
         $artisan = Artisan::call("domain:add {$request->dominio}");
         $output = Artisan::output();
+
+        $ruta = str_replace('.','_',$request->dominio);
+        mkdir(storage_path($ruta.'/app/sunat/certificados'), 0777, true);
+        mkdir(storage_path($ruta.'/app/sunat/cdr'), 0777, true);
+        mkdir(storage_path($ruta.'/app/sunat/pdf'), 0777, true);
+        mkdir(storage_path($ruta.'/app/sunat/xml'), 0777, true);
+        mkdir(storage_path($ruta.'/app/sunat/zip'), 0777, true);
         return Redirect::back()->with('mensaje_crear',$output);
     }
 

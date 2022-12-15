@@ -34,10 +34,8 @@
                                             <a class="notification notification-flush notification-unread" :href="'/notificaciones/marcar-como-leido/'+notificacion.id">
                                                 <div class="notification-body" :style="{opacity:notificacion.read_at == null?'1':'0.6'}">
                                                     <p class="mb-1">
-                                                        El comprobante <strong>{{ notificacion.data['comprobante'] }}</strong>
-                                                        está en estado
-                                                        <strong>{{ notificacion.data['estado'] }}</strong> <br>
-                                                        <strong>Mensaje:</strong> {{ notificacion.extracto }}
+                                                        <span v-html="notificacion.titulo"></span>
+                                                        <span v-html="notificacion.extracto"></span>
                                                     </p>
                                                     <span class="notification-time"><i
                                                             class="fas fa-calendar-alt"></i> {{ notificacion.fecha }}</span>
@@ -76,7 +74,9 @@
             return {
                 numNotificaciones:0,
                 notificaciones:[],
-                openPanel: false
+                openPanel: false,
+                numComprobantes:11,
+                disabledVentas:false,
             }
         },
         created(){

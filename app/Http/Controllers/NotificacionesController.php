@@ -36,7 +36,8 @@ class NotificacionesController extends Controller
         foreach ($notifications as $notification){
             $notification->fecha = date('d/m/Y H:i:s', strtotime($notification->created_at));
             $data = json_decode(json_encode($notification->data), true);
-            $notification->extracto = preg_replace('/((\w+\W*){'.(15-1).'}(\w+))(.*)/', '${1}', $data['mensaje']).'...';
+            $notification->titulo = "El comprobante <strong>".$data['comprobante']."</strong> ha sido <span class='badge badge-danger'>".$data['estado']."</span> <br>";
+            $notification->extracto = "<strong>Motivo:</strong> ".preg_replace('/((\w+\W*){'.(15-1).'}(\w+))(.*)/', '${1}', $data['mensaje'])."...";
         }
 
         return response()->json($notifications);

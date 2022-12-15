@@ -34,7 +34,7 @@ class ProcesarRespuestas
 
         if(!$response){
             Log::info('SUNAT no ha podido procesar su solicitud. Inténtalo nuevamente en unos minutos. Response: '.$response);
-            return 'SUNAT no ha podido procesar su solicitud. Inténtalo nuevamente en unos minutos.';
+            return 'SUNAT no ha podido procesar su solicitud. Se intentará el reenvío automático en el transcurso del día.';
         } else{
             //Verificación de errores
             $xml = simplexml_load_string($response);
@@ -63,9 +63,6 @@ class ProcesarRespuestas
                 $user =  User::whereHas('roles', function ($query) {
                     $query->where('id', 5);
                 })->get();
-                $venta=Venta::find($this->idventa);
-                $venta->facturacion->mensaje = $mensaje;
-                Notification::send($user, new NotificacionesSistema($venta->facturacion));
 
                 return $mensaje;
 
@@ -145,6 +142,7 @@ class ProcesarRespuestas
                         $query->where('id', 5);
                     })->get();
                     $venta->mensaje = $Description.$observación;
+                    $venta->estado = 'RECHAZADO';
                     Notification::send($user, new NotificacionesSistema($venta));
 
                     return 'El documento ha sido rechazado. '.$Description.$observación;

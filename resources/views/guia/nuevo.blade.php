@@ -712,6 +712,7 @@
                     let errorString = '';
                     if (this.fecha.length == 0) errorDatosVenta.push('*La fecha no puede estar vacia');
                     if (this.guia_datos_adicionales.direccion.length == 0) errorDatosVenta.push('*El campo direccion de la guia no puede estar vacío');
+                    if (this.guia_datos_adicionales.ubigeo.length!=6) errorDatosVenta.push('*El campo ubigeo debe contener un código de 6 dígitos');
                     if (this.guia_datos_adicionales.peso.length == 0) errorDatosVenta.push('*El campo peso no puede estar vacío');
                     if (this.guia_datos_adicionales.bultos.length == 0) errorDatosVenta.push('*El campo N° de bultos no puede estar vacío');
                     if(this.guia_datos_adicionales.categoria_vehiculo != 'M1_L'){
