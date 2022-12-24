@@ -30,7 +30,7 @@
                                 <tr v-for="(producto,index) in listaProductos" :key="index">
                                     <td>{{producto.cod_producto}}</td>
                                     <td>{{producto.nombre}}</td>
-                                    <td>{{producto.presentacion}}</td>
+                                    <td>{{extracto(producto.presentacion)}}</td>
                                     <td v-show="producto.tipo_producto===1"><span :class="'badge '+producto.badge_stock">{{producto.stock+producto.unidad}}</span></td>
                                     <td v-show="producto.tipo_producto==2">-</td>
                                     <td>{{producto.moneda}}{{producto.precio}}</td>
@@ -93,6 +93,13 @@
             resetModal(){
                 this.buscar = '';
             },
+            extracto(string){
+                string = _.truncate(string, {
+                    'length': 250,
+                    'separator': ' '
+                });
+                return string;
+            }
         }
     }
 </script>

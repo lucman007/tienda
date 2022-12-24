@@ -140,8 +140,12 @@
                                     <th scope="col">Venta</th>
                                     <th scope="col">Fecha</th>
                                     <th scope="col">Cliente</th>
-                                    <th scope="col">Importe</th>
-                                    <th scope="col">Moneda</th>
+                                    @if(!$agent->isDesktop())
+                                        <th scope="col">Importe</th>
+                                    @else
+                                        <th scope="col">Importe</th>
+                                        <th scope="col">Moneda</th>
+                                    @endif
                                     <th scope="col">Pago</th>
                                     <th scope="col">Ord. Compra</th>
                                     <th scope="col" style="width: 12%">Comprobante</th>
@@ -152,13 +156,21 @@
                                 <tbody>
                                 @if(count($ventas))
                                     @foreach($ventas as $venta)
-                                        <tr :class="{'td-anulado':'{{$venta->facturacion->estado}}'=='ANULADO' || '{{$venta->facturacion->estado}}'=='MODIFICADO'}">
+                                        <tr :class="{'td-anulado':'{{$venta->facturacion->estado}}'=='ANULADO' || '{{$venta->facturacion->estado}}'=='MODIFICADO'}" @if(!$agent->isDesktop()) onclick="location.href='{{url('facturacion/documento').'/'.$venta->idventa}}'" @endif>
                                             <td></td>
                                             <td style="width: 5%">{{$venta->idventa}}</td>
-                                            <td style="width: 15%">{{$venta->fecha}}</td>
+                                            @if(!$agent->isDesktop())
+                                                <td style="width: 15%">{{date("d-m-Y",strtotime($venta->fecha))}}</td>
+                                            @else
+                                                <td style="width: 15%">{{date("d-m-Y H:i:s",strtotime($venta->fecha))}}</td>
+                                            @endif
                                             <td>{{$venta->cliente->persona->nombre}}</td>
-                                            <td>{{$venta->total_venta}}</td>
-                                            <td>{{$venta->facturacion->codigo_moneda}}</td>
+                                            @if(!$agent->isDesktop())
+                                                <td>{{$venta->facturacion->codigo_moneda=='PEN'?'S/':'USD'}} {{$venta->total_venta}}</td>
+                                            @else
+                                                <td>{{$venta->total_venta}}</td>
+                                                <td>{{$venta->facturacion->codigo_moneda}}</td>
+                                            @endif
                                             <td>{{$venta->tipo_pago}}</td>
                                             <td>{{$venta->facturacion->oc_relacionada}}</td>
                                             <td><span class="badge {{$venta->badge_class_documento}} badge_doc">{{$venta->facturacion->serie}}-{{$venta->facturacion->correlativo}}</span><br>
@@ -170,7 +182,7 @@
                                                     <span class="badge {{$venta->badge_class_guia}}">{{$venta->guia_relacionada['estado']}}</span>
                                                 @endif
                                             </td>
-                                            <td class="botones-accion" style="width: 10%">
+                                            <td class="botones-accion" style="width: 10%" @click.stop>
                                                 <a href="{{url('facturacion/documento').'/'.$venta->idventa}}">
                                                     <button class="btn btn-info" title="Ver detalle de venta">
                                                         <i class="fas fa-folder-open"></i>

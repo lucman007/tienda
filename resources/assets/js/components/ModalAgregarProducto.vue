@@ -26,7 +26,7 @@
                                                                        :key="index">
                                                         <div class="row">
                                                             <div class="col-lg-6">{{producto.nombre}} <br>
-                                                                <span class="presentacion">{{producto.presentacion}}</span>
+                                                                <span class="presentacion">{{extracto(producto.presentacion)}}</span>
                                                             </div>
                                                             <div class="col-lg-3">{{producto.moneda+producto.precio}} <br>
                                                                 <span v-show="producto.precioPorMayor" class="presentacion">{{producto.cantidadPorMayor}}{{producto.unidad}} a {{producto.moneda+producto.precioPorMayor}}</span>
@@ -241,6 +241,13 @@
                 spinner.classList.remove('d-none');
                 spinner.classList.add('d-inline-block');
             },
+            extracto(string){
+                string = _.truncate(string, {
+                    'length': 250,
+                    'separator': ' '
+                });
+                return string;
+            }
         }
     }
 </script>
@@ -275,7 +282,7 @@
     }
     .presentacion{
         font-size: 12px;
-        color: #7e7d7d;
+        color: #45463e;
     }
     .active_item {
         background-color: #9fcdff;

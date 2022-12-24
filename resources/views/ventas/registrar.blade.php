@@ -510,7 +510,7 @@
                                 </thead>
                                 <tbody>
                                 <tr v-for="(producto,index) in productosSeleccionados" :key="index" v-b-modal.modal-detalle @click="editarItem(producto, index)">
-                                    <td>@{{producto.nombre}} x @{{producto.cantidad}}</td>
+                                    <td>@{{producto.cod_producto == '00NR'?producto.presentacion:producto.nombre}} x @{{producto.cantidad}}</td>
                                     <td>@{{producto.total}}</td>
                                     <td @click.stop >
                                         <button @click="borrarItemVenta(index)" class="btn btn-danger"

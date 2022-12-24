@@ -305,6 +305,7 @@ class PresupuestoController extends Controller
             $presupuesto->flete=$request->flete;
             $presupuesto->seguro=$request->seguro;
             $presupuesto->referencia=$request->referencia;
+            $presupuesto->fecha=$request->fecha.' '.date('H:i:s');
 
             if ($request->moneda == 'S/') {
                 $moneda = 'PEN';

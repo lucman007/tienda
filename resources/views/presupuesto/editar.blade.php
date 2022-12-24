@@ -48,8 +48,8 @@
                         </div>
                         <div class="row" v-show="editar">
                             <div class="col-lg-2 form-group">
-                                <label>N° de cotización</label>
-                                <input disabled type="text" value="{{$presupuesto->correlativo}}" class="form-control">
+                                <label>Fecha</label>
+                                <input type="date" v-model="fecha" class="form-control">
                             </div>
                             <div class="col-lg-2 form-group mb-4">
                                 <label>Moneda</label>
@@ -212,7 +212,7 @@
                                 </tr>
                                 <tr v-show="!editar" v-for="(producto,index) in productosSeleccionados" :key="producto.index">
                                     <td></td>
-                                    <td> @{{ producto.nombre }}</td>
+                                    <td> @{{ producto.cod_producto == '00NR'?'-':producto.nombre }}</td>
                                     <td style="white-space: break-spaces" class="text_desc">@{{ producto.presentacion}}</td>
                                     <td>@{{ producto.precio }}</td>
                                     <td>@{{ producto.cantidad }}</td>
@@ -237,7 +237,7 @@
                                     </thead>
                                     <tbody>
                                     <tr v-show="editar" v-for="(producto,index) in productosSeleccionados" :key="index" v-b-modal.modal-detalle @click="editarItem(producto, index)">
-                                        <td>@{{producto.nombre}} x @{{producto.cantidad}}</td>
+                                        <td>@{{producto.cod_producto == '00NR'?producto.presentacion:producto.nombre}} x @{{producto.cantidad}}</td>
                                         <td>@{{(Number(producto.total)).toFixed(2)}}</td>
                                         <td @click.stop>
                                             <b-button :disabled="producto['precio']<=0 || producto['cantidad']<=0" v-b-modal.modal-descuento @click="editarItem(producto,index)" variant="success" title="Agregar descuento">
@@ -249,7 +249,7 @@
                                         </td>
                                     </tr>
                                     <tr v-show="!editar" v-for="(producto,index) in productosSeleccionados">
-                                        <td>@{{producto.nombre}} x @{{producto.cantidad}}</td>
+                                        <td>@{{producto.cod_producto == '00NR'?producto.presentacion:producto.nombre}} x @{{producto.cantidad}}</td>
                                         <td>@{{(Number(producto.total)).toFixed(2)}}</td>
                                         <td></td>
                                     </tr>
@@ -530,6 +530,7 @@
                 referencia: '<?php echo $presupuesto->referencia ?>',
                 disabledNr:false,
                 cc:[],
+                fecha:'{{date('Y-m-d', strtotime($presupuesto->fecha))}}'
             },
             created(){
                 this.calcularTotalPorItem();
@@ -718,6 +719,7 @@
                         'porcentaje_descuento':this.porcentaje_descuento_global,
                         'tipo_descuento':this.tipo_descuento_global,
                         'moneda': this.moneda,
+                        'fecha': this.fecha,
                         'observaciones':this.observaciones,
                         'atencion':this.atencion,
                         'validez':this.validez,

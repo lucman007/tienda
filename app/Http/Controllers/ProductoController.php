@@ -89,7 +89,7 @@ class ProductoController extends Controller
 
                 foreach ($productos as $producto){
                     $producto->cantidad=$producto->inventario->first()->saldo;
-                    $producto->presentacion = Str::words($producto->presentacion,10,'...');
+                    $producto->presentacion = Str::words($producto->presentacion,40,'...');
                     $almacen = DB::table('almacen_productos')->where('idproducto', $producto->idproducto)->orderby('fecha','asc')->first();
                     if($almacen){
                         $ubicacion = Ubicacion::find($almacen->idubicacion);

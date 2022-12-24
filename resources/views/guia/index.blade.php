@@ -1,6 +1,7 @@
 @extends('layouts.main')
 @section('titulo', 'Guías emitidas')
 @section('contenido')
+    @php $agent = new \Jenssegers\Agent\Agent() @endphp
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
             <div class="col-lg-9 mb-3">
@@ -84,7 +85,7 @@
                                 <tbody>
                                 @if(count($guias))
                                     @foreach($guias as $guia)
-                                        <tr :class="{'td-anulado':'{{$guia->estado}}'=='ANULADO'}">
+                                        <tr :class="{'td-anulado':'{{$guia->estado}}'=='ANULADO'}" @if(!$agent->isDesktop()) onclick="location.href='{{url('guia/emision/').'/'.$guia->idguia}}'" @endif>
                                             <td></td>
                                             <td style="width: 5%">{{$guia->idguia}}</td>
                                             <td style="width: 15%">{{$guia->fecha_emision}}</td>
@@ -92,7 +93,7 @@
                                             <td>{{$guia->correlativo}}</td>
                                             <td>{{json_decode($guia->guia_datos_adicionales,true)['oc']??''}}</td>
                                             <td><span class="badge {{$guia->badge_class}}">{{$guia->estado}}</span></td>
-                                            <td class="botones-accion" style="width: 10%">
+                                            <td class="botones-accion" style="width: 10%" @click.stop>
                                                 <a href="{{url('guia/emision/').'/'.$guia->idguia}}">
                                                     <button class="btn btn-info" title="Ver detalle de guia">
                                                         <i class="fas fa-folder-open"></i>

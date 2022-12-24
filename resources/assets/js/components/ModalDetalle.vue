@@ -2,7 +2,7 @@
     <div>
         <b-modal id="modal-detalle" centered ref="modal-detalle" size="md" @show="getData" @hidden="limpiar">
             <template slot="modal-title">
-                {{item.nombre}}
+                {{item.cod_producto == '00NR'?'PRODUCTO LIBRE':item.nombre}}
             </template>
             <div class="container">
                 <div class="row">

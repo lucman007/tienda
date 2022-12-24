@@ -1,6 +1,7 @@
 @extends('layouts.main')
 @section('titulo', 'Productos')
 @section('contenido')
+    @php $agent = new \Jenssegers\Agent\Agent() @endphp
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
             <div class="col-lg-9">
@@ -56,7 +57,7 @@
                                 <tbody>
                                 @if(count($productos) > 0)
                                     @foreach($productos as $producto)
-                                        <tr>
+                                        <tr @if(!$agent->isDesktop()) @click="editarProducto({{$producto->idproducto}})" @endif>
                                             <td></td>
                                             <td @if(!$columnas['ubicacion']) style="display: none;" @endif>{{$producto->ubicacion}}</td>
                                             <td @if(!$columnas['codigo']) style="display: none;" @endif>{{$producto->cod_producto}}</td>
@@ -82,7 +83,7 @@
                                             <td @if(!$columnas['precio']) style="display: none;" @endif>{{$producto->moneda=='PEN'?'S/':'USD'}}{{$producto->precio}}</td>
                                             <td @if(!$columnas['precio_min']) style="display: none;" @endif>@if($producto->param_5) {{$producto->param_5=='PEN'?'S/':'USD'}} @endif{{$producto->param_4}}</td>
                                             <td @if(!$columnas['imagen']) style="display: none;" @endif class="image-product"><a><img @click="modalImagen({{$producto->idproducto}},'{{$producto->imagen}}')" src="{{$producto->imagen?$producto->imagen:url('images/no-image.jpg')}}" class="card-img-top"></a></td>
-                                            <td class="botones-accion" style="width: 10%">
+                                            <td class="botones-accion" style="width: 10%" @click.stop>
                                                 <a @click="editarProducto({{$producto->idproducto}})" href="javascript:void(0)">
                                                     <button class="btn btn-success" title="Editar producto"><i
                                                                 class="fas fa-edit"></i></button>
@@ -188,19 +189,19 @@
                                 <div v-show="tipo_producto==1" class="col-lg-3">
                                     <div class="form-group">
                                         <label for="cantidad">Cantidad:</label>
-                                        <input autocomplete="off" type="number" v-model="cantidad" name="cantidad" class="form-control">
+                                        <input onfocus="this.select()" autocomplete="off" type="number" v-model="cantidad" name="cantidad" class="form-control">
                                     </div>
                                 </div>
                                 <div v-show="tipo_producto==1" class="col-lg-3">
                                     <div class="form-group">
                                         <label for="stock_bajo">Stock mínimo:</label>
-                                        <input autocomplete="off" type="number" v-model="stock_bajo" name="stock_bajo" class="form-control">
+                                        <input onfocus="this.select()" autocomplete="off" type="number" v-model="stock_bajo" name="stock_bajo" class="form-control">
                                     </div>
                                 </div>
                                 <div class="col-lg-4">
                                     <label>Precio de venta:</label>
                                     <b-input-group>
-                                        <b-form-input type="number" v-model="precio"></b-form-input>
+                                        <b-form-input onfocus="this.select()" type="number" v-model="precio"></b-form-input>
                                         <template #append>
                                             <b-dropdown :text="moneda" variant="secondary">
                                                 <b-dropdown-item @click="moneda = 'PEN'">PEN</b-dropdown-item>
@@ -225,7 +226,7 @@
                                 <div class="col-lg-4">
                                     <label>@{{tipo_producto==1?'Precio de compra':'Costo de producción'}}:</label>
                                     <b-input-group>
-                                        <b-form-input type="number" v-model="costo"></b-form-input>
+                                        <b-form-input onfocus="this.select()" type="number" v-model="costo"></b-form-input>
                                         <template #append>
                                             <b-dropdown :text="moneda_compra" variant="secondary">
                                                 <b-dropdown-item @click="moneda_compra = 'PEN'">PEN</b-dropdown-item>
@@ -237,7 +238,7 @@
                                 <div class="col-lg-3" v-show="moneda_compra == 'USD'">
                                     <label>Tipo de cambio</label>
                                     <b-input-group prepend="S/">
-                                        <b-form-input type="number" v-model="tipo_cambio_compra"></b-form-input>
+                                        <b-form-input onfocus="this.select()" type="number" v-model="tipo_cambio_compra"></b-form-input>
                                     </b-input-group>
                                 </div>
                                 <div v-show="accion == 'editar' && cantidad != cantidad_aux && tipo_producto==1" class="col-lg-12 mt-2">

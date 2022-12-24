@@ -55,7 +55,7 @@
                                 <tbody>
                                 @if(count($presupuesto))
                                     @foreach($presupuesto as $item)
-                                        <tr>
+                                        <tr  @if(!$agent->isDesktop()) onclick="location.href='{{url('presupuestos/editar').'/'.$item->idpresupuesto}}'" @endif>
                                             <td></td>
                                             <td>{{$item->correlativo}}</td>
                                             @if($agent->isDesktop())
@@ -73,9 +73,9 @@
                                                 <td>{{$item->presupuesto}}</td>
                                                 <td>{{$item->moneda}}</td>
                                             @endif
-                                            <td class="botones-accion">
+                                            <td class="botones-accion" @click.stop>
                                                 <a href="{{url('presupuestos/editar').'/'.$item->idpresupuesto}}">
-                                                    <button class="btn btn-success" title="Abrir presupuesto">
+                                                    <button class="btn btn-success" title="Abrir cotización">
                                                         <i class="fas fa-folder-open"></i>
                                                     </button>
                                                 </a>
