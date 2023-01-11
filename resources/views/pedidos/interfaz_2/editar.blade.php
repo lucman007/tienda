@@ -26,7 +26,7 @@
                                     </b-form-checkbox>
                                 </div>
                                 <div class="float-right">
-                                    <select v-model="idmozo" style="width: 150px" class="custom-select">
+                                    <select v-model="idvendedor" style="width: 150px" class="custom-select">
                                         <option value="-1" style="font-weight: bold">Vendedor:</option>
                                         <option v-for="empleado in empleados" :value="empleado.idempleado">@{{ empleado.persona.nombre }}</option>
                                     </select>
@@ -210,7 +210,7 @@
                 comprobante: '<?php echo $orden['comprobante'] ?>',
                 observaciones: '<?php echo $orden['observaciones'] ?>',
                 esConIgv:!!<?php echo $orden['igv_incluido'] ?>,
-                idmozo:"{{$idmozo}}",
+                idvendedor:"{{$idvendedor}}",
                 empleados:[],
                 mensajeStock:{
                     string:'',
@@ -367,7 +367,7 @@
                     axios.post('{{action('PedidoController@update')}}', {
                         'idorden': <?php echo $orden['idorden'] ?>,
                         'idcliente': this.clienteSeleccionado['idcliente'],
-                        'idmozo':this.idmozo,
+                        'idvendedor':this.idvendedor,
                         'total': this.totalVenta,
                         'moneda': this.moneda,
                         'comprobante': this.comprobante,

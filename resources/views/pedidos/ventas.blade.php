@@ -53,8 +53,23 @@
                                             <td>{{date("d-m-Y H:i:s",strtotime($item->fecha))}}</td>
                                             <td>{{$item->empleado->idpersona == -1?'-':strtoupper($item->empleado->nombre)}}</td>
                                             <td>{{$item->persona->nombre}}</td>
-                                            <td>{{$item->total_venta}}</td>
-                                            <td>{{$item->tipo_pago}}</td>
+                                            <td>{{$item->facturacion->codigo_moneda}}{{$item->total_venta}}</td>
+                                            <td>
+                                                @php
+                                                    $tipo_pago = \sysfact\Http\Controllers\Helpers\DataTipoPago::getTipoPago();
+                                                    $pagos = $item->pago;
+                                                @endphp
+                                                @foreach($pagos as $pago)
+                                                    @php
+                                                        $index = array_search($pago->tipo, array_column($tipo_pago,'num_val'));
+                                                    @endphp
+                                                    @if($pago->tipo == '101')
+                                                        <span class="badge badge-info">{{strtoupper($tipo_pago[$index]['label'])}} {{$pago->monto}}</span><br>
+                                                    @else
+                                                        {{strtoupper($tipo_pago[$index]['label'])}} @if(count($pagos)>1)({{$item->moneda}}{{$pago->monto}})@endif <br>
+                                                    @endif
+                                                @endforeach
+                                            </td>
                                             <td id="comp_{{$item->idventa}}">
                                                 @if($item->facturacion->codigo_tipo_documento=='30')
                                                     {{$item->comprobante}}

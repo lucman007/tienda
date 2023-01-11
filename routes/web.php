@@ -358,7 +358,7 @@ Route::group(['middleware' => ['can:Créditos']], function () {
     Route::get('creditos/editar/{id}', 'CreditoController@editar');
     Route::post('creditos/agregar_pago', 'CreditoController@agregar_pago');
     Route::post('creditos/ver_pagos', 'CreditoController@ver_pagos');
-
+    Route::get('creditos/actualizar-pagos', 'CreditoController@actualizar_pagos');
 });
 
 //Ruta para consultar documentos

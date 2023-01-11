@@ -25,7 +25,7 @@
                                     </b-form-checkbox>
                                 </div>
                                 <div class="float-right">
-                                    <select v-model="idmozo" style="width: 150px" class="custom-select">
+                                    <select v-model="idvendedor" style="width: 150px" class="custom-select">
                                         <option value="-1" style="font-weight: bold">Vendedor:</option>
                                         <option v-for="empleado in empleados" :value="empleado.idempleado">@{{ empleado.persona.nombre }}</option>
                                     </select>
@@ -207,7 +207,7 @@
                 comprobante: '30',
                 observaciones:'',
                 esConIgv:true,
-                idmozo:"{{$idmozo}}",
+                idvendedor:"{{$idvendedor}}",
                 empleados:[],
                 mensajeStock:{
                     string:'',
@@ -342,13 +342,14 @@
                     this.mostrarProgresoGuardado = true;
                     axios.post('{{action('PedidoController@store')}}', {
                         'idcliente': this.clienteSeleccionado['idcliente'],
-                        'idmozo':this.idmozo,
+                        'idvendedor':this.idvendedor,
                         'total': this.totalVenta,
                         'moneda': this.moneda,
                         'comprobante': this.comprobante,
                         'observaciones':this.observaciones,
                         'igv_incluido': this.esConIgv,
-                        'items': JSON.stringify(this.productosSeleccionados)
+                        'items': JSON.stringify(this.productosSeleccionados),
+                        'datos_entrega': JSON.stringify({direccion:'',referencia:'',contacto:'-',telefono:'', costo:'0'})
                     })
                         .then(response => {
                             this.$swal({

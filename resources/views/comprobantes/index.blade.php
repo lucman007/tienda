@@ -171,7 +171,22 @@
                                                 <td>{{$venta->total_venta}}</td>
                                                 <td>{{$venta->facturacion->codigo_moneda}}</td>
                                             @endif
-                                            <td>{{$venta->tipo_pago}}</td>
+                                            <td>
+                                                @php
+                                                    $tipo_pago = \sysfact\Http\Controllers\Helpers\DataTipoPago::getTipoPago();
+                                                    $pagos = $venta->pago;
+                                                @endphp
+                                                @foreach($pagos as $pago)
+                                                    @php
+                                                        $index = array_search($pago->tipo, array_column($tipo_pago,'num_val'));
+                                                    @endphp
+                                                    @if($pago->tipo == '101')
+                                                        <span class="badge badge-info">{{strtoupper($tipo_pago[$index]['label'])}} {{$pago->monto}}</span><br>
+                                                    @else
+                                                        {{strtoupper($tipo_pago[$index]['label'])}} @if(count($pagos)>1)({{$pago->monto}})@endif <br>
+                                                    @endif
+                                                @endforeach
+                                            </td>
                                             <td>{{$venta->facturacion->oc_relacionada}}</td>
                                             <td><span class="badge {{$venta->badge_class_documento}} badge_doc">{{$venta->facturacion->serie}}-{{$venta->facturacion->correlativo}}</span><br>
                                                 <span class="badge badge-info badge_doc">{{$venta->guia_relacionada['correlativo']}}</span>

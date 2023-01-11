@@ -52,7 +52,7 @@
                                         <td>{{$item->total}}</td>
                                         <td><span class="badge {{$item->badge_class}}">{{$item->estado}}</span></td>
                                         <td class="botones-accion">
-                                            <b-button target="_blank" href="{{url('ordenes/imprimir').'/'.$item->idorden}}" class="btn btn-info" title="Imprimir">
+                                            <b-button target="_blank" href="{{url('pedidos/imprimir').'/'.$item->idorden}}" class="btn btn-info" title="Imprimir">
                                                 <i class="fas fa-print"></i>
                                             </b-button>
                                             <b-button @if($item->estado!='EN COLA') disabled style="opacity: 0.2" @endif href="{{url('pedidos/editar').'/'.$item->idorden}}" class="btn btn-success" title="Editar orden">
@@ -86,7 +86,7 @@
                     if(confirm('¿Realmente desea eliminar la orden?')){
                         axios.delete('{{url('/pedidos/destroy')}}' + '/' + id)
                             .then(function () {
-                                window.location.href = "/ordenes"
+                                window.location.href = "/pedidos"
                             })
                             .catch(function (error) {
                                 console.log(error);

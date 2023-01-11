@@ -172,6 +172,7 @@
                                         <option value="KGM/KG">Kilogramo</option>
                                         <option value="GRM/G">Gramo</option>
                                         <option value="LTR/L">Litro</option>
+                                        <option value="GAL/GL">Galon</option>
                                         <option value="NIU/PZA">Pieza</option>
                                         <option value="MTK/M2">Metro cuadrado</option>
                                         <option value="MTQ/M3">Metro cúbico</option>

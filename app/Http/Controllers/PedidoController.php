@@ -469,6 +469,11 @@ class PedidoController extends Controller
                 $item->estado_orden='ATENDIDO';
                 $item->nombre_fichero=$emisor->ruc.'-'.$item->facturacion->codigo_tipo_documento.'-'.$item->facturacion->serie.'-'.$item->facturacion->correlativo;
                 $item->text_whatsapp = MainHelper::texto_whatsap($item,$emisor);
+                if($item->facturacion->codigo_moneda == 'PEN'){
+                    $item->moneda = 'S/';
+                } else {
+                    $item->moneda = 'USD';
+                }
 
                 switch ($item->facturacion->codigo_tipo_documento){
                     case '01':

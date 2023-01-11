@@ -18,9 +18,20 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-lg-4">
+                                @php
+                                    $tipo_pago = \sysfact\Http\Controllers\Helpers\DataTipoPago::getTipoPago();
+                                    $pagos = $venta->pago;
+                                @endphp
                                     <strong>Fecha emisión:</strong> {{date("d/m/Y H:i:s",strtotime($venta->fecha))}}
                                 <hr>
-                                    <strong>Tipo de pago:</strong> {{ $venta->tipo_pago==2?'CRÉDITO':'CONTADO' }}
+                                    <strong>Tipo de pago:</strong>
+                                @foreach($pagos as $pago)
+                                    @php
+                                        $index = array_search($pago->tipo, array_column($tipo_pago,'num_val'));
+                                    @endphp
+                                    {{strtoupper($tipo_pago[$index]['label'])}} @if(count($pagos)>1)({{$venta->codigo_moneda}}{{$pago->monto}})@endif
+                                    <br>
+                                @endforeach
                                 <hr>
                                 <strong>Moneda:</strong>
                                 @if($venta->codigo_moneda=='S/')

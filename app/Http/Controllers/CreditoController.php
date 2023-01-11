@@ -16,6 +16,50 @@ class CreditoController extends Controller
         $this->middleware('auth');
     }
 
+    public function actualizar_pagos(){
+       try{
+           $ventas = Venta::where('tipo_pago',2)->get();
+           $arr = [];
+
+           foreach ($ventas as $venta){
+                $pago=$venta->pago;
+                if(count($pago) == 0){
+                    $pago = new Pago();
+                    $pago->idventa = $venta->idventa;
+                    $pago->tipo = $venta->tipo_pago;
+                    $pago->monto = $venta->total_venta;
+                    $pago->estado = 20;
+                    $pago->save();
+                }
+
+            }
+
+           foreach ($ventas as $venta){
+               $p=$venta->pago()->first();
+               if($venta->datos_adicionales){
+
+                   $det = json_decode($venta->datos_adicionales, true)['cuotas'][0];
+                   $detalle = [
+                       'fecha'=>$det['fecha'],
+                       'metodo_pago'=>1,
+                       'num_operacion'=>'',
+                       'monto'=>$venta->total_venta,
+                   ];
+                   $pago = Pago::find($p->idpago);
+                   $pago->detalle = [$detalle];
+                   $pago->estado = 2;
+                   $pago->update();
+               }
+
+           }
+
+           return 'success';
+       } catch (\Exception $e){
+           return $e->getMessage();
+       }
+
+    }
+
     public function index(Request $request){
 
         if ($request) {
