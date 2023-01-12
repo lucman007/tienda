@@ -10,8 +10,8 @@
         <div class="card">
             <div class="card-body">
                 <b-nav tabs>
-                    <b-nav-item href="{{url('/reportes/productos/stock_bajo')}}" active>Stock bajo</b-nav-item>
                     <b-nav-item href="{{url('/reportes/productos/mas-vendidos')}}">Más vendidos</b-nav-item>
+                    <b-nav-item href="{{url('/reportes/productos/stock_bajo')}}" active>Stock bajo</b-nav-item>
                 </b-nav>
                 <div class="row mt-4">
                     <div class="col-lg-9">

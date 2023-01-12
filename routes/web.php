@@ -248,6 +248,7 @@ Route::group(['middleware' => ['can:Reportes']], function () {
 
     Route::get('reportes/productos/stock_bajo','ReporteController@reporte_stock_bajo');
     Route::get('reportes/productos/mas-vendidos','ReporteController@mas_vendidos');
+    Route::get('reportes/productos/badge','ReporteController@mas_vendidos_badge');
 
     Route::get('reportes/comprobantes/{desde}/{hasta}','ReporteController@reporte_comprobantes');
     Route::get('reportes/comprobantes','ReporteController@reporte_comprobantes');
@@ -266,6 +267,7 @@ Route::group(['middleware' => ['can:Reportes']], function () {
     Route::get('reportes/caja','ReporteController@reporte_caja');
 
     Route::get('reportes/utilidad','ReporteController@reporte_utilidad');
+    Route::get('reportes/obtener-vendedores','ReporteController@obtener_vendedores');
 });
 
 Route::group(['middleware' => ['can:Inventario: requerimientos']], function () {

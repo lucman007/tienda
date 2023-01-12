@@ -31,6 +31,20 @@
                                         <option value="tipo-de-pago">Tipo de pago</option>
                                         <option value="moneda">Moneda</option>
                                         <option value="cliente">Cliente</option>
+                                        <option value="vendedor">Vendedor</option>
+                                    </select>
+                                </b-input-group>
+                            </div>
+                            <div class="col-lg-2" v-show="filtro=='vendedor'">
+                                <b-input-group>
+                                    <b-input-group-prepend>
+                                        <b-input-group-text>
+                                            <i class="fas fa-check"></i>
+                                        </b-input-group-text>
+                                    </b-input-group-prepend>
+                                    <select @change="filtrar" v-model="buscar" class="custom-select">
+                                        <option value="n">Seleccionar</option>
+                                        <option v-for="vendedor in vendedores" :value="vendedor.idempleado">@{{vendedor.persona.nombre}}</option>
                                     </select>
                                 </b-input-group>
                             </div>
@@ -99,7 +113,7 @@
                             <div class="col-lg-3 form-group">
                                 <range-calendar :inicio="desde + ' 00:00:00'" :fin="hasta + ' 00:00:00'" v-on:setparams="setParams"></range-calendar>
                             </div>
-                            <div class="col-lg-3 form-group">
+                            <div class="col-lg-3 form-group" v-show="!errorMensaje">
                                 @if(count($ventas)!=0)
                                     <a href="{{str_contains(url()->full(),'?')?url()->full().'&export=true':url()->current().'?export=true'}}" class="btn btn-primary"><i class="fas fa-file-export"></i> Exportar excel</a>
                                 @else
@@ -269,6 +283,11 @@
                         </div>
                     </div>
                 </div>
+                <div class="row" v-if="errorMensaje">
+                    <div class="col-lg-12 my4" style="margin-bottom: 20px">
+                        <strong>No se pueden mostrar los gráficos y sumatorias porque el volumen de ventas es demasiado grande. Selecciona un rango de fecha no mayor a un mes o extrae el reporte completo desde el menú VENTAS POR MES.</strong>
+                    </div>
+                </div>
                 <div class="row" v-show="spinner">
                     <div class="col-lg-12 my4" style="margin-bottom: 20px">
                         <b-spinner small label="Loading..." ></b-spinner> Cargando resumen...
@@ -285,6 +304,8 @@
                                             <th scope="col"></th>
                                             <th scope="col">Venta</th>
                                             <th scope="col">Fecha</th>
+                                            <th scope="col">Caja</th>
+                                            <th scope="col">Vend.</th>
                                             <th scope="col">Cliente</th>
                                             <th scope="col">Importe</th>
                                             <th scope="col">Moneda</th>
@@ -299,6 +320,8 @@
                                                     <td></td>
                                                     <td style="width: 5%">{{$venta->idventa}}</td>
                                                     <td style="width: 15%">{{$venta->fecha}}</td>
+                                                    <td>{{$venta->caja->idpersona == -1?'-':strtoupper($venta->caja->nombre)}}</td>
+                                                    <td>{{$venta->empleado->idpersona == -1?'-':strtoupper($venta->empleado->nombre)}}</td>
                                                     <td>{{$venta->cliente->persona->nombre}}</td>
                                                     <td>{{$venta->total_venta}}</td>
                                                     <td>{{$venta->facturacion->codigo_moneda}}</td>
@@ -355,12 +378,26 @@
                 spinner:false,
                 delivery:[],
                 mail:'',
-                spinnerMail: false
+                spinnerMail: false,
+                errorMensaje: false,
+                vendedores:[]
             },
             mounted(){
                 this.getReportBadge();
+                this.getVendedores();
             },
             methods: {
+                getVendedores(){
+                    axios.get('/reportes/obtener-vendedores')
+                        .then(response => {
+                            this.vendedores = response.data;
+                            console.log(response.data)
+                        })
+                        .catch(error => {
+                            alert('Ha ocurrido un error al obtener los vendedores');
+                            console.log(error);
+                        });
+                },
                 setParams(obj){
                     let d1 = new Date(obj.startDate).toISOString().split('T')[0];
                     let d2 = new Date(obj.endDate).toISOString().split('T')[0];
@@ -385,10 +422,17 @@
                     this.spinner = true;
                     axios.get('/reportes/ventas/badge/'+this.desde+'/'+this.hasta+'?filtro='+this.filtro+'&buscar='+this.buscar)
                         .then(response => {
-                            this.penReport = response.data[0];
-                            this.usdReport = response.data[1];
-                            this.tipoPagoReport = response.data[2];
-                            this.spinner = false;
+                            if(response.data == -1){
+                                this.spinner = false;
+                                this.errorMensaje = true;
+                            } else {
+                                this.penReport = response.data[0];
+                                this.usdReport = response.data[1];
+                                this.tipoPagoReport = response.data[2];
+                                this.spinner = false;
+                                this.errorMensaje = false;
+                            }
+
                         })
                         .catch(error => {
                             alert('Ha ocurrido un error');

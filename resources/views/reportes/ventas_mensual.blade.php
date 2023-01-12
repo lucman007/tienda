@@ -94,9 +94,8 @@
                             @if($manual)
                             <div class="col-lg-12 mt-3 text-center">
                                 <h4 style="color:#119527">El volumen de ventas es demasiado grande para ser analizado.</h4>
-                                <p>Genera el reporte de cada mes manualmente haciendo click en el botón <strong>ACTUALIZAR</strong> a la derecha de cada mes en la tabla inferior.
-                                    <br> No tendrás que hacerlo siempre, pues se guardará en la base de datos. Solo vuelve a generarlo
-                                    <br> si eliminas o editas ventas de algún mes en específico</p>
+                                <p>Genera el reporte de cada mes manualmente haciendo click en el botón <strong>ACTUALIZAR</strong> de la tabla inferior.
+                                    <br> Solo vuelve a actulizar si eliminas o editas ventas de algún mes en específico</p>
                             </div>
                             @endif
                             <div class="col-lg-12 mt-3">

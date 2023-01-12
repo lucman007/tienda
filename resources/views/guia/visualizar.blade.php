@@ -166,7 +166,7 @@
                 mostrarSpinnerProducto: false,
                 comprobanteReferencia:'',
                 mail:"<?php echo $guia->persona->correo ?>",
-                mensaje:'<?php echo str_replace('\'', "",$guia->response) ?>'
+                mensaje:'<?php echo str_replace(array("\r", "\n"), '', str_replace('\'', "",$guia->response)) ?>'
             },
             created(){
                 if('<?php echo $guia->estado ?>' == 'PENDIENTE' && (('<?php echo basename(url()->previous()) ?>').includes('nuevo') || ('<?php echo url()->previous() ?>').includes('correccion'))){

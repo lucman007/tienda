@@ -41,7 +41,7 @@
                                 </div>
                             </div>
                             <div class="col-lg-4 form-group">
-                                <label for="tipo_acceso">Acceso:</label>
+                                <label for="tipo_acceso">Nivel de acceso:</label>
                                 <select v-model="tipo_acceso" name="tipo_acceso" class="custom-select" id="tipo_acceso">
                                     @foreach($roles as $rol)
                                         @if($rol['name']!='Superusuario')

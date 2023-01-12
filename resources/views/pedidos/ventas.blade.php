@@ -37,7 +37,7 @@
                                 <tr>
                                     <th scope="col"></th>
                                     <th scope="col">Fecha</th>
-                                    <th scope="col">Atiende</th>
+                                    <th scope="col">Vend.</th>
                                     <th scope="col">Cliente</th>
                                     <th scope="col">Importe</th>
                                     <th scope="col">Pago</th>
@@ -53,7 +53,7 @@
                                             <td>{{date("d-m-Y H:i:s",strtotime($item->fecha))}}</td>
                                             <td>{{$item->empleado->idpersona == -1?'-':strtoupper($item->empleado->nombre)}}</td>
                                             <td>{{$item->persona->nombre}}</td>
-                                            <td>{{$item->facturacion->codigo_moneda}}{{$item->total_venta}}</td>
+                                            <td>{{$item->moneda}}{{$item->total_venta}}</td>
                                             <td>
                                                 @php
                                                     $tipo_pago = \sysfact\Http\Controllers\Helpers\DataTipoPago::getTipoPago();

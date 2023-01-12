@@ -27,6 +27,7 @@ use sysfact\Http\Controllers\Helpers\PdfHelper;
 use sysfact\Mail\ReporteResumenVentas;
 use sysfact\Opciones;
 use sysfact\Producto;
+use sysfact\Trabajador;
 use sysfact\Venta;
 
 class ReporteController extends Controller
@@ -34,10 +35,12 @@ class ReporteController extends Controller
     private $hora_inicio;
     private $hora_fin;
     private $hasta_offset;
+    private $solo_comprobantes;
 
 	public function __construct()
 	{
 		$this->middleware('auth');
+      $this->solo_comprobantes = false;
 		$this->hora_inicio = (json_decode(cache('config')['interfaz'], true)['atencion_inicio']??'00:00').':00';
 		$this->hora_fin = (json_decode(cache('config')['interfaz'], true)['atencion_fin']??'23:59').':59';
 	}
@@ -51,12 +54,34 @@ class ReporteController extends Controller
         return $hasta;
     }
 
+    public function func_filter($query){
+        if($this->solo_comprobantes) {
+            $query->where(function ($query) {
+                $query->where('codigo_tipo_documento', 01)
+                    ->orWhere('codigo_tipo_documento', 03);
+            })
+                ->where(function ($query) {
+                    $query->where('estado', 'ACEPTADO')
+                        ->orWhere('estado', 'PENDIENTE');
+                });
+        } else {
+            $query->where(function ($query) {
+                $query->where('codigo_tipo_documento', 01)
+                    ->orWhere('codigo_tipo_documento', 03)
+                    ->orWhere('codigo_tipo_documento', 30);
+            })
+                ->where(function ($query) {
+                    $query->where('estado', 'ACEPTADO')
+                        ->orWhere('estado', 'PENDIENTE');
+                })
+                ->orWhere('estado', '-');
+        }
+    }
+
     public function reporte_ventas_data($desde, $hasta, $filtro, $buscar, $esExportable){
         try {
 
             $ventas = null;
-            $suma_soles=0;
-            $suma_dolares=0;
 
             $filtros = ['desde' => $desde, 'hasta' => $hasta, 'filtro'=>$filtro,'buscar'=>$buscar];
 
@@ -66,14 +91,7 @@ class ReporteController extends Controller
                         $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
                             ->where('eliminado', '=', 0)
                             ->whereHas('facturacion', function($query) {
-                                $query
-                                    ->where(function ($query) {
-                                        $query->where('codigo_tipo_documento',01)
-                                            ->orWhere('codigo_tipo_documento',03)
-                                            ->orWhere('codigo_tipo_documento',30);
-                                        })
-                                    ->where('estado','ACEPTADO')
-                                    ->orWhere('estado','-');
+                                $this->func_filter($query);
                             })
                             ->orderby('idventa', 'desc')
                             ->get();
@@ -106,11 +124,7 @@ class ReporteController extends Controller
                             $query
                                 ->where($filtro, $buscar)
                                 ->where(function ($query) {
-                                    $query->where(function ($query){
-                                        $query->where('estado','ACEPTADO')
-                                            ->orWhere('estado','PENDIENTE');
-                                    })
-                                        ->orWhere('estado','-');
+                                    $this->func_filter($query);
                                 });
                         })
                         ->get();
@@ -127,16 +141,7 @@ class ReporteController extends Controller
                                 $query->where('tipo',$buscar);
                             })
                             ->whereHas('facturacion', function($query) {
-                                $query->where(function ($query) {
-                                    $query->where('codigo_tipo_documento',01)
-                                        ->orWhere('codigo_tipo_documento',03)
-                                        ->orWhere('codigo_tipo_documento',30);
-                                })
-                                    ->where(function ($query){
-                                        $query->where('estado','ACEPTADO')
-                                            ->orWhere('estado','PENDIENTE');
-                                    })
-                                    ->orWhere('estado','-');
+                                $this->func_filter($query);
                             })
                             ->orderby('idventa', 'desc')
                             ->get();
@@ -150,18 +155,18 @@ class ReporteController extends Controller
                                 $query->where($filtro, 'LIKE', '%' . $buscar . '%');
                             })
                             ->whereHas('facturacion', function($query) {
-                                $query->where(function ($query) {
-                                    $query->where('codigo_tipo_documento',01)
-                                        ->orWhere('codigo_tipo_documento',03)
-                                        ->orWhere('codigo_tipo_documento',30);
-                                    })
-                                    ->where(function ($query){
-                                        $query->where('estado','ACEPTADO')
-                                            ->orWhere('estado','PENDIENTE');
-                                    })
-                                    ->orWhere('estado','-');
-
+                                $this->func_filter($query);
                             })
+                            ->get();
+                        break;
+                    case 'vendedor':
+                        $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
+                            ->where('eliminado', 0)
+                            ->where('idempleado', $buscar)
+                            ->whereHas('facturacion', function($query) {
+                                $this->func_filter($query);
+                            })
+                            ->orderby('idventa', 'desc')
                             ->get();
                         break;
                 }
@@ -171,15 +176,8 @@ class ReporteController extends Controller
                     case 'fecha':
                         $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
                             ->where('eliminado', '=', 0)
-                            ->whereHas('facturacion', function($query) {
-                                $query
-                                    ->where(function ($query) {
-                                        $query->where('codigo_tipo_documento',01)
-                                            ->orWhere('codigo_tipo_documento',03)
-                                            ->orWhere('codigo_tipo_documento',30);
-                                    })
-                                    ->where('estado','ACEPTADO')
-                                    ->orWhere('estado','-');
+                            ->whereHas('facturacion', function ($query){
+                                $this->func_filter($query);
                             })
                             ->orderby('idventa', 'desc')
                             ->paginate(30);
@@ -212,11 +210,7 @@ class ReporteController extends Controller
                                 $query
                                     ->where($filtro, $buscar)
                                     ->where(function ($query) {
-                                        $query->where(function ($query){
-                                            $query->where('estado','ACEPTADO')
-                                                ->orWhere('estado','PENDIENTE');
-                                        })
-                                            ->orWhere('estado','-');
+                                        $this->func_filter($query);
                                     });
                             })
                             ->paginate(30);
@@ -233,41 +227,33 @@ class ReporteController extends Controller
                                 $query->where('tipo',$buscar);
                             })
                             ->whereHas('facturacion', function($query) {
-                                $query->where(function ($query) {
-                                    $query->where('codigo_tipo_documento',01)
-                                        ->orWhere('codigo_tipo_documento',03)
-                                        ->orWhere('codigo_tipo_documento',30);
-                                })
-                                    ->where(function ($query){
-                                        $query->where('estado','ACEPTADO')
-                                            ->orWhere('estado','PENDIENTE');
-                                    })
-                                    ->orWhere('estado','-');
+                                $this->func_filter($query);
                             })
                             ->orderby('idventa', 'desc')
                             ->paginate(30);
                         break;
                     case 'cliente':
                         $filtro = 'nombre';
-                        $ventas = Venta::where('eliminado', '=', 0)
+                        $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
+                            ->where('eliminado', '=', 0)
                             ->orderby('idventa', 'desc')
                             ->whereHas('persona', function ($query) use ($filtro, $buscar) {
                                 $query->where($filtro, 'LIKE', '%' . $buscar . '%');
                             })
                             ->whereHas('facturacion', function($query) {
-                                $query->where(function ($query) {
-                                    $query->where('codigo_tipo_documento',01)
-                                        ->orWhere('codigo_tipo_documento',03)
-                                        ->orWhere('codigo_tipo_documento',30);
-                                })
-                                    ->where(function ($query){
-                                        $query->where('estado','ACEPTADO')
-                                            ->orWhere('estado','PENDIENTE');
-                                    })
-                                    ->orWhere('estado','-');
-
+                                $this->func_filter($query);
                             })
                             ->paginate(30);
+                        break;
+                    case 'vendedor':
+                        $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
+                            ->where('eliminado', 0)
+                            ->where('idempleado', $buscar)
+                            ->whereHas('facturacion', function($query) {
+                                $this->func_filter($query);
+                            })
+                            ->orderby('idventa', 'desc')
+                            ->paginate();
                         break;
                 }
                 $ventas->appends($_GET)->links();
@@ -346,6 +332,18 @@ class ReporteController extends Controller
             $desde=date('Y-m-d');
             $hasta=date('Y-m-d');
         }
+
+        $reporte_ventas_manual = json_decode(cache('config')['interfaz'], true)['reporte_ventas_manual']??false;
+        if($reporte_ventas_manual){
+            $d1 = Carbon::parse($desde);
+            $d2 = Carbon::parse($hasta);
+            $daysDiff = $d1->diffInDays($d2);
+            if($daysDiff > 35){
+                return -1;
+            }
+
+        }
+
         $badge_data=$this->reporte_ventas_data($desde,$hasta,$filtro,$buscar,true);
 
         $ventas = $badge_data['ventas'];
@@ -478,17 +476,8 @@ class ReporteController extends Controller
             ->whereHas('facturacion', function ($query) use ($moneda) {
                 $query
                     ->where('codigo_moneda', $moneda)
-                    ->where(function ($query){
-                        $query
-                            //COMPROBANTE ACEPTADO
-                            ->where(function ($query) {
-                                $query->where('codigo_tipo_documento',01)
-                                    ->orWhere('codigo_tipo_documento',03)
-                                    ->orWhere('codigo_tipo_documento',30);
-                            })
-                            ->where('estado','ACEPTADO')
-                            //O UN RECIBO
-                            ->orWhere('estado','-');
+                    ->where(function ($query) {
+                        $this->func_filter($query);
                     });
 
             })
@@ -620,17 +609,8 @@ class ReporteController extends Controller
             ->whereHas('facturacion', function ($query) use ($moneda) {
                 $query
                     ->where('codigo_moneda', $moneda)
-                    ->where(function ($query){
-                        $query
-                            //COMPROBANTE ACEPTADO
-                            ->where(function ($query) {
-                                $query->where('codigo_tipo_documento',01)
-                                    ->orWhere('codigo_tipo_documento',03)
-                                    ->orWhere('codigo_tipo_documento',30);
-                            })
-                            ->where('estado','ACEPTADO')
-                            //O UN RECIBO
-                            ->orWhere('estado','-');
+                    ->where(function ($query) {
+                        $this->func_filter($query);
                     });
 
             })
@@ -1067,29 +1047,102 @@ class ReporteController extends Controller
 
     }
 
+    public function mas_vendidos_data($desde, $hasta, $esExportable){
+
+        try{
+            $filtros = ['desde' => $desde, 'hasta' => $hasta];
+            if($esExportable == 'true'){
+                $productos=$ventas = DB::table('ventas')
+                    ->join('ventas_detalle', 'ventas_detalle.idventa', '=', 'ventas.idventa')
+                    ->join('productos', 'productos.idproducto', '=', 'ventas_detalle.idproducto')
+                    ->join('facturacion', 'ventas.idventa', '=', 'facturacion.idventa')
+                    ->selectRaw('sum(ventas_detalle.cantidad) as vendidos,sum(ventas_detalle.monto * ventas_detalle.cantidad) as monto_total,ventas_detalle.idproducto, productos.nombre, productos.unidad_medida, productos.presentacion, productos.cod_producto, productos.precio, productos.tipo_producto')
+                    ->whereBetween('ventas.fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
+                    ->where('ventas.eliminado', 0)
+                    ->where(function($query) {
+                        $query->where(function ($query) {
+                            $query->where('facturacion.codigo_tipo_documento',01)
+                                ->orWhere('facturacion.codigo_tipo_documento',03)
+                                ->orWhere('facturacion.codigo_tipo_documento',30);
+                        })
+                            ->where(function ($query){
+                                $query->where('facturacion.estado','ACEPTADO')
+                                    ->orWhere('facturacion.estado','PENDIENTE');
+                            })
+                            ->orWhere('facturacion.estado','-');
+                    })
+                    ->groupBy('ventas_detalle.idproducto')
+                    ->orderby('vendidos','desc')
+                    ->get();
+            } else {
+                $productos=$ventas = DB::table('ventas')
+                    ->join('ventas_detalle', 'ventas_detalle.idventa', '=', 'ventas.idventa')
+                    ->join('productos', 'productos.idproducto', '=', 'ventas_detalle.idproducto')
+                    ->join('facturacion', 'ventas.idventa', '=', 'facturacion.idventa')
+                    ->selectRaw('sum(ventas_detalle.cantidad) as vendidos,sum(ventas_detalle.monto * ventas_detalle.cantidad) as monto_total,ventas_detalle.idproducto, productos.nombre, productos.unidad_medida, productos.presentacion, productos.cod_producto, productos.precio, productos.tipo_producto')
+                    ->whereBetween('ventas.fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
+                    ->where('ventas.eliminado', 0)
+                    ->where(function($query) {
+                        $query->where(function ($query) {
+                            $query->where('facturacion.codigo_tipo_documento',01)
+                                ->orWhere('facturacion.codigo_tipo_documento',03)
+                                ->orWhere('facturacion.codigo_tipo_documento',30);
+                        })
+                            ->where(function ($query){
+                                $query->where('facturacion.estado','ACEPTADO')
+                                    ->orWhere('facturacion.estado','PENDIENTE');
+                            })
+                            ->orWhere('facturacion.estado','-');
+                    })
+                    ->groupBy('ventas_detalle.idproducto')
+                    ->orderby('vendidos','desc')
+                    ->paginate(30);
+
+                $productos->appends($_GET)->links();
+            }
+
+            return ['productos'=>$productos,'filtros'=>$filtros,'usuario'=>auth()->user()->persona];
+
+        } catch (\Exception $e){
+            Log::error($e);
+            return $e->getMessage();
+        }
+    }
+
     public function mas_vendidos(Request $request){
-        $productos=$ventas = DB::table('ventas')
-            ->join('ventas_detalle', 'ventas_detalle.idventa', '=', 'ventas.idventa')
-            ->join('productos', 'productos.idproducto', '=', 'ventas_detalle.idproducto')
-            ->selectRaw('sum(ventas_detalle.cantidad) as vendidos,ventas_detalle.idproducto, productos.nombre, productos.cod_producto, productos.imagen, productos.precio, productos.presentacion')
-            ->where('ventas.eliminado', 0)
-            ->where('productos.eliminado', 0)
-            ->groupBy('ventas_detalle.idproducto')
-            ->orderby('vendidos','desc')
-            ->limit(20)
-            ->get();
+
 
         $esExportable = $request->get('export','false');
+        $desde=$request->get('desde',date('Y-m-d'));
+        $hasta=$request->get('hasta',date('Y-m-d'));
+
+        $productos = $this->mas_vendidos_data($desde, $hasta, $esExportable);
 
         if($esExportable == 'true'){
-            return Excel::download(new MasVendidosExport($productos), 'mas_vendidos.xlsx');
+            return Excel::download(new MasVendidosExport($productos['productos']), 'mas_vendidos.xlsx');
         } else {
-            return view('reportes.mas_vendidos',
-                [
-                    'usuario'=>auth()->user()->persona,
-                    'productos'=>$productos
-                ]);
+            return view('reportes.mas_vendidos',$productos);
         }
+
+    }
+
+    public function mas_vendidos_badge(Request $request){
+
+        $desde=$request->get('desde',date('Y-m-d'));
+        $hasta=$request->get('hasta',date('Y-m-d'));
+
+        $productos = $this->mas_vendidos_data($desde, $hasta, true);
+
+        $resumen = ['cantidad'=>0, 'total' => 0];
+
+        foreach ($productos['productos'] as $producto) {
+            if($producto->tipo_producto != 4){
+                $resumen['cantidad'] += $producto->vendidos;
+                $resumen['total'] += $producto->monto_total;
+            }
+        }
+
+        return $resumen;
 
     }
 
@@ -1415,6 +1468,14 @@ class ReporteController extends Controller
             Log::error($e);
             return $e->getMessage();
         }
+    }
+
+    public function obtener_vendedores(){
+        $vendedores = Trabajador::where('eliminado',0)->where('cargo',1)->get();
+        foreach ($vendedores as $vendedor){
+            $vendedor->persona;
+        }
+        return $vendedores;
     }
 
 }
