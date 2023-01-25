@@ -390,6 +390,17 @@ Route::group(['middleware' => ['can:Inventario: almacenes']], function () {
     Route::post('almacenes/update-ubicacion', 'AlmacenController@updateUbicacion');
 });
 
+Route::group(['middleware' => ['can:Catalogos']], function () {
+//Rutas para reportes
+    Route::get('catalogos', 'CatalogoController@index');
+    Route::get('catalogos/nuevo', 'CatalogoController@nuevo');
+    Route::post('catalogos/store', 'CatalogoController@store');
+    Route::post('catalogos/update', 'CatalogoController@update');
+    Route::get('catalogos/editar/{id}', 'CatalogoController@editar');
+    Route::get('catalogos/imprimir/{id}', 'CatalogoController@imprimir');
+    Route::delete('catalogos/destroy/{id}', 'CatalogoController@destroy');
+    Route::get('catalogos/duplicar/{id}', 'CatalogoController@duplicar');
+});
 
 //Helper
 Route::get('helper/obtener-clientes/{search?}', 'Helpers\MainHelper@obtener_clientes');

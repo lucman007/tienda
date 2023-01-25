@@ -2,6 +2,7 @@
 @section('titulo', 'Productos')
 @section('contenido')
     @php $agent = new \Jenssegers\Agent\Agent() @endphp
+    @php $filtro = $_GET['filtro']??'Filtro'; @endphp
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
             <div class="col-lg-9">
@@ -36,19 +37,19 @@
                                 <tr>
                                     <th scope="col"></th>
                                     <th @if(!$columnas['ubicacion']) style="display: none;" @endif scope="col">Ubicación</th>
-                                    <th @if(!$columnas['codigo']) style="display: none;" @endif scope="col"><a href="?orderby=cod_producto&order={{$order}}">Código <span class="icon-hover @if($orderby=='cod_producto') icon-hover-active @endif">{!!$order_icon!!}</span></a></th>
+                                    <th @if(!$columnas['codigo']) style="display: none;" @endif scope="col"><a href="{{$filtro == 'Filtro'?'?':url()->full()}}&orderby=cod_producto&order={{$order}}">Código <span class="icon-hover @if($orderby=='cod_producto') icon-hover-active @endif">{!!$order_icon!!}</span></a></th>
                                     <th @if(!$columnas['tipo_producto']) style="display: none;" @endif scope="col">Clasif.</th>
-                                    <th style="width: 15%" scope="col"><a href="?orderby=nombre&order={{$order}}">Producto <span class="icon-hover @if($orderby=='nombre') icon-hover-active @endif">{!!$order_icon!!}</span></a></th>
+                                    <th style="width: 15%" scope="col"><a href="{{$filtro == 'Filtro'?'?':url()->full()}}&orderby=nombre&order={{$order}}">Producto <span class="icon-hover @if($orderby=='nombre') icon-hover-active @endif">{!!$order_icon!!}</span></a></th>
                                     <th scope="col" style="width: 20%">Descripción</th>
                                     <th @if(!$columnas['montaje']) style="display: none;" @endif>Montaje</th>
                                     <th @if(!$columnas['capsula']) style="display: none;" @endif>Cápsula</th>
                                     <th @if(!$columnas['tipo']) style="display: none;" @endif>Tipo</th>
                                     <th @if(!$columnas['marca']) style="display: none;" @endif scope="col">Marca</th>
                                     <th @if(!$columnas['modelo']) style="display: none;" @endif scope="col">Modelo</th>
-                                    <th @if(!$columnas['categoria']) style="display: none;" @endif scope="col"><a href="?orderby=categoria&order={{$order}}">Categoría <span class="icon-hover @if($orderby=='categoria') icon-hover-active @endif">{!!$order_icon!!}</span></a></th>
+                                    <th @if(!$columnas['categoria']) style="display: none;" @endif scope="col"><a href="{{$filtro == 'Filtro'?'?':url()->full()}}&orderby=categoria&order={{$order}}">Categoría <span class="icon-hover @if($orderby=='categoria') icon-hover-active @endif">{!!$order_icon!!}</span></a></th>
                                     <th @if(!$columnas['stock']) style="display: none;" @endif scope="col">Stock</th>
                                     <th @if(!$columnas['costo']) style="display: none;" @endif scope="col">Compra</th>
-                                    <th @if(!$columnas['precio']) style="display: none;" @endif scope="col"><a href="?orderby=precio&order={{$order}}">Precio <span class="icon-hover @if($orderby=='precio') icon-hover-active @endif">{!!$order_icon!!}</span></a></th>
+                                    <th @if(!$columnas['precio']) style="display: none;" @endif scope="col"><a href="{{$filtro == 'Filtro'?'?':url()->full()}}&orderby=precio&order={{$order}}">Precio <span class="icon-hover @if($orderby=='precio') icon-hover-active @endif">{!!$order_icon!!}</span></a></th>
                                     <th @if(!$columnas['precio_min']) style="display: none;" @endif scope="col">Precio min.</th>
                                     <th @if(!$columnas['imagen']) style="display: none;" @endif scope="col">Imagen</th>
                                     <th scope="col">Opciones</th>
