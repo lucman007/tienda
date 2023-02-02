@@ -372,11 +372,14 @@ class PresupuestoController extends Controller
             $monto_descuento = $item->detalle['tipo_descuento']?$subtotal*$item->detalle['porcentaje_descuento']/100:$item->detalle['descuento'];
             $item->total = $subtotal - $monto_descuento;
         }*/
-
+        $i = 0;
         foreach ($presupuesto->productos as $item){
             $item->monto = $item->detalle['monto'];
             $item->monto_descuento=$item->detalle['tipo_descuento']?floatval($item->detalle['porcentaje_descuento']).'%':$item->detalle['descuento'];
             $subtotal = $item->detalle['cantidad']*$item->detalle['monto'];
+            if($item->imagen){
+                MainHelper::procesar_imagen($item->imagen,$emisor->ruc.'-cotizacion-'.$i.'.jpg');
+            }
 
             if($item->detalle['tipo_descuento']){
                 $monto_descuento = $subtotal*$item->detalle['porcentaje_descuento']/100;
@@ -390,6 +393,7 @@ class PresupuestoController extends Controller
             }
 
             $item->total = $subtotal - $monto_descuento;
+            $i++;
         }
 
         $print = MainHelper::configuracion('cotizacion');
@@ -400,6 +404,14 @@ class PresupuestoController extends Controller
         $pdf=new Html2Pdf('P','A4','es');
         $pdf->pdf->SetTitle('COTIZACION-'.str_pad($presupuesto['correlativo'],5,'0',STR_PAD_LEFT));
         $pdf->writeHTML($html);
+
+        $files = glob(public_path('images/temporal/*'));
+        foreach($files as $file){
+            if(is_file($file) && strpos($file,$emisor->ruc.'-cotizacion')!==false) {
+                unlink($file);
+            }
+        }
+
         return [
             'file'=>$pdf,
             'name'=>'COTIZACION-'.str_pad($presupuesto['correlativo'],5,'0',STR_PAD_LEFT).'.pdf'

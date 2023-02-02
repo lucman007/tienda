@@ -14,7 +14,7 @@
 <div class="portada">
     <div class="imagen-portada">
         @if($catalogo->imagen_portada)
-        <img src="{{$catalogo->imagen_portada}}">
+        <img src="{{'images/temporal/'.$emisor->ruc.'-catalogo-portada.jpg'}}">
         @endif
     </div>
     <div class="titulo-wrapper">
@@ -25,7 +25,7 @@
     </div>
     <div class="logo">
         @if($emisor->logo)
-            <img src="{{'images/'.$emisor->logo}}">
+            <img style="width: 100%" src="{{'images/'.$emisor->logo}}">
         @endif
     </div>
     <div class="texto-info">
@@ -67,16 +67,23 @@
             @endphp
             <div class="thumb {{$class}}">
                 @if($producto->imagen)
-                    <img style="width:100%;" src="{{$producto->imagen}}" alt="">
+                    @php
+                    $img = 'images/temporal/'.$emisor->ruc.'-catalogo-'.$num_loop_producto.'.jpg';
+                    @endphp
+                    @if(filesize($img) > 0)
+                        <img style="width:100%; height: 80%" src="{{$img}}" alt="">
+                    @else
+                        <img style="width:100%;" src="{{'images/no-image.jpg'}}">
+                    @endif
                 @else
-                    <img src="{{'images/no-image.jpg'}}">
+                    <img style="width:100%;" src="{{'images/no-image.jpg'}}">
                 @endif
                 @if($catalogo->precios)
                 <div class="precio">
                     {{$producto->moneda=='PEN'?'S/':'USD'}} {{$producto->precio}}
                 </div>
                 @endif
-                <div class="caption">
+                <div class="caption" style="height: 20%;">
                     <p>{{$producto->cod_producto==''?'':'CÓD. '.$producto->cod_producto.' -'}} {{$producto->nombre}}<br><span>{{\Illuminate\Support\Str::words($producto->presentacion,40,'...')}}</span></p>
                 </div>
             </div>
@@ -127,13 +134,14 @@
     }
     .row{
         position: relative;
+        margin-bottom: 8mm;
     }
     .thumb{
         border:2px solid #ffca11;
-        margin: 5mm;
+        margin: 0 5mm;
         float: left;
         width: 60mm;
-        height: 45mm;
+        height: 53mm;
         overflow: hidden;
         position: absolute;
     }
@@ -172,7 +180,6 @@
     .titulo{
         font-size: 80pt;
         font-family: impact;
-
     }
     .subtitulo-wrapper{
         margin-top: -10mm;
@@ -182,12 +189,15 @@
     .subtitulo{
 
     }
+    .caption{
+        margin-top:15mm;
+    }
     .caption p{
-        font-size: 9pt;
+        font-size: 8pt;
         vertical-align: middle;
     }
     .caption p span{
-        font-size: 7pt;
+        font-size: 6pt;
     }
     .precio{
         position: absolute;
@@ -200,20 +210,20 @@
     .portada{
         width: 220mm;
         height: 300mm;
-        background: orangered;
+        background: #ffca11;
         margin-left: -5mm;
     }
     .logo{
-        margin: 70mm 0 0 140mm;
+        margin: 60mm 0 0 150mm;
         position: relative;
         background: red;
-        width: 60mm;
+        width: 40mm;
         text-align: center;
     }
     .texto-info{
         width: 120mm;
         position: absolute;
-        bottom: 30mm;
+        bottom: 40mm;
         left:15mm;
         font-size: 9pt;
     }

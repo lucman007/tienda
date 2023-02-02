@@ -461,4 +461,18 @@ class MainHelper extends Controller
         return $text;
     }
 
+    public static function procesar_imagen($link_imagen, $nombre){
+        $ch = curl_init($link_imagen);
+        $fp = fopen(public_path('images/temporal/'.$nombre), 'wb');
+        curl_setopt($ch, CURLOPT_FILE, $fp);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        if(env('APP_ENV') == 'local'){
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        }
+        curl_exec($ch);
+        curl_close($ch);
+        fclose($fp);
+    }
+
 }

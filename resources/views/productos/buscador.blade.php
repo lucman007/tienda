@@ -27,7 +27,7 @@
                 <b-dropdown-item :href="'/productos'"><span style="color:red">Quitar filtro</span></b-dropdown-item>
                 @endif
             </b-dropdown>
-            <b-button variant="primary" type="button" :href="'{{$filtro}}'=='Filtro'?'/productos':'?textoBuscado='+search+'&filtro={{$filtro}}'">
+            <b-button variant="primary" type="button" :href="'{{$filtro}}'=='Filtro'?'?textoBuscado='+search:'?textoBuscado='+search+'&filtro={{$filtro}}'">
                 <i class="fas fa-search"></i>
             </b-button>
         </div>

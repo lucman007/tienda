@@ -400,6 +400,7 @@ Route::group(['middleware' => ['can:Catalogos']], function () {
     Route::get('catalogos/imprimir/{id}', 'CatalogoController@imprimir');
     Route::delete('catalogos/destroy/{id}', 'CatalogoController@destroy');
     Route::get('catalogos/duplicar/{id}', 'CatalogoController@duplicar');
+    Route::get('catalogos/descargar/{id}', 'CatalogoController@descargar_catalogo');
 });
 
 //Helper

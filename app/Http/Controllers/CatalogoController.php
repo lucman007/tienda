@@ -142,39 +142,61 @@ class CatalogoController extends Controller
     }
 
     public function generarPdf($id){
-        $catalogo=Catalogo::find($id);
-        $catalogo->productos;
-        $emisor=new Emisor();
-        $config = MainHelper::configuracion('mail_contact');
+        try{
+            $catalogo=Catalogo::find($id);
+            $catalogo->productos;
+            $emisor=new Emisor();
+            $config = MainHelper::configuracion('mail_contact');
+            $file=null;
+            $i = 0;
+            if($catalogo->imagen_portada){
+                MainHelper::procesar_imagen($catalogo->imagen_portada,$emisor->ruc.'-catalogo-portada.jpg');
+            }
+            foreach ($catalogo->productos as $item){
+                if($item->imagen){
+                    MainHelper::procesar_imagen($item->imagen,$emisor->ruc.'-catalogo-'.$i.'.jpg');
+                }
+                $i++;
+            }
 
-        foreach ($catalogo->productos as $item){
+            $view = view('catalogo/imprimir/modelo_1',['catalogo'=>$catalogo,'emisor'=>$emisor,'config'=>json_decode($config, true)]);
+            $html=$view->render();
+            $pdf=new Html2Pdf('P','A4','es', true, 'UTF-8');
+            $pdf->pdf->SetTitle('CATALOGO-'.str_pad($catalogo->idcatalogo,5,'0',STR_PAD_LEFT));
+            if(!file_exists(base_path('vendor/tecnickcom/tcpdf/fonts/impact.php'))){
+                $fontname = \TCPDF_FONTS::addTTFfont(public_path('fonts/impact.ttf'), 'regular', '', 32);
+            } else {
+                $fontname = "impact";
+            }
+            $pdf->pdf->SetFont($fontname);
+            $pdf->writeHTML($html);
 
+            $files = glob(public_path('images/temporal/*'));
+            foreach($files as $file){
+                if(is_file($file) && strpos($file,$emisor->ruc.'-catalogo')!==false) {
+                    unlink($file);
+                }
+            }
+
+            return [
+                'file'=>$pdf,
+                'name'=>'CATALOGO-'.str_pad($catalogo->idcatalogo,5,'0',STR_PAD_LEFT).'.pdf'
+            ];
+        } catch (\Exception $e){
+            Log::error($e);
+            return $e->getMessage();
         }
-
-        $view = view('catalogo/imprimir/modelo_1',['catalogo'=>$catalogo,'emisor'=>$emisor,'config'=>json_decode($config, true)]);
-        $html=$view->render();
-        $pdf=new Html2Pdf('P','A4','es', true, 'UTF-8');
-        $pdf->pdf->SetTitle('CATALOGO-'.str_pad($catalogo->idcatalogo,5,'0',STR_PAD_LEFT));
-        if(!file_exists(base_path('vendor/tecnickcom/tcpdf/fonts/impact.php'))){
-            $fontname = \TCPDF_FONTS::addTTFfont(public_path('fonts/impact.ttf'), 'regular', '', 32);
-        } else {
-            $fontname = "impact";
-        }
-        $pdf->pdf->SetFont($fontname);
-        //$pdf->addFont('impact','regular','fonts/impact.php');
-        //dd($pdf);
-        $pdf->writeHTML($html);
-
-        return [
-            'file'=>$pdf,
-            'name'=>'CATALOGO-'.str_pad($catalogo->idcatalogo,5,'0',STR_PAD_LEFT).'.pdf'
-        ];
     }
 
     public function imprimir($id)
     {
         $pdf=$this->generarPdf($id);
         $pdf['file']->output($pdf['name']);
+    }
+
+    public function descargar_catalogo($id){
+        $pdf=$this->generarPdf($id);
+        $pdf['file']->output($pdf['name'],'D');
     }
 
     public function destroy($id)    {

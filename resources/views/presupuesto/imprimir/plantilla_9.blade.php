@@ -114,7 +114,9 @@
 <div class="div-table-header">
 </div>
 
-    @php($i=1)
+    @php
+        $i=1
+    @endphp
         <table class="items" cellpadding="0">
             <thead>
                 <tr class="table-header" style="color: black">
@@ -133,7 +135,18 @@
                 <tr class="items-tr">
                     <td style="width: 5mm">{{$i++}}</td>
                     <td style="width: 65mm"><strong>{{$item->nombre}}</strong><br> {!!$item->detalle['descripcion']!!}</td>
-                    <td style="width: 25mm">@if($item->imagen) <img style="width: 100%; padding-right:5px " src="{{$item->imagen}}" alt="">@endif</td>
+                    <td style="width: 25mm">
+                        @if($item->imagen)
+                            @php
+                                $img = 'images/temporal/'.$emisor->ruc.'-cotizacion-'.($i-2).'.jpg';
+                            @endphp
+                            @if(filesize($img) > 0)
+                                <img style="width: 100%; padding-right:5px " src="{{$img}}" alt="">
+                            @else
+                                <img style="width:100%;" src="{{'images/no-image.jpg'}}">
+                            @endif
+                        @endif
+                    </td>
                     <td style="width: 20mm;">{{floatval($item->detalle['cantidad'])}}</td>
                     <td style="width: 10mm">{{explode('/',$item->unidad_medida)[1]}}</td>
                     <td style="width: 20mm; text-align: right">{{number_format($item->monto, 3)}}</td>
