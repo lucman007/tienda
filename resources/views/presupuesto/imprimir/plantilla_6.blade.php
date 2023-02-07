@@ -1,4 +1,4 @@
-@php /** Modelo 6 - habilitado**/@endphp
+@php /** Modelo 06 - habilitado**/@endphp
 <!doctype html>
 <html lang="{{ config('app.locale') }}">
 <head>
@@ -78,8 +78,8 @@
                     </td>
                     <td style="width: 10mm; border-right: 0.5px solid black; text-align: center; @if(count($presupuesto->productos)==$i) border-bottom: 1px solid black; border-right: 1px solid black;@endif">{{$item->detalle['cantidad']}}</td>
                     <td style="width: 8mm; border-right: 0.5px solid black; text-align: center; @if(count($presupuesto->productos)==$i) border-bottom: 1px solid black; border-right: 1px solid black;@endif">{{explode('/',$item->unidad_medida)[1]}}</td>
-                    <td style="width: 10mm; border-right: 0.5px solid black; text-align: right; @if(count($presupuesto->productos)==$i) border-bottom: 1px solid black; border-right: 1px solid black;@endif">{{number_format($item->monto, 3)}}</td>
-                    <td style="width: 10mm; border-right: 0.5px solid black; text-align: right; @if(count($presupuesto->productos)==$i) border-bottom: 1px solid black; border-right: 1px solid black;@endif">{{number_format($item->total,2)}}</td>
+                    <td style="width: 10mm; border-right: 0.5px solid black; text-align: right; @if(count($presupuesto->productos)==$i) border-bottom: 1px solid black; border-right: 1px solid black;@endif">@if(!$presupuesto->ocultar_precios){{number_format($item->monto, 3)}}@endif</td>
+                    <td style="width: 10mm; border-right: 0.5px solid black; text-align: right; @if(count($presupuesto->productos)==$i) border-bottom: 1px solid black; border-right: 1px solid black;@endif">@if(!$presupuesto->ocultar_precios){{number_format($item->total,2)}}@endif</td>
                 </tr>
                 @php
                     $i++;
@@ -97,16 +97,18 @@
                     <td style="text-align: right; border: 1px solid black">{{$presupuesto->moneda}} {{number_format($presupuesto->seguro,2)}}</td>
                 </tr>
             @else
-            <tr>
-                <td style="border: 1px solid black;" colspan="4"><strong>SON: {{$presupuesto->leyenda}}</strong></td>
-                <td style="border: 1px solid black; border-left: 1px solid black">SUBTOTAL</td>
-                <td style="text-align: right; border: 1px solid black">{{$presupuesto->moneda}} {{number_format($presupuesto->presupuesto/1.18,2)}}</td>
-            </tr>
-            <tr>
-                <td style="border-right: 0.5px solid black" colspan="4"></td>
-                <td style="border: 1px solid black">IGV 18%</td>
-                <td style="text-align: right; border: 1px solid black">{{$presupuesto->moneda}} {{number_format($presupuesto->presupuesto-($presupuesto->presupuesto/1.18),2)}}</td>
-            </tr>
+                @if(!$presupuesto->ocultar_impuestos)
+                <tr>
+                    <td style="border: 1px solid black;" colspan="4"><strong>SON: {{$presupuesto->leyenda}}</strong></td>
+                    <td style="border: 1px solid black; border-left: 1px solid black">SUBTOTAL</td>
+                    <td style="text-align: right; border: 1px solid black">{{$presupuesto->moneda}} {{number_format($presupuesto->presupuesto/1.18,2)}}</td>
+                </tr>
+                <tr>
+                    <td style="border-right: 0.5px solid black" colspan="4"></td>
+                    <td style="border: 1px solid black">IGV 18%</td>
+                    <td style="text-align: right; border: 1px solid black">{{$presupuesto->moneda}} {{number_format($presupuesto->presupuesto-($presupuesto->presupuesto/1.18),2)}}</td>
+                </tr>
+                 @endif
             @endif
             <tr>
                 <td style="border-right: 0.5px solid black" colspan="4"></td>

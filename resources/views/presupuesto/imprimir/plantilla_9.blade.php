@@ -1,4 +1,4 @@
-@php /** Modelo 9 - habilitado**/@endphp
+@php /** Modelo 09 - habilitado**/@endphp
 <!doctype html>
 <html lang="{{ config('app.locale') }}">
 <head>
@@ -149,9 +149,9 @@
                     </td>
                     <td style="width: 20mm;">{{floatval($item->detalle['cantidad'])}}</td>
                     <td style="width: 10mm">{{explode('/',$item->unidad_medida)[1]}}</td>
-                    <td style="width: 20mm; text-align: right">{{number_format($item->monto, 3)}}</td>
-                    <td style="width: 15mm; text-align: right">{{$item->monto_descuento}}</td>
-                    <td style="width: 20mm; text-align: right">{{number_format($item->total,2)}}</td>
+                    <td style="width: 20mm; text-align: right">@if(!$presupuesto->ocultar_precios){{number_format($item->monto, 3)}}@endif</td>
+                    <td style="width: 15mm; text-align: right">@if(!$presupuesto->ocultar_precios){{$item->monto_descuento}}@endif</td>
+                    <td style="width: 20mm; text-align: right">@if(!$presupuesto->ocultar_precios){{number_format($item->total,2)}}@endif</td>
                 </tr>
             @endforeach
             @if(trim($presupuesto->observaciones)!='')
@@ -194,21 +194,21 @@
             </p>
             <table>
                 <tr>
-                    <td><span class="bcp-logo"><img src="{{public_path('images/nyabby/bcp-logo.jpg')}}" alt=""></span></td>
+                    <td><span class="bcp-logo"><img src="{{public_path('images/nyabby/bcp-logo.png')}}" alt=""></span></td>
                     <td colspan="3"><strong>Cta. Soles:</strong> {{$emisor->cuenta_1}}<br><strong>Cta. Dólares:</strong> {{$emisor->cuenta_2}}</td>
                 </tr>
                 <tr>
                     <td style="padding-top:10px">
-                        <span class="bcp-logo"><img src="{{public_path('images/nyabby/yape-logo.jpg')}}" alt=""></span>
+                        <span class="bcp-logo"><img src="{{public_path('images/nyabby/yape-logo.png')}}" alt=""></span>
                     </td>
                     <td style="padding-top:10px">
                         <span class="qr-img"><img src="{{public_path('images/nyabby/qr-yape.jpeg')}}" alt=""></span>
                     </td>
                     <td style="padding:10px 0 0 10px">
-                        <span class="img-icon"><img src="{{public_path('images/nyabby/whats-logo.jpg')}}" alt="">992 480 966</span> <br>
-                        <span class="img-icon"><img src="{{public_path('images/nyabby/mail-logo.jpg')}}" alt="">ventas@nyabbycorp.com</span> <br>
-                        <span class="img-icon"><img src="{{public_path('images/nyabby/facebook-logo.jpg')}}" alt="">@NyabbyCorp</span> <br>
-                        <span class="img-icon"><img src="{{public_path('images/nyabby/insta-logo.jpg')}}" alt="">/NyabbyCorp</span> <br>
+                        <span class="img-icon"><img src="{{public_path('images/nyabby/whats-logo.png')}}" alt="">992 480 966</span> <br>
+                        <span class="img-icon"><img src="{{public_path('images/nyabby/mail-logo.png')}}" alt="">ventas@nyabbycorp.com</span> <br>
+                        <span class="img-icon"><img src="{{public_path('images/nyabby/facebook-logo.png')}}" alt="">@NyabbyCorp</span> <br>
+                        <span class="img-icon"><img src="{{public_path('images/nyabby/insta-logo.png')}}" alt="">/NyabbyCorp</span> <br>
                     </td>
                 </tr>
                 <tr>
@@ -228,6 +228,7 @@
                         <td style="width: 28mm; text-align: right">{{$presupuesto->moneda}} {{number_format($presupuesto->seguro,2)}}</td>
                     </tr>
                 @else
+                    @if(!$presupuesto->ocultar_impuestos)
                     <tr>
                         <td><strong>Subtotal:</strong></td>
                         <td style="width: 28mm; text-align: right">{{$presupuesto->moneda}} {{number_format($presupuesto->presupuesto/1.18,2)}}</td>
@@ -236,9 +237,10 @@
                         <td><strong>Total IGV 18%:</strong></td>
                         <td style="width: 28mm; text-align: right">{{$presupuesto->moneda}} {{number_format($presupuesto->presupuesto-($presupuesto->presupuesto/1.18),2)}}</td>
                     </tr>
+                    @endif
                 @endif
                 <tr>
-                    <td><strong>Importe total:</strong></td>
+                    <td><strong>Total:</strong></td>
                     <td style="width: 28mm; text-align: right">{{$presupuesto->moneda}} {{number_format($presupuesto->presupuesto,2)}}</td>
                 </tr>
             </table>

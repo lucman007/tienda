@@ -133,7 +133,8 @@ class PresupuestoController extends Controller
             $presupuesto->referencia=$request->referencia;
             $presupuesto->flete=$request->flete;
             $presupuesto->seguro=$request->seguro;
-            $presupuesto->estado='PENDIENTE';
+            $presupuesto->ocultar_impuestos=$request->ocultar_impuestos;
+            $presupuesto->ocultar_precios=$request->ocultar_precios;
             $presupuesto->save();
             $idpresupuesto=$presupuesto->idpresupuesto;
 
@@ -167,58 +168,6 @@ class PresupuestoController extends Controller
 
 
 	}
-
-	public function presupuesto_desde_orden(Request $request)
-	{
-		$presupuesto=new Presupuesto();
-		$presupuesto->idempleado=auth()->user()->idempleado;
-
-        $presupuesto->idcliente=$request->idcliente;
-		$presupuesto->presupuesto=$request->presupuesto;
-		$presupuesto->observaciones=$request->observaciones;
-		$presupuesto->estado='PENDIENTE';
-		$presupuesto->moneda='PEN';
-		$presupuesto->save();
-        $presupuesto->igv_incluido=0;
-		$idpresupuesto=$presupuesto->idpresupuesto;
-
-		$detalle=[];
-		$items=json_decode($request->items, TRUE);
-		$i=1;
-		foreach ($items as $item){
-			$detalle['num_item']=$i;
-			$detalle['cantidad']=$item['cantidad'];
-			$detalle['monto']=$item['precio'];
-			$detalle['descuento']=$item['descuento'];
-			$detalle['descripcion']=mb_strtoupper($item['presentacion']);
-			$detalle['idproducto']=$item['idproducto'];
-			$detalle['idpresupuesto']=$idpresupuesto;
-
-			if($item['idproducto']==-1){
-				$detalle['producto_nombre']=mb_strtoupper($item['producto_nombre']);
-			}
-
-			if(strlen($item['nombre'])!=0 || strlen($item['descripcion'])!=0 || strlen($item['producto_nombre'])!=0){
-				DB::table('presupuesto_detalle')->insert($detalle);
-			}
-
-			$i++;
-		}
-
-		//Actualizar estado de presupuestado en la orden
-		$orden=Orden::findOrFail($request->idorden);
-		$orden->presupuestado=$idpresupuesto;
-		$orden->update();
-
-		return $idpresupuesto;
-
-	}
-
-    public function aprobar_presupuesto(Request $request){
-        $presupuesto=Presupuesto::findOrFail($request->idpresupuesto);
-        $presupuesto->estado='APROBADO';
-        $presupuesto->update();
-    }
 
     public function editar(Request $request, $id)
     {
@@ -306,6 +255,8 @@ class PresupuestoController extends Controller
             $presupuesto->seguro=$request->seguro;
             $presupuesto->referencia=$request->referencia;
             $presupuesto->fecha=$request->fecha.' '.date('H:i:s');
+            $presupuesto->ocultar_impuestos=$request->ocultar_impuestos;
+            $presupuesto->ocultar_precios=$request->ocultar_precios;
 
             if ($request->moneda == 'S/') {
                 $moneda = 'PEN';

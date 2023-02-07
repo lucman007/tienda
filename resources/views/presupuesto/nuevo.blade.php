@@ -240,7 +240,7 @@
             <div class="col-lg-12 mb-3">
                 <div class="card">
                     <div class="card-header">
-                        Información adicional
+                        Información y configuración adicional
                     </div>
                     <div class="card-body">
                         <div class="row">
@@ -271,6 +271,19 @@
                             <div class="col-lg-4 form-group mb-4">
                                 <label>Teléfonos</label>
                                 <input class="form-control" type="text" v-model="telefonos">
+                            </div>
+                            <div class="col-lg-12">
+                                <p>Impresión PDF:</p>
+                            </div>
+                            <div class="col-lg-2">
+                                <b-form-checkbox v-model="ocultar_impuestos" switch size="sm">
+                                    Ocultar impuestos
+                                </b-form-checkbox>
+                            </div>
+                            <div class="col-lg-2">
+                                <b-form-checkbox v-model="ocultar_precios" switch size="sm">
+                                    Ocultar precios
+                                </b-form-checkbox>
                             </div>
                         </div>
                     </div>
@@ -383,7 +396,9 @@
                 esDstoGlobal: false,
                 dataDescuento:{},
                 referencia:'',
-                disabledNr:false
+                disabledNr:false,
+                ocultar_impuestos:false,
+                ocultar_precios:false
             },
             created(){
                 this.obtenerCorrelativo();
@@ -585,6 +600,8 @@
                         'seguro':this.seguro,
                         'incoterm':this.incoterm,
                         'referencia':this.referencia,
+                        'ocultar_impuestos':this.ocultar_impuestos,
+                        'ocultar_precios':this.ocultar_precios,
                         'items': JSON.stringify(this.productosSeleccionados)
                     })
                         .then(response => {
@@ -661,6 +678,8 @@
                     this.index=-1;
                     this.esDstoGlobal= false;
                     this.dataDescuento={};
+                    this.ocultar_impuestos=false;
+                    this.ocultar_precios=false;
                 },
                 guardar_prev_precio(index){
                     let producto = this.productosSeleccionados[index];

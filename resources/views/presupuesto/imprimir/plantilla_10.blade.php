@@ -139,9 +139,9 @@
                     <td style="width: 85mm"><strong>{{$item->nombre}}</strong><br> {!!$item->detalle['descripcion']!!}</td>
                     <td style="width: 20mm">{{floatval($item->detalle['cantidad'])}}</td>
                     <td style="width: 10mm">{{explode('/',$item->unidad_medida)[1]}}</td>
-                    <td style="width: 20mm; text-align: right">{{number_format($item->monto, 3)}}</td>
-                    <td style="width: 15mm; text-align: right">{{$item->monto_descuento}}</td>
-                    <td style="width: 20mm; text-align: right">{{number_format($item->total,2)}}</td>
+                    <td style="width: 20mm; text-align: right">@if(!$presupuesto->ocultar_precios){{number_format($item->monto, 3)}}@endif</td>
+                    <td style="width: 15mm; text-align: right">@if(!$presupuesto->ocultar_precios){{$item->monto_descuento}}@endif</td>
+                    <td style="width: 20mm; text-align: right">@if(!$presupuesto->ocultar_precios){{number_format($item->total,2)}}@endif</td>
                 </tr>
             @endforeach
             @if(trim($presupuesto->observaciones)!='')
@@ -199,6 +199,7 @@
                         <td style="width: 28mm; text-align: right">{{$presupuesto->moneda}} {{number_format($presupuesto->seguro,2)}}</td>
                     </tr>
                 @else
+                    @if(!$presupuesto->ocultar_impuestos)
                     <tr>
                         <td><strong>Subtotal:</strong></td>
                         <td style="width: 28mm; text-align: right">{{$presupuesto->moneda}} {{number_format($presupuesto->presupuesto/1.18,2)}}</td>
@@ -207,6 +208,7 @@
                         <td><strong>Total IGV 18%:</strong></td>
                         <td style="width: 28mm; text-align: right">{{$presupuesto->moneda}} {{number_format($presupuesto->presupuesto-($presupuesto->presupuesto/1.18),2)}}</td>
                     </tr>
+                    @endif
                 @endif
                 <tr>
                     <td><strong>Importe total:</strong></td>

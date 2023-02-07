@@ -1,4 +1,4 @@
-@php /** Modelo 1 - habilitado**/@endphp
+@php /** Modelo 01 - habilitado**/@endphp
 <!doctype html>
 <html lang="{{ config('app.locale') }}">
 <head>
@@ -85,9 +85,9 @@
                     <td style="width: 65mm"><strong>{{$item->nombre}}</strong><br> {!!$item->detalle['descripcion']!!}</td>
                     <td style="width: 20mm">{{floatval($item->detalle['cantidad'])}}</td>
                     <td style="width: 10mm">{{explode('/',$item->unidad_medida)[1]}}</td>
-                    <td style="width: 20mm; text-align: right">{{number_format($item->monto, 3)}}</td>
-                    <td style="width: 15mm; text-align: right">{{$item->monto_descuento}}</td>
-                    <td style="width: 20mm; text-align: right">{{number_format($item->total,2)}}</td>
+                    <td style="width: 20mm; text-align: right">@if(!$presupuesto->ocultar_precios){{number_format($item->monto, 3)}}@endif</td>
+                    <td style="width: 15mm; text-align: right">@if(!$presupuesto->ocultar_precios){{$item->monto_descuento}}@endif</td>
+                    <td style="width: 20mm; text-align: right">@if(!$presupuesto->ocultar_precios){{number_format($item->total,2)}}@endif</td>
                 </tr>
             @endforeach
             @if(trim($presupuesto->observaciones)!='')
@@ -125,10 +125,7 @@
                     <strong>Impuesto:</strong> {{mb_strtoupper($presupuesto->impuesto)}} <br>
                     <strong>Punto de entrega:</strong> {{mb_strtoupper($presupuesto->lugar_entrega)}} <br>
                     @if($presupuesto->exportacion)
-                        <strong>Beneficiario : </strong> LINE TECH EIRL<br>
-                        <strong>Código SWIFT:</strong> BCPLPEPL <br>
-                        <strong>Cuenta N°:</strong> 192-2669185-1-73 <br>
-                        <strong>Banco:</strong> BANCO DE CREDITO DEL PERU <br>
+
                     @else
                         <strong>Cta. detracciones:</strong> {{$emisor->cuenta_detracciones}} <br>
                         <strong>Cta. Soles:</strong> {{$emisor->cuenta_1}} <br>
@@ -149,6 +146,7 @@
                             <td style="width: 28mm; text-align: right">{{$presupuesto->moneda}} {{number_format($presupuesto->seguro,2)}}</td>
                         </tr>
                     @else
+                        @if(!$presupuesto->ocultar_impuestos)
                         <tr>
                             <td><strong>Subtotal:</strong></td>
                             <td style="width: 28mm; text-align: right">{{$presupuesto->moneda}} {{number_format($presupuesto->presupuesto/1.18,2)}}</td>
@@ -157,9 +155,10 @@
                             <td><strong>Total IGV 18%:</strong></td>
                             <td style="width: 28mm; text-align: right">{{$presupuesto->moneda}} {{number_format($presupuesto->presupuesto-($presupuesto->presupuesto/1.18),2)}}</td>
                         </tr>
+                        @endif
                     @endif
                     <tr>
-                        <td><strong>Importe total:</strong></td>
+                        <td><strong>Total:</strong></td>
                         <td style="width: 28mm; text-align: right">{{$presupuesto->moneda}} {{$presupuesto->presupuesto}}</td>
                     </tr>
                 </table>

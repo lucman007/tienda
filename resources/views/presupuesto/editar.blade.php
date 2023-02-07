@@ -281,7 +281,9 @@
                             <div class="card-body">
                                 <strong>Descuento global:</strong> @{{tipo_descuento_global?porcentaje_descuento_global+'%':moneda+' '+(Number(descuento_global)).toFixed(2)}}<br>
                                 <strong>Observaciones:</strong> @{{ observaciones }} <br>
-                                <strong>Referencia:</strong> @{{ referencia }}
+                                <strong>Referencia:</strong> @{{ referencia }} <br>
+                                <strong>Ocultar impuestos en impresión:</strong> @{{ ocultar_impuestos?'Sí':'No' }} <br>
+                                <strong>Ocultar precios en impresión:</strong> @{{ ocultar_precios?'Sí':'No' }}
                             </div>
                         </div>
                     </div>
@@ -290,7 +292,7 @@
             <div v-show="editar" class="col-lg-12 mb-3">
                 <div class="card">
                     <div class="card-header">
-                        Información adicional
+                        Información y configuración adicional
                     </div>
                     <div class="card-body">
                         <div class="row">
@@ -321,6 +323,19 @@
                             <div class="col-lg-4 form-group mb-4">
                                 <label>Teléfonos</label>
                                 <input class="form-control" type="text" v-model="telefonos">
+                            </div>
+                            <div class="col-lg-12">
+                                <p>Impresión PDF:</p>
+                            </div>
+                            <div class="col-lg-2">
+                                <b-form-checkbox v-model="ocultar_impuestos" switch size="sm">
+                                    Ocultar impuestos
+                                </b-form-checkbox>
+                            </div>
+                            <div class="col-lg-2">
+                                <b-form-checkbox v-model="ocultar_precios" switch size="sm">
+                                    Ocultar precios
+                                </b-form-checkbox>
                             </div>
                         </div>
                     </div>
@@ -530,7 +545,9 @@
                 referencia: '<?php echo $presupuesto->referencia ?>',
                 disabledNr:false,
                 cc:[],
-                fecha:'{{date('Y-m-d', strtotime($presupuesto->fecha))}}'
+                fecha:'{{date('Y-m-d', strtotime($presupuesto->fecha))}}',
+                ocultar_impuestos:!!<?php echo $presupuesto->ocultar_impuestos ?>,
+                ocultar_precios:!!<?php echo $presupuesto->ocultar_precios ?>
             },
             created(){
                 this.calcularTotalPorItem();
@@ -736,6 +753,8 @@
                         'seguro':this.seguro,
                         'incoterm':this.incoterm,
                         'referencia':this.referencia,
+                        'ocultar_impuestos':this.ocultar_impuestos,
+                        'ocultar_precios':this.ocultar_precios,
                         'items': JSON.stringify(this.productosSeleccionados)
                     })
                         .then(response => {
@@ -801,6 +820,8 @@
                     this.seguro='0.00';
                     this.incoterm='';
                     this.referencia='';
+                    this.ocultar_impuestos=false;
+                    this.ocultar_precios=false;
                 },
                 enviar_a_correo(){
 

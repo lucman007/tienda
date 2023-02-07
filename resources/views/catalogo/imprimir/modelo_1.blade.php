@@ -30,11 +30,31 @@
     </div>
     <div class="texto-info">
         {{$emisor->direccion}}, {{$emisor->urbanizacion}}, {{$emisor->provincia}},
-        {{$emisor->departamento}}, {{$emisor->distrito}} <br> {{$emisor->telefono_1}} / {{$emisor->email}} <br>
-        {{$emisor->texto_publicitario}} <br>
-        <strong>Cta. detracciones:</strong> {{$emisor->cuenta_detracciones}} <br>
-        <strong>Cta. Soles:</strong> {{$emisor->cuenta_1}} <br>
-        <strong>Cta. Dólares:</strong> {{$emisor->cuenta_2}} <br>
+        {{$emisor->departamento}}, {{$emisor->distrito}} <br>
+        {{$emisor->texto_publicitario}} <br><br>
+        <table>
+            <tr>
+                <td><span class="bcp-logo"><img src="{{public_path('images/nyabby/bcp-logo.png')}}" alt=""></span></td>
+                <td colspan="3"><strong>Cta. Soles:</strong> {{$emisor->cuenta_1}}<br><strong>Cta. Dólares:</strong> {{$emisor->cuenta_2}}</td>
+            </tr>
+            <tr>
+                <td style="padding-top:35px">
+                    <span class="bcp-logo"><img src="{{public_path('images/nyabby/yape-logo.png')}}" alt=""></span>
+                </td>
+                <td style="padding-top:10px">
+                    <span class="qr-img"><img src="{{public_path('images/nyabby/qr-yape.jpeg')}}" alt=""></span>
+                </td>
+                <td style="padding:10px 0 0 10px">
+                    <span class="img-icon"><img src="{{public_path('images/nyabby/whats-logo.png')}}" alt="">992 480 966</span> <br>
+                    <span class="img-icon"><img src="{{public_path('images/nyabby/mail-logo.png')}}" alt="">ventas@nyabbycorp.com</span> <br>
+                    <span class="img-icon"><img src="{{public_path('images/nyabby/facebook-logo.png')}}" alt="">@NyabbyCorp</span> <br>
+                    <span class="img-icon"><img src="{{public_path('images/nyabby/insta-logo.png')}}" alt="">/NyabbyCorp</span> <br>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding-top:10px" colspan="3">Más productos en: www.nyabbycorp.com</td>
+            </tr>
+        </table>
     </div>
 </div>
         @php
@@ -226,6 +246,21 @@
         bottom: 40mm;
         left:15mm;
         font-size: 9pt;
+    }
+    .bcp-logo{
+        width: 30px;
+    }
+    .bcp-logo img, .qr-img img, .img-icon img{
+        width: 100%;
+    }
+    .bcp-logo, .cuentas{
+        float: left;
+    }
+    .qr-img{
+        width: 80px;
+    }
+    .img-icon{
+        width: 20px;
     }
 
 </style>

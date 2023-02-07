@@ -141,8 +141,6 @@ Route::group(['middleware' => ['can:Cotizaciones']], function () {
 //Rutas para presupuesto
     Route::get('presupuestos','PresupuestoController@index');
     Route::post('presupuestos/store','PresupuestoController@store');
-    Route::post('presupuestos/crear_presupuesto','PresupuestoController@presupuesto_desde_orden');
-    Route::post('presupuestos/aprobar_presupuesto','PresupuestoController@aprobar_presupuesto');
     Route::post('presupuestos/productos','PresupuestoController@obtenerProductos');
     Route::post('presupuestos/update','PresupuestoController@update')->name('actualizarPresupuesto');
     Route::get('presupuestos/nuevo','PresupuestoController@nuevo_presupuesto')->name('nuevoPresupuesto');
