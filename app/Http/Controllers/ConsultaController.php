@@ -5,6 +5,7 @@ namespace sysfact\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use sysfact\Emisor;
+use sysfact\Http\Controllers\Helpers\MainHelper;
 use sysfact\Http\Controllers\Helpers\PdfHelper;
 use sysfact\Venta;
 
@@ -44,6 +45,9 @@ class ConsultaController extends Controller
             PdfHelper::generarPdf($file_or_id,false, 'D');
         } else {
             $archivo=explode('.',$file_or_id);
+            if(MainHelper::check_doc_up_to_year($archivo)){
+                return redirect()->back()->withErrors(['El almacenamiento de documentos es por el periodo de un año. Si deseas obtener este documento comunícate con nosotros.']);
+            }
             switch($archivo[1]) {
                 case 'xml':
                     $pathtoFile = storage_path().'/app/sunat/xml/' . $file_or_id;

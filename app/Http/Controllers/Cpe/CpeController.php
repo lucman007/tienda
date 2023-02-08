@@ -260,7 +260,6 @@ class CpeController extends Controller
 
     public function descargarArchivo(Request $request, $file_or_id)
     {
-
         if (is_numeric($file_or_id)) {
             if ($request->guia) {
                 PdfHelper::generarPdfGuia($file_or_id, false, 'D');
@@ -270,6 +269,11 @@ class CpeController extends Controller
 
         } else {
             $archivo = explode('.', $file_or_id);
+
+            if(MainHelper::check_doc_up_to_year($archivo)){
+                return redirect()->back()->withErrors(['El almacenamiento de documentos es por el periodo de un año. Si deseas obtener este documento solicítalo al administrador del sistema.']);
+            }
+
             switch ($archivo[1]) {
                 case 'xml':
                     $pathtoFile = storage_path() . '/app/sunat/xml/' . $file_or_id;

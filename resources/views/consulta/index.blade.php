@@ -3,6 +3,11 @@
 @section('contenido')
     <div class="container">
         <div class="row">
+            @if($errors->any())
+                <div class="col-lg-6 offset-lg-3">
+                    <p style="color:red; text-align: center">{{$errors->first()}}</p>
+                </div>
+            @endif
             <div class="col-lg-6 offset-lg-3">
                 <div class="card">
                     <div class="card-header">

@@ -7,6 +7,7 @@
  */
 
 namespace sysfact\Http\Controllers\Helpers;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
@@ -473,6 +474,25 @@ class MainHelper extends Controller
         curl_exec($ch);
         curl_close($ch);
         fclose($fp);
+    }
+
+    public static function check_doc_up_to_year($file){
+
+        $pathtoFile = storage_path() . '/app/sunat/'.$file[1].'/' . $file[0].'.xml';
+
+        if(file_exists($pathtoFile)){
+            $desde = date ("Y-m-d", filemtime($pathtoFile));
+            $hasta = date("Y-m-d");
+            $d1 = Carbon::parse($desde);
+            $d2 = Carbon::parse($hasta);
+            $daysDiff = $d1->diffInDays($d2);
+            return $daysDiff > 365;
+        } else {
+            return false;
+        }
+
+
+
     }
 
 }

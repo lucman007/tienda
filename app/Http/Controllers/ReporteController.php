@@ -23,6 +23,7 @@ use sysfact\Exports\VentasMensualExport;
 use sysfact\Exports\VentasResumenExport;
 use sysfact\Gastos;
 use sysfact\Http\Controllers\Helpers\DataTipoPago;
+use sysfact\Http\Controllers\Helpers\MainHelper;
 use sysfact\Http\Controllers\Helpers\PdfHelper;
 use sysfact\Mail\ReporteResumenVentas;
 use sysfact\Opciones;
@@ -1401,6 +1402,11 @@ class ReporteController extends Controller
             PdfHelper::generarPdf($file_or_id,false, 'D');
         } else {
             $archivo=explode('.',$file_or_id);
+
+            if(MainHelper::check_doc_up_to_year($archivo)){
+                return redirect()->back()->withErrors(['El almacenamiento de documentos es por el periodo de un año. Si deseas obtener el documento solicítalo al administrador del sistema.']);
+            }
+
             switch($archivo[1]) {
                 case 'xml':
                     $pathtoFile = storage_path().'/app/sunat/xml/' . $file_or_id;

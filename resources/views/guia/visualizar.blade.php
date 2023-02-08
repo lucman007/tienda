@@ -130,6 +130,11 @@
                                 </svg>
                             </b-button>
                         </div>
+                        @if($errors->any())
+                            <div class="col-lg-12">
+                                <p style="color:red; text-align: center">{{$errors->first()}}</p>
+                            </div>
+                        @endif
                         <div class="col-lg-8 offset-lg-2 mt-5">
                             <div class="form-group">
                                 <label>Enviar a correo electrónico:</label>

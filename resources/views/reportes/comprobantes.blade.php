@@ -63,6 +63,11 @@
             </div>
         </div>
         <div class="row">
+            @if($errors->any())
+                <div class="col-lg-12 mt-4">
+                    <p style="color:red; text-align: center">{{$errors->first()}}</p>
+                </div>
+            @endif
             <div class="col-sm-12 mt-4">
                 <div class="card">
                     <div class="card-header">
