@@ -174,9 +174,10 @@
                         </div>
                         <div class="table-responsive tabla-gestionar">
                             @if($agent->isDesktop())
+                            <table-draggable v-show="ordenar" :productos="productosSeleccionados"></table-draggable>
                             <table class="table table-striped table-hover table-sm">
                                 <thead class="bg-custom-green">
-                                <tr>
+                                <tr v-show="!ordenar">
                                     <th scope="col" style="width: 10px"></th>
                                     <th scope="col" style="width: 250px">Producto</th>
                                     <th scope="col" style="width: 350px">Caracteristicas</th>
@@ -210,7 +211,7 @@
                                         </b-button>
                                     </td>
                                 </tr>
-                                <tr v-show="!editar" v-for="(producto,index) in productosSeleccionados" :key="producto.index">
+                                <tr v-show="!(editar || ordenar)" v-for="(producto,index) in productosSeleccionados" :key="producto.index">
                                     <td></td>
                                     <td> @{{ producto.cod_producto == '00NR'?'-':producto.nombre }}</td>
                                     <td style="white-space: break-spaces" class="text_desc">@{{ producto.presentacion}}</td>
@@ -226,6 +227,12 @@
                                 <tr class="text-center" v-show="productosSeleccionados.length == 0"><td colspan="9">Agrega productos desde el buscador</td></tr>
                                 </tbody>
                             </table>
+                            <div class="alert alert-primary text-center" v-show="ordenar">
+                                Selecciona un item y arrastra para reordenarlo
+                            </div>
+                            <button v-show="!(ordenar||editar)" class="btn btn-primary float-right mb-2 mr-2" @click="ordenar = !ordenar"><i class="fas fa-arrows-alt"></i> Ordenar items</button>
+                            <button v-show="ordenar" class="btn btn-success float-right mb-2 mr-2" @click="actualizarPresupuesto"><i class="fas fa-save"></i> Guardar</button>
+                            <button v-show="ordenar" class="btn btn-danger float-right mb-2 mr-2" @click="cancelar_edicion"><i class="fas fa-save"></i> Cancelar</button>
                             @else
                                 <table class="table table-striped table-hover table-sm">
                                     <thead class="bg-custom-green">
@@ -342,7 +349,7 @@
                 </div>
             </div>
             <div class="col-lg-8 mb-5 order-1 order-md-0">
-                <div class="card">
+                <div class="card" v-show="!ordenar">
                     <div class="card-header">
                         Acciones
                     </div>
@@ -446,7 +453,7 @@
                 </div>
             </div>
             <div class="col-lg-4 mb-5 order-0 order-md-1">
-                <div class="card">
+                <div class="card" v-show="!ordenar">
                     <div class="card-header">
                         Totales
                     </div>
@@ -498,6 +505,7 @@
         let app = new Vue({
             el: '.app',
             data: {
+                ordenar:false,
                 editar:false,
                 accion: 'insertar',
                 idpresupuesto:<?php echo $presupuesto['idpresupuesto'] ?>,

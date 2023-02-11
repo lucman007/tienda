@@ -28,7 +28,7 @@
                             </div>
                             <div class="col-lg-3 form-group">
                                 <label>Documento relacionado</label>
-                                <select v-model="guia_datos_adicionales.doc_relacionado" name="cargo" class="custom-select">
+                                <select v-model="guia_datos_adicionales.doc_relacionado" class="custom-select">
                                     @php
                                         $doc_relacionado = \sysfact\Http\Controllers\Helpers\DataGuia::getDocumentoRelacionado();
                                     @endphp
@@ -85,7 +85,7 @@
                             </div>
                             <div class="col-lg-2 form-group">
                                 <label>Tipo de transporte</label>
-                                <select v-model="guia_datos_adicionales.tipo_transporte" name="cargo" class="custom-select" id="tipo_transporte">
+                                <select v-model="guia_datos_adicionales.tipo_transporte" class="custom-select" id="tipo_transporte">
                                     <option value="01">Público</option>
                                     <option value="02">Privado</option>
                                 </select>

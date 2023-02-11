@@ -11,6 +11,7 @@ window.Vue = require('vue');
 import BootstrapVue from 'bootstrap-vue';
 import VueSweetalert2 from 'vue-sweetalert2';
 
+
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
@@ -43,3 +44,4 @@ Vue.component('modal-producto', require('./components/Modalproducto.vue'));
 Vue.component('modal-ubigeo',require('./components/ModalUbigeo.vue'));
 Vue.component('modal-producto-descuento',require('./components/ProductoDescuento.vue'));
 Vue.component('modal-devolucion',require('./components/ModalDevolucion.vue'));
+Vue.component('table-draggable',require('./components/TableDraggable.vue'));

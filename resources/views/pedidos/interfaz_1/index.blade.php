@@ -68,7 +68,7 @@
                                                     <span class="numero_mesa" :class="{'transicion':mostrarSpinner}">#@{{ idpedido }}</span>
                                                 </h4>
                                             </div>
-                                            <div class="info_selected_mesa float-right float-md-left"><h4>Monto: S/ @{{ totalVenta }}</h4></div>
+                                            <div class="info_selected_mesa float-right float-md-left"><h4>Monto: S/ @{{ Number(totalVenta).toFixed(2) }}</h4></div>
                                         </div>
                                     </div>
                                     @endif
@@ -230,6 +230,9 @@
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-lg-12 buttons-mesa">
+                                        @php
+                                            $emitir_solo_ticket = json_decode(cache('config')['interfaz'], true)['emitir_solo_ticket']??false;
+                                        @endphp
                                         @if(!$agent->isDesktop())
                                             <div class="row">
                                                 @endif
@@ -268,6 +271,8 @@
                                                               variant="info"><i class="fas fa-receipt"></i>
                                                         Nota de venta
                                                     </b-button>
+                                                @endcan
+                                                @if(!$emitir_solo_ticket)
                                                     <b-button
                                                             @if(!$agent->isDesktop()) class="col-3 col-md p-md-4 order-2 order-lg-1"
                                                             @endif :disabled="productosSeleccionados == 0"
@@ -284,7 +289,7 @@
                                                             variant="warning"><i class="fas fa-file-invoice-dollar"></i>
                                                         Generar boleta
                                                     </b-button>
-                                                @endcan
+                                                @endif
                                             @if(!$agent->isDesktop())
                                             </div>
                                         @endif

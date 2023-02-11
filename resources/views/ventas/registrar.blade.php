@@ -317,7 +317,7 @@
                                     <option value="10">Otros conceptos</option>--}}
                                 </select>
                                 <select v-show="comprobante=='08.01' || comprobante=='08.02'"
-                                        v-model="tipo_nota_electronica" name="motivo" class="custom-select"
+                                        v-model="tipo_nota_electronica" class="custom-select"
                                         id="selectMotivo">
                                     <option value="01">Intereses por mora</option>
                                     <option value="02">Aumento en el valor</option>
@@ -326,7 +326,7 @@
                             </div>
                             <div class="col-lg-4 form-group">
                                 <label>Documento que modifica</label>
-                                <input disabled type="text" v-model="comprobanteReferencia" name="comprobanteReferencia"
+                                <input disabled type="text" v-model="comprobanteReferencia"
                                        placeholder="Serie y correlativo"
                                        class="form-control">
                                 <b-button @click="abrir_modal('nota')" variant="primary"
@@ -1462,16 +1462,16 @@
                         return;
                     }
                     this.$swal({
-                        heightAuto: false,
-                        position: 'top',
-                        icon: 'question',
-                        text: 'Se registrará una venta. Confirma esta acción.',
-                        showCancelButton: true,
-                        confirmButtonColor: '#3085d6',
-                        cancelButtonColor: '#d33',
-                        cancelButtonText: 'Cancelar',
-                        confirmButtonText: 'Sí, registrar'
-                    }).then((result) => {
+                            heightAuto: false,
+                            position: 'top',
+                            icon: 'question',
+                            text: 'Se registrará una venta. Confirma esta acción.',
+                            showCancelButton: true,
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#d33',
+                            cancelButtonText: 'Cancelar',
+                            confirmButtonText: 'Sí, registrar'
+                        }).then((result) => {
                         if (result.isConfirmed) {
                             this.mostrarProgresoGuardado = true;
                             let comprobante;
@@ -1536,8 +1536,7 @@
                                     let texto = 'la venta';
                                     if(comprobante == '07' || comprobante == '08'){
                                         texto = 'la nota';
-                                    }
-                                    if (isNaN(response.data.idventa)) {
+                                    }if (isNaN(response.data.idventa)) {
                                         this.$swal({
                                             position: 'top',
                                             icon: 'info',

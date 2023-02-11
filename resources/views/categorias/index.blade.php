@@ -80,12 +80,18 @@
                 <label for="descripcion">Color:</label>
                 <select v-model="color" class="custom-select">
                     <option value="-1">Ninguno</option>
-                    <option value="orange">Naranja</option>
-                    <option value="red">Rojo</option>
-                    <option value="#0680a5">Azul</option>
-                    <option value="#72ab17">Verde</option>
-                    <option value="#9528d9">Lila</option>
-                    <option value="#d92882">Rosado</option>
+                    <option style="background: orange; color: white" value="orange">Naranja</option>
+                    <option style="background: red; color: white" value="red">Rojo</option>
+                    <option style="background: #0680a5; color: white" value="#0680a5">Azul</option>
+                    <option style="background: #72ab17; color: white" value="#72ab17">Verde</option>
+                    <option style="background: #9528d9; color: white" value="#9528d9">Lila</option>
+                    <option style="background: #d92882; color: white" value="#d92882">Rosado</option>
+                    <option style="background: #4100c1; color: white" value="#4100c1">Violeta</option>
+                    <option style="background: #fff700; color: black" value="#fff700">Amarillo</option>
+                    <option style="background: #891a0f; color: white" value="#891a0f">Ocre</option>
+                    <option style="background: #933a06; color: white" value="#933a06">Marrón</option>
+                    <option style="background: #af8900; color: white" value="#af8900">Dorado</option>
+                    <option style="background: #ffa876; color: white" value="#ffa876">Melón</option>
                 </select>
             </div>
             <div v-for="error in errorDatosCategoria">

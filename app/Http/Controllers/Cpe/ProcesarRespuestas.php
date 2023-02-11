@@ -246,7 +246,6 @@ class ProcesarRespuestas
                     $codigo_documento = explode('-',$nombre_zip)[1];
                     $correlativo_factura=explode('-',$doc_relacionado);
                     $factura_a_anular=Facturacion::where('serie',$correlativo_factura[0])->where('correlativo',$correlativo_factura[1])->first();
-                    $idventa = $factura_a_anular->idventa;
 
                     if($codigo_documento == '07'){
                         $factura_a_anular->estado='ANULADO';
@@ -271,8 +270,8 @@ class ProcesarRespuestas
                         $inventario = new Inventario();
                         $inventario->idproducto = $item['idproducto'];
                         $inventario->idempleado = auth()->user()->idempleado??-1;
-                        $inventario->cantidad = $item->detalle->cantidad;
-                        $inventario->saldo = $item->inventario()->first()->saldo - $item->detalle->cantidad; //corregir -> es cantidad - devueltos
+                        $inventario->cantidad = $item->detalle->cantidad * -1;
+                        $inventario->saldo = $item->inventario()->first()->saldo - $item->detalle->cantidad;
                         $inventario->operacion = 'NOTA DE CREDITO RECHAZADA - ID '. $this->idventa;
                         $inventario->save();
                     }

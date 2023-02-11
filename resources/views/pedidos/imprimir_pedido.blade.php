@@ -11,7 +11,7 @@
 </head>
 <body onload="window.print()">
 <div class="body">
-    <div class="info-usuario">
+    <div class="info-usuario" style="margin-left: -5mm">
         <p>
             #{{$orden->idorden}}  <br>
             Fecha: {{ date('d/m/Y H:i:s',strtotime($orden->fecha)) }} <br>
@@ -21,7 +21,7 @@
             Cliente: {{json_decode($orden->datos_entrega,true)['contacto']}}
         </p>
     </div>
-    <table class="items" cellpadding="0">
+    <table class="items" cellpadding="0" style="margin-left: -5mm">
         <thead>
         <tr class="table-header">
             <td><strong>(Cant.) Descripción</strong></td>
@@ -36,7 +36,7 @@
         </tr>
         @foreach($orden->productos as $item)
             <tr>
-                <td style="width: 50mm">
+                <td style="width: 60mm">
                     ({{$item->detalle->cantidad}}) <strong>{{$item->nombre}} </strong><br>
                     {!! $item->detalle->descripcion !!}
                 </td>
@@ -58,11 +58,6 @@
 </body>
 
 <style>
-    .texto-anulado{
-        font-size: 18pt;
-        margin: 0;
-        padding: 0;
-    }
     h3{
         font-size: 13pt;
         margin: 0;
@@ -75,13 +70,6 @@
     p,td{
         font-size: 9pt;
     }
-    .borde{
-        border: 1px solid black;
-        border-radius: 5px;
-        padding: 20px;
-    }
-
-
     table{
         margin: 0;
         padding: 0;
@@ -90,31 +78,13 @@
         margin: 0;
     }
 
-    .body{
-        position: relative;
-        width: 200mm;
-        height: 100mm;
-        float: left;
-        margin-top: 5mm;
-    }
-
     .body .info-usuario{
-        width: 188mm;
+        margin-left: -5mm;
         margin-bottom: 5mm;
+        width: 60mm;
     }
     .body .info-usuario p{
         line-height: 4mm;
-    }
-
-    .body .items {
-        width: 200mm;
-        position: relative;
-    }
-
-    .leyenda{
-        width: 200mm;
-        margin-top: 3mm;
-        text-align: center;
     }
 </style>
 

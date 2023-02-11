@@ -1,4 +1,4 @@
-.container-fluid {
+.container {
     max-width:1400px;
 }
 
@@ -1400,6 +1400,14 @@ table tr td, table tr th{
 
 .table-responsive .input-group-prepend button,.table-responsive .input-group-append button{
     padding: 0 0.75rem
+}
+
+.delivery-item {
+    cursor: pointer;
+    height: 35px;
+}
+.delivery-item td{
+    font-size: 13px;
 }
 
 /*RESPONSIVE*/

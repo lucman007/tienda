@@ -144,6 +144,7 @@
                                                 <th scope="col" style="width: 10px"></th>
                                                 <th scope="col" style="width: 200px">Cuota</th>
                                                 <th scope="col" style="width: 250px">Monto</th>
+                                                <th scope="col" style="width: 250px">M. Neto</th>
                                                 <th scope="col" style="width: 90px">F. Venc.</th>
                                             </tr>
                                             </thead>
@@ -152,10 +153,24 @@
                                                 $i=1
                                             @endphp
                                             @foreach($venta->pago as $item)
+                                                @php
+                                                    $monto_neto = $item->monto;
+                                                    if($venta->facturacion->retencion == 1){
+                                                        $r = round($item->monto * 0.03,2);
+                                                        $monto_neto =  round($item->monto - $r,2);
+                                                    }
+                                                    if($venta->facturacion->codigo_tipo_factura == '1001'){
+                                                        $detraccion = explode('/',$venta->facturacion->tipo_detraccion);
+                                                        $porcentaje_detraccion = number_format($detraccion[1],2);
+                                                        $r = round($item->monto * ($porcentaje_detraccion/100),2);
+                                                        $monto_neto =  round($item->monto - $r,2);
+                                                    }
+                                                @endphp
                                                 <tr>
                                                     <td></td>
                                                     <td>Cuota{{str_pad($i,3,"0",STR_PAD_LEFT)}}</td>
                                                     <td>{{ $venta->codigo_moneda }} {{$item->monto}}</td>
+                                                    <td>{{ $venta->codigo_moneda }} {{number_format($monto_neto,2)}}</td>
                                                     <td>{{date('d/m/Y',strtotime($item->fecha))}}</td>
                                                 </tr>
                                                 @php

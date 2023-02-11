@@ -554,15 +554,7 @@ class VentaController extends Controller
 
             DB::commit();
 
-            //Actualizar pedido
-            /*if($request->idpedido){
-                $pedido = Orden::find($request->idpedido);
-                $pedido->idventa=$idventa;
-                $pedido->estado='ATENDIDO';
-                $pedido->save();
-
-            }    */
-
+            //Guardamos la guía asociada si existe
             $idguia = -1;
             if ($request->esConGuia){
                 $guia_remision=new GuiaController();
