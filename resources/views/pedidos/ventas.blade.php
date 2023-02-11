@@ -37,6 +37,7 @@
                                 <tr>
                                     <th scope="col"></th>
                                     <th scope="col">Fecha</th>
+                                    <th scope="col">Caja</th>
                                     <th scope="col">Vend.</th>
                                     <th scope="col">Cliente</th>
                                     <th scope="col">Importe</th>
@@ -50,7 +51,8 @@
                                     @foreach($ventas as $item)
                                         <tr>
                                             <td></td>
-                                            <td>{{date("d-m-Y H:i:s",strtotime($item->fecha))}}</td>
+                                            <td style="width:10%;">{{date("d-m-Y H:i:s",strtotime($item->fecha))}}</td>
+                                            <td>{{$item->caja->idpersona == -1?'-':strtoupper($item->caja->nombre)}}</td>
                                             <td>{{$item->empleado->idpersona == -1?'-':strtoupper($item->empleado->nombre)}}</td>
                                             <td>{{$item->persona->nombre}}</td>
                                             <td>{{$item->moneda}}{{$item->total_venta}}</td>

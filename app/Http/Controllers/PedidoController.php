@@ -420,7 +420,9 @@ class PedidoController extends Controller
     }
 
     public function ventas(Request $request){
-        $idcaja = $caja= Cache::get('caja_abierta');
+
+        $idcaja = $request->idcaja?$request->idcaja:$caja= Cache::get('caja_abierta');
+
         if ($request) {
             $consulta = trim($request->get('textoBuscado'));
 

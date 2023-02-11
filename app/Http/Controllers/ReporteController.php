@@ -29,6 +29,7 @@ use sysfact\Mail\ReporteResumenVentas;
 use sysfact\Opciones;
 use sysfact\Producto;
 use sysfact\Trabajador;
+use sysfact\User;
 use sysfact\Venta;
 
 class ReporteController extends Controller
@@ -41,7 +42,7 @@ class ReporteController extends Controller
 	public function __construct()
 	{
 		$this->middleware('auth');
-      $this->solo_comprobantes = false;
+        $this->solo_comprobantes = false;
 		$this->hora_inicio = (json_decode(cache('config')['interfaz'], true)['atencion_inicio']??'00:00').':00';
 		$this->hora_fin = (json_decode(cache('config')['interfaz'], true)['atencion_fin']??'23:59').':59';
 	}
@@ -170,6 +171,16 @@ class ReporteController extends Controller
                             ->orderby('idventa', 'desc')
                             ->get();
                         break;
+                    case 'cajero':
+                        $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
+                            ->where('eliminado', 0)
+                            ->where('idcajero', $buscar)
+                            ->whereHas('facturacion', function($query) {
+                                $this->func_filter($query);
+                            })
+                            ->orderby('idventa', 'desc')
+                            ->get();
+                        break;
                 }
             }
             else{
@@ -250,6 +261,16 @@ class ReporteController extends Controller
                         $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
                             ->where('eliminado', 0)
                             ->where('idempleado', $buscar)
+                            ->whereHas('facturacion', function($query) {
+                                $this->func_filter($query);
+                            })
+                            ->orderby('idventa', 'desc')
+                            ->paginate();
+                        break;
+                    case 'cajero':
+                        $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
+                            ->where('eliminado', 0)
+                            ->where('idcajero', $buscar)
                             ->whereHas('facturacion', function($query) {
                                 $this->func_filter($query);
                             })
@@ -1363,6 +1384,11 @@ class ReporteController extends Controller
                 $cajas->appends($_GET)->links();
             }
 
+            foreach ($cajas as $caja) {
+                $suma = $caja->efectivo + $caja->tarjeta + $caja->tarjeta_1 + $caja->tarjeta_2 + $caja->yape + $caja->plin + $caja->otros;
+                $caja->total_ventas = number_format($suma, 2);
+            }
+
             return [
                 'cajas'=>$cajas,
                 'filtros'=>$filtros,
@@ -1482,6 +1508,18 @@ class ReporteController extends Controller
             $vendedor->persona;
         }
         return $vendedores;
+    }
+
+    public function obtener_cajeros(){
+        $cajeros=User::role('Caja')
+            ->where('acceso','!=','1')
+            ->where('eliminado',0)
+            ->get();
+
+        foreach ($cajeros as $cajero){
+            $cajero->persona;
+        }
+        return $cajeros;
     }
 
 }

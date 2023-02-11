@@ -232,7 +232,7 @@
                             </div>
                             <button v-show="!(ordenar||editar)" class="btn btn-primary float-right mb-2 mr-2" @click="ordenar = !ordenar"><i class="fas fa-arrows-alt"></i> Ordenar items</button>
                             <button v-show="ordenar" class="btn btn-success float-right mb-2 mr-2" @click="actualizarPresupuesto"><i class="fas fa-save"></i> Guardar</button>
-                            <button v-show="ordenar" class="btn btn-danger float-right mb-2 mr-2" @click="cancelar_edicion"><i class="fas fa-save"></i> Cancelar</button>
+                            <button v-show="ordenar" class="btn btn-danger float-right mb-2 mr-2" @click="cancelar_edicion"><i class="fas fa-times"></i> Cancelar</button>
                             @else
                                 <table class="table table-striped table-hover table-sm">
                                     <thead class="bg-custom-green">

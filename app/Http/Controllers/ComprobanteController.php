@@ -9,6 +9,7 @@
 namespace sysfact\Http\Controllers;
 
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -25,9 +26,23 @@ use sysfact\Venta;
 class ComprobanteController extends Controller
 {
 
+    private $hora_inicio;
+    private $hora_fin;
+
     public function __construct()
     {
         $this->middleware('auth');
+        $this->hora_inicio = (json_decode(cache('config')['interfaz'], true)['atencion_inicio']??'00:00').':00';
+        $this->hora_fin = (json_decode(cache('config')['interfaz'], true)['atencion_fin']??'23:59').':59';
+    }
+
+    public function getHasta($hasta){
+        if($this->hora_fin < $this->hora_inicio){
+            $fecha = new Carbon($hasta);
+            $fecha->addDays(1);
+            return $fecha->format('Y-m-d');
+        }
+        return $hasta;
     }
 
     public function comprobantes(Request $request, $desde=null,$hasta=null){
@@ -59,7 +74,7 @@ class ComprobanteController extends Controller
 
             switch ($filtro){
                 case 'fecha':
-                    $ventas=Venta::whereBetween('fecha',[$desde.' 00:00:00',$hasta.' 23:59:59'])
+                    $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
                         ->where('eliminado','=',0)
                         ->orderby('idventa','desc')
                         ->paginate(30);
@@ -93,7 +108,7 @@ class ComprobanteController extends Controller
                             break;
                     }
 
-                    $ventas=Venta::whereBetween('fecha',[$desde.' 00:00:00',$hasta.' 23:59:59'])
+                $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
                         ->where('eliminado','=',0)
                         ->orderby('idventa','desc')
                         ->whereHas('facturacion', function($query) use($filtro,$buscar){
@@ -110,7 +125,7 @@ class ComprobanteController extends Controller
                     $buscar = $pago[$find]['num_val'];
 
                     $filtro = 'tipo_pago';
-                    $ventas=Venta::whereBetween('fecha',[$desde.' 00:00:00',$hasta.' 23:59:59'])
+                    $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
                         ->where('eliminado','=',0)
                         ->where($filtro,$buscar)
                         ->orderby('idventa','desc')
@@ -119,7 +134,7 @@ class ComprobanteController extends Controller
                     break;
                 case 'cliente':
                     $filtro = 'nombre';
-                    $ventas=Venta::whereBetween('fecha',[$desde.' 00:00:00',$hasta.' 23:59:59'])
+                    $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
                         ->where('eliminado','=',0)
                         ->orderby('idventa','desc')
                         ->whereHas('persona', function($query) use($filtro,$buscar){

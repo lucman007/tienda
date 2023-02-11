@@ -6,26 +6,36 @@
             </template>
             <div class="container">
                 <div class="row">
-                    <div class="col-lg-3">
-                        <div class="form-group">
-                            <label>Comprobante</label>
+                    <div class="col-lg-3 mb-2 mb-lg-0">
+                        <b-input-group>
+                            <b-input-group-prepend>
+                                <b-input-group-text>
+                                    <i class="fas fa-file-invoice-dollar"></i>
+                                </b-input-group-text>
+                            </b-input-group-prepend>
                             <select :disabled="origen=='pedidos'" v-model="comprobante" name="comprobante"
                                     class="custom-select" id="selectComprobante">
                                 <option value="03">Boleta</option>
                                 <option value="01">Factura</option>
                                 <option v-show="origen=='pedidos'" value="30">Nota de venta</option>
                             </select>
-                        </div>
+                        </b-input-group>
                     </div>
                     <div class="col-lg-9">
-                        <label>Tipo de pago</label>
                         <div class="row">
-                            <div class="col-lg-4 form-group">
+                            <div class="col-lg-4">
+                                <b-input-group>
+                                    <b-input-group-prepend>
+                                        <b-input-group-text>
+                                            <i class="fas fa-dollar-sign"></i>
+                                        </b-input-group-text>
+                                    </b-input-group-prepend>
                                 <select v-model="tipoPagoContado" class="custom-select">
                                     <option v-for="pago in tipo_pago" v-bind:value="pago['num_val']">{{pago['label']}}</option>
                                 </select>
+                                </b-input-group>
                             </div>
-                            <div class="col-lg-4 form-group">
+                            <div class="col-lg-4 mt-2 mt-lg-0">
                                 <b-button v-show="tipoPagoContado==4" v-b-modal.modal-pagofraccionado variant="primary"><i
                                         class="fas fa-plus"></i> Editar pago
                                 </b-button>
@@ -41,7 +51,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-8 mt-2 order-2 order-md-1">
+                    <div class="col-lg-8 order-2 order-md-1">
                         <span v-show="clienteSeleccionado.esNuevo" class="badge badge-success n-cliente"> NUEVO CLIENTE</span>
                         <b-input-group>
                             <b-input-group-prepend>
@@ -53,7 +63,7 @@
                                    type="text" class="form-control">
                         </b-input-group>
                     </div>
-                    <div class="col-lg-4 mt-2 order-1 order-md-2">
+                    <div class="col-lg-4 mb-2 mb-lg-0 order-1 order-md-2">
                         <b-input-group>
                             <b-input-group-prepend>
                                 <b-input-group-text>
@@ -61,7 +71,7 @@
                                 </b-input-group-text>
                             </b-input-group-prepend>
                             <input autocomplete="nope" :disabled="disabledClienteRuc" @keyup="buscarCliente"
-                                   v-model="query" ref="focusThis" id="buscar-cliente" maxlength="11" type="number"
+                                   v-model="query" id="buscar-cliente" maxlength="11" type="number"
                                    class="form-control">
                             <b-input-group-append>
                                 <b-button :disabled="disabledClienteRuc" @click="buscarCliente(null)" variant="primary">
@@ -89,6 +99,65 @@
                             </b-input-group-append>
                         </b-input-group>
                     </div>
+                </div>
+                <div class="row mb-2 mt-4">
+                    <div class="col-lg-12">
+                        <div class="card no-shadow">
+                            <div class="card-body div-calculadora">
+                                <span class="badge badge-secondary calc">CALCULADORA</span>
+                                <div class="row">
+                                    <div class="col-lg-9" style="display: inline-table">
+                                        <p class="mb-1">Selecciona un billete o digita para calcular el vuelto:</p>
+                                        <div @click="calcularVuelto(1)" class="d-inline-flex billete mt-1 mt-md-0">
+                                            S/ 1
+                                        </div>
+                                        <div @click="calcularVuelto(5)" class="d-inline-flex billete mt-1 mt-md-0">
+                                            S/ 5
+                                        </div>
+                                        <div @click="calcularVuelto(10)" class="d-inline-flex billete mt-1 mt-md-0">
+                                            S/ 10
+                                        </div>
+                                        <div @click="calcularVuelto(20)" class="d-inline-flex billete mt-1 mt-md-0">
+                                            S/ 20
+                                        </div>
+                                        <div @click="calcularVuelto(50)" class="d-inline-flex billete mt-1 mt-md-0">
+                                            S/ 50
+                                        </div>
+                                        <div @click="calcularVuelto(100)" class="d-inline-flex billete mt-1 mt-md-0">
+                                            S/ 100
+                                        </div>
+                                        <div @click="calcularVuelto(200)" class="d-inline-flex billete mt-1 mt-md-0">
+                                            S/ 200
+                                        </div>
+                                        <div class="d-inline-flex billete mt-1 mt-md-0" @click="calcularVuelto(porPagar)">
+                                            Exacto
+                                        </div>
+                                        <div class="d-inline-flex mt-1 mt-md-2 mt-lg-0">
+                                            <input onfocus="this.select()" type="number" class="form-control" placeholder="Digita el monto" v-model="pagaCon" @keyup="calcularVuelto(null)">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <table class="tabla_vuelto float-left float-md-right">
+                                            <tr>
+                                                <td style="width: 120px">Total:</td>
+                                                <td>{{porPagar}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Paga con:</td>
+                                                <td>{{pagaCon==''?'0.00':Number(pagaCon).toFixed(2)}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td :style="vuelto<0?'color:#f14040':'color:#2b9505'"><strong>{{vuelto<0?'Faltan:':'Vuelto:'}}</strong></td>
+                                                <td :style="vuelto<0?'color:#f14040':'color:#2b9505'"><strong>{{Number(vuelto).toFixed(2)}}</strong></td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-2">
                     <div class="col-lg-12">
                         <div v-for="error in errorDatosVenta">
                             <p class="texto-error">{{ error }}</p>
@@ -113,9 +182,9 @@
             </template>
             <div class="container">
                 <div class="row">
-                    <div v-for="pago in pago_fraccionado" class="col-lg-12 mb-3">
+                    <div v-for="pago,index in pago_fraccionado" class="col-lg-12 mb-3">
                         <div class="row">
-                            <div class="col-lg-5">
+                            <div class="col-lg-4">
                                 <label>Monto</label>
                                 <input v-model="pago.monto" type="number" class="form-control" onfocus="this.select()">
                             </div>
@@ -125,7 +194,15 @@
                                     <option v-show="!(pago['num_val'] == 4 || pago['num_val'] == 2)" v-for="pago in tipo_pago" v-bind:value="pago['num_val']">{{pago['label']}}</option>
                                 </select>
                             </div>
+                            <div class="col-lg-2" v-show="index > 1">
+                                <button @click="borrarFraccionado(index)" style="margin-top: 20px" class="btn btn-danger"><i class="fas fa-trash"></i></button>
+                            </div>
                         </div>
+                    </div>
+                    <div class="col-lg-12">
+                        <b-button variant="primary" @click="agregarFraccionado"><i
+                                class="fas fa-plus"></i>
+                        </b-button>
                     </div>
                 </div>
             </div>
@@ -210,9 +287,24 @@
                 num_operacion:'',
                 cuotas:[],
                 cuotasAux:[],
+                pagaCon:'',
+                vuelto:'0.00',
+                productos:[],
+                total_venta:0,
+                porPagar:0,
+                idorden: -1,
+                idorden_origen: -1,
+                dividir:0,
+                propina:'',
             }
         },
         methods: {
+            agregarFraccionado(){
+                this.pago_fraccionado.push({monto: '0.00', tipo: '1'});
+            },
+            borrarFraccionado(index){
+                this.pago_fraccionado.splice(index,1);
+            },
             init(){
                 if(this.origen == 'pedidos'){
                     if(this.tipo_doc == '01'){
@@ -228,9 +320,9 @@
                         this.buscarCliente(null);
                     }
                     this.comprobante = this.tipo_doc;
-                    this.$nextTick(function () {
-                        this.$refs.focusThis.focus()
-                    })
+                    setTimeout(() => {
+                        document.getElementById('buscar-cliente').focus();
+                    }, 50);
                 } else if(this.origen == 'ventas'){
                     this.comprobante = '03';
                     this.tituloModal ='Generar comprobante desde ticket';
@@ -238,6 +330,9 @@
                     this.buscarCliente();
                 }
                 this.tipo_pago = this.tipo_de_pago;
+                this.total_venta = this.total;
+                this.porPagar = this.total;
+                this.pagaCon = this.total;
             },
             abrirCuotas(){
                 this.$refs['modal-tipopago'].show();
@@ -314,9 +409,18 @@
                 this.clienteSeleccionado = {};
                 this.disabledClienteRuc = false;
                 this.query = '';
-                this.$nextTick(() => {
-                    this.$refs.focusThis.focus()
-                })
+                setTimeout(() => {
+                    document.getElementById('buscar-cliente').focus();
+                }, 50);
+
+            },
+            calcularVuelto(monto){
+                let vuelto = Number(this.pagaCon) - this.porPagar;
+                if(monto){
+                    vuelto = monto - this.porPagar;
+                    this.pagaCon = monto;
+                }
+                this.vuelto = vuelto;
             },
             procesar(){
                 if (this.validarVenta()) {
@@ -343,6 +447,7 @@
                     'num_operacion':this.num_operacion,
                     'pago_fraccionado': JSON.stringify(this.pago_fraccionado),
                     'cuotas': JSON.stringify(this.cuotas),
+                    'pago_fraccionado': JSON.stringify(this.pago_fraccionado)
                 })
                     .then(response => {
                         let data = response.data;
@@ -428,8 +533,9 @@
                     for (let pago of this.pago_fraccionado) {
                         suma_pago_fra += Number(pago.monto);
                     }
-                    if (suma_pago_fra.toFixed(2) > this.total) this.errorDatosVenta.push('*La suma de los pagos fraccionados supera el monto total de la venta');
-                    if (suma_pago_fra.toFixed(2) < this.total) this.errorDatosVenta.push('*La suma de los pagos fraccionados es inferior al monto total de la venta');
+
+                    if (suma_pago_fra > this.porPagar) this.errorDatosVenta.push('*La suma de los pagos fraccionados supera el monto total de la venta');
+                    if (suma_pago_fra < this.porPagar) this.errorDatosVenta.push('*La suma de los pagos fraccionados es inferior al monto total de la venta');
                 }
                 if (Object.keys(this.clienteSeleccionado).length == 0) this.errorDatosVenta.push('*Debes ingresar un cliente');
                 if ('nombre_o_razon_social' in this.clienteSeleccionado && this.clienteSeleccionado['nombre_o_razon_social'].length == 0) this.errorDatosVenta.push('*Debes ingresar un cliente');
@@ -438,7 +544,7 @@
                     if (this.clienteSeleccionado['num_documento'] && this.clienteSeleccionado['num_documento'].length != 11) this.errorDatosVenta.push('*Ingrese un RUC válido');
                 }
                 if (this.comprobante == '03') {
-                    if (this.total >= 700){
+                    if (this.total_venta >= 700){
                         let str = this.clienteSeleccionado['num_documento'];
                         let regex = new RegExp(/(.)\1{7}/);
                         if(regex.test(str)){
@@ -463,7 +569,22 @@
                 this.mostrarProgreso=false;
                 this.mostrarSpinner=false;
                 this.tipoPagoContado = 1;
+                this.idorden = -1;
+                this.idorden_origen = -1;
+                this.dividir = 0;
+                this.propina = '';
+                this.vuelto = 0;
                 this.imprimir = true;
+                this.pago_fraccionado = [
+                    {
+                        monto: '0.00',
+                        tipo: '1'
+                    },
+                    {
+                        monto: '0.00',
+                        tipo: '3'
+                    },
+                ];
             }
         }
     }
@@ -485,5 +606,29 @@
         z-index: 99;
         right: 19px;
         top: 10px;
+    }
+    .div-calculadora{
+        padding:10px;
+    }
+    .billete{
+        background: #5dba3c;
+        padding: 5px;
+        margin-right: 7px;
+        border-radius: 2px;
+        color: black;
+        font-weight: 700;
+        cursor:pointer;
+    }
+    .billete:hover {
+        background:#0bd311;
+    }
+    .calc{
+        position:absolute;
+        top: -10px;
+        left: 28px;
+    }
+    .tabla_vuelto td{
+        font-size: 17px;
+        padding: 0;
     }
 </style>

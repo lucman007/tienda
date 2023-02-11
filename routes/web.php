@@ -21,6 +21,7 @@ Route::group(['middleware' => ['permission:Caja: egresos|Inventario: productos']
     Route::post('caja/gasto/obtener-pago-pendiente', 'GastoController@obtenerPagoPendiente');
     Route::get('caja/obtener-detalle-venta/{idventa}', 'GastoController@obtenerDetalleVenta');
     Route::post('caja/devolver-productos', 'GastoController@devolver_productos');
+    Route::get('caja/ventas/','PedidoController@ventas');
 });
 
 Route::group(['middleware' => ['can:Caja: gestionar']], function () {
@@ -266,6 +267,7 @@ Route::group(['middleware' => ['can:Reportes']], function () {
 
     Route::get('reportes/utilidad','ReporteController@reporte_utilidad');
     Route::get('reportes/obtener-vendedores','ReporteController@obtener_vendedores');
+    Route::get('reportes/obtener-cajeros','ReporteController@obtener_cajeros');
 });
 
 Route::group(['middleware' => ['can:Inventario: requerimientos']], function () {

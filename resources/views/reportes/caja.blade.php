@@ -53,9 +53,11 @@
                                     <th scope="col">Fecha cierre</th>
                                     <th scope="col">Turno</th>
                                     <th scope="col">Saldo inic.</th>
+                                    <th scope="col">Total ventas</th>
                                     <th scope="col">Total teórico</th>
                                     <th scope="col">Total real</th>
                                     <th scope="col">Descuadre</th>
+                                    <th scope="col"></th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -68,9 +70,11 @@
                                             <td>{{date('d/m/Y H:m',strtotime($caja->fecha_c))}}</td>
                                             <td>TURNO {{$caja->turno}}</td>
                                             <td>S/ {{$caja->apertura}}</td>
+                                            <td>S/ {{$caja->total_ventas}}</td>
                                             <td>S/ {{$caja->efectivo_teorico}}</td>
                                             <td>S/ {{$caja->efectivo_real}}</td>
                                             <td style="color:{{$caja->descuadre >= 0?'inherit':'red'}}">S/ {{$caja->descuadre}}</td>
+                                            <td style="width: 10%"><a href="{{url('/caja/ventas?idcaja=').$caja->idcaja}}">Ver resumen de ventas</a></td>
                                         </tr>
                                     @endforeach
                                 @else

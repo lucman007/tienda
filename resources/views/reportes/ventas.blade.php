@@ -32,6 +32,7 @@
                                         <option value="moneda">Moneda</option>
                                         <option value="cliente">Cliente</option>
                                         <option value="vendedor">Vendedor</option>
+                                        <option value="cajero">Cajero</option>
                                     </select>
                                 </b-input-group>
                             </div>
@@ -45,6 +46,19 @@
                                     <select @change="filtrar" v-model="buscar" class="custom-select">
                                         <option value="n">Seleccionar</option>
                                         <option v-for="vendedor in vendedores" :value="vendedor.idempleado">@{{vendedor.persona.nombre}}</option>
+                                    </select>
+                                </b-input-group>
+                            </div>
+                            <div class="col-lg-2" v-show="filtro=='cajero'">
+                                <b-input-group>
+                                    <b-input-group-prepend>
+                                        <b-input-group-text>
+                                            <i class="fas fa-check"></i>
+                                        </b-input-group-text>
+                                    </b-input-group-prepend>
+                                    <select @change="filtrar" v-model="buscar" class="custom-select">
+                                        <option value="n">Seleccionar</option>
+                                        <option v-for="cajero in cajeros" :value="cajero.idempleado">@{{cajero.persona.nombre}}</option>
                                     </select>
                                 </b-input-group>
                             </div>
@@ -141,11 +155,11 @@
                 </div>
                 <div class="row" v-if="penReport">
                     <div class="col-lg-12">
-                        <div class="card no-shadow">
+                        <div class="card no-shadow" style="background: #dcffe5;">
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-lg-12">
-                                        <h5 class="d-inline"><strong>Ventas facturadas en soles</strong></h5>
+                                        <h5 class="d-inline" style="font-size: 24px"><strong>Total ventas en soles</strong></h5>
                                         <button class="btn btn-success float-right" title="Imprimir" @click="imprimir_reporte('totales')">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-printer" viewBox="0 0 16 16">
                                                 <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>
@@ -191,11 +205,11 @@
                 </div>
                 <div class="row" v-if="usdReport">
                     <div class="col-lg-12 mt-1">
-                        <div class="card no-shadow">
+                        <div class="card no-shadow" style="background: #dcffe5;">
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-lg-12">
-                                        <h5 class="d-inline"><strong>Ventas facturadas en dólares</strong></h5>
+                                        <h5 class="d-inline" style="font-size: 24px"><strong>Total ventas en dólares</strong></h5>
                                         <button class="btn btn-success float-right" title="Imprimir" @click="imprimir_reporte('totales')">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-printer" viewBox="0 0 16 16">
                                                 <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>
@@ -239,7 +253,7 @@
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-lg-12">
-                                        <h5 class="d-inline"><strong>Ventas por tipo de pago</strong></h5>
+                                        <h5 class="d-inline" style="font-size: 18px"><strong>Detalle de ventas</strong></h5>
                                         <button class="btn btn-success float-right" title="Imprimir" @click="imprimir_reporte('tipo_pago')">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-printer" viewBox="0 0 16 16">
                                                 <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>
@@ -380,21 +394,32 @@
                 mail:'',
                 spinnerMail: false,
                 errorMensaje: false,
-                vendedores:[]
+                vendedores:[],
+                cajeros:[]
             },
             mounted(){
                 this.getReportBadge();
                 this.getVendedores();
+                this.getCajeros();
             },
             methods: {
                 getVendedores(){
                     axios.get('/reportes/obtener-vendedores')
                         .then(response => {
                             this.vendedores = response.data;
-                            console.log(response.data)
                         })
                         .catch(error => {
                             alert('Ha ocurrido un error al obtener los vendedores');
+                            console.log(error);
+                        });
+                },
+                getCajeros(){
+                    axios.get('/reportes/obtener-cajeros')
+                        .then(response => {
+                            this.cajeros = response.data;
+                        })
+                        .catch(error => {
+                            alert('Ha ocurrido un error al obtener los cajeros');
                             console.log(error);
                         });
                 },

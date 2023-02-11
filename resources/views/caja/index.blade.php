@@ -138,6 +138,9 @@
                                                         <i class="fas fa-check"></i> Cerrar caja
                                                     </b-button>
                                                 @endif
+                                                    <b-button class="mr-2 float-right" :href="'/caja/ventas?idcaja='+idcaja" variant="success">
+                                                        <i class="fas fa-list"></i> Ventas del turno
+                                                    </b-button>
                                             </div>
                                         </div>
                                         <div class="table-responsive tabla-gestionar">

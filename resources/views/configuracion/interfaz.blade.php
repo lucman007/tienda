@@ -101,6 +101,26 @@
         </div>
     </div>
 </div>
+<div class="col-lg-12 mt-4">
+    <div class="row">
+        <div class="col-lg-3">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Atención de:</label>
+                        <input type="time" v-model="interfaz.atencion_inicio" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label>Hasta:</label>
+                        <input type="time" v-model="interfaz.atencion_fin" class="form-control">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="col-lg-12">
     <b-button @click="guardarConfiguracion('interfaz')" class="mr-2 mb-5 float-right" variant="success"><i class="fas fa-save"></i> Guardar</b-button>
 </div>
