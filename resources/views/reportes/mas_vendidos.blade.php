@@ -75,8 +75,9 @@
                                                     <th scope="col">Código</th>
                                                     <th scope="col">Producto</th>
                                                     <th scope="col">Características</th>
-                                                    <th scope="col">Cantidad</th>
+                                                    <th scope="col">Vendidos</th>
                                                     <th scope="col">Total</th>
+                                                    <th scope="col"></th>
                                                     <th></th>
                                                 </tr>
                                                 </thead>
@@ -95,13 +96,13 @@
                                                                 <td>{{ floatval($producto->vendidos).' '.$unidad[1]}}</td>
                                                                 <td>S/ {{ number_format($producto->monto_total,3)}}</td>
                                                                 <td></td>
-                                                                {{--<td><a href="{{url('/productos/inventario/'.$producto->idproducto.'?desde='.$filtros['desde'].'&hasta='.$filtros['hasta'])}}"><i class="fas fa-indent"></i> Ver kardex</a></td>--}}
+                                                                <td><a href="{{url('/productos/inventario/'.$producto->idproducto.'?desde='.$filtros['desde'].'&hasta='.$filtros['hasta'])}}"><i class="fas fa-indent"></i> Ver kardex</a></td>
                                                             </tr>
                                                         @endif
                                                     @endforeach
                                                 @else
                                                     <tr>
-                                                        <td colspan="6" class="text-center">No hay datos para mostrar</td>
+                                                        <td colspan="8" class="text-center">No hay datos para mostrar</td>
                                                     </tr>
                                                 @endif
                                                 </tbody>

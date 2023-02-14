@@ -32,6 +32,7 @@ class Producto extends Model
         'param_3',
         'param_4',
         'param_5',
+        'items_kit',
 	];
 
     public function almacen(){

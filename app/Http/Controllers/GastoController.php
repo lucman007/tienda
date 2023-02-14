@@ -3,6 +3,7 @@
 namespace sysfact\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use sysfact\Gastos;
@@ -217,18 +218,7 @@ class GastoController extends Controller
 
             foreach ($productos as $producto) {
                 $inv = Inventario::where('idproducto',$producto['idproducto'])->orderby('idinventario', 'desc')->first();
-
-                $inventario=new Inventario();
-                $inventario->idproducto = $producto['idproducto'];
-                $inventario->idempleado=auth()->user()->idempleado;
-                $inventario->cantidad=$producto['cantidad_devolucion'];
-                $inventario->costo = $inv->costo;
-                $inventario->saldo = $inv->saldo + $producto['cantidad_devolucion'];
-                $inventario->moneda = $inv->moneda;
-                $inventario->tipo_cambio = $inv->tipo_cambio;
-                $inventario->fecha=date('Y-m-d H:i:m');
-                $inventario->operacion='DEVOLUCIÓN DE PRODUCTO - VENTA '.$request->idventa;
-                $inventario->save();
+                MainHelper::actualizar_inventario($request->idventa,$producto,$inv,'devolucion');
 
                 DB::statement("UPDATE ventas_detalle SET devueltos = ".($producto['detalle']['devueltos']+$producto['cantidad_devolucion'])." WHERE idventa=".$request->idventa." AND num_item = ".$producto['detalle']['num_item']." AND idproducto=".$producto['idproducto']);
 

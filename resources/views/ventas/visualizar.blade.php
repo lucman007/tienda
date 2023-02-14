@@ -119,7 +119,10 @@
                                 <tbody>
                                 <tr v-for="(producto,index) in productosSeleccionados" :key="producto.index">
                                     <td></td>
-                                    <td>@{{ producto.nombre }}</td>
+                                    <td>
+                                        @{{ producto.nombre }} <br>
+                                        <span style="font-size: 11px; color: #0b870b;" v-for="item in producto.items_kit">+ (@{{ item.cantidad }}) @{{item['nombre']}}<br></span>
+                                    </td>
                                     <td style="white-space: break-spaces; width: 250px">@{{ producto.detalle.descripcion}}</td>
                                     <td>@{{ producto.detalle.monto }}</td>
                                     <td>@{{ producto.detalle.cantidad }} <span v-show="producto.detalle.devueltos > 0" class="badge badge-warning w-100">@{{producto.detalle.devueltos}} DEVUELTOS</span></td>

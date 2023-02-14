@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use sysfact\Facturacion;
 use sysfact\Guia;
+use sysfact\Http\Controllers\Helpers\MainHelper;
 use sysfact\Inventario;
 use sysfact\Notifications\NotificacionesSistema;
 use sysfact\Resumen;
@@ -129,13 +130,8 @@ class ProcesarRespuestas
                     $productos=$venta->productos;
 
                     foreach ($productos as $item){
-                        $inventario = new Inventario();
-                        $inventario->idproducto = $item['idproducto'];
-                        $inventario->idempleado = auth()->user()->idempleado??-1;
-                        $inventario->cantidad = $item->detalle->cantidad;
-                        $inventario->saldo = $item->inventario()->first()->saldo + $item->detalle->cantidad;
-                        $inventario->operacion = 'DOCUMENTO RECHAZADO - VENTA N ° '. $this->idventa;
-                        $inventario->save();
+                        $inv = $item->inventario()->first();
+                        MainHelper::actualizar_inventario($this->idventa,$item,$inv,'rechazo_doc');
                     }
 
                     $user =  User::whereHas('roles', function ($query) {
@@ -267,13 +263,8 @@ class ProcesarRespuestas
                     $productos=$venta->productos;
 
                     foreach ($productos as $item){
-                        $inventario = new Inventario();
-                        $inventario->idproducto = $item['idproducto'];
-                        $inventario->idempleado = auth()->user()->idempleado??-1;
-                        $inventario->cantidad = $item->detalle->cantidad * -1;
-                        $inventario->saldo = $item->inventario()->first()->saldo - $item->detalle->cantidad;
-                        $inventario->operacion = 'NOTA DE CREDITO RECHAZADA - ID '. $this->idventa;
-                        $inventario->save();
+                        $inv = $item->inventario()->first();
+                        MainHelper::actualizar_inventario($this->idventa,$item,$inv,'rechazo_nc');
                     }
 
                     return 'El documento ha sido rechazado. '.$Description.$observación;

@@ -10,6 +10,8 @@
                 <b-button class="mr-2" v-b-modal.modal-1 variant="primary"><i class="fas fa-plus"></i> Nuevo</b-button>
                 <b-button class="mr-2" v-b-modal.modal-2 variant="primary"><i class="fas fa-file-import"></i> Importar</b-button>
                 <b-button class="mr-2"href="{{action('ProductoController@exportar')}}" variant="primary"><i class="fas fa-file-export"></i> Exportar...</b-button>
+                <b-button class="mr-2" v-b-modal.modal-1 @click="tipo_producto = 3" variant="success"><i class="fas fa-cube"></i> Kit de productos
+                </b-button>
 {{--
                 <b-button class="mr-2" href="{{action('ProductoController@exportar')}}" variant="success"><i class="fas fa-edit"></i> Edición múltiple</b-button>
 --}}
@@ -62,12 +64,19 @@
                                             <td></td>
                                             <td @if(!$columnas['ubicacion']) style="display: none;" @endif>{{$producto->ubicacion}}</td>
                                             <td @if(!$columnas['codigo']) style="display: none;" @endif>{{$producto->cod_producto}}</td>
-                                            @if($producto->tipo_producto==1)
-                                                <td @if(!$columnas['tipo_producto']) style="display: none;" @endif scope="col">PRODUCTO</td>
-                                            @else
-                                                <td @if(!$columnas['tipo_producto']) style="display: none;" @endif scope="col">SERVICIO</td>
-                                            @endif
-                                            <td>{{$producto->nombre}}</td>
+                                            <td @if(!$columnas['tipo_producto']) style="display: none;" @endif scope="col">{{$producto->tipo_producto_nombre}}</td>
+                                            <td>
+                                                {{$producto->nombre}} @if($producto->tipo_producto == 3) <span class="badge badge-warning"><i class="far fa-star"></i> KIT</span> <br>@endif
+                                                @if($producto->items_kit)
+                                                    @php
+                                                        $kit = json_decode($producto->items_kit, true);
+                                                    @endphp
+                                                    @foreach($kit as $item)
+                                                    <span style="font-size: 11px; color: #0b870b;">+ ({{ $item['cantidad'] }}) {{$item['nombre']}}
+                                                        <br></span>
+                                                    @endforeach
+                                                @endif
+                                            </td>
                                             <td>{{$producto->presentacion}}</td>
                                             <td @if(!$columnas['montaje']) style="display: none;" @endif>{{$producto->param_1}}</td>
                                             <td @if(!$columnas['capsula']) style="display: none;" @endif>{{$producto->param_2}}</td>
@@ -127,12 +136,16 @@
                 <b-tab title="General" active>
                     <div class="container">
                         <div class="row">
+                            <div v-show="tipo_producto == 3" class="col-lg-12">
+                                <p style="color: green">Ahora puedes armar un conjunto de productos y establecerle un precio. Cada producto se descontará del inventario individualmente. Agrega los productos al kit desde la pestaña <strong>AGREGAR PRODUCTOS</strong>.</p>
+                            </div>
                             <div class="col-lg-3">
                                 <div class="form-group">
                                     <label>Tipo:</label>
-                                    <select v-model="tipo_producto" class="custom-select">
+                                    <select v-model="tipo_producto" class="custom-select" :disabled="tipo_producto == 3">
                                         <option value="1">Producto</option>
                                         <option value="2">Servicio</option>
+                                        <option value="3" v-show="tipo_producto == 3">Kit de productos</option>
                                     </select>
                                 </div>
                             </div>
@@ -144,7 +157,8 @@
                             </div>
                             <div :class="[accion=='insertar'?'col-lg-9':'col-lg-6']">
                                 <div class="form-group">
-                                    <label for="nombre">Nombre producto / servicio:</label>
+                                    <label for="nombre" v-show="tipo_producto != 3">Nombre del producto o servicio:</label>
+                                    <label for="nombre" v-show="tipo_producto == 3">Nombre del kit de productos:</label>
                                     <input type="text" v-model="nombre" name="nombre"  class="form-control" autocomplete="off">
                                 </div>
                             </div>
@@ -253,6 +267,47 @@
                         </div>
                     </div>
                 </b-tab>
+                <b-tab v-if="tipo_producto == 3" title="Agregar productos">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-12" v-show="tipo_producto == 3">
+                                <div class="form-group">
+                                    <autocomplete v-on:agregar_producto="agregarAlKit" :buscador-alt="true"></autocomplete>
+                                </div>
+                            </div>
+                            <div class="col-lg-12" v-show="tipo_producto == 3">
+                                <table class="table table-striped table-hover table-sm">
+                                    <thead class="bg-custom-green">
+                                    <tr>
+                                        <th scope="col" style="width: 10px"></th>
+                                        <th scope="col" style="width: 290px">Producto</th>
+                                        <th scope="col" style="width: 100px">Cantidad</th>
+                                        <th scope="col" style="width: 50px"></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr v-for="(producto,index) in items_kit" :key="index">
+                                        <td></td>
+                                        <td>
+                                            @{{producto.nombre}}
+                                        </td>
+                                        <td><input onfocus="this.select()"
+                                                   class="form-control" type="number"
+                                                   v-model="producto.cantidad">
+                                        </td>
+                                        <td class="">
+                                            <button @click="borrarItemKit(index)" class="btn btn-danger"
+                                                    title="Borrar item"><i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr class="text-center" v-show="items_kit.length == 0"><td colspan="8">Agrega productos predeterminados al kit</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </b-tab>
                 <b-tab :disabled="tipo_producto!=1"  title="Descuentos">
                     <div class="container">
                         <div class="row">
@@ -282,7 +337,7 @@
                         </div>
                     </div>
                 </b-tab>
-                <b-tab title="Ubicación">
+                <b-tab :disabled="tipo_producto!=1" title="Ubicación">
                     <div class="container">
                         <div class="row">
                             <div class="col-lg-6">
@@ -313,7 +368,7 @@
                         </div>
                     </div>
                 </b-tab>
-                <b-tab title="Otros atributos">
+                <b-tab :disabled="tipo_producto!=1" title="Otros atributos">
                     <div class="container">
                         <div class="row">
                             <div class="col-lg-3 form-group">
@@ -518,13 +573,21 @@
                 columnas: <?php echo json_encode($columnas) ?>,
                 search: '{{$textoBuscado}}',
                 nuevaUbicacion:false,
-                nombreUbicacion:''
+                nombreUbicacion:'',
+                items_kit:[],
             },
             mounted(){
                 this.obtener_categorias();
                 this.obtener_almacen();
             },
             methods: {
+                agregarAlKit(obj){
+                    let plato = {idproducto:obj['idproducto'],cantidad:1,precio:obj['precio'],nombre:obj['nombre']};
+                    this.items_kit.push(plato);
+                },
+                borrarItemKit(index){
+                    this.items_kit.splice(index, 1);
+                },
                 guardarUbicacion(e){
                     axios.post('/almacenes/store-ubicacion?origen=productos', {
                         'idalmacen':this.idalmacen,
@@ -693,6 +756,7 @@
                         'param_3': this.param_3,
                         'param_4': this.param_4,
                         'param_5': this.param_5,
+                        'items_kit': this.tipo_producto==3?JSON.stringify(this.items_kit):null,
                     };
 
                     let tipo_accion = this.accion == 'insertar' ? '{{action('ProductoController@store')}}' : '{{action('ProductoController@update')}}';
@@ -749,6 +813,7 @@
                             this.tipo_cambio_compra = datos.tipo_cambio;
                             this.idalmacen = datos.almacen.idalmacen || null;
                             this.idubicacion = datos.almacen.idubicacion || null;
+                            this.items_kit = datos.items_kit == null?[]:JSON.parse(datos.items_kit);
                             this.$refs['modal-1'].show();
                         })
                         .catch(error => {
@@ -873,6 +938,7 @@
                     this.param_5 = 'PEN';
                     this.nombreUbicacion = '';
                     this.nuevaUbicacion = false;
+                    this.items_kit = [];
                 },
                 alerta(texto, icon){
                     this.$swal({

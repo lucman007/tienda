@@ -112,8 +112,10 @@
                                                 <tbody>
                                                 <tr v-for="(producto,index) in productosSeleccionados" :key="index">
                                                     <td></td>
-                                                    <td>@{{producto.nombre}}</td>
-
+                                                    <td>
+                                                        @{{producto.nombre}}<br>
+                                                        <span style="font-size: 11px; color: #0b870b;" v-for="item in producto.items_kit">+ (@{{ item.cantidad }}) @{{item['nombre']}}<br></span>
+                                                    </td>
                                                     <td @click="habilitar(producto.num_item,'d')"><input
                                                                 onblur="app.noFocus(this)"
                                                                 @keyup="actualizarDetalle"
@@ -463,7 +465,6 @@
                         this.procesar("{{action('PedidoController@store')}}", 'nuevo')
                     },
                     procesar(accion, tipo){
-
                         let data = {
                             'idvendedor':this.idvendedor,
                             'idorden': this.idpedido,
@@ -475,6 +476,8 @@
                             'igv_incluido': 1,
                             'items': JSON.stringify(this.productosSeleccionados)
                         };
+
+                        console.log(this.productosSeleccionados)
 
                         if(tipo == 'nuevo'){
                             this.disabledNuevo = true;

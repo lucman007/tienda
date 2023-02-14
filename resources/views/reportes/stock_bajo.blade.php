@@ -37,7 +37,7 @@
                                                     <th scope="col">Producto</th>
                                                     <th scope="col">Características</th>
                                                     <th scope="col">Stock actual</th>
-
+                                                    <th scope="col"></th>
                                                 </tr>
                                                 </thead>
                                                 <tbody>
@@ -47,8 +47,9 @@
                                                             <td></td>
                                                             <td>{{ $producto->cod_producto }}</td>
                                                             <td>{{ $producto->nombre }}</td>
-                                                            <td>{{ $producto->presentacion }}</td>
-                                                            <td style="color:{{$producto->saldo <= 0?'red':'inherit'}}">{{ $producto->saldo}}</td>
+                                                            <td style="width: 30%">{{ \Illuminate\Support\Str::words($producto->presentacion,40,'...')}}</td>
+                                                            <td style="color:{{$producto->saldo <= 0?'red':'green'}}">{{ $producto->saldo}}</td>
+                                                            <td><a href="{{url('/productos/inventario/'.$producto->idproducto)}}"><i class="fas fa-indent"></i> Ver kardex</a></td>
                                                         </tr>
                                                     @endforeach
                                                 @else

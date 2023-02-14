@@ -31,7 +31,7 @@ class Venta extends Model
 		return $this->belongsToMany(Producto::class,'ventas_detalle','idventa','idproducto')
 			->as('detalle')
 			->withPivot('num_item', 'cantidad', 'monto', 'porcentaje_descuento','descuento', 'descripcion',
-                'producto_nombre','afectacion','subtotal','igv','total','devueltos');
+                'producto_nombre','afectacion','subtotal','igv','total','devueltos','items_kit');
 	}
 
 	public function persona(){

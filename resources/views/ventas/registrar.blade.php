@@ -452,7 +452,9 @@
                                 <tbody>
                                 <tr v-for="(producto,index) in productosSeleccionados" :key="producto.num_item">
                                     <td></td>
-                                    <td>@{{producto.cod_producto}} - @{{producto.nombre}}</td>
+                                    <td>@{{producto.cod_producto}} - @{{producto.nombre}} <br>
+                                        <span style="font-size: 11px; color: #0b870b;" v-for="item in producto.items_kit">+ (@{{ item.cantidad }}) @{{item['nombre']}}<br></span>
+                                    </td>
                                     <td><textarea rows="1" @keyup="agregarCaracteristicasSession()" class="form-control" type="text"
                                                   v-model="producto.presentacion"></textarea></td>
                                     <td><input @keyup="calcular(index)" class="form-control" type="text"
@@ -569,7 +571,6 @@
                                 <tbody>
                                 <tr v-for="(producto,index) in productosSeleccionados" :key="producto.index">
                                     <td></td>
-                                    <td style="display:none">@{{producto.idproducto}}</td>
                                     <td>@{{ producto.nombre }}</td>
                                     <td style="white-space: break-spaces">@{{ producto.presentacion}}</td>
                                     <td>@{{ producto.precio }}</td>

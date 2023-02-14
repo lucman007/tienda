@@ -25,7 +25,8 @@
                                                                        v-for="(producto, index) in productos" button
                                                                        :key="index">
                                                         <div class="row">
-                                                            <div class="col-lg-6">{{producto.nombre}} <br>
+                                                            <div class="col-lg-6">{{producto.nombre}} <span v-show="producto.tipo_producto==3" class="badge badge-warning"><i class="far fa-star"></i> KIT</span> <br>
+                                                                <span style="font-size: 11px; color: #0b870b;" v-for="item in producto.items_kit">+ ({{ item.cantidad }}) {{item['nombre']}} </span>
                                                                 <span class="presentacion">{{extracto(producto.presentacion)}}</span>
                                                             </div>
                                                             <div class="col-lg-3">{{producto.moneda+producto.precio}} <br>

@@ -124,7 +124,7 @@ class PedidoController extends Controller
                 $producto->moneda = $producto->moneda=='PEN'?'S/':'USD';
                 $producto->unidad = explode('/',$producto->unidad_medida)[1];
                 $producto->badge_stock = 'badge-success';
-
+                $producto->items_kit = json_decode($producto->items_kit, true);
                 $descuento=$producto->descuento()->orderby('monto_desc','asc')->first();
                 $producto->precioPorMayor = $descuento['monto_desc'];
                 $producto->cantidadPorMayor = $descuento['cantidad_min'];
@@ -180,7 +180,7 @@ class PedidoController extends Controller
             $descuento=$producto->descuento()->orderby('monto_desc','asc')->first();
             $producto->precioPorMayor = $descuento['monto_desc'];
             $producto->cantidadPorMayor = $descuento['cantidad_min'];
-
+            $producto->items_kit = json_decode($producto->items_kit, true);
             $producto->stock = $producto->inventario()->first()->saldo;
         }
 
@@ -307,6 +307,7 @@ class PedidoController extends Controller
                 $detalle['descripcion'] = mb_strtoupper($item['presentacion']);
                 $detalle['idproducto'] = $item['idproducto'];
                 $detalle['idorden'] = $request->idorden;
+                $detalle['items_kit'] = json_encode($item['items_kit']);
                 DB::table('orden_detalle')->insert($detalle);
 
                 $i++;
@@ -337,6 +338,7 @@ class PedidoController extends Controller
 
         } catch (\Exception $e){
             DB::rollBack();
+            Log::error($e);
            return $e->getMessage();
         }
     }
@@ -549,6 +551,7 @@ class PedidoController extends Controller
                 $productos[$i]['total']=null;
                 $productos[$i]['unidad_medida']=$product->unidad_medida;
                 $productos[$i]['porcentaje_descuento']=null;
+                $productos[$i]['items_kit']=json_decode($product->detalle->items_kit, true);
                 $i++;
 
             }
@@ -593,6 +596,7 @@ class PedidoController extends Controller
                 $detalle['descripcion'] = mb_strtoupper($item['presentacion']);
                 $detalle['idproducto'] = $item['idproducto'];
                 $detalle['idorden'] = $request->idorden;
+                $detalle['items_kit'] = json_encode($item['items_kit']);
                 DB::table('orden_detalle')->insert($detalle);
                 $i++;
             }
@@ -806,6 +810,7 @@ class PedidoController extends Controller
             $productos[$i]['total']=null;
             $productos[$i]['unidad_medida']=$product->unidad_medida;
             $productos[$i]['porcentaje_descuento']=null;
+            $productos[$i]['items_kit']=json_decode($product->detalle->items_kit, true);
             $i++;
 
         }

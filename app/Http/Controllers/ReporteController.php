@@ -1039,7 +1039,7 @@ class ReporteController extends Controller
         }
 
         usort($seleccionados, function($a, $b) {
-            return $b['saldo'] <=> $a['saldo'];
+            return $a['saldo'] <=> $b['saldo'];
         });
 
         $esExportable = $request->get('export','false');
@@ -1074,7 +1074,7 @@ class ReporteController extends Controller
         try{
             $filtros = ['desde' => $desde, 'hasta' => $hasta];
             if($esExportable == 'true'){
-                $productos=$ventas = DB::table('ventas')
+                $productos = DB::table('ventas')
                     ->join('ventas_detalle', 'ventas_detalle.idventa', '=', 'ventas.idventa')
                     ->join('productos', 'productos.idproducto', '=', 'ventas_detalle.idproducto')
                     ->join('facturacion', 'ventas.idventa', '=', 'facturacion.idventa')
@@ -1097,7 +1097,7 @@ class ReporteController extends Controller
                     ->orderby('vendidos','desc')
                     ->get();
             } else {
-                $productos=$ventas = DB::table('ventas')
+                $productos = DB::table('ventas')
                     ->join('ventas_detalle', 'ventas_detalle.idventa', '=', 'ventas.idventa')
                     ->join('productos', 'productos.idproducto', '=', 'ventas_detalle.idproducto')
                     ->join('facturacion', 'ventas.idventa', '=', 'facturacion.idventa')

@@ -90,6 +90,19 @@ class ProductoController extends Controller
                 foreach ($productos as $producto){
                     $producto->cantidad=$producto->inventario->first()->saldo;
                     $producto->presentacion = Str::words($producto->presentacion,40,'...');
+
+                    switch ($producto->tipo_producto){
+                        case 1:
+                            $producto->tipo_producto_nombre = 'PRODUCTO';
+                            break;
+                        case 2:
+                            $producto->tipo_producto_nombre = 'SERVICIO';
+                            break;
+                        case 3:
+                            $producto->tipo_producto_nombre = 'KIT DE PRODUCTOS';
+                            break;
+                    }
+
                     $almacen = DB::table('almacen_productos')->where('idproducto', $producto->idproducto)->orderby('fecha','asc')->first();
                     if($almacen){
                         $ubicacion = Ubicacion::find($almacen->idubicacion);
@@ -213,6 +226,7 @@ class ProductoController extends Controller
             } else{
                 $producto->discounts = 0;
             }
+            $producto->items_kit = $request->items_kit;
             $producto->save();
 
             $inventario=new Inventario();
@@ -347,6 +361,7 @@ class ProductoController extends Controller
             } else {
                 $producto->discounts = 0;
             }
+            $producto->items_kit = $request->items_kit;
             $producto->save();
 
             if($request->cantidad!=$request->cantidad_aux){

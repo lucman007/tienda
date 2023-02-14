@@ -23,6 +23,7 @@ use sysfact\Http\Controllers\ClienteController;
 use sysfact\Http\Controllers\Controller;
 use sysfact\Http\Controllers\OpcionController;
 use sysfact\Http\Controllers\ProductoController;
+use sysfact\Inventario;
 use sysfact\Producto;
 
 class MainHelper extends Controller
@@ -292,7 +293,7 @@ class MainHelper extends Controller
             $descuento=$producto->descuento()->orderby('monto_desc','asc')->first();
             $producto->precioPorMayor = $descuento['monto_desc'];
             $producto->cantidadPorMayor = $descuento['cantidad_min'];
-
+            $producto->items_kit = json_decode($producto->items_kit, true);
             $producto->badge_stock = 'badge-success';
             if($producto->stock <= 0){
                 $producto->badge_stock = 'badge-danger';
@@ -490,7 +491,92 @@ class MainHelper extends Controller
         } else {
             return false;
         }
+    }
 
+    public static function actualizar_inventario($idventa, $item, $inv, $operacion){
+
+        try{
+            switch($operacion){
+                case 'anulacion':
+                    $descripcion_operacion = 'ANULACIÓN DE VENTA N° ' . $idventa;
+                    if($item['detalle']['devueltos'] > 0){
+                        $cantidad = ($item['detalle']['cantidad']??$item['cantidad']) - $item['detalle']['devueltos'];
+                    } else {
+                        $cantidad = $item['cantidad']??$item['detalle']['cantidad'];
+                    }
+                    $tipo_operacion = 'ingreso';
+                    break;
+                case 'anulacion_nc':
+                    $descripcion_operacion = 'ANULACIÓN (NC) DE VENTA N° ' . $idventa;
+                    if($item['detalle']['devueltos'] > 0){
+                        $cantidad = ($item['cantidad']??$item['detalle']['cantidad']) - $item['detalle']['devueltos'];
+                    } else {
+                        $cantidad = $item['cantidad']??$item['detalle']['cantidad'];
+                    }
+                    $tipo_operacion = 'ingreso';
+                    break;
+                case 'devolucion':
+                    $descripcion_operacion = 'DEVOLUCIÓN DE PRODUCTO - VENTA ' . $idventa;
+                    $cantidad = $item['cantidad_devolucion'];
+                    $tipo_operacion = 'ingreso';
+                    break;
+                case 'rechazo_doc':
+                    $descripcion_operacion = 'DOCUMENTO RECHAZADO - VENTA N ° ' . $idventa;
+                    $cantidad = $item['cantidad']??$item['detalle']['cantidad'];
+                    $tipo_operacion = 'ingreso';
+                    break;
+                case 'rechazo_nc':
+                    $descripcion_operacion = 'NOTA DE CREDITO RECHAZADA - VENTA N° ' . $idventa;
+                    $cantidad = $item['cantidad']??$item['detalle']['cantidad'];
+                    $tipo_operacion = 'salida';
+                    break;
+                default:
+                    $descripcion_operacion = 'VENTA N° ' . $idventa;
+                    $cantidad = $item['cantidad']??$item['detalle']['cantidad'];
+                    $tipo_operacion = 'salida';
+            }
+
+            if($item['tipo_producto'] == 3){
+                $kits = json_decode($item['detalle']['items_kit']);
+                foreach ($kits as $kit){
+                    $inv_kit = Inventario::where('idproducto',$kit->idproducto)->orderby('idinventario', 'desc')->first();
+                    $inventario = new Inventario();
+                    $inventario->idproducto = $kit->idproducto;
+                    $inventario->idempleado = auth()->user()->idempleado??-1;
+                    $inventario->idventa = $idventa;
+                    if($tipo_operacion == 'ingreso'){
+                        $inventario->cantidad = $kit->cantidad * $cantidad;
+                        $inventario->saldo = $inv_kit->saldo + ($kit->cantidad * $cantidad);
+                    } else {
+                        $inventario->cantidad = $kit->cantidad * $cantidad * -1;
+                        $inventario->saldo = $inv_kit->saldo - ($kit->cantidad * $cantidad);
+                    }
+                    $inventario->operacion = $descripcion_operacion.' (KIT)';
+                    $inventario->save();
+                }
+            } else {
+                $inventario = new Inventario();
+                $inventario->idproducto = $item['idproducto'];
+                $inventario->idempleado = auth()->user()->idempleado??-1;
+                $inventario->idventa = $idventa;
+                $inventario->operacion = $descripcion_operacion;
+                $inventario->costo = $item['costo'];
+                $inventario->moneda = $item['moneda_compra'];
+                $inventario->tipo_cambio = $item['tipo_cambio'];
+                if($tipo_operacion == 'ingreso'){
+                    $inventario->cantidad = $cantidad;
+                    $inventario->saldo = $inv->saldo + $cantidad;
+                } else {
+                    $inventario->cantidad = $cantidad * -1;
+                    $inventario->saldo = $inv->saldo - $cantidad;
+                }
+                $inventario->save();
+            }
+
+        } catch (\Exception $e){
+            Log::error($e);
+            return $e->getMessage();
+        }
 
 
     }

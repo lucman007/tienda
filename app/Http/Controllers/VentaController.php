@@ -294,7 +294,9 @@ class VentaController extends Controller
                 $producto->presentacion = strip_tags($producto->detalle->descripcion);
                 $producto->subtotal = $producto->detalle->subtotal;
                 $producto->igv = $producto->detalle->igv;
+                $producto->igv = $producto->detalle->igv;
                 $producto->total = $producto->detalle->total;
+                $producto->items_kit = json_decode($producto->detalle->items_kit, true);
             }
 
             $venta->comprobante_referencia=$venta->facturacion->serie.'-'.$venta->facturacion->correlativo;
@@ -333,6 +335,7 @@ class VentaController extends Controller
                 $producto->igv = round($total - $subtotal,2);
                 $producto->total=$total;
                 $producto->stock = $producto->inventario()->first()->saldo;
+                $producto->items_kit = null;
                 $suma_total+=$total;
             }
 
@@ -483,35 +486,18 @@ class VentaController extends Controller
                     $detalle['subtotal'] = $item['subtotal'];
                     $detalle['igv'] = $item['igv'];
                     $detalle['total'] = $item['total'];
+                    $detalle['items_kit'] = json_encode($item['items_kit']);
                     $venta->productos()->attach($item['idproducto'], $detalle);
 
                     //Actualizar inventario
+                    $item['detalle']['items_kit'] = json_encode($item['items_kit']);
                     $inv = Inventario::where('idproducto',$item['idproducto'])->orderby('idinventario', 'desc')->first();
-                    if($request->comprobante != '07'){
-                        $saldo = $inv->saldo - $item['cantidad'];
-                        $cantidad = $item['cantidad'] * -1;
-                        $operacion = 'VENTA N° ' . $idventa;
-                    } else {
-                        if($item['detalle']['devueltos'] > 0){
-                            $cantidad = $item['cantidad'] - $item['detalle']['devueltos'];
-                        } else {
-                            $cantidad = $item['cantidad'];
-                        }
-                        $saldo = $inv->saldo + $cantidad;
-                        $operacion = 'ANULACIÓN (NC) DE VENTA N° ' . $request->idventa_modifica;
-                    }
 
-                    $inventario = new Inventario();
-                    $inventario->idproducto = $item['idproducto'];
-                    $inventario->idempleado = auth()->user()->idempleado;
-                    $inventario->idventa = $idventa;
-                    $inventario->cantidad = $cantidad;
-                    $inventario->costo = $item['costo'];
-                    $inventario->saldo = $saldo;
-                    $inventario->moneda = $item['moneda_compra'];
-                    $inventario->tipo_cambio = $item['tipo_cambio'];
-                    $inventario->operacion = $operacion;
-                    $inventario->save();
+                    if($request->comprobante != '07'){
+                        MainHelper::actualizar_inventario($idventa, $item, $inv, 'venta');
+                    } else {
+                        MainHelper::actualizar_inventario($request->idventa_modifica, $item, $inv, 'anulacion_nc');
+                    }
 
                     $i++;
                 }
@@ -640,6 +626,7 @@ class VentaController extends Controller
 
         foreach ($productos as $producto){
             $producto->detalle->descripcion = strip_tags($producto->detalle->descripcion);
+            $producto->items_kit = json_decode($producto->detalle->items_kit, true);
         }
 
         if($venta->facturacion->codigo_moneda=='PEN'){
@@ -737,6 +724,7 @@ class VentaController extends Controller
                 $producto->igv = round($total - $subtotal,2);
                 $producto->total=$total;
                 $producto->stock = $producto->inventario()->first()->saldo;
+                $producto->items_kit = json_decode($producto->items_kit, true);
                 $suma_total+=$total;
             }
 
@@ -790,6 +778,7 @@ class VentaController extends Controller
                 $producto->igv = round($total - $subtotal,2);
                 $producto->total=$total;
                 $suma_total+=$total;
+                $producto->items_kit = null;
             }
 
             $guia->cliente->nombre=$guia->cliente->persona->nombre;
@@ -850,6 +839,7 @@ class VentaController extends Controller
                 $producto->igv = round($total - $subtotal,2);
                 $producto->total=$total;
                 $producto->stock = $producto->inventario()->first()->saldo;
+                $producto->items_kit = null;
                 $suma_total+=$total;
             }
 
@@ -902,6 +892,7 @@ class VentaController extends Controller
                 $producto->igv = round($total - $subtotal,2);
                 $producto->total=$total;
                 $suma_total+=$total;
+                $producto->items_kit = null;
             }
 
             $guia->cliente->nombre=$guia->cliente->persona->nombre;
@@ -1032,35 +1023,28 @@ class VentaController extends Controller
     }
 
     public function eliminar_venta($idventa){
+        try{
+            $venta = Venta::find($idventa);
+            $detalle = $venta->productos;
 
-        $venta = Venta::find($idventa);
-        $detalle = $venta->productos;
-
-        foreach ($detalle as $item){
-            //Actualizar inventario
-
-            if($item['detalle']['devueltos'] > 0){
-                $cantidad = $item['detalle']['cantidad'] - $item['detalle']['devueltos'];
-            } else {
-                $cantidad = $item['detalle']['cantidad'];
+            foreach ($detalle as $item){
+                $item_inv = $item->inventario()->first();
+                MainHelper::actualizar_inventario($idventa,$item,$item_inv,'anulacion');
             }
 
-            $inventario = new Inventario();
-            $inventario->idproducto = $item['idproducto'];
-            $inventario->idempleado = auth()->user()->idempleado;
-            $inventario->cantidad = $cantidad;
-            $inventario->saldo = $item->inventario()->first()->saldo + $cantidad;
-            $inventario->operacion = 'ANULACIÓN DE VENTA N° ' . $idventa;
-            $inventario->save();
+            $venta->eliminado=1;
+            $venta->save();
+
+            //Actualizar pedido
+            $venta->orden()->update([
+                'estado'=>'VENTA ANULADA'
+            ]);
+
+        } catch (\Exception $e){
+            Log::info($e);
+            return $e->getMessage();
         }
 
-        $venta->eliminado=1;
-        $venta->save();
-
-        //Actualizar pedido
-        $venta->orden()->update([
-            'estado'=>'VENTA ANULADA'
-        ]);
     }
 
     public function categorias()
@@ -1232,6 +1216,7 @@ class VentaController extends Controller
                     $detalle['monto'] = $item->detalle->monto;
                     $detalle['descuento'] = 0;
                     $detalle['descripcion'] = trim($item->detalle->descripcion);
+                    $detalle['items_kit'] = $item->detalle->items_kit;
                     $detalle['afectacion'] = 10;
                     $detalle['porcentaje_descuento'] = 0;
                     $detalle['subtotal'] = $subtotal_item;
@@ -1239,18 +1224,7 @@ class VentaController extends Controller
                     $detalle['total'] = $total_item;
                     $venta->productos()->attach($item->idproducto, $detalle);
 
-                    //Actualizar inventario
-                    $inventario = new Inventario();
-                    $inventario->idproducto = $item->idproducto;
-                    $inventario->idempleado = auth()->user()->idempleado;
-                    $inventario->idventa = $idventa;
-                    $inventario->cantidad = $item->detalle->cantidad * -1;
-                    $inventario->costo = $item->costo;
-                    $inventario->saldo = $item_inv->saldo - $item->detalle->cantidad;
-                    $inventario->moneda = $item->moneda_compra;
-                    $inventario->tipo_cambio = $item->tipo_cambio;
-                    $inventario->operacion = 'VENTA N° ' . $idventa;
-                    $inventario->save();
+                    MainHelper::actualizar_inventario($idventa, $item, $item_inv, 'venta');
 
                     $i++;
                 }
@@ -1268,11 +1242,13 @@ class VentaController extends Controller
             if($request->tipo_pago_contado == 4){
                 $fraccionado = json_decode($request->pago_fraccionado, TRUE);
                 foreach ($fraccionado as $item){
-                    $pago = new Pago();
-                    $pago->monto=$item['monto'];
-                    $pago->tipo = $item['tipo'];
-                    $pago->fecha=date('Y-m-d H:i:s');
-                    $venta->pago()->save($pago);
+                    if($item['monto'] > 0){
+                        $pago = new Pago();
+                        $pago->monto = $item['monto'];
+                        $pago->tipo = $item['tipo'];
+                        $pago->fecha = date('Y-m-d H:i:s');
+                        $venta->pago()->save($pago);
+                    }
                 }
             } else if ($request->tipo_pago_contado == 2) {
                 $cuotas = json_decode($request->cuotas, TRUE);
@@ -1321,7 +1297,7 @@ class VentaController extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             Log::error($e);
-            return $e;
+            return $e->getMessage();
         }
     }
 
@@ -1534,24 +1510,8 @@ class VentaController extends Controller
             $productos=$venta->productos;
 
             foreach ($productos as $item){
-
-                if($item['detalle']['devueltos'] > 0){
-                    $cantidad = $item['detalle']['cantidad'] - $item['detalle']['devueltos'];
-                } else {
-                    $cantidad = $item['detalle']['cantidad'];
-                }
-
-                $inventario = new Inventario();
-                $inventario->idproducto = $item['idproducto'];
-                $inventario->idempleado = auth()->user()->idempleado;
-                $inventario->idventa = $idventa;
-                $inventario->cantidad = $cantidad;
-                $inventario->costo = $item->costo;
-                $inventario->saldo = $item->inventario()->first()->saldo + $cantidad;
-                $inventario->moneda = $item->moneda_compra;
-                $inventario->tipo_cambio = $item->tipo_cambio;
-                $inventario->operacion = 'ANULACIÓN (NC) DE VENTA N° ' . $request->idventa;
-                $inventario->save();
+                $item_inv = $item->inventario()->first();
+                MainHelper::actualizar_inventario($request->idventa,$item,$item_inv,'anulacion_nc');
             }
 
             $cpe = new CpeController();
@@ -1572,29 +1532,34 @@ Imprime y entrega la NOTA DE CRÉDITO junto al comprobante anulado.',
     public function verificar_pedido($idpedido, $items){
         try{
             $orden = Orden::find($idpedido);
-
-            $detalle = [];
             $items = json_decode($items, TRUE);
-            $i = 1;
-            $suma = 0;
+            if($items){
+                $detalle = [];
+                $i = 1;
+                $suma = 0;
 
-            DB::table('orden_detalle')->where('idorden', '=', $idpedido)->delete();
+                DB::table('orden_detalle')->where('idorden', $idpedido)->delete();
 
-            foreach ($items as $item) {
-                $suma += $item['precio'] * $item['cantidad'];
-                $detalle['num_item'] = $i;
-                $detalle['cantidad'] = $item['cantidad'];
-                $detalle['monto'] = $item['precio'];
-                $detalle['descuento'] = 0;
-                $detalle['descripcion'] = mb_strtoupper($item['presentacion']);
-                $detalle['idproducto'] = $item['idproducto'];
-                $detalle['idorden'] = $idpedido;
-                DB::table('orden_detalle')->insert($detalle);
-                $i++;
+                foreach ($items as $item) {
+                    $suma += $item['precio'] * $item['cantidad'];
+                    $detalle['num_item'] = $i;
+                    $detalle['cantidad'] = $item['cantidad'];
+                    $detalle['monto'] = $item['precio'];
+                    $detalle['descuento'] = 0;
+                    $detalle['descripcion'] = mb_strtoupper($item['presentacion']);
+                    $detalle['items_kit'] = json_encode($item['items_kit']);
+                    $detalle['idproducto'] = $item['idproducto'];
+                    $detalle['idorden'] = $idpedido;
+                    DB::table('orden_detalle')->insert($detalle);
+                    $i++;
+                }
+
+                $orden->total = round($suma,2);
+                $orden->save();
+            } else {
+                Log::info('idpedido: '.$idpedido.' - No existen items...');
             }
 
-            $orden->total = round($suma,2);
-            $orden->save();
         } catch (\Exception $e){
             Log::error($e);
             return $e->getMessage();
