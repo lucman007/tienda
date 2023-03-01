@@ -155,6 +155,33 @@
                 </td>
             </tr>
         </table>
+        @if($documento->tipo_pago == 2)
+            @php
+                $i=1
+            @endphp
+            <table class="cuotas_table">
+                <thead>
+                <tr><td colspan="3" style="text-align:center"><strong>Detalle de cuotas</strong></td></tr>
+                <tr>
+                    <td style="width:20mm">Cuota</td>
+                    <td style="width:30mm">Monto</td>
+                    <td style="width:40mm">F. Vencimiento</td>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach($documento->pago as $pago)
+                    <tr>
+                        <td>{{str_pad($i,3,"0",STR_PAD_LEFT)}}</td>
+                        <td>{{$documento->codigo_moneda}} {{$pago->monto}}</td>
+                        <td>{{date('d/m/Y',strtotime($pago->fecha))}}</td>
+                    </tr>
+                    @php
+                        $i++
+                    @endphp
+                @endforeach
+                </tbody>
+            </table>
+        @endif
     </div>
 
 
@@ -266,6 +293,13 @@
             width: 200mm;
             margin-top: 3mm;
             text-align: center;
+        }
+        .cuotas_table{
+            width:100mm;
+            border-collapse: collapse;
+        }
+        .cuotas_table tr td{
+            border: 1px solid black;
         }
     </style>
 

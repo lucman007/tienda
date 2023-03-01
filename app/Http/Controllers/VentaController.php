@@ -468,6 +468,7 @@ class VentaController extends Controller
             }
 
             $facturacion->guia_fisica=strtoupper($parse_guias_string);
+            $facturacion->doc_relacionado_nc = $request->doc_relacionado_nc;
             $guardado = $facturacion->save();
 
 
@@ -505,7 +506,7 @@ class VentaController extends Controller
             }
 
             //Guardar tipo de pago
-            if(!($request->comprobante == '07' || $request->comprobante == '08')) {
+            if($request->comprobante != '08') {
                 if ($request->tipo_pago == 2) {
 
                     $cuotas = json_decode($request->cuotas, TRUE);
@@ -517,22 +518,23 @@ class VentaController extends Controller
                         $venta->pago()->save($pago);
                     }
                 } else {
-
-                    if ($request->tipo_pago_contado == 4) {
-                        $fraccionado = json_decode($request->pago_fraccionado, TRUE);
-                        foreach ($fraccionado as $item) {
+                    if($request->comprobante != '07') {
+                        if ($request->tipo_pago_contado == 4) {
+                            $fraccionado = json_decode($request->pago_fraccionado, TRUE);
+                            foreach ($fraccionado as $item) {
+                                $pago = new Pago();
+                                $pago->monto = $item['monto'];
+                                $pago->tipo = $item['tipo'];
+                                $pago->fecha = date('Y-m-d H:i:s');
+                                $venta->pago()->save($pago);
+                            }
+                        } else {
                             $pago = new Pago();
-                            $pago->monto = $item['monto'];
-                            $pago->tipo = $item['tipo'];
+                            $pago->monto = $request->total_venta;
+                            $pago->tipo = $request->tipo_pago_contado;
                             $pago->fecha = date('Y-m-d H:i:s');
                             $venta->pago()->save($pago);
                         }
-                    } else {
-                        $pago = new Pago();
-                        $pago->monto = $request->total_venta;
-                        $pago->tipo = $request->tipo_pago_contado;
-                        $pago->fecha = date('Y-m-d H:i:s');
-                        $venta->pago()->save($pago);
                     }
 
                 }

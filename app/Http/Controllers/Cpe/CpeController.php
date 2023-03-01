@@ -204,9 +204,10 @@ class CpeController extends Controller
         $response=$sunat->enviar($zip);
 
         $procesar=new ProcesarRespuestas($idventa);
-        $respuesta = $procesar->mensaje($response,$zip['nombre']);
         if($codigo_documento=='07' || $codigo_documento=='08'){
             $respuesta =  $procesar->mensajeNotas($response,$zip['nombre'],$doc_relacionado);
+        } else {
+            $respuesta = $procesar->mensaje($response,$zip['nombre']);
         }
 
         //Si falla envío, verificamos con getStatusCDR

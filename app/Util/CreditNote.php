@@ -190,13 +190,18 @@ class CreditNote {
         $documento->hora_emision=date('H:i:s', strtotime($documento->fecha));
         $documento->fecha_vencimiento=date('Y-m-d', strtotime($documento->fecha));
         $documento->codigo_tipo_documento=$documento->facturacion->codigo_tipo_documento; //Catálago N° 01: Código tipo de documento
-        //Generar leyenda
-        $documento->leyenda=NumeroALetras::convert($documento->total_venta, $moneda_letras,true);
+
         $documento->codigo_leyenda=1000;
         $documento->codigo_moneda=$documento->facturacion->codigo_moneda;
         $documento->tipo_guia='09';
         $documento->total_impuestos=$documento->facturacion->igv+$documento->facturacion->isc+$documento->facturacion->ivap;
-
+        $documento->descuento_nc = round($documento->facturacion->descuento_global/1.18,2);
+        $documento->descuento_nc_igv = round($documento->facturacion->descuento_global-$documento->descuento_nc,2);
+        if($documento->facturacion->tipo_nota_electronica == '04'){
+            $documento->leyenda=NumeroALetras::convert($documento->facturacion->descuento_global, $moneda_letras,true);
+        } else {
+            $documento->leyenda=NumeroALetras::convert($documento->total_venta, $moneda_letras,true);
+        }
 
         $usuario->razon_social=$usuario->persona['nombre'];
         $this->nombre_fichero=$emisor->ruc.'-'.$documento->codigo_tipo_documento.'-'.$documento->serie.'-'.$documento->correlativo;

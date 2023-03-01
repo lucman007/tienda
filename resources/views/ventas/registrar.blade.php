@@ -302,18 +302,16 @@
                             <div class="col-lg-3 form-group">
                                 <label>Tipo</label>
                                 <select :disabled="inhabilitarComprobante" v-show="comprobante=='07.01' || comprobante=='07.02'"
-                                        v-model="tipo_nota_electronica" name="motivo" class="custom-select"
+                                        v-model="tipo_nota_electronica" class="custom-select"
                                         id="selectMotivo">
                                     <option value="01">Anulación de la operación</option>
                                     <option value="02">Anulación por error en el RUC</option>
                                     <option value="13">Ajustes – montos y/o fechas de pago</option>
                                     {{--<option value="03">Corrección por error en la descripción</option>
-                                    <option value="04">Descuento global</option>
-                                    <option value="05">Descuento por ítem</option>
-                                    <option value="06">Devolución total</option>
+                                    <option v-show="comprobante != '07.01'" value="04">Descuento global</option>--}}
+                                    <option v-show="comprobante != '07.01'" value="05">Descuento por ítem</option>
+                                    {{--<option value="06">Devolución total</option>
                                     <option value="07">Devolución por ítem</option>
-                                    <option value="08">Bonificación</option>
-                                    <option value="09">Disminuciónen el valor</option>
                                     <option value="10">Otros conceptos</option>--}}
                                 </select>
                                 <select v-show="comprobante=='08.01' || comprobante=='08.02'"
@@ -337,6 +335,11 @@
                             <div class="col-lg-5 form-group">
                                 <label>Motivo</label>
                                 <input autocomplete="nope" type="text" v-model="motivo" placeholder="Descripcion breve"
+                                       class="form-control">
+                            </div>
+                            <div class="col-lg-3 form-group" v-show="tipo_nota_electronica == '02'">
+                                <label>Correlativo de la nueva factura</label>
+                                <input autocomplete="nope" type="text" v-model="doc_relacionado_nc" placeholder="Serie-correlativo"
                                        class="form-control">
                             </div>
                         </div>
@@ -559,7 +562,7 @@
                                     <th scope="col" style="width: 10px"></th>
                                     <th scope="col" style="width: 200px">Producto</th>
                                     <th scope="col" style="width: 250px">Caracteristicas</th>
-                                    <th scope="col" style="width: 90px">Precio</th>
+                                    <th scope="col" style="width: 90px">@{{ tipo_nota_electronica == '04' || tipo_nota_electronica == '05'?'Monto descuento':'Precio' }}</th>
                                     <th scope="col" style="width: 90px">Cantidad</th>
                                     <th scope="col" style="width: 90px">Dscto</th>
                                     <th scope="col" style="width: 80px;">Subtotal</th>
@@ -572,9 +575,19 @@
                                 <tr v-for="(producto,index) in productosSeleccionados" :key="producto.index">
                                     <td></td>
                                     <td>@{{ producto.nombre }}</td>
-                                    <td style="white-space: break-spaces">@{{ producto.presentacion}}</td>
-                                    <td>@{{ producto.precio }}</td>
-                                    <td>@{{ producto.cantidad }}</td>
+                                    <td v-show="tipo_nota_electronica != 03" style="white-space: break-spaces">@{{ producto.presentacion}}</td>
+                                    <td v-show="tipo_nota_electronica == 03"><textarea rows="1" @keyup="agregarCaracteristicasSession()" class="form-control" type="text"
+                                                  v-model="producto.presentacion"></textarea></td>
+                                    <td v-show="!(tipo_nota_electronica == 04 || tipo_nota_electronica == 05)">@{{ producto.precio }}</td>
+                                    <td v-show="tipo_nota_electronica == 04 || tipo_nota_electronica == 05">
+                                        <input @keyup="calcular(index)" class="form-control" type="text"
+                                               v-model="producto.precio">
+                                    </td>
+                                    <td v-show="tipo_nota_electronica != 07">@{{ producto.cantidad }}</td>
+                                    <td v-show="tipo_nota_electronica == 07">
+                                        <input @keyup="calcular(index)" class="form-control" type="text"
+                                               v-model="producto.cantidad">
+                                    </td>
                                     <td>@{{ producto.descuento }}</td>
                                     <td>@{{ producto.subtotal }}</td>
                                     <td>@{{ producto.igv }}</td>
@@ -589,7 +602,7 @@
                             </table>
                         </div>
                         <div class="dropdown-divider"></div>
-                        <p>Descuento global: @{{porcentaje_descuento_global}} %</p>
+                        <p v-show="tipo_nota_electronica != 04">Descuento global: @{{porcentaje_descuento_global}} %</p>
                     </div>
                 </div>
             </div>
@@ -927,6 +940,7 @@
                     string: '',
                     style: ''
                 },
+                doc_relacionado_nc:'',
                 guiasRelacionadas: [],
                 guiasRelacionadasAux: [],
                 tipoCambio: <?php echo cache('opciones')['tipo_cambio_compra'] ?>,
@@ -1026,6 +1040,22 @@
                         monto: monto,
                         fecha: '{{date('Y-m-d', strtotime(date('Y-m-d').' + 1 days'))}}',
                     });
+                },
+                agregarDescuento(){
+                    //TIPO DE NOTA ELECTRONICA DESCUENTO
+                    axios.post('{{action('VentaController@obtenerProductos')}}', {
+                        'textoBuscado': 'descuento',
+                        'idproducto':-2
+                    })
+                        .then(response => {
+                            this.listaProductos = response.data;
+                            this.agregarProducto(0);
+                        })
+                        .catch(function (error) {
+                            alert('Ha ocurrido un error.');
+                            console.log(error);
+                        });
+
                 },
                 borrarCuota(index){
                     this.cuotasAux.splice(index, 1);
@@ -1204,7 +1234,7 @@
                                 this.comprobanteReferencia = null;
                                 this.inhabilitarComprobante = false;
                             } else {
-                                if(this.tipo_nota_electronica == 13){
+                                if(this.tipo_nota_electronica == 13 || this.tipo_nota_electronica == '03'){
                                     for (let producto of this.productosSeleccionados) {
                                         producto['precio'] = 0;
                                         producto['descuento'] = 0;
@@ -1213,6 +1243,10 @@
                                         producto['total'] = 0;
                                     }
                                     this.calcularTotalVenta();
+                                }
+                                if(this.tipo_nota_electronica=='04'){
+                                    this.productosSeleccionados = [];
+                                    this.agregarDescuento();
                                 }
                                 this.inhabilitarComprobante = true;
                             }
@@ -1528,6 +1562,7 @@
                                 'cuotas': JSON.stringify(this.cuotas),
                                 'tipo_pago_contado': this.tipoPagoContado,
                                 'codigo_tipo_factura':this.codigo_tipo_factura,
+                                'doc_relacionado_nc':this.doc_relacionado_nc,
                                 'idventa_modifica':this.idventa_modifica,
                             })
                                 .then(response => {
@@ -1623,6 +1658,9 @@
                     if (this.comprobante == '07.02' || this.comprobante == '08.02' || this.comprobante == '07.01' || this.comprobante == '08.01') {
                         if (this.motivo.length == 0) errorDatosVenta.push('*El campo motivo no puede quedar en blanco');
                         if (this.comprobanteReferencia.length == 0) errorDatosVenta.push('*El campo documento que modifica no puede quedar en blanco');
+                        if(this.tipo_nota_electronica == '02'){
+                            if (this.doc_relacionado_nc.length == 0) errorDatosVenta.push('*Debes ingresar el correlativo de la nueva factura emitida');
+                        }
                     }
 
                     if (this.comprobante == '07.01' || this.comprobante == '07.02') {
@@ -1789,6 +1827,7 @@
                     localStorage.removeItem('productos');
                     localStorage.removeItem('cliente');
                     localStorage.removeItem('esConIgv');
+                    this.doc_relacionado_nc='';
                 },
                 agregarUbigeo(ubigeo){
                     this.guia_datos_adicionales.ubigeo=ubigeo;
@@ -1851,6 +1890,7 @@
                     this.obtenerCorrelativo();
                     this.comprobanteReferencia = '';
                     this.guiasRelacionadas = [];
+                    this.doc_relacionado_nc='';
                     this.esConGuia = 0;
                 },
                 esConGuia(){

@@ -137,7 +137,7 @@
                             </table>
                         </div>
                         <div class="dropdown-divider"></div>
-                        @if($venta->tipo_pago==2 && $venta->facturacion->codigo_tipo_documento == 01)
+                        @if($venta->tipo_pago==2 && ($venta->facturacion->codigo_tipo_documento == 01 || $venta->facturacion->codigo_tipo_documento == 07))
                             <div class="row">
                                 <div class="col-lg-4">
                                     <div class="table-responsive">
