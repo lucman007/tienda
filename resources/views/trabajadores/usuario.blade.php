@@ -14,7 +14,7 @@
             <div class="col-lg-12 mt-4 mb-3">
                 <div class="card">
                     <div class="card-header">
-                        <b-form-checkbox @change="eliminar_credenciales" v-model="es_usuario" switch size="lg"><p style="font-size: 1rem;">Establer como usuario</p></b-form-checkbox>
+                        <b-form-checkbox @change="eliminar_credenciales" v-model="es_usuario" switch size="lg"><p style="font-size: 1rem;">Establecer como usuario</p></b-form-checkbox>
                     </div>
                     <div v-show="es_usuario" class="card-body">
                         <div class="row">

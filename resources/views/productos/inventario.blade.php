@@ -6,7 +6,7 @@
             <div class="col-lg-9">
                 <h3 class="titulo-admin-1">
                     <a href="{{url()->previous()}}"><i class="fas fa-arrow-circle-left"></i></a>
-                    {{$producto['nombre']}}
+                    {{$producto['cod_producto']}} - {{$producto['nombre']}}
                 </h3>
             </div>
         </div>

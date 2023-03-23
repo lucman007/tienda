@@ -439,6 +439,9 @@ class CpeController extends Controller
         $guia = Guia::find($idguia);
         if($guia->ticket){
             $array_ticket = json_decode($guia->ticket, true);
+            if(!is_array($array_ticket)){
+                $array_ticket = [];
+            }
             $new_ticket = json_decode($response, true);
             array_push($array_ticket, $new_ticket);
             $guia->ticket = $array_ticket;
@@ -480,66 +483,70 @@ class CpeController extends Controller
         Log::info('ticket: '.$request->ticket);
 
         $response = json_decode($response, true);
-
-        switch ($response['codRespuesta']){
-            case '0':
-                $respuesta = 'La guía se ha enviado correctamente';
-                $estado = 'ACEPTADO';
-                $file = storage_path('/app/sunat/zip/') . $request->file . '.zip';
-                if (file_exists($file)) {
-                    unlink($file);
-                }
-                break;
-            case '98':
-                $respuesta = 'Código:98 - El envío de la guía está en proceso';
-                $estado = 'PENDIENTE';
-                break;
-            case '99':
-                $respuesta = 'Código:99 - Error:';
-                $respuesta .= $response['error']['numError'].' - '.$response['error']['desError'];
-                $estado = 'PENDIENTE';
-
-                if($response['error']['numError'] == '1033'){
-                    $estado = 'ACEPTADO';
+        if(isset($response['codRespuesta'])){
+            switch ($response['codRespuesta']){
+                case '0':
                     $respuesta = 'La guía se ha enviado correctamente';
-                    $guia = Guia::find($request->idguia);
-                    $num_ticket = json_decode($guia->ticket,true);
-                    $penultimo_ticket = count($num_ticket)-2;
-                    if($penultimo_ticket >= 0){
-                        $request->ticket = $num_ticket[$penultimo_ticket]['numTicket'];
-                        $this->consultarGRE($request);
+                    $estado = 'ACEPTADO';
+                    $file = storage_path('/app/sunat/zip/') . $request->file . '.zip';
+                    if (file_exists($file)) {
+                        unlink($file);
                     }
-                }
+                    break;
+                case '98':
+                    $respuesta = 'Código:98 - El envío de la guía está en proceso';
+                    $estado = 'PENDIENTE';
+                    break;
+                case '99':
+                    $respuesta = 'Código:99 - Error:';
+                    $respuesta .= $response['error']['numError'].' - '.$response['error']['desError'];
+                    $estado = 'PENDIENTE';
 
-                break;
-            default:
-                $respuesta = '';
-                $estado = 'PENDIENTE';
-        }
+                    if($response['error']['numError'] == '1033'){
+                        $estado = 'ACEPTADO';
+                        $respuesta = 'La guía se ha enviado correctamente';
+                        $guia = Guia::find($request->idguia);
+                        $num_ticket = json_decode($guia->ticket,true);
+                        $penultimo_ticket = count($num_ticket)-2;
+                        if($penultimo_ticket >= 0){
+                            $request->ticket = $num_ticket[$penultimo_ticket]['numTicket'];
+                            $this->consultarGRE($request);
+                        }
+                    }
 
-        if($response['codRespuesta'] != 98 && $response['indCdrGenerado']=='1'){
-            /*CONVERTIR A ZIP */
-            $cdr=base64_decode($response['arcCdr']);
-            $zip_cdr = fopen(storage_path().'/app/sunat/cdr/'.$request->file.'.zip','w+');
-            fputs($zip_cdr,$cdr);
-            fclose($zip_cdr);
-
-            /*EXTRAER EL ZIP*/
-            $file = storage_path().'/app/sunat/cdr/'.$request->file.'.zip';
-            if (file_exists($file)) {
-                $zip_cdr = new \ZipArchive();
-                if ($zip_cdr->open($file)=== TRUE) {
-                    $zip_cdr->extractTo(storage_path().'/app/sunat/cdr/');
-                    $zip_cdr->close();
-                    unlink($file);
-                } else {
-                    return 'Error al descomprimir el CDR';
-                }
-            } else {
-                Log::info($request->idguia.' Error: No se ha recibido CDR desde sunat');
-                return 'No se ha recibido CDR desde sunat';
+                    break;
+                default:
+                    $respuesta = '';
+                    $estado = 'PENDIENTE';
             }
 
+            if($response['codRespuesta'] != 98 && $response['indCdrGenerado']=='1'){
+                /*CONVERTIR A ZIP */
+                $cdr=base64_decode($response['arcCdr']);
+                $zip_cdr = fopen(storage_path().'/app/sunat/cdr/'.$request->file.'.zip','w+');
+                fputs($zip_cdr,$cdr);
+                fclose($zip_cdr);
+
+                /*EXTRAER EL ZIP*/
+                $file = storage_path().'/app/sunat/cdr/'.$request->file.'.zip';
+                if (file_exists($file)) {
+                    $zip_cdr = new \ZipArchive();
+                    if ($zip_cdr->open($file)=== TRUE) {
+                        $zip_cdr->extractTo(storage_path().'/app/sunat/cdr/');
+                        $zip_cdr->close();
+                        unlink($file);
+                    } else {
+                        return 'Error al descomprimir el CDR';
+                    }
+                } else {
+                    Log::info($request->idguia.' Error: No se ha recibido CDR desde sunat');
+                    return 'No se ha recibido CDR desde sunat';
+                }
+
+            }
+        } else {
+            $respuesta = 'No se ha recibido respuesta de sunat';
+            $estado = 'PENDIENTE';
         }
 
         $guia = Guia::find($request->idguia);

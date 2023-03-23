@@ -310,9 +310,9 @@
                                     {{--<option value="03">Corrección por error en la descripción</option>
                                     <option v-show="comprobante != '07.01'" value="04">Descuento global</option>--}}
                                     <option v-show="comprobante != '07.01'" value="05">Descuento por ítem</option>
-                                    {{--<option value="06">Devolución total</option>
+                                    {{--<option value="06">Devolución total</option>--}}
                                     <option value="07">Devolución por ítem</option>
-                                    <option value="10">Otros conceptos</option>--}}
+                                    {{--<option value="10">Otros conceptos</option>--}}
                                 </select>
                                 <select v-show="comprobante=='08.01' || comprobante=='08.02'"
                                         v-model="tipo_nota_electronica" class="custom-select"
@@ -593,6 +593,9 @@
                                     <td>@{{ producto.igv }}</td>
                                     <td>@{{ producto.total }}</td>
                                     <td>
+                                        <button v-show="tipo_nota_electronica == 07" @click="borrarItemVenta(index)" class="btn btn-danger" title="Borrar item"><i
+                                                    class="fas fa-trash"></i>
+                                        </button>
                                     </td>
                                 </tr>
                                 <tr class="text-center" v-show="productosSeleccionados.length == 0">
@@ -600,6 +603,9 @@
                                 </tr>
                                 </tbody>
                             </table>
+                        </div>
+                        <div class="alert alert-primary text-center" v-show="tipo_nota_electronica == 07">
+                            <strong>Instrucciones:</strong> Para este tipo de nota deberás colocar la cantidad a devolver en la casilla correspondiente. Elimina de la lista los productos que no serán devueltos.
                         </div>
                         <div class="dropdown-divider"></div>
                         <p v-show="tipo_nota_electronica != 04">Descuento global: @{{porcentaje_descuento_global}} %</p>

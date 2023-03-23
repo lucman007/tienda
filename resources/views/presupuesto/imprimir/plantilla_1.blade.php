@@ -19,7 +19,7 @@
             </div>
         @endif
         <div class="texto">
-            <p>R.U.C.: {{$emisor->ruc}}<br>{{$emisor->direccion}}, {{$emisor->urbanizacion}}, {{$emisor->provincia}},
+            <p><strong>{{$emisor->razon_social}}</strong><br>R.U.C.: {{$emisor->ruc}}<br>{{$emisor->direccion}}, {{$emisor->urbanizacion}}, {{$emisor->provincia}},
                 {{$emisor->departamento}}, {{$emisor->distrito}} <br> {{$emisor->telefono_1}} / {{$emisor->email}}<br>
                     {{$emisor->texto_publicitario}}
 	</p>
@@ -262,7 +262,7 @@
         width: 95mm;
         position: absolute;
         right: 0;
-        top:35mm;
+        top:30mm;
     }
 
     .body{

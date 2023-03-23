@@ -289,7 +289,8 @@ class GuiaController extends Controller
 
         } catch (\Exception $e) {
             DB::rollback();
-            return $e;
+            Log::error($e);
+            return $e->getMessage();
         }
 
     }
