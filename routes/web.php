@@ -370,12 +370,14 @@ Route::get('consulta/descargar/{file}', 'ConsultaController@descargarArchivo');
 Route::get('consulta/descargar-comprobante/{tipo}/{file}', 'ConsultaController@descargar_comprobante');
 //Route::get('impresion/print-file/{file}','ConsultaController@printFile');
 
-Route::group(['middleware' => ['can:Ventas']], function () {
+
+Route::group(['middleware' => ['can:Pedido']], function () {
     Route::get('notificaciones','NotificacionesController@index');
     Route::get('notificaciones/count','NotificacionesController@countNotificaciones');
     Route::get('notificaciones/marcar-como-leido/{id}','NotificacionesController@marcarComoLeido');
     Route::get('notificaciones/marcar-todo-como-leido','NotificacionesController@marcarTodoComoLeido');
     Route::get('notificaciones/obtener-notificaciones','NotificacionesController@obtenerNotificaciones');
+    Route::get('notificaciones/count-comprobantes','NotificacionesController@countComprobantes');
 });
 
 Route::group(['middleware' => ['can:Inventario: almacenes']], function () {

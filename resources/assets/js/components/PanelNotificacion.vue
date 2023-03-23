@@ -1,6 +1,7 @@
 <template>
     <div>
         <div id="notificacion-panel" class="ml-2 mr-2" style="position: relative">
+            <span v-show="numComprobantes <= 10" class="aviso-comprobantes">Te quedan {{numComprobantes}} comprobantes</span>
             <a class="notificacion" @click="obtenerNotificaciones">
                 <i class="fas fa-bell"></i>
                 <span v-show="numNotificaciones > 0" class="badge badge-danger" style="position: absolute">{{ numNotificaciones }}</span>
@@ -81,6 +82,7 @@
         },
         created(){
             this.countNotifications();
+            this.countComprobantes();
             window.addEventListener('click', e => {
                 if (!document.getElementById('notificacion-panel').contains(e.target)) {
                     this.openPanel = false;
@@ -102,6 +104,18 @@
                 axios.get('/notificaciones/count')
                     .then(response => {
                         this.numNotificaciones = response.data;
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+            },
+            countComprobantes(){
+                axios.get('/notificaciones/count-comprobantes')
+                    .then(response => {
+                        this.numComprobantes = response.data[0];
+                        if(this.numComprobantes <= 0){
+                            this.$emit('disabledventas');
+                        }
                     })
                     .catch(error => {
                         console.log(error);

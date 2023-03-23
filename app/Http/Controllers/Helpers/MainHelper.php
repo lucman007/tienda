@@ -25,6 +25,7 @@ use sysfact\Http\Controllers\OpcionController;
 use sysfact\Http\Controllers\ProductoController;
 use sysfact\Inventario;
 use sysfact\Producto;
+use sysfact\Venta;
 
 class MainHelper extends Controller
 {
@@ -579,6 +580,39 @@ class MainHelper extends Controller
         }
 
 
+    }
+
+    public static function disabledVentas(){
+        $config = json_decode(cache('config')['plan']??null, true);
+        $plan = $config['tipo']??'plan_ilimitado';
+        if($plan != 'plan_ilimitado'){
+            $ventas = Venta::whereBetween('fecha', [date('Y-m-') . '01 00:00:00', date('Y-m-') . '31 23:59:59'])
+                ->whereHas('facturacion', function($query) {
+                    $query
+                        ->where(function ($query) {
+                            $query->where('codigo_tipo_documento',01)
+                                ->orWhere('codigo_tipo_documento',03);
+                        })
+                        ->where('estado','ACEPTADO');
+                })->get();
+
+            $emitidos = $ventas->count();
+            $restan = 0;
+            switch($plan){
+                case 'plan_100':
+                    $restan = (100 + $config['tolerancia']) - $emitidos;
+                    break;
+                case 'plan_500':
+                    $restan = (500 + $config['tolerancia']) - $emitidos;
+                    break;
+                case 'plan_personalizado':
+                    $restan = ($config['cantidad'] + $config['tolerancia']) - $emitidos;
+                    break;
+            }
+
+            return [$restan,$restan <= 0];
+        }
+        return [8000,false];
     }
 
 }

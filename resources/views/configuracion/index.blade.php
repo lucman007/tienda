@@ -209,6 +209,7 @@
                 tipo_logo:'',
                 impresion:<?php echo $configuracion->impresion ?>,
                 series: <?php echo $configuracion->series ?>,
+                plan: <?php echo $configuracion->plan ?>,
                 guia:<?php echo $configuracion->guia ?>,
             },
             computed:{

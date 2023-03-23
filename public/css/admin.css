@@ -1410,6 +1410,12 @@ table tr td, table tr th{
     font-size: 13px;
 }
 
+.aviso-comprobantes {
+    color: #ff860a;
+    margin: 3px 5px 0 0;
+    float: left;
+}
+
 /*RESPONSIVE*/
 
 @media (min-width: 576px) {

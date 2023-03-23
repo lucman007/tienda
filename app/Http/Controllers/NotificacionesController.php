@@ -4,6 +4,7 @@ namespace sysfact\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use sysfact\Http\Controllers\Helpers\MainHelper;
 use sysfact\User;
 
 class NotificacionesController extends Controller
@@ -25,6 +26,12 @@ class NotificacionesController extends Controller
     public function countNotificaciones(){
         $notificaciones = DB::table('notifications')->whereNull('read_at')->get();
         return $notificaciones->count();
+    }
+
+    public function countComprobantes(){
+
+        return MainHelper::disabledVentas();
+
     }
 
     public function obtenerNotificaciones()

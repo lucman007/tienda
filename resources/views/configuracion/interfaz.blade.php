@@ -144,3 +144,39 @@
 <div class="col-lg-12">
     <b-button @click="guardarConfiguracion('interfaz_pedidos')" class="mr-2 mb-5 float-right" variant="success"><i class="fas fa-save"></i> Guardar</b-button>
 </div>
+<hr class="my-4">
+<div class="col-lg-12">
+    <h4>Plan:</h4>
+</div>
+<div class="col-lg-3">
+    <label>Plan mensual</label>
+    <select v-model="plan.tipo" class="custom-select">
+        <option value="plan_100">100 comprobantes</option>
+        <option value="plan_500">500 comprobantes</option>
+        <option value="plan_ilimitado">Ilimitado</option>
+        <option value="plan_personalizado">Personalizado</option>
+    </select>
+</div>
+<div v-show="plan.tipo == 'plan_personalizado'" class="col-lg-3">
+    <label>Cantidad</label>
+    <input type="number" class="form-control" v-model="plan.cantidad">
+</div>
+<div class="col-lg-3">
+    <label>Tolerancia</label>
+    <input type="number" class="form-control" v-model="plan.tolerancia">
+</div>
+<div class="col-lg-3">
+    <label>Ciclo de pago</label>
+    <select v-model="plan.ciclo" class="custom-select">
+        <option value="mensual">Mensual</option>
+        <option value="trimestral">Trimestral</option>
+        <option value="anual">Anual</option>
+    </select>
+</div>
+<div class="col-lg-3">
+    <label>Inicio</label>
+    <input type="date" v-model="plan.fecha" class="form-control">
+</div>
+<div class="col-lg-12 mt-3">
+    <b-button @click="guardarConfiguracion('plan')" class="mr-2 mb-5 float-right" variant="success"><i class="fas fa-save"></i> Guardar</b-button>
+</div>

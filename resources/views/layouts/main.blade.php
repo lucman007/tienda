@@ -54,7 +54,7 @@
                             </b-dropdown>
                         </div>
                         <div class="float-right">
-                            <panel-notificacion ref="panelNotificacion"></panel-notificacion>
+                            <panel-notificacion v-on:disabledventas="disabled_ventas" ref="panelNotificacion"></panel-notificacion>
                         </div>
                     </div>
                 </div>
@@ -248,7 +248,14 @@
 @yield('script')
 <script>
     let app_menu = new Vue({
-        el: '.app_menu'
+        el: '.app_menu',
+        methods:{
+            disabled_ventas(){
+                if (typeof app.disabled_ventas === 'function'){
+                    app.disabled_ventas();
+                }
+            }
+        }
     })
 </script>
 <script src="{{asset('js/phpjsdate.js')}}"></script>

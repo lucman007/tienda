@@ -277,7 +277,7 @@
                                                 @if(!$emitir_solo_ticket)
                                                     <b-button
                                                             @if(!$agent->isDesktop()) class="col-3 col-md p-md-4 order-2 order-lg-1"
-                                                            @endif :disabled="productosSeleccionados == 0"
+                                                            @endif :disabled="productosSeleccionados == 0 || disabledVentas"
                                                             v-b-modal.modal-facturar class="float-right ml-1"
                                                             @click="comprobante='01'"
                                                             variant="warning"><i class="fas fa-file-invoice-dollar"></i>
@@ -285,7 +285,7 @@
                                                     </b-button>
                                                     <b-button
                                                             @if(!$agent->isDesktop()) class="col-3 col-md p-md-4 order-1 order-lg-2"
-                                                            @endif :disabled="productosSeleccionados == 0"
+                                                            @endif :disabled="productosSeleccionados == 0 || disabledVentas"
                                                             v-b-modal.modal-facturar class="float-right"
                                                             @click="comprobante='03'"
                                                             variant="warning"><i class="fas fa-file-invoice-dollar"></i>
@@ -315,6 +315,7 @@
             v-on:imprimir="imprimir"
             v-on:obtener-mesas="obtener_pedidos"
             v-on:notificaciones="obtener_notificaciones"
+            v-on:countcomprobantes="obtener_num_comprobantes"
             v-on:limpiar="limpiar">
     </modal-facturacion>
     @if($buscador_alternativo)
@@ -370,12 +371,16 @@
                     idvendedor:"{{$idvendedor}}",
                     item:{},
                     disabledNuevo: false,
+                    disabledVentas: false,
                 },
                 created(){
                     this.obtener_pedidos();
                     this.obtenerEmpleados();
                 },
                 methods:{
+                    disabled_ventas(){
+                      this.disabledVentas = true;
+                    },
                     reloadPage() {
                         window.location.reload();
                     },
@@ -476,8 +481,6 @@
                             'igv_incluido': 1,
                             'items': JSON.stringify(this.productosSeleccionados)
                         };
-
-                        console.log(this.productosSeleccionados)
 
                         if(tipo == 'nuevo'){
                             this.disabledNuevo = true;
@@ -665,6 +668,9 @@
                     },
                     obtener_notificaciones(){
                         app_menu.$refs['panelNotificacion'].countNotifications();
+                    },
+                    obtener_num_comprobantes(){
+                        app_menu.$refs['panelNotificacion'].countComprobantes();
                     },
                     cambiarCantidad(index, tipo){
                         let producto = this.productosSeleccionados[index];

@@ -140,7 +140,7 @@
                                         <table class="tabla_vuelto float-left float-md-right">
                                             <tr>
                                                 <td style="width: 120px">Total:</td>
-                                                <td>{{porPagar}}</td>
+                                                <td>{{Number(porPagar).toFixed(2)}}</td>
                                             </tr>
                                             <tr>
                                                 <td>Paga con:</td>
@@ -447,7 +447,6 @@
                     'num_operacion':this.num_operacion,
                     'pago_fraccionado': JSON.stringify(this.pago_fraccionado),
                     'cuotas': JSON.stringify(this.cuotas),
-                    'pago_fraccionado': JSON.stringify(this.pago_fraccionado)
                 })
                     .then(response => {
                         let data = response.data;
@@ -498,6 +497,7 @@
                             titulo = 'Comprobante enviado con éxito';
                             color = 'primary';
                             tiempo = 5000;
+                            this.$emit('countcomprobantes');
                         } else if((mensaje.toLowerCase()).includes('rechazado')) {
                             titulo = 'El comprobante ha sido rechazado y no es válido';
                             color = 'danger';
