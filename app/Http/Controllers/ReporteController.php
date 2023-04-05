@@ -1482,7 +1482,7 @@ class ReporteController extends Controller
         try{
             $data=$this->reporte_ventas_badge($request, $desde, $hasta);
             $fecha = ['desde'=>$desde, 'hasta'=>$hasta];
-            $view = view('reportes/imprimir/resumen_ventas', ['totales'=>$data[0],'tipo_pago'=> $data[2],'fecha'=>$fecha,'tipo'=>$request->reporte]);
+            $view = view('reportes/imprimir/resumen_ventas', ['totales'=>$data,'tipo_pago'=> $data[2],'fecha'=>$fecha,'tipo'=>$request->reporte,'moneda'=>$request->moneda]);
             $html = $view->render();
 
             $pdf=new Html2Pdf('P',[72,250],'es');

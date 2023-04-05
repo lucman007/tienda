@@ -581,6 +581,16 @@
                 this.obtener_almacen();
             },
             methods: {
+                buscar(event){
+                    if(event.code == 'Enter' || event.code == 'NumpadEnter'){
+                        event.preventDefault();
+                        if('Filtro' == '<?php echo $filtro ?>'){
+                            window.location.href = '/productos?textoBuscado='+this.search;
+                        } else {
+                            window.location.href = '/productos?textoBuscado='+this.search+'&filtro=<?php echo $filtro ?>'
+                        }
+                    }
+                },
                 agregarAlKit(obj){
                     let plato = {idproducto:obj['idproducto'],cantidad:1,precio:obj['precio'],nombre:obj['nombre']};
                     this.items_kit.push(plato);

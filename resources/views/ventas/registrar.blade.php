@@ -1624,6 +1624,7 @@
                     let errorVenta = 0;
                     let errorDatosVenta = [];
                     let errorString = '';
+                    if (this.tipoPago == 2 && this.cuotas.length == 0) errorDatosVenta.push('Debes ingresar al menos una cuota con su fecha de vencimiento');
                     if (this.fecha.length == 0) errorDatosVenta.push('*La fecha no puede estar vacia');
                     if (this.serie.length == 0 || this.correlativo.length == 0) errorDatosVenta.push('*La serie y correlativo no puede estar vacio');
                     if (this.tipoPago == 2 && (this.comprobante == '01' || this.comprobante == '03')) {

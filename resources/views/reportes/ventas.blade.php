@@ -160,7 +160,7 @@
                                 <div class="row">
                                     <div class="col-lg-12">
                                         <h5 class="d-inline" style="font-size: 24px"><strong>Total ventas en soles</strong></h5>
-                                        <button class="btn btn-success float-right" title="Imprimir" @click="imprimir_reporte('totales')">
+                                        <button class="btn btn-success float-right" title="Imprimir" @click="imprimir_reporte('totales','pen')">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-printer" viewBox="0 0 16 16">
                                                 <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>
                                                 <path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2H5zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"/>
@@ -173,16 +173,19 @@
                                         </p>
                                     </div>
                                     <div class="col-md col-sm-6">
-                                        <p class="mb-0">Impuestos <br>
+                                        <p class="mb-0">Impuestos <i class="fas fa-info-circle" id="tooltip-impuesto-pen"></i><br>
                                             <span style="font-size: 25px;">S/@{{ penReport.impuestos.toFixed(2) }}</span>
                                         </p>
                                     </div>
+                                    <b-tooltip target="tooltip-impuesto-pen" triggers="hover">
+                                        Impuesto de las facturas y boletas (No recibos)
+                                    </b-tooltip>
                                     <div class="col-md col-sm-6">
-                                        <p class="mb-0">Ventas netas <i class="fas fa-info-circle" id="tooltip-target-1"></i><br>
+                                        <p class="mb-0">Ventas netas <i class="fas fa-info-circle" id="tooltip-v-netas-pen"></i><br>
                                             <span style="font-size: 25px;">S/@{{ penReport.ventas_netas.toFixed(2) }}</span>
                                         </p>
                                     </div>
-                                    <b-tooltip target="tooltip-target-1" triggers="hover">
+                                    <b-tooltip target="tooltip-v-netas-pen" triggers="hover">
                                         Ventas brutas - impuestos
                                     </b-tooltip>
                                     <div class="col-md col-sm-6">
@@ -191,11 +194,11 @@
                                         </p>
                                     </div>
                                     <div class="col-md col-sm-6">
-                                        <p class="mb-0">Utilidad <i class="fas fa-info-circle" id="tooltip-target-2"></i><br>
+                                        <p class="mb-0">Utilidad <i class="fas fa-info-circle" id="tooltip-utilidad-pen"></i><br>
                                             <span style="font-size: 25px;">S/@{{ penReport.utilidad.toFixed(2) }}</span>
                                         </p>
                                     </div>
-                                    <b-tooltip target="tooltip-target-2" triggers="hover">
+                                    <b-tooltip target="tooltip-utilidad-pen" triggers="hover">
                                         Ventas netas - costos
                                     </b-tooltip>
                                 </div>
@@ -210,7 +213,7 @@
                                 <div class="row">
                                     <div class="col-lg-12">
                                         <h5 class="d-inline" style="font-size: 24px"><strong>Total ventas en dólares</strong></h5>
-                                        <button class="btn btn-success float-right" title="Imprimir" @click="imprimir_reporte('totales')">
+                                        <button class="btn btn-success float-right" title="Imprimir" @click="imprimir_reporte('totales','usd')">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-printer" viewBox="0 0 16 16">
                                                 <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>
                                                 <path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2H5zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"/>
@@ -223,25 +226,34 @@
                                         </p>
                                     </div>
                                     <div class="col-md col-sm-6">
-                                        <p class="mb-0">Impuestos <br>
+                                        <p class="mb-0">Impuestos <i class="fas fa-info-circle" id="tooltip-impuesto-usd"></i><br>
                                             <span style="font-size: 25px;">S/@{{ usdReport.impuestos.toFixed(2) }}</span>
                                         </p>
                                     </div>
+                                    <b-tooltip target="tooltip-impuesto-usd" triggers="hover">
+                                        Impuesto de las facturas y boletas (No recibos)
+                                    </b-tooltip>
                                     <div class="col-md col-sm-6">
-                                        <p class="mb-0">Ventas netas <br>
+                                        <p class="mb-0">Ventas netas <i class="fas fa-info-circle" id="tooltip-v-netas-usd"></i><br>
                                             <span style="font-size: 25px;">S/@{{ usdReport.ventas_netas.toFixed(2) }}</span>
                                         </p>
                                     </div>
+                                    <b-tooltip target="tooltip-v-netas-usd" triggers="hover">
+                                        Ventas brutas - impuestos
+                                    </b-tooltip>
                                     <div class="col-md col-sm-6">
-                                        <p class="mb-0">Costos <br>
+                                        <p class="mb-0">Precio de compra <br>
                                             <span style="font-size: 25px;">S/@{{ usdReport.costos.toFixed(2) }}</span>
                                         </p>
                                     </div>
                                     <div class="col-md col-sm-6">
-                                        <p class="mb-0">Utilidad<br>
+                                        <p class="mb-0">Utilidad <i class="fas fa-info-circle" id="tooltip-utilidad-usd"></i><br>
                                             <span style="font-size: 25px;">S/@{{ usdReport.utilidad.toFixed(2) }}</span>
                                         </p>
                                     </div>
+                                    <b-tooltip target="tooltip-utilidad-usd" triggers="hover">
+                                        Ventas netas - costos
+                                    </b-tooltip>
                                 </div>
                             </div>
                         </div>
@@ -254,7 +266,7 @@
                                 <div class="row">
                                     <div class="col-lg-12">
                                         <h5 class="d-inline" style="font-size: 18px"><strong>Detalle de ventas</strong></h5>
-                                        <button class="btn btn-success float-right" title="Imprimir" @click="imprimir_reporte('tipo_pago')">
+                                        <button class="btn btn-success float-right" title="Imprimir" @click="imprimir_reporte('tipo_pago','pen')">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-printer" viewBox="0 0 16 16">
                                                 <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>
                                                 <path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2H5zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"/>
@@ -348,7 +360,7 @@
                                                                   style="font-weight: bold"
                                                                   @elseif($filtros['filtro'] == 'tipo-de-pago' && $venta->tipo_pago == 4 && $filtros['buscar'] != $tipo_pago[$index]['text_val']) style="opacity: 0.6"
                                                                   @endif>
-                                                                {{strtoupper($tipo_pago[$index]['label'])}} {{$pago->monto}}
+                                                                {{mb_strtoupper($tipo_pago[$index]['label'])}} {{$pago->monto}}
                                                             </span>
                                                             <br>
                                                         @endforeach
@@ -478,8 +490,8 @@
                             this.spinnerMail = false;
                         });
                 },
-                imprimir_reporte(tipo){
-                    let src = '/reportes/ventas/imprimir/'+this.desde+'/'+this.hasta+'?filtro='+this.filtro+'&buscar='+this.buscar+'&reporte='+tipo;
+                imprimir_reporte(tipo, moneda){
+                    let src = '/reportes/ventas/imprimir/'+this.desde+'/'+this.hasta+'?filtro='+this.filtro+'&buscar='+this.buscar+'&reporte='+tipo+'&moneda='+moneda;
                     @if(!$agent->isDesktop())
                         @if(isset(json_decode(cache('config')['interfaz'], true)['rawbt']) && json_decode(cache('config')['interfaz'], true)['rawbt'])
                             axios.get(src+'&rawbt=true')

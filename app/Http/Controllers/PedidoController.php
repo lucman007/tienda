@@ -100,7 +100,7 @@ class PedidoController extends Controller
 
 
         foreach ($ordenes as $orden){
-            $orden->fecha = date('d-m-Y h:m', strtotime($orden->fecha));
+            $orden->fecha = date('d-m-Y h:i', strtotime($orden->fecha));
             $orden->empleado = $orden->idempleado==-1?'-':strtoupper($orden->trabajador->persona->nombre);
             $orden->cliente->persona;
             $orden->direccion = json_decode($orden->datos_entrega, true)['direccion'];

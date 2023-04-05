@@ -15,7 +15,7 @@
 @endphp
 <form action="productos" method="GET" autocomplete="off" role="search">
     <div class="input-group" id="buscador">
-        <input type="text" class="form-control" name="textoBuscado" placeholder="Buscar..." v-model="search">
+        <input type="text" class="form-control" name="textoBuscado" placeholder="Buscar..." v-model="search" @keydown="buscar">
         <div class="input-group-append">
             <b-dropdown variant="{{$filtro == 'Filtro'?'outline-secondary':'success'}}" class="variant-alt" text="{{ucfirst($name_filtro)}}">
                 <b-dropdown-item :href="'?textoBuscado='+search+'&filtro=categoria'">Categoría</b-dropdown-item>

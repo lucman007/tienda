@@ -75,6 +75,17 @@
         </tbody>
     </table>
      @else
+        @php
+
+        if($moneda == 'pen'){
+            $totales = $totales[0];
+            $signo_moneda = 'S/';
+        } else {
+            $totales = $totales[1];
+            $signo_moneda = 'USD';
+        }
+
+        @endphp
         <table class="items">
             <thead>
             <tr>
@@ -88,27 +99,27 @@
             <tbody>
             <tr class="items-tr">
                 <td style="width: 42mm; text-align: left">Ventas brutas</td>
-                <td style="width: 15mm">S/ {{number_format($totales['ventas_brutas']??0,2)}}</td>
+                <td style="width: 15mm">{{$signo_moneda}} {{number_format($totales['ventas_brutas']??0,2)}}</td>
             </tr>
             <tr class="items-tr">
                 <td style="width: 42mm; text-align: left">Impuestos</td>
-                <td style="width: 15mm">S/ {{number_format($totales['impuestos']??0,2)}}</td>
+                <td style="width: 15mm">{{$signo_moneda}} {{number_format($totales['impuestos']??0,2)}}</td>
             </tr>
             <tr class="items-tr">
                 <td style="width: 42mm; text-align: left">Ventas netas</td>
-                <td style="width: 15mm">S/ {{number_format($totales['ventas_netas']??0,2)}}</td>
+                <td style="width: 15mm">{{$signo_moneda}} {{number_format($totales['ventas_netas']??0,2)}}</td>
             </tr>
             <tr class="items-tr">
                 <td style="width: 42mm; text-align: left">Costos</td>
-                <td style="width: 15mm">S/ {{number_format($totales['costos']??0,2)}}</td>
+                <td style="width: 15mm">{{$signo_moneda}} {{number_format($totales['costos']??0,2)}}</td>
             </tr>
             <tr class="items-tr">
                 <td style="width: 42mm; text-align: left">Cobros por envío</td>
-                <td style="width: 15mm">S/ {{number_format($totales['delivery']??0,2)}}</td>
+                <td style="width: 15mm">{{$signo_moneda}} {{number_format($totales['delivery']??0,2)}}</td>
             </tr>
             <tr class="items-tr">
                 <td style="width: 42mm; text-align: left">Utilidad</td>
-                <td style="width: 15mm">S/ {{number_format($totales['utilidad']??0,2)}}</td>
+                <td style="width: 15mm">{{$signo_moneda}} {{number_format($totales['utilidad']??0,2)}}</td>
             </tr>
             <tr>
                 <td colspan="2">
