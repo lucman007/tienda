@@ -9,37 +9,40 @@
         </div>
         <div class="row">
             <div class="col-lg-2">
-                <label><i class="far fa-list-alt"></i> Acciones</label>
-                <b-dropdown variant="primary" text="Anulaciones">
+                <b-dropdown variant="primary">
+                    <template #button-content>
+                        <i class="fas fa-ban"></i> Anulaciones
+                    </template>
                     <b-dropdown-item href="{{action('ComprobanteController@comprobantes')}}"><i class="fas fa-file-alt"></i> Comprobantes</b-dropdown-item>
                     <b-dropdown-item href="{{action('ComprobanteController@anular')}}"><i class="fas fa-ban"></i> Anulaciones</b-dropdown-item>
                     <b-dropdown-item href="{{action('ComprobanteController@consulta')}}"><i class="fas fa-external-link-square-alt"></i> Consulta CDR</b-dropdown-item>
                     <b-dropdown-item href="{{action('ComprobanteController@resumenes_enviados')}}"><i class="fas fa-external-link-square-alt"></i> Consulta anulación</b-dropdown-item>
                     <b-dropdown-item href="{{action('ReporteController@reporte_ventas')}}"><i class="fas fa-chart-line"></i> Reporte de ventas</b-dropdown-item>
+                    <b-dropdown-item href="{{action('GuiaController@index')}}"><i class="fas fa-dolly"></i> Guía de remisión</b-dropdown-item>
                 </b-dropdown>
             </div>
-            <div class="col-lg-3">
-                <div class="form-group">
-                    <label><i class="fas fa-file-alt"></i> Comprobantes</label>
-                    <select @change="cambiarComprobante" v-model="tipo_comprobante" name="tipo_comprobante"
-                            class="custom-select" id="tipo_comprobante">
-                        <option value="40">Anular facturas y notas vinculadas</option>
-                        <option value="50">Anular boletas y notas vinculadas</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-lg-7">
+            <div class="col-lg-10">
                 <div class="row">
-                    <div class="col-lg-4 form-group">
-                        <label><i class="far fa-calendar-alt"></i> Fecha</label>
-                        <input @change="obtenerComprobantes" type="date" v-model="fecha_in" name="fecha_in"
-                               class="form-control">
+                    <div class="col-lg-3">
+                        <div class="form-group">
+                            <select @change="cambiarComprobante" v-model="tipo_comprobante" name="tipo_comprobante"
+                                    class="custom-select" id="tipo_comprobante">
+                                <option value="40">Anular facturas y notas vinculadas</option>
+                                <option value="50">Anular boletas y notas vinculadas</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="col-lg-4 form-group">
-                        <label for="start"><i class="fas fa-external-link-square-alt"></i> Consultar</label>
-                        <b-button href="{{url('comprobantes/resumenes')}}" variant="primary"><i
-                                    class="fas fa-file"></i> Estado de anulaciones
-                        </b-button>
+                    <div class="col-lg-7">
+                        <div class="row">
+                            <div class="col-lg-4 form-group">
+                                <input @change="obtenerComprobantes" type="date" v-model="fecha_in" name="fecha_in"
+                                       class="form-control">
+                            </div>
+                            <div class="col-lg-4 form-group">
+                                <b-button href="{{url('comprobantes/resumenes')}}" variant="primary"><i class="fas fa-external-link-square-alt"></i> Estado de anulaciones
+                                </b-button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

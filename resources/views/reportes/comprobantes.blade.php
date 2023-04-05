@@ -104,7 +104,7 @@
                                 <tbody>
                                 @if(count($comprobantes)!=0)
                                     @foreach($comprobantes as $comprobante)
-                                        <tr :class="{'td-anulado':'{{$comprobante->facturacion->estado}}'=='ANULADO CON NC' || '{{$comprobante->facturacion->estado}}'=='MODIFICADO CON ND'}">
+                                        <tr :class="{'td-anulado':'{{$comprobante->facturacion->estado}}'=='ANULADO CON NC' || '{{$comprobante->facturacion->estado}}'=='ANULADO (COMUNICACIÓN DE BAJA)' || '{{$comprobante->facturacion->estado}}'=='MODIFICADO CON ND'}">
                                             <td></td>
                                             <td style="width: 5%">{{$comprobante->idventa}}</td>
                                             <td style="width: 15%">{{$comprobante->fecha}}</td>

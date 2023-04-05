@@ -675,6 +675,7 @@ class VentaController extends Controller
                 $venta->badge_class='badge-success';
                 break;
             case 'ANULADO':
+            case 'ANULADO (BAJA)':
             case 'MODIFICADO':
                 $venta->badge_class='badge-dark';
                 break;

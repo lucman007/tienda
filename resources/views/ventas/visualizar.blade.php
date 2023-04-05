@@ -63,7 +63,7 @@
                                 @if($venta->facturacion->codigo_tipo_documento != '30')
                                     <strong>Estado de {{$venta->facturacion['comprobante']}}:</strong> <span class="badge" :class="{'badge-warning':estado=='PENDIENTE',
                                    'badge-success' : estado=='ACEPTADO',
-                                   'badge-dark' : estado=='ANULADO',
+                                   'badge-dark' : (estado=='ANULADO' || estado=='ANULADO (BAJA)'),
                                    'badge-danger' :estado=='RECHAZADO'}">@{{estado}}</span>
                                 <hr>
                                 @endif

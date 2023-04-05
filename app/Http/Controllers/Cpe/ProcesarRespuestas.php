@@ -325,7 +325,7 @@ class ProcesarRespuestas
 
                     foreach ($items as $venta) {
                         $fact = Facturacion::find($venta['idventa']);
-                        $fact->estado = 'ANULADO';
+                        $fact->estado = 'ANULADO (BAJA)';
                         $fact->motivo_baja = $venta['motivo_baja'];
                         $fact->idresumen = $idresumen;
                         $fact->save();

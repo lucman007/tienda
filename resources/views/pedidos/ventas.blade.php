@@ -68,7 +68,7 @@
                                                     @if($pago->tipo == '101')
                                                         <span class="badge badge-info">{{strtoupper($tipo_pago[$index]['label'])}} {{$pago->monto}}</span><br>
                                                     @else
-                                                        {{strtoupper($tipo_pago[$index]['label'])}} @if(count($pagos)>1)({{$item->moneda}}{{$pago->monto}})@endif <br>
+                                                        {{mb_strtoupper($tipo_pago[$index]['label'])}} @if(count($pagos)>1)({{$item->moneda}}{{$pago->monto}})@endif <br>
                                                     @endif
                                                 @endforeach
                                             </td>

@@ -12,7 +12,7 @@
                 <div class="row">
                     <div class="col-lg-2">
                         <label><i class="far fa-list-alt"></i> Acciones</label>
-                        <b-dropdown variant="primary" text="Consulta anulación">
+                        <b-dropdown variant="primary" text="Consulta anulación" style="display: block">
                             <b-dropdown-item href="{{action('ComprobanteController@comprobantes')}}"><i class="fas fa-file-alt"></i> Comprobantes</b-dropdown-item>
                             <b-dropdown-item href="{{action('ComprobanteController@anular')}}"><i class="fas fa-ban"></i> Anulaciones</b-dropdown-item>
                             <b-dropdown-item href="{{action('ComprobanteController@consulta')}}"><i class="fas fa-external-link-square-alt"></i> Consulta CDR</b-dropdown-item>

@@ -1321,6 +1321,10 @@ class ReporteController extends Controller
                         $item->facturacion->estado='ANULADO CON NC';
                         $item->badge_class='badge-dark';
                         break;
+                    case 'ANULADO (BAJA)':
+                        $item->facturacion->estado='ANULADO (COMUNICACIÓN DE BAJA)';
+                        $item->badge_class='badge-dark';
+                        break;
                     case 'MODIFICADO':
                         $item->facturacion->estado='MODIFICADO CON ND';
                         $item->badge_class='badge-dark';

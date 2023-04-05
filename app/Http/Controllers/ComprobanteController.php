@@ -163,6 +163,7 @@ class ComprobanteController extends Controller
                         $item->badge_class='badge-success';
                         break;
                     case 'ANULADO':
+                    case 'ANULADO (BAJA)':
                     case 'MODIFICADO':
                         $item->badge_class='badge-dark';
                         break;

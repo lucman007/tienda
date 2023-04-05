@@ -156,7 +156,7 @@
                                 <tbody>
                                 @if(count($ventas))
                                     @foreach($ventas as $venta)
-                                        <tr :class="{'td-anulado':'{{$venta->facturacion->estado}}'=='ANULADO' || '{{$venta->facturacion->estado}}'=='MODIFICADO'}" @if(!$agent->isDesktop()) onclick="location.href='{{url('facturacion/documento').'/'.$venta->idventa}}'" @endif>
+                                        <tr :class="{'td-anulado':'{{$venta->facturacion->estado}}'=='ANULADO' || '{{$venta->facturacion->estado}}'=='ANULADO (BAJA)' || '{{$venta->facturacion->estado}}'=='MODIFICADO'}" @if(!$agent->isDesktop()) onclick="location.href='{{url('facturacion/documento').'/'.$venta->idventa}}'" @endif>
                                             <td></td>
                                             <td style="width: 5%">{{$venta->idventa}}</td>
                                             @if(!$agent->isDesktop())
