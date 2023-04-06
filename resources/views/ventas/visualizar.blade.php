@@ -29,7 +29,7 @@
                                     @php
                                         $index = array_search($pago->tipo, array_column($tipo_pago,'num_val'));
                                     @endphp
-                                    {{strtoupper($tipo_pago[$index]['label'])}} @if(count($pagos)>1)({{$venta->codigo_moneda}}{{$pago->monto}})@endif
+                                    {{mb_strtoupper($tipo_pago[$index]['label'])}} @if(count($pagos)>1)({{$venta->codigo_moneda}}{{$pago->monto}})@endif
                                     <br>
                                 @endforeach
                                 <hr>

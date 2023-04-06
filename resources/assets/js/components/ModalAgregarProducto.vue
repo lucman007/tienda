@@ -1,6 +1,6 @@
 <template>
     <div>
-        <b-modal no-d id="modal-agregar-producto" ref="modal-agregar-producto" hide-footer hide-header size="xl" @shown="focusBuscador" @hidden="closeModal">
+        <b-modal no-d id="modal-agregar-producto" ref="modal-agregar-producto" hide-footer hide-header size="xl" @shown="init" @hidden="closeModal">
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-lg-7 order-2 order-lg-1 lista-menu">
@@ -70,7 +70,7 @@
                             </div>
                             <div class="col-lg-12 order-3 order-lg-1" v-show="showCategorias">
                                 <div class="card">
-                                    <div class="card-body categorias-container">
+                                    <div class="card-body categorias-container" id="box-categorias">
                                         <div class="row">
                                             <div v-for="categoria in categorias" class="col-6 col-sm-4 col-lg-4 menu-categorias" @click="getMenuCategoria(categoria.idcategoria)">
                                                 <span :style="{'background':categoria.color,'font-size':categoria.nombre.length>33?'10px':'13px'}">
@@ -126,6 +126,28 @@
             window.removeEventListener('keydown', this.handler);
         },
         methods: {
+            init(){
+                this.focusBuscador();
+
+                let width = window.innerWidth
+                    || document.documentElement.clientWidth
+                    || document.body.clientWidth;
+
+                if(width > 992) {
+
+                    let height = window.innerHeight
+                        || document.documentElement.clientHeight
+                        || document.body.clientHeight;
+
+                    let h_box_productos = height - 90 - 150;
+                    let h_box_categorias = height - 90 - 150;
+
+                    let box_productos = document.getElementById('section_productos');
+                    let box_categorias = document.getElementById('box-categorias');
+                    Object.assign(box_productos.style, {height:h_box_productos+'px'});
+                    Object.assign(box_categorias.style, {height:h_box_categorias+'px'});
+                }
+            },
             navigate(event){
                 switch (event.code) {
                     case 'ArrowUp':

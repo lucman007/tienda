@@ -19,7 +19,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="card-body scroll-mesas">
+                    <div class="card-body scroll-mesas" id="box-pedidos">
                         <div class="row">
                             <div class="col-lg-12">
                                 <table class="table table-striped table-hover table-sm">
@@ -58,7 +58,7 @@
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="card">
-                            <div class="card-header">
+                            <div class="card-header" id="top-btns">
                                 <div class="row">
                                     @if($agent->isDesktop())
                                     <div class="col-12 col-md-12 col-lg-6">
@@ -88,7 +88,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="card-body" style="height: 360px; overflow-y: scroll">
+                            <div class="card-body" style="height: 360px; overflow-y: scroll" id="box-items">
                                 <div class="loader" v-show="mostrarSpinner">
                                     <b-spinner label="Cargando..." ></b-spinner>
                                 </div>
@@ -228,7 +228,7 @@
                 </div>
                 <div class="row mt-2">
                     <div class="col-lg-12">
-                        <div class="card">
+                        <div class="card" id="bottom-btns">
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-lg-12 buttons-mesa">
@@ -377,7 +377,31 @@
                     this.obtener_pedidos();
                     this.obtenerEmpleados();
                 },
+                mounted(){
+                    this.getHeights();
+                },
                 methods:{
+                    getHeights(){
+                        let width = window.innerWidth
+                            || document.documentElement.clientWidth
+                            || document.body.clientWidth;
+
+                        if(width > 992) {
+                            let height = window.innerHeight
+                                || document.documentElement.clientHeight
+                                || document.body.clientHeight;
+
+                            let bottom_btns = document.getElementById('bottom-btns').offsetHeight;
+                            let top_btns = document.getElementById('top-btns').offsetHeight;
+                            let h_box_pedidos = height - 90 - 150;
+                            let h_box_items = height - 90 - top_btns - bottom_btns - 100;
+
+                            let box_mesas = document.getElementById('box-pedidos');
+                            let box_items = document.getElementById('box-items');
+                            Object.assign(box_mesas.style, {height:h_box_pedidos+'px'});
+                            Object.assign(box_items.style, {height:h_box_items+'px'});
+                        }
+                    },
                     disabled_ventas(){
                       this.disabledVentas = true;
                     },

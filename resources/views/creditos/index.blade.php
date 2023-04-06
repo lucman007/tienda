@@ -33,6 +33,7 @@
                                     <th scope="col"></th>
                                     <th scope="col"><a href="?orderby=idventa&order={{$order}}">Venta <span class="icon-hover @if($orderby=='idventa') icon-hover-active @endif">{!!$order_icon!!}</span></a></th>
                                     <th scope="col"><a href="?orderby=fecha&order={{$order}}">Fecha <span class="icon-hover @if($orderby=='fecha') icon-hover-active @endif">{!!$order_icon!!}</span></a></th>
+                                    <th scope="col">Vend.</th>
                                     <th scope="col" style="width:25%"><a href="?orderby=cliente&order={{$order}}">Cliente <span class="icon-hover @if($orderby=='cliente') icon-hover-active @endif">{!!$order_icon!!}</span></a></th>
                                     <th scope="col">Importe</th>
                                     <th scope="col">Moneda</th>
@@ -48,7 +49,8 @@
                                             <td></td>
                                             <td>{{$venta->idventa}}</td>
                                             <td style="width: 15%">{{date("d-m-Y",strtotime($venta->fecha))}}</td>
-                                            <td>{{$venta->cliente}}</td>
+                                            <td>{{$venta->empleado->nombre}}</td>
+                                            <td>{{$venta->cliente}} {{$venta->alias?'('.$venta->alias.')':''}}</td>
                                             <td>{{$venta->total_venta}}</td>
                                             <td>{{$venta->facturacion->codigo_moneda}}</td>
                                             <td>{{$venta->facturacion->serie}}-{{$venta->facturacion->correlativo}}<br>

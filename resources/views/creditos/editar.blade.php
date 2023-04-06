@@ -16,7 +16,7 @@
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-lg-8">
+                            <div class="col-lg-6">
                                 <strong>Fecha emisión:</strong> {{date("d/m/Y H:i:s",strtotime($credito->fecha))}}
                                 <hr>
                                 <strong>Moneda:</strong>
@@ -25,7 +25,7 @@
                                 @else
                                     DÓLARES <hr>
                                 @endif
-                                <strong>Cliente:</strong> {{$credito->cliente['num_documento']}} - {{$credito->persona['nombre']}}
+                                <strong>Cliente:</strong> {{$credito->cliente['num_documento']}} - {{$credito->persona['nombre']}} {{$credito->alias?'('.$credito->alias.')':''}}<a href="javascript:void(0)" @click="abrir_modal()" class="ml-3"><i class="fas fa-user"></i> Alias de cliente</a>
                             </div>{{--
                             <div class="col-lg-3 offset-lg-3">
                                 <button class="btn btn-primary float-right" title="Pagar"><i class="fas fa-dollar-sign"></i> Pago total
@@ -166,6 +166,28 @@
     </template>
     </b-modal>
     <!--FIN MODAL AGREGAR PAGO -->
+    <b-modal id="modal-alias" ref="modal-alias" @hidden="alias = ''">
+    <template slot="modal-title">
+        Cliente: <br>{{$credito->cliente['num_documento']}} - {{$credito->persona['nombre']}}
+    </template>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <p>Escribe un alias de cliente para control interno</p>
+            </div>
+            <div class="col-lg-12">
+                <div class="form-group">
+                    <input v-model="alias" type="text" class="form-control" placeholder="Alias de cliente">
+                </div>
+            </div>
+        </div>
+    </div>
+    <template #modal-footer="{ ok, cancel}">
+        <b-button variant="secondary" @click="cancel()">Cancelar</b-button>
+        <b-button variant="primary" @click="agregar_alias">Ok
+        </b-button>
+    </template>
+    </b-modal>
 @endsection
 @section('script')
     <script>
@@ -185,13 +207,33 @@
                 idpago: -1,
                 detalle:[],
                 disabledButtonPago:false,
-                estado: 1
+                estado: 1,
+                alias:''
             },
             methods: {
+                agregar_alias(){
+                    axios.post("{{action('CreditoController@set_alias')}}",{
+                        'idventa':this.idventa,
+                        'alias':this.alias
+                    })
+                        .then(()=> {
+                            location.reload(true)
+                        })
+                        .catch(error => {
+                            alert('Ha ocurrido un error.');
+                            console.log(error);
+                        });
+                },
                 abrir_modal(idpago){
-                    this.idpago=idpago;
-                    this.$refs['modal-1'].show();
-                    this.obtenerPagos();
+                    if(idpago){
+                        this.idpago=idpago;
+                        this.$refs['modal-1'].show();
+                        this.obtenerPagos();
+                    } else{
+                        this.obtenerAlias();
+                        this.$refs['modal-alias'].show();
+                    }
+
                 },
                 borrarPago(index){
                     this.detalle.splice(index,1);
@@ -219,8 +261,17 @@
                     this.procesarPago()
 
                 },
+                obtenerAlias(){
+                    axios.get('/creditos/get-alias'+'/'+this.idventa)
+                        .then(response => {
+                            this.alias=response.data;
+                        })
+                        .catch(error => {
+                            alert('Ha ocurrido un error.');
+                            console.log(error);
+                        });
+                },
                 obtenerPagos(){
-
                     axios.post("{{action('CreditoController@ver_pagos')}}",{
                             'idpago':this.idpago
                         })

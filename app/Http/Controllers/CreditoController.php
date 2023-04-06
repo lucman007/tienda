@@ -4,6 +4,8 @@ namespace sysfact\Http\Controllers;
 
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Matrix\Exception;
 use sysfact\Http\Controllers\Helpers\DataTipoPago;
 use sysfact\Pago;
 use sysfact\Venta;
@@ -237,5 +239,26 @@ class CreditoController extends Controller
         $total_pagado = $suma;
         $total_adeuda = $pago->monto - $suma;
         return json_encode(['detalle'=>$data,'pagado'=>$total_pagado,'adeuda'=>$total_adeuda]);
+    }
+
+    public function set_alias(Request $request){
+       try{
+           $venta = Venta::find($request->idventa);
+           $venta->alias = mb_strtoupper($request->alias);
+           $venta->save();
+       } catch (Exception $e){
+           Log::error($e);
+           return $e->getMessage();
+       }
+    }
+
+    public function get_alias($idventa){
+        try{
+            $venta = Venta::find($idventa);
+            return $venta->alias;
+        } catch (Exception $e){
+            Log::error($e);
+            return $e->getMessage();
+        }
     }
 }
