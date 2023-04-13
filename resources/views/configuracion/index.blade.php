@@ -118,6 +118,7 @@
                     </b-tab>
                     @endcan
                     @can('Configuración: tenants')
+                        @if($tenantPermision)
                         <b-tab @click="tabChanged('tenants')" title="Tenants" :active="tabActive=='tenants'">
                             <div class="container">
                                 <div class="row">
@@ -125,6 +126,7 @@
                                 </div>
                             </div>
                         </b-tab>
+                        @endif
                     @endcan
                 </b-tabs>
             </b-card>

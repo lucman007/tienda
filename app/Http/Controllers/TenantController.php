@@ -11,6 +11,7 @@ class TenantController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
+        $this->middleware('superuser');
     }
 
     public function crearTenant(Request $request) {

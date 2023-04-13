@@ -36,7 +36,7 @@
                                         <td style="display:none">{{$categoria->idcategoria}}</td>
                                         <td>{{$categoria->nombre}}</td>
                                         <td>{{$categoria->descripcion}}</td>
-                                        <td style="background: {{$categoria->color}}"></td>
+                                        <td><span style="background: {{$categoria->color}};" class="cat-circle-color"></span></td>
                                         <td class="botones-accion">
                                             <a @@click="editarCategoria({{$categoria->idcategoria}})" href="javascript:void(0)">
                                                 <button class="btn btn-success" title="Editar categoria"><i

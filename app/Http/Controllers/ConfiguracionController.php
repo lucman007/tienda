@@ -70,7 +70,7 @@ class ConfiguracionController extends Controller
             }
         }
 
-
+        $tenantPermision = json_decode(cache('config')['emisor'], true)['superuser']??false;
 
         return view('configuracion.index', [
             'permissions' => json_encode($permisos),
@@ -78,7 +78,8 @@ class ConfiguracionController extends Controller
             'permisos' => $permisos,
             'configuracion'=>$configuracion,
             'templates'=>$templates,
-            'usuario' => auth()->user()->persona
+            'usuario' => auth()->user()->persona,
+            'tenantPermision' => $tenantPermision
         ]);
     }
 
