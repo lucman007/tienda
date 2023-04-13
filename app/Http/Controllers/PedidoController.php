@@ -117,7 +117,7 @@ class PedidoController extends Controller
                 ->where('eliminado',0)
                 ->orderby('productos.nombre','asc')
                 ->skip($request->skip)
-                ->take(15)
+                ->take(30)
                 ->get();
             foreach ($productos as $producto) {
                 $producto->stock = $producto->inventario()->first()->saldo;

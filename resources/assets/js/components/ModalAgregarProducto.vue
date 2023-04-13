@@ -16,7 +16,7 @@
                             <div class="col-lg-12">
                                 <div class="card">
                                     <div class="card-body" id="section_productos" style="height: 500px" @scroll="getProductos">
-                                        <div class="row">
+                                        <div class="row mb-5">
                                             <div class="col-lg-12">
                                                 <b-list-group v-show="!mostrarSpinner">
                                                     <b-list-group-item variant="primary"
@@ -188,7 +188,7 @@
                 let bottom = div.scrollHeight;
                 let offset = div.offsetHeight;
                 let top = div.scrollTop;
-                if ((offset + top) === bottom) {
+                if ((offset + top) >= bottom) {
                     axios.post('/pedidos/productos_por_categoria', {
                         'idcategoria': this.idcategoria,
                         'skip':this.productos.length || 0

@@ -52,10 +52,12 @@ class ConfiguracionController extends Controller
 
         $templates = [];
         $files=scandir(resource_path('views/presupuesto/imprimir/'));
+        natsort($files);
         foreach ($files as $file){
             if (strpos($file, 'plantilla_') !== false) {
                 $readfile=file(resource_path('views/presupuesto/imprimir/').$file);
                 $plantilla_titulo=$readfile[0];
+
                 if(strpos($plantilla_titulo, '**') !== false){
                     $title=explode('**',$plantilla_titulo)[1];
                     $name=explode('.',$file);
@@ -67,6 +69,8 @@ class ConfiguracionController extends Controller
 
             }
         }
+
+
 
         return view('configuracion.index', [
             'permissions' => json_encode($permisos),

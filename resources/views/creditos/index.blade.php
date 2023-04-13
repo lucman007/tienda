@@ -49,7 +49,7 @@
                                             <td></td>
                                             <td>{{$venta->idventa}}</td>
                                             <td style="width: 15%">{{date("d-m-Y",strtotime($venta->fecha))}}</td>
-                                            <td>{{$venta->empleado->nombre}}</td>
+                                            <td>{{mb_strtoupper($venta->empleado->nombre)}}</td>
                                             <td>{{$venta->cliente}} {{$venta->alias?'('.$venta->alias.')':''}}</td>
                                             <td>{{$venta->total_venta}}</td>
                                             <td>{{$venta->facturacion->codigo_moneda}}</td>
