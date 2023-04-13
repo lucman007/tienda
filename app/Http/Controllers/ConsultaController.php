@@ -46,7 +46,7 @@ class ConsultaController extends Controller
         } else {
             $archivo=explode('.',$file_or_id);
             if(MainHelper::check_doc_up_to_year($archivo)){
-                return redirect()->back()->withErrors(['El almacenamiento de documentos es por el periodo de un año. Si deseas obtener este documento comunícate con nosotros.']);
+                return redirect()->back()->withErrors(['El archivo no existe o supera un año de antiguedad. Comunícate con el administrador del sistema.']);
             }
             switch($archivo[1]) {
                 case 'xml':

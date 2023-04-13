@@ -272,7 +272,7 @@ class CpeController extends Controller
             $archivo = explode('.', $file_or_id);
 
             if(MainHelper::check_doc_up_to_year($archivo)){
-                return redirect()->back()->withErrors(['El almacenamiento de documentos es por el periodo de un año. Si deseas obtener este documento solicítalo al administrador del sistema.']);
+                return redirect()->back()->withErrors(['El archivo no existe o supera un año de antiguedad. Comunícate con el administrador del sistema.']);
             }
 
             switch ($archivo[1]) {

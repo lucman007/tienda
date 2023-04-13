@@ -92,10 +92,14 @@ class PdfHelper
             $nombre_fichero=$doc->getNombreFichero();
 
             /*OBTENER CÓDIGO HASH*/
-            $dom = new \DOMDocument();
-            $dom->load(storage_path().'/app/sunat/xml/'.$nombre_fichero.'.xml');
-            $digest = $dom->getElementsByTagName('DigestValue')->item(0);
-            $documento->hash=$digest->nodeValue;
+            $filename = storage_path().'/app/sunat/xml/'.$nombre_fichero.'.xml';
+            if(file_exists($filename)){
+                $dom = new \DOMDocument();
+                $dom->load($filename);
+                $digest = $dom->getElementsByTagName('DigestValue')->item(0);
+                $documento->hash=$digest->nodeValue;
+            }
+
             $documento->qr=$nombre_fichero.'.png';
 
             /*CREAR CÓDIGO QR*/

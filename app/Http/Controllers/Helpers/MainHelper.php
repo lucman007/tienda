@@ -480,16 +480,24 @@ class MainHelper extends Controller
 
     public static function check_doc_up_to_year($file){
 
-        $pathtoFile = storage_path() . '/app/sunat/'.$file[1].'/' . $file[0].'.xml';
-
-        if(file_exists($pathtoFile)){
-            $desde = date ("Y-m-d", filemtime($pathtoFile));
-            $hasta = date("Y-m-d");
-            $d1 = Carbon::parse($desde);
-            $d2 = Carbon::parse($hasta);
-            $daysDiff = $d1->diffInDays($d2);
-            return $daysDiff > 365;
-        } else {
+        try{
+            if($file[1] == 'cdr'){
+                $pathtoFile = storage_path() . '/app/sunat/'.$file[1].'/R-' . $file[0].'.xml';
+            } else {
+                $pathtoFile = storage_path() . '/app/sunat/'.$file[1].'/' . $file[0].'.xml';
+            }
+            if(file_exists($pathtoFile)){
+                $desde = date ("Y-m-d", filemtime($pathtoFile));
+                $hasta = date("Y-m-d");
+                $d1 = Carbon::parse($desde);
+                $d2 = Carbon::parse($hasta);
+                $daysDiff = $d1->diffInDays($d2);
+                return $daysDiff > 365;
+            } else {
+                return true;
+            }
+        } catch (\Exception $e){
+            Log::error($e);
             return false;
         }
     }

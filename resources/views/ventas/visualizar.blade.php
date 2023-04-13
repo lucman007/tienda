@@ -310,9 +310,7 @@
                             </div>
                         @endif
                         @if($errors->any())
-                            <div class="col-lg-12">
-                                <p style="color:red; text-align: center">{{$errors->first()}}</p>
-                            </div>
+                            <div class="alert alert-danger" style="text-align: center">{{$errors->first()}}</div>
                         @endif
                         <div class="col-lg-12 mt-5">
                             <div class="row">

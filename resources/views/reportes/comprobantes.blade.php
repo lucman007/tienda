@@ -65,7 +65,7 @@
         <div class="row">
             @if($errors->any())
                 <div class="col-lg-12 mt-4">
-                    <p style="color:red; text-align: center">{{$errors->first()}}</p>
+                    <div class="alert alert-danger" style="text-align: center">{{$errors->first()}}</div>
                 </div>
             @endif
             <div class="col-sm-12 mt-4">
