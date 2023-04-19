@@ -481,11 +481,7 @@ class MainHelper extends Controller
     public static function check_doc_up_to_year($file){
 
         try{
-            if($file[1] == 'cdr'){
-                $pathtoFile = storage_path() . '/app/sunat/'.$file[1].'/R-' . $file[0].'.xml';
-            } else {
-                $pathtoFile = storage_path() . '/app/sunat/'.$file[1].'/' . $file[0].'.xml';
-            }
+            $pathtoFile = storage_path() . '/app/sunat/'.$file[1].'/' . $file[0].'.xml';
             if(file_exists($pathtoFile)){
                 $desde = date ("Y-m-d", filemtime($pathtoFile));
                 $hasta = date("Y-m-d");

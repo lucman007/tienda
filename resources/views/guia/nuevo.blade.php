@@ -240,6 +240,11 @@
                                         <b-spinner v-show="mostrarSpinnerProducto" small label="Loading..."></b-spinner>
                                         Nuevo producto
                                     </b-button>
+                                    <b-button class="mb-4 mt-2 ml-1 mt-lg-0 float-left" :disabled="disabledNr" @click="agregar_nr('00NR')"
+                                              variant="success"><i class="fas fa-plus"></i>
+                                        <b-spinner v-show="mostrarSpinnerProducto" small label="Loading..."></b-spinner>
+                                        NR
+                                    </b-button>
                                 </div>
                             @else
                                 <div class="col-lg-10">
@@ -296,7 +301,7 @@
                                     </thead>
                                     <tbody>
                                     <tr v-for="(producto,index) in productosSeleccionados" :key="index" v-b-modal.modal-detalle @click="editarItem(producto, index)">
-                                        <td>@{{producto.nombre}}</td>
+                                        <td>@{{producto.cod_producto == '00NR'?producto.presentacion:producto.nombre}}</td>
                                         <td>@{{producto.cantidad}}</td>
                                         <td @click.stop >
                                             <button @click="borrarItemVenta(index)" class="btn btn-danger"
@@ -466,7 +471,8 @@
                 item:{},
                 index:-1,
                 spinnerRuc:false,
-                domicilioFiscalCliente:true
+                domicilioFiscalCliente:true,
+                disabledNr:false,
             },
             created(){
                 this.obtenerCorrelativo();
@@ -475,6 +481,24 @@
                 }
             },
             methods: {
+                agregar_nr(codigo){
+                    this.disabledNr = true;
+                    axios.get('/helper/agregar-producto'+'/'+codigo)
+                        .then(response => {
+                            this.results = response.data;
+                            if((Object.keys(this.results).length === 0)){
+                                alert('No se ha encontrado el producto con el código marcado');
+                            } else{
+                                this.agregarProducto(this.results);
+                            }
+                            this.disabledNr = false;
+                        })
+                        .catch(error => {
+                            this.disabledNr = false;
+                            alert('Ha ocurrido un error.');
+                            console.log(error);
+                        });
+                },
                 consultaRucDni(tipo, numero){
                     if(tipo == 6 && numero.length != 11){
                         this.alerta('Ingresa un ruc válido de 11 dígitos');

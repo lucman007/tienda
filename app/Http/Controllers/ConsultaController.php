@@ -29,9 +29,8 @@ class ConsultaController extends Controller
             ->first();
 
         $emisor=new Emisor();
-        $nombre_fichero=$emisor->ruc.'-'.$venta['facturacion']['codigo_tipo_documento'].'-'.$venta['facturacion']['serie'].'-'.$venta['facturacion']['correlativo'];
-
         if($venta){
+            $nombre_fichero=$emisor->ruc.'-'.$venta['facturacion']['codigo_tipo_documento'].'-'.$venta['facturacion']['serie'].'-'.$venta['facturacion']['correlativo'];
             return json_encode(['mostrar'=>1,'nombre_fichero'=>$nombre_fichero,'idventa'=>$venta->idventa]);
         } else{
             return json_encode(['mostrar'=>0,'nombre_fichero'=>'','idventa'=>-1]);

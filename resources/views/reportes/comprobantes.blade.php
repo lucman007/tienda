@@ -116,7 +116,7 @@
                                                 {{$comprobante->guia_relacionada['correlativo']}}
                                             </td>
                                             <td><a href="{{url('reportes/descargar/comprobante').'/'.$comprobante->nombre_fichero.'.xml'}}"><span class="badge badge-warning">DESCARGAR <i class="fas fa-download"></i></span></a></td>
-                                            <td><a href="{{url('reportes/descargar/comprobante').'/'.$comprobante->nombre_fichero.'.cdr'}}"><span class="badge badge-primary">DESCARGAR <i class="fas fa-download"></i></span></a></td>
+                                            <td><a href="{{url('reportes/descargar/comprobante').'/R-'.$comprobante->nombre_fichero.'.cdr'}}"><span class="badge badge-primary">DESCARGAR <i class="fas fa-download"></i></span></a></td>
                                             <td><a href="{{url('reportes/descargar/comprobante').'/'.$comprobante->idventa}}"><span class="badge badge-info">DESCARGAR <i class="fas fa-download"></i></span></a></td>
                                             <td v-show="buscar=='nota-de-credito' || buscar=='nota-de-debito'">{{$comprobante->facturacion->num_doc_relacionado?$comprobante->facturacion->num_doc_relacionado:'-'}}</td>
                                             <td><span class="badge {{$comprobante->badge_class}}">{{$comprobante->facturacion->estado}}</span></td>

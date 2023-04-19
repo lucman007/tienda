@@ -480,7 +480,6 @@ class CpeController extends Controller
         $response = curl_exec($curl);
 
         curl_close($curl);
-        Log::info('ticket: '.$request->ticket);
 
         $response = json_decode($response, true);
         if(isset($response['codRespuesta'])){

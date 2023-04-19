@@ -1443,7 +1443,7 @@ class ReporteController extends Controller
                     return response()->download($pathtoFile);
                     break;
                 case 'cdr':
-                    $pathtoFile = storage_path().'/app/sunat/cdr/'.'R-'.$archivo[0].'.xml';
+                    $pathtoFile = storage_path().'/app/sunat/cdr/'.$archivo[0].'.xml';
                     if (!file_exists($pathtoFile)) {
                         return redirect('/comprobantes/consulta-cdr')->withErrors(['No se ha obtenido el CDR del comprobante. LLena los datos abajo, dale al botón CONSULTAR CDR y vuelve a descargar desde la página anterior.']);
                     }
