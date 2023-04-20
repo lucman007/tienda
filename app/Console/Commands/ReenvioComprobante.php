@@ -3,10 +3,12 @@
 namespace sysfact\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Cache;
 use sysfact\Caja;
 use sysfact\Emisor;
 use sysfact\Http\Controllers\CajaController;
 use sysfact\Http\Controllers\Cpe\CpeController;
+use sysfact\Http\Controllers\CreditoController;
 use sysfact\Venta;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -45,7 +47,26 @@ class ReenvioComprobante extends Command
     public function handle()
     {
 
-        //cerrar caja
+        $this->cerrar_caja();
+        $this->reenviar_comprobantes();
+        $this->creditos();
+        $this->close_activities();
+    }
+
+    public function creditos(){
+        if(!Cache::get('checkActivities',false)){
+            $credito = new CreditoController();
+            $credito->creditos_notificacion();
+        }
+    }
+
+    public function close_activities(){
+        Cache::remember('checkActivities', 24*60, function(){
+            return true;
+        });
+    }
+
+    public function cerrar_caja(){
         try{
             if(date('H') >= 4 && date('H') <= 6){
                 $caja=Caja::orderby('fecha_a','desc')
@@ -59,8 +80,9 @@ class ReenvioComprobante extends Command
         } catch (\Exception $e){
             Log::error($e);
         }
+    }
 
-        //reenvío de comprobantes
+    public function reenviar_comprobantes(){
         try{
             $ventas=Venta::where('eliminado','=',0)
                 ->orderby('idventa','desc')
@@ -110,6 +132,5 @@ class ReenvioComprobante extends Command
             }
             Log::error($e);
         }
-
     }
 }
