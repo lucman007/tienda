@@ -31,7 +31,7 @@
                 <td>SERVICIO</td>
             @endif
             <td>{{$producto->nombre}}</td>
-            <td>{{$producto->presentacion}}</td>
+            <td>{{preg_replace("/[^A-Za-zÁÉÍÓÚáéíóú0-9.!? ]/",'',$producto->presentacion)}}</td>
             @if($producto->tipo_producto==1)
                 <td >{{$producto->cantidad}}</td>
             @else

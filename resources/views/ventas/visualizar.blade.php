@@ -125,7 +125,7 @@
                                     </td>
                                     <td style="white-space: break-spaces; width: 250px">@{{ producto.detalle.descripcion}}</td>
                                     <td>@{{ producto.detalle.monto }}</td>
-                                    <td>@{{ producto.detalle.cantidad }} <span v-show="producto.detalle.devueltos > 0" class="badge badge-warning w-100">@{{producto.detalle.devueltos}} DEVUELTOS</span></td>
+                                    <td>@{{ producto.detalle.cantidad }} @{{ producto.unidad_medida }}<span v-show="producto.detalle.devueltos > 0" class="badge badge-warning w-100">@{{producto.detalle.devueltos}} DEVUELTOS</span></td>
                                     <td>@{{ parseFloat(producto.detalle.porcentaje_descuento)}}%</td>
                                     <td>@{{ producto.detalle.subtotal }}</td>
                                     <td>@{{ producto.detalle.igv }}</td>

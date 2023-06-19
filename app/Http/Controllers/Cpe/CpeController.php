@@ -450,7 +450,7 @@ class CpeController extends Controller
         }
 
         $guia->save();
-        return 'Número de ticket Sunat: '.json_decode($response, true)['numTicket']??'-';
+        return 'Número de ticket Sunat: '.(json_decode($response, true)['numTicket']??'-');
     }
 
     public function consultarGRE(Request $request)    {

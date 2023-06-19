@@ -46,24 +46,33 @@ class ReenvioComprobante extends Command
      */
     public function handle()
     {
-
         $this->cerrar_caja();
         $this->reenviar_comprobantes();
         $this->creditos();
-        $this->close_activities();
+        $this->disabledNotification();
     }
 
     public function creditos(){
-        if(!Cache::get('checkActivities',false)){
+        Log::info(Cache::get('notificationEnabled'));
+        if(!Cache::get('notificationEnabled')){
+            Cache::put('notificationEnabled','enabled',24*60);
+        }
+        $notification_enabled = Cache::get('notificationEnabled');
+        Log::info('notificationEnabled: '.$notification_enabled);
+        if($notification_enabled == 'enabled'){
+            Log::info('yes');
             $credito = new CreditoController();
             $credito->creditos_notificacion();
+        } else {
+            Log::info('not');
         }
     }
 
-    public function close_activities(){
-        Cache::remember('checkActivities', 24*60, function(){
-            return true;
-        });
+    public function disabledNotification(){
+        //Desactivar las notificaciones por correo
+        Log::info(Cache::get('notificationEnabled'));
+        Cache::put('notificationEnabled','disabled',120);
+        Log::info('Despues: '.Cache::get('notificationEnabled'));
     }
 
     public function cerrar_caja(){

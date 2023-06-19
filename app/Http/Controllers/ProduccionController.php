@@ -155,7 +155,7 @@ class ProduccionController extends Controller
 
             $produccion->fecha_emision=date('Y-m-d H:i:s');
             $produccion->fecha_entrega=$request->fecha_entrega . ' ' . date('H:i:s');
-            $produccion->correlativo=$request->correlativo;
+            $produccion->correlativo=json_decode($this->obtenerCorrelativo());
             $nota = [];
             $nota['editado_por']=mb_strtoupper($request->editado_por);
             $nota['fabricado_por']=mb_strtoupper($request->fabricado_por);

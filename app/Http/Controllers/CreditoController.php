@@ -4,7 +4,6 @@ namespace sysfact\Http\Controllers;
 
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Matrix\Exception;
@@ -144,7 +143,6 @@ class CreditoController extends Controller
     }
 
     public function creditos_notificacion(){
-
         $ventas = Venta::where('eliminado', 0)
             ->where('tipo_pago', 2)
             ->whereHas('facturacion', function($query) {
@@ -162,44 +160,49 @@ class CreditoController extends Controller
             ->orderby('idventa', 'desc')
             ->get();
 
-        $seleccionadas = [];
-        foreach ($ventas as $key=>$venta){
-            $pagos = $venta->pago;
-            $minimo_dias = 5;
-            $suma_cuotas = 0;
-            $dias_restantes = 0;
-            $estado = 0;
-            foreach ($pagos as $pago){
-                $estado = $pago->estado;
-                $fecha_hoy = Carbon::now();
-                $dias_restantes=$fecha_hoy->diffInDays(Carbon::parse($pago->fecha),false);
+        if(count($ventas) > 0){
+            $seleccionadas = [];
+            foreach ($ventas as $key=>$venta){
+                $pagos = $venta->pago;
+                $minimo_dias = 5;
+                $suma_cuotas = 0;
+                $dias_restantes = 0;
+                $estado = 0;
+                foreach ($pagos as $pago){
+                    $estado = $pago->estado;
+                    $fecha_hoy = Carbon::now();
+                    $dias_restantes=$fecha_hoy->diffInDays(Carbon::parse($pago->fecha),false);
 
-                if($pago->estado == 2){
-                    $suma_cuotas +=  $pago->monto;
+                    if($pago->estado == 2){
+                        $suma_cuotas +=  $pago->monto;
+                    }
+
+                    if($dias_restantes <= 0 && $pago->estado == 1){
+                        $venta->estado = 'CUOTA VENCIDA '.$dias_restantes.' DÍA(S)';
+                        $venta->bg_color = '#ffbfbf';
+                        break;
+                    }
+                    if($dias_restantes <= $minimo_dias && $pago->estado == 1){
+                        $venta->estado = 'CUOTA POR VENCER EN '.$dias_restantes.' DÍA(S)';
+                        $venta->bg_color = '#ffe047';
+                        break;
+                    }
+
                 }
 
-                if($dias_restantes <= 0 && $pago->estado == 1){
-                    $venta->estado = 'CUOTA VENCIDA '.$dias_restantes.' DÍA(S)';
-                    $venta->bg_color = '#ffbfbf';
-                    break;
+                if($estado == 1){
+                    if($dias_restantes >= -3 && $dias_restantes <= 3){
+                        $seleccionadas[] = $venta;
+                    }
                 }
-                if($dias_restantes <= $minimo_dias && $pago->estado == 1){
-                    $venta->estado = 'CUOTA POR VENCER EN '.$dias_restantes.' DÍA(S)';
-                    $venta->bg_color = '#ffe047';
-                    break;
-                }
-
             }
 
-            if($estado == 1){
-                if($dias_restantes >= -3 && $dias_restantes <= 3){
-                    $seleccionadas[] = $venta;
-                }
+            if(count($seleccionadas) > 0){
+                Mail::to('ces.des007@gmail.com')->send(new MailCreditos($seleccionadas));
+                //Mail::to('lucespedes.p@gmail.com')->cc('ces.des007@gmail.com')->send(new EnviarDocumentos($request));
             }
+
         }
-
-        //Mail::to('lucespedes.p@gmail.com')->cc('ces.des007@gmail.com')->send(new EnviarDocumentos($request));
-        Mail::to('ces.des007@gmail.com')->send(new MailCreditos($seleccionadas));
 
     }
 

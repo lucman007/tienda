@@ -149,6 +149,13 @@
                 </td>
             </tr>
         </table>
+        <table style="width: 200mm">
+            <tr>
+                <td>
+                    <span class="logo-footer-1"><img style="width: 100%" src="{{public_path('images/linetech/logos-linetech.png')}}" alt=""></span>
+                </td>
+            </tr>
+        </table>
     </div>
 
 

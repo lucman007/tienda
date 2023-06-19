@@ -199,7 +199,14 @@
                                         <input onfocus="this.select()" @change="guardar_prev_precio(index)" @keyup="calcular(index)" class="form-control navigable nav-precio" :data-i="index" type="text" v-model="producto.precio">
                                     </td>
                                     <td>
-                                        <input onfocus="this.select()" @keyup="calcular(index)" class="form-control navigable nav-cantidad" :data-i="index" type="text" v-model="producto.cantidad">
+                                        <b-input-group>
+                                            <input onfocus="this.select()" @keyup="calcular(index)" class="form-control navigable nav-cantidad" :data-i="index" type="text" v-model="producto.cantidad">
+                                            <b-input-group-append>
+                                                <b-input-group-text style="font-size: 10px !important; font-weight: 700;">
+                                                    @{{ producto.unidad_medida }}
+                                                </b-input-group-text>
+                                            </b-input-group-append>
+                                        </b-input-group>
                                     </td>
                                     <td class="text-center">@{{producto.tipo_descuento?producto.porcentaje_descuento+'%':(Number(producto.descuento)).toFixed(2)}}</td>
                                     <td class="text-center">@{{(Number(producto.subtotal)).toFixed(2)}}</td>
@@ -216,7 +223,7 @@
                                     <td> @{{ producto.cod_producto == '00NR'?'-':producto.nombre }}</td>
                                     <td style="white-space: break-spaces" class="text_desc">@{{ producto.presentacion}}</td>
                                     <td>@{{ producto.precio }}</td>
-                                    <td>@{{ producto.cantidad }}</td>
+                                    <td>@{{ producto.cantidad }} @{{ producto.unidad_medida }}</td>
                                     <td style="text-align: center">@{{producto.tipo_descuento?producto.porcentaje_descuento+'%':(Number(producto.descuento)).toFixed(2)}}</td>
                                     <td style="text-align: center">@{{(Number(producto.subtotal)).toFixed(2)}}</td>
                                     <td style="text-align: center">@{{(Number(producto.igv)).toFixed(2)}}</td>
@@ -460,8 +467,8 @@
                     <div class="card-body">
                         <div class="text-center">
                             <p>@{{descuentos>0?'Descuentos: '+ moneda + ' ' + descuentos:''}}<br>
-                                Subtotal: @{{ moneda }} @{{ (Number(subtotal)).toFixed(2) }}<br>
-                                IGV: @{{ moneda }} @{{ (Number(igv)).toFixed(2) }}</p>
+                                <span v-show="!ocultar_impuestos">Subtotal: @{{ moneda }} @{{ (Number(subtotal)).toFixed(2) }}</span><br>
+                                <span v-show="!ocultar_impuestos">IGV: @{{ moneda }} @{{ (Number(igv)).toFixed(2) }}</span></p>
                             <p class="p-2 total-venta" style="margin-top:20px;">@{{ moneda }} @{{ (Number(totalVenta)).toFixed(2) }}</p>
                         </div>
                     </div>

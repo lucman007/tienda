@@ -205,7 +205,8 @@ class PresupuestoController extends Controller
             $productos[$i]['moneda']=$presupuesto->moneda=='S/'?'PEN':'USD';
             $productos[$i]['tipo_producto']=$product->tipo_producto;
             $productos[$i]['total']=null;
-            $productos[$i]['unidad_medida']=$product->detalle->unidad_medida;
+            $ex = explode('/', $product->unidad_medida);
+            $productos[$i]['unidad_medida']=$ex[1];
             $productos[$i]['prev_precio']=$product->detalle->monto;
             $productos[$i]['tipo_descuento']=$product->detalle->tipo_descuento;
             $productos[$i]['descuento_por_und']=$product->detalle->descuento_por_und;

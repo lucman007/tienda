@@ -1,4 +1,4 @@
-@php /** Modelo 06 - habilitado**/@endphp
+@php /** Modelo 06 - deshabilitado**/@endphp
 <!doctype html>
 <html lang="{{ config('app.locale') }}">
 <head>
@@ -163,13 +163,31 @@
                     @endif
                 </p>
             </td>
-            <td style="width: 1%"></td>
+            <td style="padding-top: 50px">
+                <table>
+                    <tr>
+                        <td>
+                            <span class="logo-footer-1"><img src="{{public_path('images/lizano/mega.jpeg')}}" alt=""></span>
+                        </td>
+                        <td>
+                            <span class="logo-footer-2"><img src="{{public_path('images/lizano/hodelpe.jpeg')}}" alt=""></span>
+                        </td>
+                    </tr>
+                </table>
+            </td>
         </tr>
     </table>
 </div>
 </body>
 </html>
 <style>
+    .logo-footer-1 img{
+        width: 70px;
+        margin-left: -20px;
+    }
+    .logo-footer-2 img{
+        width: 70px;
+    }
 
     h3{
         font-size: 14pt;

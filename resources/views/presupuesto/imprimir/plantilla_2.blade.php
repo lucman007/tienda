@@ -179,6 +179,21 @@
             </td>
         </tr>
     </table>
+    @php
+        $logos_ = json_decode(cache('config')['interfaz'], true)['buscador_productos_alt']??false;
+    @endphp
+    @if($logos_)
+    <table style="width: 200mm">
+        <tr>
+            <td>
+               Imagen 1
+            </td>
+            <td>
+               Imagen 2
+            </td>
+        </tr>
+    </table>
+    @endif
 </div>
 </body>
 </html>

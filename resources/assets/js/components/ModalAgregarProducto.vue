@@ -25,7 +25,7 @@
                                                                        v-for="(producto, index) in productos" button
                                                                        :key="index">
                                                         <div class="row">
-                                                            <div class="col-lg-6">{{producto.nombre}} <span v-show="producto.tipo_producto==3" class="badge badge-warning"><i class="far fa-star"></i> KIT</span> <br>
+                                                            <div class="col-lg-6"><span class="codigo_producto">{{producto.cod_producto?producto.cod_producto+' - ':''}}</span>{{producto.nombre}}<span v-show="producto.tipo_producto==3" class="badge badge-warning"><i class="far fa-star"></i> KIT</span> <br>
                                                                 <span style="font-size: 11px; color: #0b870b;" v-for="item in producto.items_kit">+ ({{ item.cantidad }}) {{item['nombre']}} </span>
                                                                 <span class="presentacion">{{extracto(producto.presentacion)}}</span>
                                                             </div>
@@ -315,5 +315,8 @@
     .list-group-item:hover {
         background-color: #9fcdff;
         color: white
+    }
+    .codigo_producto{
+        color:#8b8b8b;
     }
 </style>

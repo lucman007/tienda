@@ -121,52 +121,50 @@
 </div>
 <div class="div-table-header">
 </div>
-<div class="body">
-    @php($i=1)
-    <table class="items" cellpadding="0">
-        <thead>
-        <tr class="table-header" style="color: black">
-            <td><strong>#</strong></td>
-            <td><strong>CONCEPTO</strong></td>
-            <td><strong>CANT.</strong></td>
-            <td><strong>UND</strong></td>
-            <td><strong>P. UNITARIO</strong></td>
-            <td><strong>DSCTO</strong></td>
-            <td style="text-align: right"><strong>IMPORTE</strong></td>
+@php($i=1)
+<table class="items" cellpadding="0" style="margin-left: 10mm">
+    <thead>
+    <tr class="table-header" style="color: black">
+        <td><strong>#</strong></td>
+        <td><strong>CONCEPTO</strong></td>
+        <td><strong>CANT.</strong></td>
+        <td><strong>UND</strong></td>
+        <td><strong>P. UNITARIO</strong></td>
+        <td><strong>DSCTO</strong></td>
+        <td style="text-align: right"><strong>IMPORTE</strong></td>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach($presupuesto['productos'] as $item)
+        <tr class="items-tr">
+            <td style="width: 5mm">{{$i++}}</td>
+            <td style="width: 85mm"><strong>{{$item->nombre}}</strong><br> {!!$item->detalle['descripcion']!!}</td>
+            <td style="width: 20mm">{{floatval($item->detalle['cantidad'])}}</td>
+            <td style="width: 10mm">{{explode('/',$item->unidad_medida)[1]}}</td>
+            <td style="width: 20mm; text-align: right">@if(!$presupuesto->ocultar_precios){{number_format($item->monto, 3)}}@endif</td>
+            <td style="width: 15mm; text-align: right">@if(!$presupuesto->ocultar_precios){{$item->monto_descuento}}@endif</td>
+            <td style="width: 20mm; text-align: right">@if(!$presupuesto->ocultar_precios){{number_format($item->total,2)}}@endif</td>
         </tr>
-        </thead>
-        <tbody>
-        @foreach($presupuesto['productos'] as $item)
-            <tr class="items-tr">
-                <td style="width: 5mm">{{$i++}}</td>
-                <td style="width: 85mm"><strong>{{$item->nombre}}</strong><br> {!!$item->detalle['descripcion']!!}</td>
-                <td style="width: 20mm">{{floatval($item->detalle['cantidad'])}}</td>
-                <td style="width: 10mm">{{explode('/',$item->unidad_medida)[1]}}</td>
-                <td style="width: 20mm; text-align: right">@if(!$presupuesto->ocultar_precios){{number_format($item->monto, 3)}}@endif</td>
-                <td style="width: 15mm; text-align: right">@if(!$presupuesto->ocultar_precios){{$item->monto_descuento}}@endif</td>
-                <td style="width: 20mm; text-align: right">@if(!$presupuesto->ocultar_precios){{number_format($item->total,2)}}@endif</td>
-            </tr>
-        @endforeach
-        @if(trim($presupuesto->observaciones)!='')
-            <tr>
-                <td><br></td>
-            </tr>
-            <tr>
-                <td colspan="7" style="margin-top: 5mm">
-                    Observación: {{$presupuesto->observaciones}}
-                </td>
-            </tr>
-        @endif
-        @if($presupuesto->descuento > 0)
-            <tr>
-                <td colspan="7" style="margin-top: 5mm">
-                    <br>Descuento global: {{$presupuesto->descuento_global}}
-                </td>
-            </tr>
-        @endif
-        </tbody>
-    </table>
-</div>
+    @endforeach
+    @if(trim($presupuesto->observaciones)!='')
+        <tr>
+            <td><br></td>
+        </tr>
+        <tr>
+            <td colspan="7" style="margin-top: 5mm">
+                Observación: {{$presupuesto->observaciones}}
+            </td>
+        </tr>
+    @endif
+    @if($presupuesto->descuento > 0)
+        <tr>
+            <td colspan="7" style="margin-top: 5mm">
+                <br>Descuento global: {{$presupuesto->descuento_global}}
+            </td>
+        </tr>
+    @endif
+    </tbody>
+</table>
 <table class="footer">
     <tr>
         <td class="footer-l">
@@ -188,6 +186,13 @@
                     <strong>Cta. Soles:</strong> {{$emisor->cuenta_1}} <br>
                     <strong>Cta. Dólares:</strong> {{$emisor->cuenta_2}} <br>
                 @endif
+            </p>
+            <br>
+            <p class="leyenda">
+                Atentamente <br>
+                {{mb_strtoupper($presupuesto->contacto)==''?'Área de ventas':mb_strtoupper($presupuesto->contacto)}} <br>
+                Telf.: {{strtoupper($presupuesto->telefonos)}} <br>
+                {{$config['website']}}
             </p>
         </td>
         <td class="footer-r">
@@ -239,7 +244,13 @@
     }
 
     .div-table-header{
-        width: 190mm; background: #00a34d; padding: 2mm 5mm; text-align: center; margin-top: 5mm; height: 5mm
+        width: 190mm;
+        background: #00a34d;
+        padding: 2mm 5mm;
+        text-align: center;
+        margin-top: 104mm;
+        height: 5mm;
+        position: absolute;
     }
 
     .line-bottom{
@@ -322,17 +333,6 @@
         top:25mm;
     }
 
-    .body{
-        position: relative;
-        width: 200mm;
-    }
-
-    .body .items {
-        width: 200mm;
-        position: relative;
-        padding: 0 32px 20px 32px;
-        margin-top: -25px;
-    }
     .footer{
         width: 220mm;
         height: 20mm;

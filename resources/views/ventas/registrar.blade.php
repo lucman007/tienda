@@ -462,8 +462,17 @@
                                                   v-model="producto.presentacion"></textarea></td>
                                     <td><input @keyup="calcular(index)" class="form-control" type="text"
                                                v-model="producto.precio"></td>
-                                    <td><input @keyup="calcular(index)" class="form-control" type="text"
-                                               v-model="producto.cantidad"></td>
+                                    <td>
+                                        <b-input-group>
+                                            <input @keyup="calcular(index)" class="form-control" type="text"
+                                                   v-model="producto.cantidad">
+                                            <b-input-group-append>
+                                                <b-input-group-text style="font-size: 10px !important; font-weight: 700;">
+                                                    @{{ (producto.unidad_medida).split('/')[1] }}
+                                                </b-input-group-text>
+                                            </b-input-group-append>
+                                        </b-input-group>
+                                    </td>
                                     <td><input @keyup="calcular(index)" class="form-control" type="text"
                                                v-model="producto.porcentaje_descuento"></td>
                                     <td style="display:none;"><input @keyup="calcular(index)" class="form-control"

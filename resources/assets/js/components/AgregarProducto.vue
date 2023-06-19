@@ -46,7 +46,7 @@
                      <div class="col-lg-3">
                         <div class="form-group">
                             <label for="undMedida">Unidad de medida:</label>
-                            <select v-model="medida" name="undMedida" class="custom-select" id="selectUnd">
+                            <select v-model="medida" class="custom-select" id="selectUnd">
                                 <option value="NIU/UND">Unidad</option>
                                 <option value="MTR/M">Metro</option>
                                 <option value="RO/ROL">Rollo</option>

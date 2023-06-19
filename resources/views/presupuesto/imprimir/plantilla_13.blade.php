@@ -1,4 +1,4 @@
-@php /** Modelo 05 - habilitado**/@endphp
+@php /** Modelo 13 - habilitado**/@endphp
 <!doctype html>
 <html lang="{{ config('app.locale') }}">
 <head>
@@ -19,12 +19,12 @@
             </div>
         @endif
         <div class="texto">
-            <p>@if($emisor->texto_publicitario)<strong>{{mb_strtoupper($emisor->texto_publicitario)}}</strong> <br> @endif R.U.C.: {{$emisor->ruc}}<br>{{$emisor->direccion}}, {{$emisor->urbanizacion}}, {{$emisor->provincia}},
-                {{$emisor->departamento}}, {{$emisor->distrito}} <br> {{$emisor->telefono_1}} {{$emisor->telefono_2?'- '.$emisor->telefono_2:''}} / {{$emisor->email}}</p>
+            <p><strong>{{mb_strtoupper($emisor->texto_publicitario)}}</strong> <br>  R.U.C.: {{$emisor->ruc}}<br>{{$emisor->direccion}}, {{$emisor->urbanizacion}}, {{$emisor->provincia}},
+                {{$emisor->departamento}}, {{$emisor->distrito}} <br> {{$emisor->telefono_1}} / {{$emisor->email}}</p>
         </div>
     </div>
     <div class="info-ruc">
-        <h3 class="titulo_comprobante"><span>COTIZACIÓN N° {{$presupuesto['correlativo']}}</span></h3>
+        <h3 class="titulo_comprobante"><span>COTIZACIÓN <br> N° {{$presupuesto['correlativo']}}</span></h3>
     </div>
 </div>
 <div class="body">
@@ -61,7 +61,9 @@
             </tr>
         </table>
     </div>
-    @php($i=1)
+    @php
+        $i=1
+    @endphp
         <table class="items" cellpadding="0">
             <thead>
                 <tr class="table-header">
@@ -179,6 +181,16 @@
             </td>
         </tr>
     </table>
+    @php
+        $logos_ = json_decode(cache('config')['interfaz'], true)['buscador_productos_alt']??false;
+    @endphp
+    <table style="width: 200mm">
+        <tr>
+            <td>
+                <span class="logo-footer-1"><img style="width: 100%" src="{{public_path('images/linetech/logos-linetech.png')}}" alt=""></span>
+            </td>
+        </tr>
+    </table>
 </div>
 </body>
 </html>
@@ -234,28 +246,29 @@
     }
 
     .header .info-ruc{
+        position: absolute;
+        right: 15mm;
+        top:15mm;
         text-align: center;
-        padding: 5px 35px;
+        padding: 20px 45px;
         border: 3px solid black;
         border-radius: 10px;
-        width: 70mm;
-        margin-left:60mm;
     }
 
     .header .info-emisor{
-        width: 100mm;
+        width: 90mm;
         padding: 25px 20px;
     }
     .header .info-emisor .logo{
-        width: 30mm;
+        width: 40mm;
     }
     .header .info-emisor .logo img{
-        width: 45mm;
+        width: 70mm;
         text-align: center;
         margin-left: -5mm;
     }
     .header .info-emisor .texto{
-        width: 105mm;
+        width: 95mm;
         right: 0;
         top:25mm;
     }
@@ -285,11 +298,12 @@
         width: 200mm;
         height: 20mm;
         margin-top: 5mm;
+        margin-bottom: 10mm;
     }
     .footer .footer-l{
         width: 60%;
         border-right: 1px solid #CCC;
-        padding: 20px 32px 25px 32px;
+        padding: 20px 32px 0px 32px;
     }
     .footer .footer-r{
         width: 39%;
@@ -300,10 +314,15 @@
         margin-top: 5mm;
         padding-bottom: 3mm;
         margin-left: 8mm;
+        text-align: center;
     }
     .atentamente{
+        text-align: center;
         position: absolute;
         bottom: 10mm;
+    }
+    .atentamente td{
+        width: 200mm;
     }
 
 </style>

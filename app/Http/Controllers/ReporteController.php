@@ -301,6 +301,8 @@ class ReporteController extends Controller
                     }
                 }
 
+
+
                 /*$pago = DataTipoPago::getTipoPago();
                 $find = array_search($item->tipo_pago, array_column($pago,'num_val'));
                 $item->tipo_pago = mb_strtoupper($pago[$find]['label']);*/

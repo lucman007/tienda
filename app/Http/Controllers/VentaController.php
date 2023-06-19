@@ -629,6 +629,8 @@ class VentaController extends Controller
         foreach ($productos as $producto){
             $producto->detalle->descripcion = strip_tags($producto->detalle->descripcion);
             $producto->items_kit = json_decode($producto->detalle->items_kit, true);
+            $ex = explode('/', $producto->unidad_medida);
+            $producto->unidad_medida = $ex[1];
         }
 
         if($venta->facturacion->codigo_moneda=='PEN'){

@@ -45,8 +45,8 @@
                     <td>{{$documento->facturacion->oc_relacionada}}</td>
                 @endif
                 @if($documento->facturacion->guia_fisica)
-                    <td><strong>Guía:</strong></td>
-                    <td>{{$documento->facturacion->guia_fisica}}</td>
+                    <td><strong>Guía:</strong>{{$documento->facturacion->guia_fisica}}</td>
+                    <td></td>
                 @endif
             </tr>
             <tr>

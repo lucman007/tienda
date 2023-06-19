@@ -180,24 +180,13 @@
                             <div class="col-lg-3">
                                 <div class="form-group">
                                     <label for="undMedida">Unidad de medida:</label>
-                                    <select v-model="medida" name="undMedida" class="custom-select" id="selectUnd">
-                                        <option value="NIU/UND">Unidad</option>
-                                        <option value="MTR/M">Metro</option>
-                                        <option value="RO/ROL">Rollo</option>
-                                        <option value="KGM/KG">Kilogramo</option>
-                                        <option value="GRM/G">Gramo</option>
-                                        <option value="LTR/L">Litro</option>
-                                        <option value="GLL/GL">Galon</option>
-                                        <option value="NIU/PZA">Pieza</option>
-                                        <option value="MTK/M2">Metro cuadrado</option>
-                                        <option value="MTQ/M3">Metro cúbico</option>
-                                        <option value="PK/PQ">Paquete</option>
-                                        <option value="BX/CJ">Caja</option>
-                                        <option value="NIU/JG">Juego</option>
-                                        <option value="NIU/PR">Par</option>
-                                        <option value="BE/BE">Fardo</option>
-                                        <option value="BG/BG">Bolsa</option>
-                                        <option value="BJ/BJ">Balde</option>
+                                    <select v-model="medida" class="custom-select" id="selectUnd">
+                                        @php
+                                            $unidad_medida = \sysfact\Http\Controllers\Helpers\DataUnidadMedida::getUnidadMedida();
+                                        @endphp
+                                        @foreach($unidad_medida as $unidad)
+                                            <option value="{{$unidad['text_val']}}">{{$unidad['label']}}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                             </div>

@@ -67,6 +67,9 @@ class ProductosFirstSheet implements ToCollection, WithHeadingRow
                 case 'JUEGO':
                     $row['unidad_de_medida']='NIU/JG';
                     break;
+                case 'KIT':
+                    $row['unidad_de_medida']='NIU/KT';
+                    break;
                 case 'PAR':
                     $row['unidad_de_medida']='NIU/PR';
                     break;
