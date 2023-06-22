@@ -11,6 +11,12 @@
         </select>
     </div>
 </div>
+<div class="col-lg-3">
+    <div class="form-group">
+        <label>Colores:</label>
+        <input class="form-control" type="text" v-model="cotizacion.color">
+    </div>
+</div>
 <div class="col-lg-2" style="margin-top: 18px">
     <div class="form-group">
         <b-button :href="'/configuracion/mostrar-plantilla-cotizacion/'+cotizacion.formato" target="_blank" variant="primary"><i class="fas fa-eye"></i> Ver plantilla</b-button>

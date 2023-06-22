@@ -23,7 +23,7 @@
         </div>
     </div>
 </div>
-<div class="num-cotizacion" style="width: 190mm; background: #2831ff; padding: 2mm 5mm; text-align: center; border-radius: 15px 15px 0 0;">
+<div class="num-cotizacion" style="width: 190mm; background: {{$presupuesto->color?$presupuesto->color:'#2831ff'}}; padding: 2mm 5mm; text-align: center; border-radius: 15px 15px 0 0;">
     <h3 style="color:white; font-size: 22px"><span>COTIZACIÓN N° {{$presupuesto['correlativo']}}</span></h3>
 </div>
 <div class="info-usuario" style="width: 190mm; background: #dfdfdf; border-radius: 0 0 15px 15px; padding: 5mm; margin-bottom: 5mm">
@@ -176,7 +176,7 @@
     }
 
     .div-table-header{
-        width: 190mm; background: #2831ff; padding: 2mm 5mm; text-align: center; border-radius: 15px 15px 0 0; margin-top: 5mm; height: 5mm
+        width: 190mm; background: {{$presupuesto->color?$presupuesto->color:'#2831ff'}}; padding: 2mm 5mm; text-align: center; border-radius: 15px 15px 0 0; margin-top: 5mm; height: 5mm
     }
 
     .line-bottom{

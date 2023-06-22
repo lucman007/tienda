@@ -354,6 +354,7 @@ class ConfiguracionController extends Controller
         $venta->pago = [$pago];
         $venta->caja = $caja;
         $venta->empleado = $empleado;
+        $venta->color = json_decode(cache('config')['impresion'], true)['color']??false;
 
         $datos = [
             'documento'=>$venta,
@@ -403,6 +404,7 @@ class ConfiguracionController extends Controller
         $presupuesto->lugar_entrega = 'En almacén';
         $presupuesto->contacto = 'CARLOS TORRES';
         $presupuesto->telefonos = '01 87934555';
+        $presupuesto->color = json_decode(cache('config')['cotizacion'], true)['color']??false;
 
         $emisor=new Emisor();
         $cliente=new Collection();

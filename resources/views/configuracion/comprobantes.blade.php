@@ -18,6 +18,12 @@
         </select>
     </div>
 </div>
+<div class="col-lg-2">
+    <div class="form-group">
+        <label>Colores:</label>
+        <input class="form-control" type="text" v-model="impresion.color">
+    </div>
+</div>
 <div class="col-lg-2" style="margin-top: 18px">
     <div class="form-group">
         <b-button :href="'/configuracion/mostrar-plantilla/'+impresion.formato" target="_blank" variant="primary"><i class="fas fa-eye"></i> Ver plantilla</b-button>

@@ -39,6 +39,7 @@ class PdfHelper
 
         self::setFormatoImpresion();
         $venta=Venta::find($idventa);
+        $venta->color = json_decode(cache('config')['impresion'], true)['color']??false;
 
         if($venta->facturacion->codigo_tipo_documento == '30'){
 

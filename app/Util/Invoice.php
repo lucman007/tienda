@@ -38,7 +38,7 @@ class Invoice {
 
             /*DATOS DE ITEMS SOLO PARA XML*/
 
-            $item->valor_venta_unitario_por_item=$item->detalle->subtotal; //PRECIO * CANTIDAD  SIN IGV
+            $item->valor_venta_unitario_por_item=round($item->detalle->subtotal,4); //PRECIO * CANTIDAD  SIN IGV
             $item->precio_venta_unitario_por_item=$item->detalle->total; //PRECIO * CANTIDAD  CON IGV
 
             $porcentaje_descuento=round($item->detalle->porcentaje_descuento/100,2);

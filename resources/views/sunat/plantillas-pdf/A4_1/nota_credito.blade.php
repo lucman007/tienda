@@ -1,5 +1,5 @@
 @extends('sunat.plantillas-pdf.main')
-@section('titulo','Factura')
+@section('titulo','Nota de crédito')
 @section('contenido')
     <div class="header">
         <div class="info-emisor">
@@ -89,7 +89,6 @@
                     @else
                         <td style="width: 20mm; text-align: right">{{$item->detalle->subtotal}}</td>
                     @endif
-
                 </tr>
             @endforeach
             @if($documento->facturacion->descuento_global > '0.00')

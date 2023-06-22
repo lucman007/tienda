@@ -316,7 +316,7 @@ class PresupuestoController extends Controller
 
         $presupuesto->leyenda=NumeroALetras::convert($presupuesto->presupuesto, $moneda_letras,true);
         $presupuesto->descuento_global = $presupuesto->tipo_descuento?floatval($presupuesto->porcentaje_descuento).'%':$presupuesto->moneda.' '.$presupuesto->descuento;
-
+        $presupuesto->color = json_decode(cache('config')['cotizacion'], true)['color']??false;
         /*foreach ($presupuesto->productos as $item){
             $item->monto = $presupuesto->igv_incluido && !$presupuesto->exportacion?round($item->detalle['monto'] / 1.18,3):round($item->detalle['monto'],2);
             $item->monto_descuento=$item->detalle['tipo_descuento']?floatval($item->detalle['porcentaje_descuento']).'%':$item->detalle['descuento'];

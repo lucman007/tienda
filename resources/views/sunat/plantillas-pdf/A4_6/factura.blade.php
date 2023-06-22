@@ -233,7 +233,7 @@
             padding: 0;
         }
         strong{
-            color: #27ae60;
+            color: {{$documento->color?$documento->color:'#27ae60'}};
         }
         .header{
             width: 180mm;
@@ -243,7 +243,7 @@
         .header-ruc{
             width: 260px;
             text-align: center;
-            background: #27ae60;
+            background: {{$documento->color?$documento->color:'#27ae60'}};
             padding: 10px;
             float: left;
             display: inline;
@@ -279,7 +279,7 @@
             margin-bottom: 3mm;
         }
         .div-table-header{
-            width: 190mm; background: #27ae60; padding: 2mm 5mm; text-align: center; height: 5mm
+            width: 190mm; background: {{$documento->color?$documento->color:'#27ae60'}}; padding: 2mm 5mm; text-align: center; height: 5mm
         }
         .items {
             width: 200mm;

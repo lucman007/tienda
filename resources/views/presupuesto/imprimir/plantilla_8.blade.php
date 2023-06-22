@@ -229,7 +229,7 @@
     }
 
     .div-table-header{
-        width: 190mm; background: #ff4809; padding: 2mm 5mm; text-align: center; margin-top: 5mm; height: 5mm
+        width: 190mm; background: {{$presupuesto->color?$presupuesto->color:'#ff4809'}}; padding: 2mm 5mm; text-align: center; margin-top: 5mm; height: 5mm
     }
 
     .line-bottom{
