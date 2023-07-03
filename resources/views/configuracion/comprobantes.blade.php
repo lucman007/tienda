@@ -30,8 +30,13 @@
     </div>
 </div>
 <div class="col-lg-3 mt-3">
-    <b-form-checkbox v-model="impresion.mostrar_mozo" switch size="lg">
+    <b-form-checkbox v-model="impresion.mostrar_vendedor" switch size="lg">
         <p style="font-size: 1rem;">Mostrar vendedor</p>
+    </b-form-checkbox>
+</div>
+<div class="col-lg-3 mt-3">
+    <b-form-checkbox v-model="impresion.mostrar_cajero" switch size="lg">
+        <p style="font-size: 1rem;">Mostrar cajero</p>
     </b-form-checkbox>
 </div>
 <div class="col-lg-3 mt-3">

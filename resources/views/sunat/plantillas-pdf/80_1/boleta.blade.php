@@ -51,8 +51,19 @@
                     @endif
                 </tr>
                 <tr>
-                    <td><strong>Caja:</strong></td>
-                    <td>{{ $documento->caja->nombre }} @if($documento->empleado->idpersona != -1)/ <strong>Vend:</strong>  {{ $documento->empleado->nombre }}@endif</td>
+                    @php
+                        $ver_vendedor=json_decode(cache('config')['impresion'], true)['mostrar_vendedor']??false;
+                        $ver_cajero=json_decode(cache('config')['impresion'], true)['mostrar_cajero']??false;
+                    @endphp
+                    <td>@if($ver_cajero)<strong>Caja:</strong> @endif</td>
+                    <td>
+                        @if($ver_cajero)
+                        {{ $documento->caja->nombre }}
+                        @endif
+                        @if($ver_vendedor && $documento->empleado->idpersona != -1)
+                            / <strong>Vend:</strong>  {{ $documento->empleado->nombre }}
+                        @endif
+                    </td>
                 </tr>
             </table>
         </div>

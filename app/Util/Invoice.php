@@ -47,7 +47,7 @@ class Invoice {
                 //VERIFICAMOS SI EL PRECIO DE PRODUCTO INCLUYE O NO EL IGV
                 if($documento->igv_incluido){
                     // Si incluir igv es true
-                    $item->valor_venta_bruto_unitario = round($item->detalle->monto/1.18,2);//PRECIO UNITARIO DE PRODUCTO SIN IGV
+                    $item->valor_venta_bruto_unitario = round($item->detalle->monto/1.18,10);//PRECIO UNITARIO DE PRODUCTO SIN IGV
                     $item->base_descuento=round($item->detalle->monto*$item->detalle->cantidad/1.18,2);
                 } else{
                     // Si incluir igv es false

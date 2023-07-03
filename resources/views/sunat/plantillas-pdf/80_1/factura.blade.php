@@ -51,8 +51,19 @@
                     @endif
                 </tr>
                 <tr>
-                    <td><strong>Caja:</strong></td>
-                    <td>{{ $documento->caja->nombre }} @if($documento->empleado->idpersona != -1)/ <strong>Vend:</strong>  {{ $documento->empleado->nombre }}@endif</td>
+                    @php
+                        $ver_vendedor=json_decode(cache('config')['impresion'], true)['mostrar_vendedor']??false;
+                        $ver_cajero=json_decode(cache('config')['impresion'], true)['mostrar_cajero']??false;
+                    @endphp
+                    <td>@if($ver_cajero)<strong>Caja:</strong>@endif</td>
+                    <td>
+                        @if($ver_cajero)
+                        {{ $documento->caja->nombre }}
+                        @endif
+                        @if($ver_vendedor && $documento->empleado->idpersona != -1)
+                            / <strong>Vend:</strong>  {{ $documento->empleado->nombre }}
+                        @endif
+                    </td>
                 </tr>
             </table>
         </div>
@@ -121,6 +132,53 @@
                 <td style="text-align: right; width: 38mm">{{$documento->codigo_moneda}} {{$documento->total_venta}}</td>
             </tr>
         </table>
+        @if($documento->facturacion->retencion == 1)
+            <br>
+            <table>
+                <tr>
+                    <td><strong>Retención:</strong> <br> {{$documento->codigo_moneda}} {{$documento->retencion}}</td>
+                </tr>
+                @if($documento->tipo_pago == 2)
+                    <tr>
+                        <td><strong>Monto neto pendiente de pago:</strong><br> {{$documento->codigo_moneda}} {{$documento->monto_menos_retencion}}</td>
+                    </tr>
+                @endif
+            </table>
+            <br>
+        @endif
+        @if($documento->tipo_pago == 2)
+            @php
+                $i=1
+            @endphp
+            <table class="cuotas_table">
+                <thead>
+                <tr>
+                    <td colspan="3"><strong>Detalle de cuotas</strong></td>
+                </tr>
+                <tr>
+                    <td style="width:20mm">Cuota</td>
+                    <td style="width:20mm">Monto</td>
+                    <td style="width:30mm">F. Vencimiento</td>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach($documento->pago as $pago)
+                    <tr>
+                        <td>{{str_pad($i,3,"0",STR_PAD_LEFT)}}</td>
+                        <td>{{$documento->codigo_moneda}} {{$pago->monto}}</td>
+                        <td>{{date('d/m/Y',strtotime($pago->fecha))}}</td>
+                    </tr>
+                    @php
+                        $i++
+                    @endphp
+                @endforeach
+                </tbody>
+            </table>
+        @endif
+        @if($documento->facturacion->codigo_tipo_factura == '1001')
+            <p><strong>OPERACIÓN SUJETA A DETRACCIÓN {{$documento->codigo_moneda}} {{$documento->detraccion}} ({{$documento->porcentaje_detraccion}}%)</strong></p>
+            <p>N° de cuenta detracción: {{$emisor->cuenta_detracciones}}</p>
+        @endif
         <table style="text-align: center">
             <tr>
                 <td style="width: 62mm"><img class="qr" src="images/qr/{{$documento->qr}}"></td>

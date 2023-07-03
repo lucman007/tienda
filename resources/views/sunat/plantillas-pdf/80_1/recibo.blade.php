@@ -30,11 +30,17 @@
                     <td style="width: 20mm"><strong>Fecha:</strong></td>
                     <td style="width: 35mm">{{ date('d/m/Y h:m:s A',strtotime($documento->fecha)) }}</td>
                 </tr>
+                @php
+                    $ver_vendedor=json_decode(cache('config')['impresion'], true)['mostrar_vendedor']??false;
+                    $ver_cajero=json_decode(cache('config')['impresion'], true)['mostrar_cajero']??false;
+                @endphp
+                @if($ver_cajero)
                 <tr>
                     <td><strong>Caja:</strong></td>
                     <td>{{ $documento->caja->nombre }}</td>
                 </tr>
-                @if(isset(json_decode(cache('config')['impresion'], true)['mostrar_mozo']) && json_decode(cache('config')['impresion'], true)['mostrar_mozo'] && $documento->empleado->idpersona != -1)
+                @endif
+                @if($ver_vendedor && $documento->empleado->idpersona != -1)
                 <tr>
                     <td><strong>Vend:</strong></td>
                     <td>{{ $documento->empleado->nombre }}</td>
