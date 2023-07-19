@@ -211,6 +211,7 @@
                                             Mantenimiento
                                         </template>
                                         <b-dropdown-item @cannot('Clientes') class="disabled" disabled @endcannot href="{{action('ClienteController@index')}}"><i class="fas fa-user-tag"></i> Clientes</b-dropdown-item>
+                                        <b-dropdown-item @cannot('Mantenimiento: empleados') class="disabled" disabled @endcannot href="{{action('TrabajadorController@index')}}"><i class="fas fa-users"></i> Empleados</b-dropdown-item>
                                         <b-dropdown-item @cannot('Mantenimiento: proveedores') class="disabled" disabled @endcannot href="{{action('ProveedorController@index')}}"><i class="fas fa-user-tie"></i> Proveedores</b-dropdown-item>
                                         <b-dropdown-item @cannot('Configuración') class="disabled" disabled style="display: none;" @endcannot href="{{action('ConfiguracionController@index')}}"><i class="fas fa-cogs"></i> Configuración</b-dropdown-item>
                                     </b-nav-item-dropdown>

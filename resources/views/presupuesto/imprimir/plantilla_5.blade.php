@@ -19,7 +19,7 @@
             </div>
         @endif
         <div class="texto">
-            <p>@if($emisor->texto_publicitario)<strong>{{mb_strtoupper($emisor->texto_publicitario)}}</strong> <br> @endif R.U.C.: {{$emisor->ruc}}<br>{{$emisor->direccion}}, {{$emisor->urbanizacion}}, {{$emisor->provincia}},
+            <p>@if($emisor->texto_publicitario)<strong>{{mb_strtoupper($emisor->texto_publicitario)}}</strong> <br> {{$emisor->razon_social}}<br> @endif R.U.C.: {{$emisor->ruc}}<br>{{$emisor->direccion}}, {{$emisor->urbanizacion}}, {{$emisor->provincia}},
                 {{$emisor->departamento}}, {{$emisor->distrito}} <br> {{$emisor->telefono_1}} {{$emisor->telefono_2?'- '.$emisor->telefono_2:''}} / {{$emisor->email}}</p>
         </div>
     </div>

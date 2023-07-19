@@ -116,6 +116,11 @@
             </tbody>
         </table>
         <table class="footer">
+            @if($documento->observacion)
+                <tr>
+                    <td colspan="8">Observación: {{$documento->observacion}}</td>
+                </tr>
+            @endif
             <tr>
                 <td class="footer-l">
                     <img class="qr" src="images/qr/{{$documento->qr}}">

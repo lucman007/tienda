@@ -50,6 +50,11 @@
     </b-form-checkbox>
 </div>
 <div class="col-lg-3 mt-3">
+    <b-form-checkbox v-model="interfaz.cierre_automatico" switch size="lg">
+        <p style="font-size: 14px;">Cierre de caja automatico</p>
+    </b-form-checkbox>
+</div>
+<div class="col-lg-3 mt-3">
     <b-form-checkbox v-model="interfaz.reporte_ventas_manual" switch size="lg">
         <p style="font-size: 14px;">Reporte de ventas manual (Alto volumen)</p>
     </b-form-checkbox>

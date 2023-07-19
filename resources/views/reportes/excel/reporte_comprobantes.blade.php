@@ -12,6 +12,7 @@
         <th scope="col">IGV</th>
         <th scope="col">Total Venta</th>
         <th scope="col">Moneda</th>
+        <th scope="col">Tipo de cambio</th>
         <th scope="col">Comprobante</th>
         <th scope="col">Correlativo</th>
         <th scope="col">Doc. que modifica</th>
@@ -32,6 +33,7 @@
             <td>{{$comprobante->facturacion->igv}}</td>
             <td>{{$comprobante->total_venta}}</td>
             <td>{{$comprobante->facturacion->codigo_moneda}}</td>
+            <td>{{$comprobante->tipo_cambio}}</td>
             <td>{{$comprobante->tipo_doc}}</td>
             <td>{{$comprobante->facturacion->serie}}-{{$comprobante->facturacion->correlativo}}</td>
             <td>{{$comprobante->facturacion->num_doc_relacionado}}</td>

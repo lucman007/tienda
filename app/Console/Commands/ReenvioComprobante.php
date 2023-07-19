@@ -46,21 +46,21 @@ class ReenvioComprobante extends Command
      */
     public function handle()
     {
-        $this->cerrar_caja();
+        $cierre_automatico = json_decode(cache('config')['interfaz'], true)['cierre_automatico']??true;
+        if($cierre_automatico){
+            $this->cerrar_caja();
+        }
         $this->reenviar_comprobantes();
         $this->creditos();
         $this->disabledNotification();
     }
 
     public function creditos(){
-        Log::info(Cache::get('notificationEnabled'));
         if(!Cache::get('notificationEnabled')){
             Cache::put('notificationEnabled','enabled',24*60);
         }
         $notification_enabled = Cache::get('notificationEnabled');
-        Log::info('notificationEnabled: '.$notification_enabled);
         if($notification_enabled == 'enabled'){
-            Log::info('yes');
             $credito = new CreditoController();
             $credito->creditos_notificacion();
         } else {
@@ -76,6 +76,7 @@ class ReenvioComprobante extends Command
     }
 
     public function cerrar_caja(){
+        Log::info('Cerrar caja');
         try{
             if(date('H') >= 4 && date('H') <= 6){
                 $caja=Caja::orderby('fecha_a','desc')

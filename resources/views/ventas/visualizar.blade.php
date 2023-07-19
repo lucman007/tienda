@@ -94,6 +94,10 @@
                                             <strong>Observación:</strong> {{$venta->guia_relacionada->nota}}  <hr>
                                         @endif
                                     @endif
+                                    @if($venta->observacion)
+                                        <strong>Observacion:</strong> {{$venta->observacion}}
+                                        <hr>
+                                        @endif
                             </div>
                             <div class="col-lg-8">
                                 <strong>Cliente:</strong> {{$venta->cliente['num_documento']}} - {{$venta->persona['nombre']}}

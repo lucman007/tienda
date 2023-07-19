@@ -400,6 +400,7 @@ class VentaController extends Controller
                 $venta->tipo_pago = $request->tipo_pago_contado;
             }
             $venta->igv_incluido = $request->esConIgv;
+            $venta->observacion = $request->doc_observacion;
             $venta->save();
             $idventa = $venta->idventa;
 

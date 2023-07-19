@@ -542,11 +542,20 @@
                             </b-alert>
                         </div>
                         <div class="dropdown-divider"></div>
-                        <div class="col-lg-2 mt-3">
-                            <div class="form-group">
-                                <label for="observaciones">Descuento global (%):</label>
-                                <input @keyup="calcularTotalVenta()" class="form-control"
-                                       v-model="porcentaje_descuento_global" type="text">
+                        <div class="row  mt-3">
+                            <div class="col-lg-2">
+                                <div class="form-group">
+                                    <label>Descuento global (%):</label>
+                                    <input @keyup="calcularTotalVenta()" class="form-control"
+                                           v-model="porcentaje_descuento_global" type="text">
+                                </div>
+                            </div>
+                            <div class="col-lg-10">
+                                <div class="form-group">
+                                    <label>Observación:</label>
+                                    <input class="form-control"
+                                           v-model="doc_observacion" type="text">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -965,7 +974,8 @@
                 item:{},
                 index:-1,
                 spinnerRuc:false,
-                domicilioFiscalCliente:true
+                domicilioFiscalCliente:true,
+                doc_observacion:""
             },
             mounted() {
                 if (localStorage.getItem('productos')) {
@@ -1478,9 +1488,9 @@
                     this.descuentos = (suma_descuentos + Number(this.monto_descuento_global)).toFixed(2);
                     this.igv = (suma_igv - (suma_igv * desc_global)).toFixed(2);
                     this.totalVenta = (Number(this.gravadas) + Number(this.exoneradas) + Number(this.inafectas) + Number(this.igv)).toFixed(2);
-                    //this.igv = (this.gravadas * 0.18).toFixed(2);
+                    //this.igv = (Math.round(this.gravadas * 0.18 * 100) / 100).toFixed(2);
                     //this.totalVenta = (Number(this.gravadas) + Number(this.igv)).toFixed(2);
-                    this.subtotalVenta = total_venta_bruto.toFixed(2);
+                    this.subtotalVenta = total_venta_bruto.toFixed(3);
                     this.calcularDeducciones();
 
                 },
@@ -1579,6 +1589,7 @@
                                 'codigo_tipo_factura':this.codigo_tipo_factura,
                                 'doc_relacionado_nc':this.doc_relacionado_nc,
                                 'idventa_modifica':this.idventa_modifica,
+                                'doc_observacion':this.doc_observacion,
                             })
                                 .then(response => {
                                     localStorage.removeItem('productos');
@@ -1843,6 +1854,7 @@
                     localStorage.removeItem('cliente');
                     localStorage.removeItem('esConIgv');
                     this.doc_relacionado_nc='';
+                    this.doc_observacion="";
                 },
                 agregarUbigeo(ubigeo){
                     this.guia_datos_adicionales.ubigeo=ubigeo;
