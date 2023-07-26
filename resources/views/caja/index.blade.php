@@ -27,8 +27,8 @@
                     <div class="card-body">
                         <div class="row">
                             @if(!$caja)
-                                <div class="col-lg-12 text-center">
-                                    <h4 class="m-0 p-0">No has abierto caja :( </h4>
+                                <div class="col-lg-12 text-center" style="padding-top: 50px;padding-bottom: 50px;">
+                                    <h4 class="m-0 p-0">No has abierto caja</h4>
                                     @if($caja_abierta)
                                     <div class="row">
                                         <div class="col-md-6 offset-md-3 mt-3">
@@ -59,209 +59,194 @@
                                     @endif
                                 </b-nav>
                             </div>
-                            <div class="col-lg-6">
+                            <div class="col-lg-12">
                                 <div class="card" style="box-shadow: none">
-                                    <div class="card-header">
-                                        Apertura
-                                    </div>
-                                    <div class="card-body" style="min-height: 430px">
-                                        <p><strong>Estado de caja:</strong>
-                                            @if($caja)
-                                                <span class="badge badge-success">Abierta</span>
-                                                @else
-                                                <span class="badge badge-warning">Sin abrir</span>
-                                            @endif
-                                        </p>
-                                        <div class="table-responsive tabla-gestionar">
-                                            <table class="table table-striped table-hover table-sm">
-                                                <tbody>
-                                                @if($caja)
-                                                    <tr>
-                                                        <td><strong>Fecha y hora de apertura:</strong></td>
-                                                        <td>{{ date('d/m/Y H:i:s', strtotime($caja->fecha_a)) }}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><strong>Responsable de caja:</strong></td>
-                                                        <td>{{ $caja->empleado->nombre }} {{ $caja->empleado->apellidos }}</td>
-                                                    </tr>
-                                                @else
-                                                    <tr>
-                                                        <td><strong>Fecha y hora de apertura:</strong></td>
-                                                        <td>0.00</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><strong>Responsable de caja:</strong></td>
-                                                        <td>0.00</td>
-                                                    </tr>
-                                                @endif
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                        @if($caja)
-                                        <div class="alert alert-primary">
-                                            <strong>Saldo inicial: @if($caja) {{$caja->moneda}} {{ $caja->apertura }} @endif</strong>
-                                        </div>
-                                        <p><strong>Observación:</strong> {{$caja->observacion_a}}</p>
-                                            @if(!$caja->estado)
-                                            <b-button @click="editarApertura" class="btn btn-success" style="position: absolute;right: 30px;bottom: 30px;"><i class="fas fa-edit"></i> Editar</b-button>
-                                            @endif
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="card" style="box-shadow: none">
-                                    <div class="card-header">
-                                        Cierre
-                                    </div>
                                     <div class="card-body" style="min-height: 430px">
                                         <div class="row">
-                                            <div class="col-lg-5">
-                                                <p><strong>Estado de caja:</strong>
-                                                    @if($caja && $caja->estado)
-                                                        <span class="badge badge-success">Cerrada</span>
-                                                    @else
-                                                        <span class="badge badge-warning">Sin cerrar</span>
-                                                    @endif
-                                                </p>
-                                            </div>
-                                            <div class="col-lg-7">
-                                                @if(!$caja || ($caja && $caja->estado))
-                                                   <b-form-checkbox v-model="detallado" switch size="lg" class="float-right">
-                                                        <p style="font-size: 1rem;">Detallado</p>
-                                                    </b-form-checkbox>
-                                                    <b-button @if(!$caja) disabled @endif  @click="imprimir" class="btn btn-warning float-right mr-3" title="Imprimir">
-                                                        <i class="fas fa-print"></i> Imprimir
-                                                    </b-button>
-                                                @else
-                                                    <b-button class="mr-2 float-right" @click="cerrar_caja" variant="primary">
-                                                        <i class="fas fa-check"></i> Cerrar caja
-                                                    </b-button>
-                                                @endif
-                                                    <b-button class="mr-2 float-right" :href="'/caja/ventas?idcaja='+idcaja" variant="success">
-                                                        <i class="fas fa-list"></i> Ventas del turno
-                                                    </b-button>
-                                            </div>
                                             @if(!($caja && $caja->estado))
+                                                <div class="col-lg-12 text-center">
+                                                    Total en caja
+                                                    <h1 class="text-success"><strong>S/ {{number_format($total_caja,2)}}</strong></h1>
+                                                    <p><strong>Estado de caja:</strong>
+                                                        @if($caja)
+                                                            <span class="badge badge-success">Abierta</span>
+                                                        @else
+                                                            <span class="badge badge-warning">Sin abrir</span>
+                                                        @endif
+                                                    </p>
+                                                </div>
+                                            @endif
                                             <div class="col-lg-12">
-                                               <div class="row">
-                                                   <div class="col-lg-4">
-                                                       Total en caja
-                                                       <h1 class="text-success"><strong>S/ {{number_format($total_caja,2)}}</strong></h1>
-                                                   </div>
-                                               </div>
+                                                <div class="row">
+                                                    <div class="col-lg-6">
+                                                        @if($caja && !$caja->estado)
+                                                            <b-button @click="editarApertura" class="btn btn-success"><i class="fas fa-edit"></i> Editar apertura</b-button>
+                                                        @endif
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        @if(!$caja || ($caja && $caja->estado))
+                                                            <b-form-checkbox v-model="detallado" switch size="lg" class="float-right">
+                                                                <p style="font-size: 1rem;">Detallado</p>
+                                                            </b-form-checkbox>
+                                                            <b-button @if(!$caja) disabled @endif  @click="imprimir" class="btn btn-warning float-right mr-3" title="Imprimir">
+                                                                <i class="fas fa-print"></i> Imprimir
+                                                            </b-button>
+                                                        @else
+                                                            <b-button class="mr-2 float-right" @click="cerrar_caja" variant="primary">
+                                                                <i class="fas fa-check"></i> Cerrar caja
+                                                            </b-button>
+                                                        @endif
+                                                        <b-button class="mr-2 float-right" :href="'/caja/ventas?idcaja='+idcaja" variant="success">
+                                                            <i class="fas fa-list"></i> Ventas del turno
+                                                        </b-button>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            @endif
-                                        </div>
-                                        <div class="table-responsive tabla-gestionar">
-                                            <table class="table table-striped table-hover table-sm">
-                                                <tbody>
+                                            <div class="col-lg-6">
+                                                <div class="table-responsive tabla-gestionar">
+                                                    <table class="table table-striped table-hover table-sm">
+                                                        <tbody>
+                                                        @if($caja)
+                                                            <tr>
+                                                                <td><strong>Fecha y hora de apertura:</strong></td>
+                                                                <td>{{ date('d/m/Y H:i:s', strtotime($caja->fecha_a)) }}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td><strong>Responsable de caja:</strong></td>
+                                                                <td>{{ $caja->empleado->nombre }} {{ $caja->empleado->apellidos }}</td>
+                                                            </tr>
+                                                        @else
+                                                            <tr>
+                                                                <td><strong>Fecha y hora de apertura:</strong></td>
+                                                                <td>0.00</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td><strong>Responsable de caja:</strong></td>
+                                                                <td>0.00</td>
+                                                            </tr>
+                                                        @endif
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                @if($caja)
+                                                    <div class="alert alert-primary">
+                                                        <strong>Saldo inicial: @if($caja) {{$caja->moneda}} {{ $caja->apertura }} @endif</strong>
+                                                    </div>
+                                                    <p><strong>Observación:</strong> {{$caja->observacion_a}}</p>
+                                                @endif
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="table-responsive tabla-gestionar">
+                                                    <table class="table table-striped table-hover table-sm">
+                                                        <tbody>
+                                                        @if($caja && $caja->estado)
+                                                            <tr>
+                                                                <td style="width: 50%"><strong>Fecha y hora de cierre:</strong></td>
+                                                                <td>{{ date('d/m/Y H:i:s', strtotime($caja->fecha_c)) }}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td><strong>Saldo inicial:</strong></td>
+                                                                <td>{{$caja->moneda}} {{ $caja->apertura }}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td><strong>Total efectivo:</strong></td>
+                                                                <td>{{$caja->moneda}} {{ $caja->efectivo }}</td>
+                                                            </tr>
+                                                            @if($caja->tarjeta > 0)
+                                                                <tr>
+                                                                    <td><strong>Tarjeta visa:</strong></td>
+                                                                    <td>{{$caja->moneda}} {{ $caja->tarjeta }}</td>
+                                                                </tr>
+                                                            @endif
+                                                            @if($caja->tarjeta_1 > 0)
+                                                                <tr>
+                                                                    <td><strong>Tarjeta mastercard:</strong></td>
+                                                                    <td>{{$caja->moneda}} {{ $caja->tarjeta_1 }}</td>
+                                                                </tr>
+                                                            @endif
+                                                            @if($caja->yape > 0)
+                                                                <tr>
+                                                                    <td><strong>Total Yape:</strong></td>
+                                                                    <td>{{$caja->moneda}} {{ $caja->yape }}</td>
+                                                                </tr>
+                                                            @endif
+                                                            @if($caja->plin > 0)
+                                                                <tr>
+                                                                    <td><strong>Total Plin:</strong></td>
+                                                                    <td>{{$caja->moneda}} {{ $caja->plin }}</td>
+                                                                </tr>
+                                                            @endif
+                                                            @if($caja->transferencia > 0)
+                                                                <tr>
+                                                                    <td><strong>Total transferencia:</strong></td>
+                                                                    <td>{{$caja->moneda}} {{ $caja->transferencia }}</td>
+                                                                </tr>
+                                                            @endif
+                                                            @if($caja->otros > 0)
+                                                                <tr>
+                                                                    <td><strong>Total otros:</strong></td>
+                                                                    <td>{{$caja->moneda}} {{ $caja->otros }}</td>
+                                                                </tr>
+                                                            @endif
+                                                            <tr>
+                                                                <td><strong>Total gastos:</strong></td>
+                                                                <td>{{$caja->moneda}} {{ $caja->gastos }}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td><strong>Total devoluciones:</strong></td>
+                                                                <td>{{$caja->moneda}} {{ $caja->devoluciones }}</td>
+                                                            </tr>
+                                                        @endif
+                                                        </tbody>
+                                                    </table>
+                                                    @if($caja->credito > 0 || $caja->efectivo_usd > 0 || $caja->credito_usd > 0)
+                                                        <p class="mt-3"><strong>Otros tipos de venta:</strong></p>
+                                                    @endif
+                                                    <table class="table table-striped table-hover table-sm">
+                                                        <tbody>
+                                                        @if($caja->credito > 0)
+                                                            <tr>
+                                                                <td style="width: 50%"><strong>Crédito:</strong></td>
+                                                                <td>{{$caja->moneda}} {{ $caja->credito }}</td>
+                                                            </tr>
+                                                        @endif
+                                                        @if($caja->efectivo_usd > 0)
+                                                            <tr>
+                                                                <td><strong>Efectivo USD:</strong></td>
+                                                                <td>USD {{ $caja->efectivo_usd}}</td>
+                                                            </tr>
+                                                        @endif
+                                                        @if($caja->credito_usd > 0)
+                                                            <tr>
+                                                                <td><strong>Crédito USD:</strong></td>
+                                                                <td>USD {{ $caja->credito_usd }}</td>
+                                                            </tr>
+                                                        @endif
+                                                        </tbody>
+                                                    </table>
+                                                </div>
                                                 @if($caja && $caja->estado)
-                                                    <tr>
-                                                        <td style="width: 50%"><strong>Fecha y hora de cierre:</strong></td>
-                                                        <td>{{ date('d/m/Y H:i:s', strtotime($caja->fecha_c)) }}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><strong>Saldo inicial:</strong></td>
-                                                        <td>{{$caja->moneda}} {{ $caja->apertura }}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><strong>Total efectivo:</strong></td>
-                                                        <td>{{$caja->moneda}} {{ $caja->efectivo }}</td>
-                                                    </tr>
-                                                    @if($caja->tarjeta > 0)
-                                                    <tr>
-                                                        <td><strong>Tarjeta visa:</strong></td>
-                                                        <td>{{$caja->moneda}} {{ $caja->tarjeta }}</td>
-                                                    </tr>
-                                                    @endif
-                                                    @if($caja->tarjeta_1 > 0)
-                                                    <tr>
-                                                        <td><strong>Tarjeta mastercard:</strong></td>
-                                                        <td>{{$caja->moneda}} {{ $caja->tarjeta_1 }}</td>
-                                                    </tr>
-                                                    @endif
-                                                    @if($caja->yape > 0)
-                                                    <tr>
-                                                        <td><strong>Total Yape:</strong></td>
-                                                        <td>{{$caja->moneda}} {{ $caja->yape }}</td>
-                                                    </tr>
-                                                    @endif
-                                                    @if($caja->plin > 0)
-                                                    <tr>
-                                                        <td><strong>Total Plin:</strong></td>
-                                                        <td>{{$caja->moneda}} {{ $caja->plin }}</td>
-                                                    </tr>
-                                                    @endif
-                                                    @if($caja->transferencia > 0)
-                                                    <tr>
-                                                        <td><strong>Total transferencia:</strong></td>
-                                                        <td>{{$caja->moneda}} {{ $caja->transferencia }}</td>
-                                                    </tr>
-                                                    @endif
-                                                    @if($caja->otros > 0)
-                                                        <tr>
-                                                            <td><strong>Total otros:</strong></td>
-                                                            <td>{{$caja->moneda}} {{ $caja->otros }}</td>
-                                                        </tr>
-                                                    @endif
-                                                    <tr>
-                                                        <td><strong>Total gastos:</strong></td>
-                                                        <td>{{$caja->moneda}} {{ $caja->gastos }}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><strong>Total devoluciones:</strong></td>
-                                                        <td>{{$caja->moneda}} {{ $caja->devoluciones }}</td>
-                                                    </tr>
+                                                    <div class="alert alert-primary">
+                                                        <div class="row">
+                                                            <div class="col-md-2">
+                                                                <i class="fas fa-check-circle" style="font-size: 65px;color: #28a745;"></i>
+                                                            </div>
+                                                            <div class="col-md-5">
+                                                                <p style="font-size: 18px; margin: 0"><strong>Total efectivo teórico: <br>
+                                                                        <span style="font-size: 25px">{{$caja->moneda}} {{ $caja->efectivo_teorico }}</span></strong></p>
+                                                            </div>
+                                                            <div class="col-md-5 d-flex align-items-center">
+                                                                <strong>
+                                                                    Total efectivo real: {{$caja->moneda}} {{ $caja->efectivo_real }} <br>
+                                                                    Descuadre: <span style="color:{{$caja->descuadre >= 0?'green':'red'}}"> {{$caja->moneda}} {{ $caja->descuadre }}</span>
+                                                                </strong>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <p><strong>Observación:</strong> {{ $caja->observacion_c }}
                                                 @endif
-                                                </tbody>
-                                            </table>
-                                            @if($caja->credito > 0 || $caja->efectivo_usd > 0 || $caja->credito_usd > 0)
-                                            <p class="mt-3"><strong>Otros tipos de venta:</strong></p>
-                                            @endif
-                                            <table class="table table-striped table-hover table-sm">
-                                                <tbody>
-                                                @if($caja->credito > 0)
-                                                    <tr>
-                                                        <td style="width: 50%"><strong>Crédito:</strong></td>
-                                                        <td>{{$caja->moneda}} {{ $caja->credito }}</td>
-                                                    </tr>
-                                                @endif
-                                                @if($caja->efectivo_usd > 0)
-                                                    <tr>
-                                                        <td><strong>Efectivo USD:</strong></td>
-                                                        <td>USD {{ $caja->efectivo_usd}}</td>
-                                                    </tr>
-                                                @endif
-                                                @if($caja->credito_usd > 0)
-                                                    <tr>
-                                                        <td><strong>Crédito USD:</strong></td>
-                                                        <td>USD {{ $caja->credito_usd }}</td>
-                                                    </tr>
-                                                @endif
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                        @if($caja && $caja->estado)
-                                        <div class="alert alert-primary">
-                                            <div class="row">
-                                                <div class="col-md-2">
-                                                    <i class="fas fa-check-circle" style="font-size: 65px;color: #28a745;"></i>
-                                                </div>
-                                                <div class="col-md-5">
-                                                    <p style="font-size: 18px; margin: 0"><strong>Total efectivo teórico: <br>
-                                                            <span style="font-size: 25px">{{$caja->moneda}} {{ $caja->efectivo_teorico }}</span></strong></p>
-                                                </div>
-                                                <div class="col-md-5 d-flex align-items-center">
-                                                    <strong>
-                                                        Total efectivo real: {{$caja->moneda}} {{ $caja->efectivo_real }} <br>
-                                                        Descuadre: <span style="color:{{$caja->descuadre >= 0?'green':'red'}}"> {{$caja->moneda}} {{ $caja->descuadre }}</span>
-                                                    </strong>
-                                                </div>
                                             </div>
                                         </div>
-                                        <p><strong>Observación:</strong> {{ $caja->observacion_c }}
-                                        @endif
                                     </div>
                                 </div>
                             </div>

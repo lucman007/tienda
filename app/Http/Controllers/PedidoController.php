@@ -389,7 +389,7 @@ class PedidoController extends Controller
     }
 
     public function imprimir_historial(Request $request){
-        Log::info($request->idcaja);
+
         $idcaja = $request->idcaja?$request->idcaja:$caja= Cache::get('caja_abierta');
         $ventas = Venta::where('eliminado', 0)
             ->where('idcaja',$idcaja)
@@ -405,7 +405,6 @@ class PedidoController extends Controller
                     })
                     ->orWhere('estado','-');
             })
-            ->whereBetween('fecha', [date('Y-m-d') . ' 00:00:00', date('Y-m-d') . ' 23:59:59'])
             ->orderby('idventa','desc')
             ->get();
 
@@ -454,7 +453,23 @@ class PedidoController extends Controller
             $total_dolares = 0;
             $total_soles = 0;
 
-            foreach ($ventas as $venta) {
+            $total_ventas = Venta::where('eliminado', 0)
+                ->whereHas('facturacion', function($query) {
+                    $query->where(function ($query) {
+                        $query->where('codigo_tipo_documento',01)
+                            ->orWhere('codigo_tipo_documento',03)
+                            ->orWhere('codigo_tipo_documento',30);
+                    })
+                        ->where(function ($query){
+                            $query->where('estado','ACEPTADO')
+                                ->orWhere('estado','PENDIENTE');
+                        })
+                        ->orWhere('estado','-');
+                })
+                ->where('idcaja',$idcaja)
+                ->get();
+
+            foreach ($total_ventas as $venta) {
                 if ($venta->facturacion->codigo_moneda === 'PEN') {
                     $total_soles += $venta->total_venta;
                 } else {

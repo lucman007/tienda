@@ -98,7 +98,7 @@ class GastoController extends Controller
                     break;
                 case'4':
                     $item->tipo_gasto='PAGO DE EMPLEADOS';
-                    $item->descripcion=mb_strtoupper('Pago a: '.$item->empleado['nombre'].' '.$item->empleado['apellidos']);
+                    $item->descripcion=mb_strtoupper('Pago a: '.$item->empleado['nombre'].' '.$item->empleado['apellidos']).' - RECIBO N° '.str_pad($item->correlativo,5,'0', STR_PAD_LEFT);
                     break;
             }
 
@@ -111,12 +111,26 @@ class GastoController extends Controller
         try{
             DB::beginTransaction();
 
+            $correlativo = 1;
+
+            if($request->tipo_egreso == 4){
+                $ultimoCorrelativo = DB::table('gastos')
+                    ->whereNotNull('correlativo')
+                    ->max('correlativo');
+
+                if ($ultimoCorrelativo === null) {
+                    $correlativo = 1;
+                } else {
+                    $correlativo = $ultimoCorrelativo + 1;
+                }
+            }
+
             $egreso=new Gastos();
             $egreso->idcajero=auth()->user()->idempleado;
             $egreso->fecha=date('Y-m-d H:i:s');
             $egreso->idempleado=$request->idempleado;
             $egreso->idcaja=MainHelper::obtener_idcaja();
-            $egreso->descripcion=$request->descripcion;
+            $egreso->descripcion=mb_strtoupper($request->descripcion);
             $egreso->tipo_pago_empleado=$request->tipo_pago_empleado;
             $egreso->mes_pago_empleado=$request->mes_pago_empleado;
             $egreso->tipo_comprobante=$request->tipo_comprobante;
@@ -124,6 +138,7 @@ class GastoController extends Controller
             $egreso->monto=$request->monto;
             $egreso->tipo=$request->tipo_movimiento;
             $egreso->tipo_egreso=$request->tipo_movimiento==1?$request->tipo_egreso:-1;
+            $egreso->correlativo=$correlativo;
             $egreso->save();
 
             DB::commit();

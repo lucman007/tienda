@@ -100,13 +100,6 @@ class TrabajadorController extends Controller
             ->where('idempleado',$id)
             ->first();
 	    $trabajador->persona;
-
-	    /*$trabajador=DB::table('empleado')
-				    ->join('persona', 'persona.idpersona', '=', 'empleado.idempleado')
-				    ->select('empleado.*','persona.*')
-				    ->where('eliminado','=',0)
-	                ->where('idempleado','=',$id)
-	                ->first();*/
 	    $trabajador->fecha_ingreso=date('Y-m-d', strtotime($trabajador->fecha_ingreso));
 
 	    return response()->json($trabajador);
@@ -134,12 +127,6 @@ class TrabajadorController extends Controller
 	    $persona->trabajador()->save($trabajador);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
 	    $trabajador=Trabajador::findOrFail($id);
@@ -173,7 +160,6 @@ class TrabajadorController extends Controller
 	    $trabajador=Trabajador::find($request->idtrabajador);
 	    $trabajador->usuario=$request->usuario;
 	    $trabajador->es_usuario=$request->es_usuario;
-	    //$trabajador->acceso=$request->acceso;
 	    if($request->edicion_password || $request->existe_password==null){
 		    $trabajador->password=bcrypt($request->password);
 	    }
@@ -214,9 +200,9 @@ class TrabajadorController extends Controller
         $view = view('trabajadores/imprimir',$gastos);
         $html=$view->render();
         $pdf=new Html2Pdf('P','A4','es');
-        $pdf->pdf->SetTitle('Pago trabajador');
+        $pdf->pdf->SetTitle('PAGOS DE TRABAJADOR');
         $pdf->writeHTML($html);
-        $pdf->output('Pago-trabajador.pdf');
+        $pdf->output('PAGOS-DE-TRABAJADOR.pdf');
     }
 
     public function exportar_pagos($id,$fecha){
@@ -225,7 +211,6 @@ class TrabajadorController extends Controller
     }
 
     public function obtener_gastos_empleado($id,$fecha){
-        Log::info($fecha);
         $gastos=Gastos::whereBetween('fecha',[$fecha.'-01 00:00:00',$fecha.'-31 23:59:59'])
         ->where('idempleado',$id)
             ->where('tipo_egreso',4)
@@ -272,6 +257,48 @@ class TrabajadorController extends Controller
         }
 
         return ['gastos'=>$gastos,'total_pagado'=>$total_pagado,'extras'=>$extras];
+    }
+
+    public function imprimir_recibo($idgasto){
+
+        $pago = Gastos::find($idgasto);
+
+        $meses = [
+            '01' => 'Enero',
+            '02' => 'Febrero',
+            '03' => 'Marzo',
+            '04' => 'Abril',
+            '05' => 'Mayo',
+            '06' => 'Junio',
+            '07' => 'Julio',
+            '08' => 'Agosto',
+            '09' => 'Septiembre',
+            '10' => 'Octubre',
+            '11' => 'Noviembre',
+            '12' => 'Diciembre',
+        ];
+
+        switch($pago->tipo_pago_empleado){
+            case '1':
+                $pago->tipo='Pago de sueldo';
+                break;
+            case'2':
+                $pago->tipo='Adelanto de sueldo';
+                break;
+            case'3':
+                $pago->tipo='Bonificación / aguinaldo';
+                break;
+        }
+
+        $pago->mes = $meses[$pago->mes_pago_empleado];
+
+        $view = view('caja/imprimir/recibo',['pago'=>$pago]);
+        $html=$view->render();
+        $pdf=new Html2Pdf('P',[72,350],'es');
+        $pdf->pdf->SetTitle('Pago trabajador');
+        $pdf->writeHTML($html);
+        $pdf->output('RECIBO-DE-PAGO.pdf');
+
     }
 
 }

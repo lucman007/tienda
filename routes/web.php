@@ -93,6 +93,7 @@ Route::group(['middleware' => ['can:Mantenimiento: empleados']], function () {
     Route::post('trabajadores/update', 'TrabajadorController@update')->name('actualizarTrabajador');
     Route::post('trabajadores/verificar', 'TrabajadorController@verificarUsuario')->name('verificarUsuario');
     Route::get('trabajadores/pagos/{id}', 'TrabajadorController@pagos');
+    Route::get('trabajadores/imprimir/{id}', 'TrabajadorController@imprimir_recibo');
     Route::post('trabajadores/obtener-pagos', 'TrabajadorController@obtenerPagos');
     Route::get('trabajadores/imprimir-pagos/{id}/{fecha}', 'TrabajadorController@imprimir_pagos');
     Route::get('trabajadores/exportar-pagos/{id}/{fecha}', 'TrabajadorController@exportar_pagos');

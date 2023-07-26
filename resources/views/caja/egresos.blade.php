@@ -73,16 +73,20 @@
                                                     <td>S/{{$item->monto}}</td>
                                                     @if($tipo_movimiento != 3)
                                                     <td class="botones-accion">
-                                                        <a @click="borrarGastoIngreso({{$item->idgasto}})" href="javascript:void(0)">
-                                                            <button class="btn btn-danger" title="Eliminar"><i
-                                                                        class="fas fa-trash-alt"></i>
-                                                            </button>
+                                                        <a href="javascript:void(0)" @click="borrarGastoIngreso({{$item->idgasto}})" class="btn btn-danger" title="Eliminar"><i
+                                                                    class="fas fa-trash-alt"></i>
                                                         </a>
                                                         @can('Mantenimiento: empleados')
                                                             @if($item->tipo_egreso==4)
-                                                            <a :href="'/trabajadores/pagos/'+'{{$item->idempleado}}'">
-                                                                <button class="btn btn-warning" title="Historial de pagos de empleado"><i class="fas fa-coins"></i></button>
-                                                            </a>
+                                                                <b-button :href="'/trabajadores/pagos/'+'{{$item->idempleado}}'" variant="warning" title="Pagos de empleado">
+                                                                    <i class="fas fa-coins"></i>
+                                                                </b-button>
+                                                                <b-button target="_blank" :href="'/trabajadores/imprimir/'+'{{$item->idgasto}}'" variant="success" title="Imprimir">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-printer" viewBox="0 0 16 16">
+                                                                        <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>
+                                                                        <path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2H5zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"/>
+                                                                    </svg>
+                                                                </b-button>
                                                             @endif
                                                         @endcan
                                                     </td>
@@ -188,13 +192,17 @@
                     </div>
                 </div>
                 <div v-show="tipo_egreso==4" class="row">
-                    <div class="col-lg-8 form-group">
+                    <div class="col-lg-8">
                         <label>Empleado:</label>
-                        <input disabled type="text" v-model="nombre" name="comprobanteReferencia"
-                               class="form-control">
-                        <b-button @click="abrir_modal('empleado')" variant="primary" class="boton_adjunto">
-                            Seleccionar
-                        </b-button>
+                        <b-input-group>
+                            <input disabled type="text" v-model="nombre" name="comprobanteReferencia"
+                                   class="form-control">
+                            <b-input-group-append>
+                                <b-button @click="abrir_modal('empleado')" variant="primary">
+                                    Seleccionar
+                                </b-button>
+                            </b-input-group-append>
+                        </b-input-group>
                     </div>
                     <div class="col-lg-4">
                         <div class="form-group">

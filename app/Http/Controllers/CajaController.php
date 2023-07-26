@@ -27,7 +27,7 @@ class CajaController extends Controller
 
         $fecha=$fecha??date('Y-m-d');
         $turno = $request->get('turno')??1;
-        $total_caja = 0;
+        $total_caja = ['total_cierre'=>0];
 
         $caja_abierta = null;
 
@@ -52,7 +52,6 @@ class CajaController extends Controller
 
         $cajas_del_dia = Caja::where('fecha_a','LIKE',$fecha.'%')
             ->get();
-
 
         return view('caja.index',['usuario'=>auth()->user()->persona],
             [
@@ -203,7 +202,6 @@ class CajaController extends Controller
             $pago = DataTipoPago::getTipoPago();
             $find = array_search($item->tipo_pago, array_column($pago,'num_val'));
             $item->tipo_pago = mb_strtoupper($pago[$find]['label']);
-
             $suma += $item->total_venta;
         }
 
@@ -337,7 +335,6 @@ class CajaController extends Controller
 
 
         foreach ($gastos as $gasto) {
-            $sumas['gastos'] += $gasto->monto;
             switch ($gasto->tipo) {
                 case 1:
                     $sumas['gastos'] += $gasto->monto;
@@ -355,7 +352,6 @@ class CajaController extends Controller
 
         return array_merge(['idcaja' => $caja->idcaja, 'apertura' => $caja->apertura, 'total_cierre' => $total_cierre], $sumas);
     }
-
 
     public function cierre_automatico($idcaja){
         $request = new Request();
