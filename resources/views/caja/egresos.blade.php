@@ -235,7 +235,7 @@
                     <div v-show="tipo_pago_empleado != 3" class="col-lg-3">
                         <div class="form-group">
                             <label>Monto a pagar:</label>
-                            <input :disabled="tipo_pago_empleado==1 || monto==0" autocomplete="off" type="text"
+                            <input autocomplete="off" type="text"
                                    v-model="monto" class="form-control">
                         </div>
                     </div>

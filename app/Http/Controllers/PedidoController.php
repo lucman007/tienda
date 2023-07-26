@@ -389,7 +389,10 @@ class PedidoController extends Controller
     }
 
     public function imprimir_historial(Request $request){
+        Log::info($request->idcaja);
+        $idcaja = $request->idcaja?$request->idcaja:$caja= Cache::get('caja_abierta');
         $ventas = Venta::where('eliminado', 0)
+            ->where('idcaja',$idcaja)
             ->whereHas('facturacion', function($query) {
                 $query->where(function ($query) {
                     $query->where('codigo_tipo_documento',01)
@@ -444,27 +447,20 @@ class PedidoController extends Controller
                         })
                         ->orWhere('estado','-');
                 })
-                //->whereBetween('fecha', [date('Y-m-d') . ' 00:00:00', date('Y-m-d') . ' 23:59:59'])
                 ->where('idcaja',$idcaja)
                 ->orderby('idventa','desc')
                 ->paginate(50);
 
-            $total = Venta::where('eliminado', 0)
-                ->whereHas('facturacion', function($query) {
-                    $query->where(function ($query) {
-                        $query->where('codigo_tipo_documento',01)
-                            ->orWhere('codigo_tipo_documento',03)
-                            ->orWhere('codigo_tipo_documento',30);
-                    })
-                        ->where(function ($query){
-                            $query->where('estado','ACEPTADO')
-                                ->orWhere('estado','PENDIENTE');
-                        })
-                        ->orWhere('estado','-');
-                })
-                //->whereBetween('fecha', [date('Y-m-d') . ' 00:00:00', date('Y-m-d') . ' 23:59:59'])
-                ->where('idcaja',$idcaja)
-                ->sum('total_venta');
+            $total_dolares = 0;
+            $total_soles = 0;
+
+            foreach ($ventas as $venta) {
+                if ($venta->facturacion->codigo_moneda === 'PEN') {
+                    $total_soles += $venta->total_venta;
+                } else {
+                    $total_dolares += $venta->total_venta;
+                }
+            }
 
             $emisor = new Emisor();
 
@@ -501,8 +497,10 @@ class PedidoController extends Controller
                 'ventas' => $ventas,
                 'textoBuscado'=>$consulta,
                 'usuario'=>auth()->user()->persona,
-                'total'=>$total,
-                'agent'=>$agent
+                'total_soles'=>$total_soles,
+                'total_dolares'=>$total_dolares,
+                'agent'=>$agent,
+                'idcaja'=>$idcaja
             ]);
         }
     }
@@ -574,58 +572,56 @@ class PedidoController extends Controller
 
     }
 
-    public function borrarItemPedido(Request $request){
-        try{
-
+    public function borrarItemPedido(Request $request)
+    {
+        try {
             DB::beginTransaction();
-            $orden = Orden::find($request->idorden);
-            $orden->total = $request->total;
-            $orden->save();
 
-            $detalle = [];
-            $items = json_decode($request->items, TRUE);
-            $i = 1;
+            Orden::find($request->idorden)->update(['total' => $request->total]);
 
+            $items = collect(json_decode($request->items, true));
             DB::table('orden_detalle')->where('idorden', $request->idorden)->delete();
 
-            foreach ($items as $item) {
-                $detalle['num_item'] = $i;
-                $detalle['cantidad'] = $item['cantidad'];
-                $detalle['monto'] = $item['precio'];
-                $detalle['descuento'] = 0;
-                $detalle['descripcion'] = mb_strtoupper($item['presentacion']);
-                $detalle['idproducto'] = $item['idproducto'];
-                $detalle['idorden'] = $request->idorden;
-                $detalle['items_kit'] = json_encode($item['items_kit']);
+            $detalle = [];
+            $items->each(function ($item, $index) use ($detalle, $request) {
+                $detalle = [
+                    'num_item' => $index + 1,
+                    'cantidad' => $item['cantidad'],
+                    'monto' => $item['precio'],
+                    'descuento' => 0,
+                    'descripcion' => mb_strtoupper($item['presentacion']),
+                    'idproducto' => $item['idproducto'],
+                    'idorden' => $request->idorden,
+                    'items_kit' => json_encode($item['items_kit']),
+                ];
                 DB::table('orden_detalle')->insert($detalle);
-                $i++;
-            }
-
-
+            });
 
             DB::commit();
 
             $orden = Orden::find($request->idorden);
             $productos = $orden->productos;
 
-            foreach ($productos as $producto) {
-                $producto->precio = $producto->detalle->monto;
-                $producto->total = number_format($producto->detalle->monto * $producto->detalle->cantidad,2);
-                $producto->cantidad = $producto->detalle->cantidad;
-                $producto->num_item = $producto->detalle->num_item;
-                $producto->presentacion = $producto->detalle->descripcion;
+            $productos->each(function ($producto) {
+                $detalle = $producto->detalle;
+                $producto->precio = $detalle->monto;
+                $producto->total = number_format($detalle->monto * $detalle->cantidad, 2);
+                $producto->cantidad = $detalle->cantidad;
+                $producto->num_item = $detalle->num_item;
+                $producto->presentacion = $detalle->descripcion;
+                $producto->items_kit = json_decode($detalle->items_kit, true);
                 $producto->warning = false;
                 $producto->loading = false;
-            }
+            });
 
             return $productos;
 
-        } catch (\Exception $e){
+        } catch (\Exception $e) {
             DB::rollBack();
-           return $e->getMessage();
+            return $e->getMessage();
         }
-
     }
+
 
     public function actualizarDetalle(Request $request){
 

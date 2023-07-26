@@ -27,6 +27,7 @@ class CajaController extends Controller
 
         $fecha=$fecha??date('Y-m-d');
         $turno = $request->get('turno')??1;
+        $total_caja = 0;
 
         $caja_abierta = null;
 
@@ -38,6 +39,9 @@ class CajaController extends Controller
         if($caja){
             $caja->email = json_decode(cache('config')['mail_contact'], true)['notificacion_caja'];
             $caja->moneda = 'S/';
+            $rq = new Request();
+            $rq->idcaja = $caja->idcaja;
+            $total_caja = $this->obtener_datos_cierre($rq);
         }
 
         if($fecha == date('Y-m-d')){
@@ -49,12 +53,14 @@ class CajaController extends Controller
         $cajas_del_dia = Caja::where('fecha_a','LIKE',$fecha.'%')
             ->get();
 
+
         return view('caja.index',['usuario'=>auth()->user()->persona],
             [
                 'caja'=>$caja,
                 'caja_abierta'=>$caja_abierta,
                 'cajas'=>$cajas_del_dia,
-                'fecha'=>$fecha
+                'fecha'=>$fecha,
+                'total_caja'=>$total_caja['total_cierre']
             ]);
     }
 
@@ -93,13 +99,15 @@ class CajaController extends Controller
             $caja=Caja::find($idcaja);
             $caja->efectivo_teorico=$request->efectivo_teorico;
             $caja->efectivo=$request->efectivo;
-            $caja->tarjeta=$request->tarjeta_visa;
-            $caja->tarjeta_1=$request->tarjeta_mastercard;
+            $caja->tarjeta=$request->visa;
+            $caja->tarjeta_1=$request->mastercard;
             $caja->plin=$request->plin;
             $caja->yape=$request->yape;
             $caja->transferencia=$request->transferencia;
             $caja->devoluciones=$request->devoluciones;
             $caja->credito=$request->credito;
+            $caja->credito_usd=$request->credito_usd;
+            $caja->efectivo_usd=$request->efectivo_usd;
             $caja->extras=$request->extras;
             $caja->gastos=$request->gastos;
             $caja->otros=$request->otros;
@@ -270,34 +278,19 @@ class CajaController extends Controller
 
     public function obtener_datos_cierre(Request $request)
     {
-        $suma_ventas_efectivo=0;
-        $suma_ventas_credito=0;
-        $suma_ventas_tarjeta_visa=0;
-        $suma_ventas_tarjeta_mastercard=0;
-        $suma_ventas_yape=0;
-        $suma_ventas_plin=0;
-        $suma_ventas_tranferencia=0;
-        $suma_otros=0;
-        $suma_devoluciones=0;
-        $suma_gastos=0;
-        $suma_extras=0;
-        $suma_dolares=0;
         $idcaja = $request->idcaja;
 
         $ventas = Venta::with("pago")
             ->where('eliminado', 0)
             ->where('idcaja', $idcaja)
             ->whereHas('facturacion', function($query) {
-                $query->where(function ($query) {
-                    $query->where('codigo_tipo_documento',01)
-                        ->orWhere('codigo_tipo_documento',03)
-                        ->orWhere('codigo_tipo_documento',30);
-                })
+                $query->whereIn('codigo_tipo_documento', [01, 03, 30])
                     ->where(function ($query){
                         $query->where('estado','ACEPTADO')
-                            ->orWhere('estado','PENDIENTE');
-                    })
-                    ->orWhere('estado','-');
+                            ->orWhere('estado','PENDIENTE')
+                            ->orWhere('estado','-');
+                    });
+
             })
             ->get();
 
@@ -305,79 +298,64 @@ class CajaController extends Controller
 
         $caja = Caja::find($idcaja);
 
-        foreach ($ventas as $venta) {
-
-            foreach ($venta->pago as $pago){
-                if($venta->facturacion->codigo_moneda=='PEN'){
-                    switch($pago->tipo){
-                        case 1:
-                            $suma_ventas_efectivo += $pago->monto;
-                            break;
-                        case 2:
-                            $suma_ventas_credito += $pago->monto;
-                            break;
-                        case 3:
-                            $suma_ventas_tarjeta_visa += $pago->monto;
-                            break;
-                        case 5:
-                            $suma_ventas_yape += $pago->monto;
-                            break;
-                        case 6:
-                            $suma_ventas_plin += $pago->monto;
-                            break;
-                        case 7:
-                            $suma_ventas_tarjeta_mastercard += $pago->monto;
-                            break;
-                        case 8:
-                            $suma_otros += $pago->monto;
-                            break;
-                        case 9:
-                            $suma_ventas_tranferencia += $pago->monto;
-                            break;
-                    }
-                } else{
-                    $suma_dolares += $pago->monto;
-                }
-            }
-
-        }
-
-        foreach ($gastos as $gasto) {
-            switch($gasto->tipo){
-                case 1:
-                    $suma_gastos += $gasto->monto;
-                    break;
-                case 2:
-                    $suma_extras += $gasto->monto;
-                    break;
-                case 3:
-                    $suma_devoluciones += $gasto->monto;
-                    break;
-            }
-
-        }
-
-        $total_cierre=$caja->apertura+$suma_ventas_efectivo+$suma_extras-$suma_gastos-$suma_devoluciones;
-
-        return [
-            'idcaja'=>$caja->idcaja,
-            'apertura'=>$caja->apertura,
-            'efectivo'=>$suma_ventas_efectivo,
-            'tarjeta_visa'=>$suma_ventas_tarjeta_visa,
-            'tarjeta_mastercard'=>$suma_ventas_tarjeta_mastercard,
-            'yape'=>$suma_ventas_yape,
-            'plin'=>$suma_ventas_plin,
-            'transferencia'=>$suma_ventas_tranferencia,
-            'otros'=>$suma_otros,
-            'credito'=>$suma_ventas_credito,
-            'gastos'=>$suma_gastos,
-            'extras'=>$suma_extras,
-            'total_cierre'=>$total_cierre,
-            'devoluciones'=>$suma_devoluciones,
-            'dolares'=>$suma_dolares
+        $sumas = [
+            'efectivo' => 0,
+            'visa' => 0,
+            'mastercard' => 0,
+            'yape' => 0,
+            'plin' => 0,
+            'transferencia' => 0,
+            'otros' => 0,
+            'credito' => 0,
+            'credito_usd' => 0,
+            'gastos' => 0,
+            'extras' => 0,
+            'devoluciones' => 0,
+            'efectivo_usd' => 0,
         ];
 
+        $tipo_pago = DataTipoPago::getTipoPago();
+
+        foreach ($ventas as $venta) {
+            foreach ($venta->pago as $pago) {
+                $tipoPago = collect($tipo_pago)->firstWhere('num_val', $pago->tipo);
+                if ($venta->facturacion->codigo_moneda === 'PEN') {
+                    if ($tipoPago) {
+                        $sumas[$tipoPago['text_val']] += $pago->monto;
+                    } else {
+                        $sumas['otros'] += $pago->monto;
+                    }
+                } else {
+                    if($tipoPago['text_val'] == 'credito'){
+                        $sumas['credito_usd'] += $pago->monto;
+                    } else {
+                        $sumas['efectivo_usd'] += $pago->monto;
+                    }
+                }
+            }
+        }
+
+
+        foreach ($gastos as $gasto) {
+            $sumas['gastos'] += $gasto->monto;
+            switch ($gasto->tipo) {
+                case 1:
+                    $sumas['gastos'] += $gasto->monto;
+                    break;
+                case 2:
+                    $sumas['extras'] += $gasto->monto;
+                    break;
+                case 3:
+                    $sumas['devoluciones'] += $gasto->monto;
+                    break;
+            }
+        }
+
+        $total_cierre = $caja->apertura + $sumas['efectivo'] + $sumas['extras'] - $sumas['gastos'] - $sumas['devoluciones'];
+
+        return array_merge(['idcaja' => $caja->idcaja, 'apertura' => $caja->apertura, 'total_cierre' => $total_cierre], $sumas);
     }
+
 
     public function cierre_automatico($idcaja){
         $request = new Request();

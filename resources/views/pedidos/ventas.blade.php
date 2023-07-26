@@ -24,12 +24,15 @@
         <div class="row">
             <div class="col-sm-12 mt-4">
                 <div class="card">
-                    <div class="card-header">
-                        Listado de ventas
-                    </div>
                     <div class="card-body">
                         @if($textoBuscado=='')
-                            <span class="float-right d-inline-flex">Total del día: <strong style="margin: -7px 0 0 10px;"><h3>S/ {{$total}}</h3></strong></span>
+                            <h3 class="float-right d-inline-flex">
+                                <span style="font-size: 12px; margin: 8px;">Total del día:</span> S/ {{number_format($total_soles,2)}}
+                                @if($total_dolares > 0)
+                                <span style="font-size: 12px; margin: 8px 8px 0 20px;">Total dólares:</span> USD {{number_format($total_dolares,2)}}
+                                @endif
+                            </h3>
+
                         @endif
                         <div class="table-responsive tabla-gestionar" style="min-height: 300px">
                             <table class="table table-striped table-hover table-sm">
@@ -296,7 +299,7 @@
                      @if(!$agent->isDesktop())
                         let src = "{{url('/ventas/imprimir').'/'}}"+file_or_id;
                         if(file_or_id==null) {
-                            src = "{{url('/pedidos/imprimir-historial/')}}";
+                            src = "{{url('/pedidos/imprimir-historial').($idcaja?'?idcaja='.$idcaja:'')}}";
                         }
                         @if(isset(json_decode(cache('config')['interfaz'], true)['rawbt']) && json_decode(cache('config')['interfaz'], true)['rawbt'])
                             axios.get(src+'?rawbt=true')
@@ -316,7 +319,7 @@
                         document.body.appendChild(iframe);
                         iframe.style.display = 'none';
                         if(file_or_id==null) {
-                            iframe.src = "/pedidos/imprimir-historial/";
+                            iframe.src = "{{url('/pedidos/imprimir-historial').($idcaja?'?idcaja='.$idcaja:'')}}";
                         } else{
                             iframe.src = "/ventas/imprimir/"+file_or_id;
                         }

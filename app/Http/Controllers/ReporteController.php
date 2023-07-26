@@ -58,25 +58,18 @@ class ReporteController extends Controller
 
     public function func_filter($query){
         if($this->solo_comprobantes) {
-            $query->where(function ($query) {
-                $query->where('codigo_tipo_documento', 01)
-                    ->orWhere('codigo_tipo_documento', 03);
-            })
-                ->where(function ($query) {
-                    $query->where('estado', 'ACEPTADO')
-                        ->orWhere('estado', 'PENDIENTE');
+            $query->whereIn('codigo_tipo_documento', [01, 03])
+                ->where(function ($query){
+                    $query->where('estado','ACEPTADO')
+                        ->orWhere('estado','PENDIENTE');
                 });
         } else {
-            $query->where(function ($query) {
-                $query->where('codigo_tipo_documento', 01)
-                    ->orWhere('codigo_tipo_documento', 03)
-                    ->orWhere('codigo_tipo_documento', 30);
-            })
-                ->where(function ($query) {
-                    $query->where('estado', 'ACEPTADO')
-                        ->orWhere('estado', 'PENDIENTE');
-                })
-                ->orWhere('estado', '-');
+            $query->whereIn('codigo_tipo_documento', [01, 03, 30])
+                ->where(function ($query){
+                    $query->where('estado','ACEPTADO')
+                        ->orWhere('estado','PENDIENTE')
+                        ->orWhere('estado','-');
+                });
         }
     }
 

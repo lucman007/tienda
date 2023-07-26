@@ -5,6 +5,7 @@ namespace sysfact\Http\Controllers;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use Spatie\Permission\Models\Role;
 use Spipu\Html2Pdf\Html2Pdf;
@@ -224,13 +225,29 @@ class TrabajadorController extends Controller
     }
 
     public function obtener_gastos_empleado($id,$fecha){
-        $gastos=Gastos::where('mes_pago_empleado',explode('-',$fecha)[1])//whereBetween('fecha',[$fecha.'-01 00:00:00',$fecha.'-31 23:59:59'])
+        Log::info($fecha);
+        $gastos=Gastos::whereBetween('fecha',[$fecha.'-01 00:00:00',$fecha.'-31 23:59:59'])
         ->where('idempleado',$id)
             ->where('tipo_egreso',4)
             ->orderby('idgasto','desc')->get();
 
         $total_pagado=0;
         $extras=0;
+
+        $meses = [
+            '01' => 'Enero',
+            '02' => 'Febrero',
+            '03' => 'Marzo',
+            '04' => 'Abril',
+            '05' => 'Mayo',
+            '06' => 'Junio',
+            '07' => 'Julio',
+            '08' => 'Agosto',
+            '09' => 'Septiembre',
+            '10' => 'Octubre',
+            '11' => 'Noviembre',
+            '12' => 'Diciembre',
+        ];
 
         foreach ($gastos as $item){
 
@@ -251,7 +268,7 @@ class TrabajadorController extends Controller
                     break;
             }
 
-
+            $item->mes = $meses[$item->mes_pago_empleado];
         }
 
         return ['gastos'=>$gastos,'total_pagado'=>$total_pagado,'extras'=>$extras];

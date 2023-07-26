@@ -20,6 +20,8 @@ class Caja extends Model
         'tarjeta',
         'devoluciones',
         'credito',
+        'credito_usd',
+        'efectivo_usd',
         'extras',
         'gastos',
         'observacion_c',

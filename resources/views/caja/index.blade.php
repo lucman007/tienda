@@ -38,7 +38,7 @@
                                             <a href="/caja/{{date('Y-m-d',strtotime($caja_abierta->fecha_a))}}?turno={{$caja_abierta->turno}}" class="btn btn-primary">Ir a la caja abierta</a>
                                         </div>
                                     </div>
-                                        @else
+                                    @else
                                         @if($fecha == date('Y-m-d'))
                                         <div class="row">
                                             <div class="col-md-6 offset-md-3 mt-3">
@@ -55,7 +55,7 @@
                                     <b-nav-item href="/caja/{{$fecha}}?turno={{$i}}" @if($i == $caja->turno) active @endif>TURNO {{$i}}</b-nav-item>
                                     @endfor
                                     @if($fecha == date('Y-m-d'))
-                                    <b-nav-item href="javascript:void(0)" @if($caja->estado) v-b-modal.modal-1 @else disabled onclick="alert('Debes cerrar el primer turno para abrir otro')" @endif><i class="fas fa-plus"></i> Abrir caja</b-nav-item>
+                                    <b-nav-item href="javascript:void(0)" @if(!$caja_abierta) v-b-modal.modal-1 @else disabled onclick="alert('Debes cerrar el turno {{$caja_abierta->turno}} para abrir otro')" @endif><i class="fas fa-plus"></i> Abrir caja</b-nav-item>
                                     @endif
                                 </b-nav>
                             </div>
@@ -142,13 +142,23 @@
                                                         <i class="fas fa-list"></i> Ventas del turno
                                                     </b-button>
                                             </div>
+                                            @if(!($caja && $caja->estado))
+                                            <div class="col-lg-12">
+                                               <div class="row">
+                                                   <div class="col-lg-4">
+                                                       Total en caja
+                                                       <h1 class="text-success"><strong>S/ {{number_format($total_caja,2)}}</strong></h1>
+                                                   </div>
+                                               </div>
+                                            </div>
+                                            @endif
                                         </div>
                                         <div class="table-responsive tabla-gestionar">
                                             <table class="table table-striped table-hover table-sm">
                                                 <tbody>
                                                 @if($caja && $caja->estado)
                                                     <tr>
-                                                        <td><strong>Fecha y hora de cierre:</strong></td>
+                                                        <td style="width: 50%"><strong>Fecha y hora de cierre:</strong></td>
                                                         <td>{{ date('d/m/Y H:i:s', strtotime($caja->fecha_c)) }}</td>
                                                     </tr>
                                                     <tr>
@@ -195,12 +205,6 @@
                                                             <td>{{$caja->moneda}} {{ $caja->otros }}</td>
                                                         </tr>
                                                     @endif
-                                                    @if($caja->credito > 0)
-                                                    <tr>
-                                                        <td><strong>Total crédito:</strong></td>
-                                                        <td>{{$caja->moneda}} {{ $caja->credito }}</td>
-                                                    </tr>
-                                                    @endif
                                                     <tr>
                                                         <td><strong>Total gastos:</strong></td>
                                                         <td>{{$caja->moneda}} {{ $caja->gastos }}</td>
@@ -208,6 +212,31 @@
                                                     <tr>
                                                         <td><strong>Total devoluciones:</strong></td>
                                                         <td>{{$caja->moneda}} {{ $caja->devoluciones }}</td>
+                                                    </tr>
+                                                @endif
+                                                </tbody>
+                                            </table>
+                                            @if($caja->credito > 0 || $caja->efectivo_usd > 0 || $caja->credito_usd > 0)
+                                            <p class="mt-3"><strong>Otros tipos de venta:</strong></p>
+                                            @endif
+                                            <table class="table table-striped table-hover table-sm">
+                                                <tbody>
+                                                @if($caja->credito > 0)
+                                                    <tr>
+                                                        <td style="width: 50%"><strong>Crédito:</strong></td>
+                                                        <td>{{$caja->moneda}} {{ $caja->credito }}</td>
+                                                    </tr>
+                                                @endif
+                                                @if($caja->efectivo_usd > 0)
+                                                    <tr>
+                                                        <td><strong>Efectivo USD:</strong></td>
+                                                        <td>USD {{ $caja->efectivo_usd}}</td>
+                                                    </tr>
+                                                @endif
+                                                @if($caja->credito_usd > 0)
+                                                    <tr>
+                                                        <td><strong>Crédito USD:</strong></td>
+                                                        <td>USD {{ $caja->credito_usd }}</td>
                                                     </tr>
                                                 @endif
                                                 </tbody>
@@ -394,6 +423,9 @@
     </template>
     <div class="container">
         <div class="row">
+            <div class="col-lg-12">
+                <p><strong>Resumen de ingresos y egresos</strong></p>
+            </div>
             <div class="col-md-3">
                 <div class="form-group">
                     <label for="apertura">Saldo inicial:</label>
@@ -418,22 +450,16 @@
                     <input type="text" v-model="gastos" class="form-control" disabled>
                 </div>
             </div>
-            <div v-show="credito > 0" class="col-md-3">
-                <div class="form-group">
-                    <label for="credito">Ventas a crédito:</label>
-                    <input type="text" v-model="credito" class="form-control" disabled>
-                </div>
-            </div>
-            <div v-show="tarjeta_visa > 0" class="col-md-3">
+            <div v-show="visa > 0" class="col-md-3">
                 <div class="form-group">
                     <label for="tarjeta">Tarjeta visa:</label>
-                    <input type="text" v-model="tarjeta_visa" class="form-control" disabled>
+                    <input type="text" v-model="visa" class="form-control" disabled>
                 </div>
             </div>
-            <div v-show="tarjeta_mastercard > 0" class="col-md-3">
+            <div v-show="mastercard > 0" class="col-md-3">
                 <div class="form-group">
                     <label for="tarjeta">Tarjeta mastercard:</label>
-                    <input type="text" v-model="tarjeta_mastercard" class="form-control" disabled>
+                    <input type="text" v-model="mastercard" class="form-control" disabled>
                 </div>
             </div>
             <div v-show="yape > 0" class="col-md-3">
@@ -466,12 +492,6 @@
                     <input type="text" v-model="devoluciones" class="form-control" disabled>
                 </div>
             </div>
-            <div v-show="dolares > 0" class="col-md-3">
-                <div class="form-group">
-                    <label>Ventas en dólares:</label>
-                    <h3>USD @{{ dolares }}</h3>
-                </div>
-            </div>
             <div class="col-lg-12">
                 <div class="row">
                     <div class="col-lg-4">
@@ -490,6 +510,29 @@
                         <div class="form-group">
                             <label for="tarjeta">Descuadre:</label>
                             <input type="text" v-model="descuadre" class="form-control" disabled>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-12" v-if="credito > 0 || credito_usd > 0 || efectivo_usd > 0">
+                <p class="mt-3"><strong>Otros tipos de venta</strong></p>
+                <div class="row">
+                    <div v-show="efectivo_usd > 0" class="col-md-3">
+                        <div class="form-group">
+                            <label>Efectivo en dólares:</label>
+                            <h3>USD @{{ efectivo_usd }}</h3>
+                        </div>
+                    </div>
+                    <div v-show="credito > 0" class="col-md-3">
+                        <div class="form-group">
+                            <label>Ventas a crédito (S/):</label>
+                            <input type="text" v-model="credito" class="form-control" disabled>
+                        </div>
+                    </div>
+                    <div v-show="credito_usd > 0" class="col-md-3">
+                        <div class="form-group">
+                            <label>Ventas a crédito (USD):</label>
+                            <input type="text" v-model="credito_usd" class="form-control" disabled>
                         </div>
                     </div>
                 </div>
@@ -559,8 +602,9 @@
                 efectivo:'',
                 extras:'',
                 credito:'',
-                tarjeta_visa:'',
-                tarjeta_mastercard:'',
+                credito_usd:'',
+                visa:'',
+                mastercard:'',
                 yape:'',
                 plin:'',
                 transferencia:'',
@@ -568,7 +612,7 @@
                 gastos:'',
                 devoluciones:'',
                 efectivo_teorico:'',
-                dolares:'',
+                efectivo_usd:'',
                 observacion_c:'',
                 notificacion: <?php echo json_encode(json_decode(cache('config')['interfaz'], true)['notificar_caja']??false)??false ?>,
                 observacion_a:'',
@@ -658,16 +702,17 @@
                             this.idcaja=cierre.idcaja;
                             this.apertura=cierre.apertura;
                             this.efectivo=cierre.efectivo.toFixed(2);
-                            this.tarjeta_visa=cierre.tarjeta_visa.toFixed(2);
-                            this.tarjeta_mastercard=cierre.tarjeta_mastercard.toFixed(2);
+                            this.visa=cierre.visa.toFixed(2);
+                            this.mastercard=cierre.mastercard.toFixed(2);
                             this.yape=cierre.yape.toFixed(2);
                             this.transferencia=cierre.transferencia.toFixed(2);
                             this.plin=cierre.plin.toFixed(2);
                             this.otros=cierre.otros.toFixed(2);
                             this.devoluciones=cierre.devoluciones.toFixed(2);
                             this.credito=cierre.credito.toFixed(2);
+                            this.credito_usd=cierre.credito_usd.toFixed(2);
                             this.gastos=cierre.gastos.toFixed(2);
-                            this.dolares=cierre.dolares.toFixed(2);
+                            this.efectivo_usd=cierre.efectivo_usd.toFixed(2);
                             this.extras=cierre.extras.toFixed(2);
                             this.efectivo_teorico=cierre.total_cierre.toFixed(2);
                             this.total_real = cierre.total_cierre.toFixed(2);
@@ -683,9 +728,10 @@
                         'idcaja':this.idcaja,
                         'apertura':this.apertura,
                         'efectivo':this.efectivo,
-                        'tarjeta_visa':this.tarjeta_visa,
-                        'tarjeta_mastercard':this.tarjeta_mastercard,
+                        'visa':this.visa,
+                        'mastercard':this.mastercard,
                         'credito':this.credito,
+                        'credito_usd':this.credito_usd,
                         'devoluciones':this.devoluciones,
                         'yape':this.yape,
                         'transferencia':this.transferencia,

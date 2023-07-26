@@ -4,6 +4,7 @@ namespace sysfact\Http\Controllers;
 
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Matrix\Exception;
@@ -198,8 +199,10 @@ class CreditoController extends Controller
             }
 
             if(count($seleccionadas) > 0){
-                Mail::to('ces.des007@gmail.com')->send(new MailCreditos($seleccionadas));
-                //Mail::to('lucespedes.p@gmail.com')->cc('ces.des007@gmail.com')->send(new EnviarDocumentos($request));
+                $mail = json_decode(cache('config')['mail_contact'], true)['notificacion_caja']??false;
+                if($mail && !empty($mail)){
+                    Mail::to($mail)->send(new MailCreditos($seleccionadas));
+                }
             }
 
         }

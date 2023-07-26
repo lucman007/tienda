@@ -2,8 +2,9 @@
 
 namespace sysfact\Console\Commands;
 
+use Carbon\Carbon;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use sysfact\Caja;
 use sysfact\Emisor;
 use sysfact\Http\Controllers\CajaController;
@@ -51,32 +52,26 @@ class ReenvioComprobante extends Command
             $this->cerrar_caja();
         }
         $this->reenviar_comprobantes();
-        $this->creditos();
-        $this->disabledNotification();
+        $this->notificacion_creditos();
     }
 
-    public function creditos(){
-        if(!Cache::get('notificationEnabled')){
-            Cache::put('notificationEnabled','enabled',24*60);
-        }
-        $notification_enabled = Cache::get('notificationEnabled');
-        if($notification_enabled == 'enabled'){
+    public function notificacion_creditos()
+    {
+        $opcion = DB::table('opciones')->where('nombre_opcion', 'notificacion_creditos')->first();
+
+        if (!$opcion || Carbon::now()->diffInDays($opcion->fecha) >= 2) {
             $credito = new CreditoController();
             $credito->creditos_notificacion();
-        } else {
-            Log::info('not');
+
+            DB::table('opciones')->updateOrInsert(
+                ['nombre_opcion' => 'notificacion_creditos'],
+                ['fecha' => date('Y-m-d').' 09:00:00']
+            );
         }
     }
 
-    public function disabledNotification(){
-        //Desactivar las notificaciones por correo
-        Log::info(Cache::get('notificationEnabled'));
-        Cache::put('notificationEnabled','disabled',120);
-        Log::info('Despues: '.Cache::get('notificationEnabled'));
-    }
 
     public function cerrar_caja(){
-        Log::info('Cerrar caja');
         try{
             if(date('H') >= 4 && date('H') <= 6){
                 $caja=Caja::orderby('fecha_a','desc')
@@ -119,7 +114,6 @@ class ReenvioComprobante extends Command
 
             if($pendientes>0){
                 Mail::to('ces.des007@gmail.com')->send(new \sysfact\Mail\MailPendientes($pendientes));
-                Log::info('Reenvío automático: Enviando mail pendientes...');
             }
 
         } catch(\Exception $e){
@@ -135,7 +129,6 @@ class ReenvioComprobante extends Command
             if($pendientes > 0){
                 try{
                     Mail::to('ces.des007@gmail.com')->send(new \sysfact\Mail\MailPendientes($pendientes));
-                    Log::info('Enviando mail pendientes...');
                 } catch (\Swift_TransportException $e){
                     return $e;
                 }

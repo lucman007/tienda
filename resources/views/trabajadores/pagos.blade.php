@@ -7,7 +7,7 @@
                 <h3 class="titulo-admin-1">Pagos: {{$empleado->persona->nombre}} {{$empleado->persona->apellidos}}</h3>
             </div>
             <div class="col-lg-3 form-group">
-                <label>Correspondiente a:</label>
+                <label>Fecha</label>
                 <input @change="obtenerDatos" v-model="fecha_in" type="month" name="fecha_in" min="2020-01" class="custom-select">
             </div>
         </div>
@@ -28,6 +28,7 @@
                                     <th scope="col">Fecha</th>
                                     <th scope="col">Caja</th>
                                     <th scope="col">Tipo</th>
+                                    <th scope="col">Mes</th>
                                     <th scope="col">N° comprobante</th>
                                     <th scope="col">Monto</th>
                                 </tr>
@@ -38,6 +39,7 @@
                                     <td>@{{item.fecha}}</td>
                                     <td>@{{item.caja}}</td>
                                     <td>@{{item.tipo}}</td>
+                                    <td>@{{item.mes}}</td>
                                     <td>@{{item.num_comprobante}}</td>
                                     <td>@{{item.monto}}</td>
                                 </tr>

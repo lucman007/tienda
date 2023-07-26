@@ -83,7 +83,7 @@
                 <td><br></td>
             </tr>
             <tr>
-                <td colspan="8" style="margin-top: 5mm;width: 170mm">
+                <td colspan="7" style="margin-top: 5mm;width: 170mm">
                     Observación: {{$requerimiento->observacion}}
                 </td>
             </tr>

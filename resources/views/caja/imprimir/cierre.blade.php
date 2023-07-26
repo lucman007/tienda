@@ -88,16 +88,30 @@
             <td><strong>Descuadre:</strong></td>
             <td class="float-r">S/ {{$caja->descuadre??'0.00'}}</td>
         </tr>
-        @if($caja->credito > 0)
+        @if($caja->credito > 0 || $caja->efectivo_usd > 0 || $caja->credito_usd > 0)
             <tr>
                 <td colspan="2">
                     <hr style="border: 1px dashed black">
                 </td>
             </tr>
+            @if($caja->credito > 0)
+                <tr>
+                    <td><strong>Total crédito:</strong></td>
+                    <td class="float-r">S/ {{$caja->credito}}</td>
+                </tr>
+            @endif
+            @if($caja->efectivo_usd > 0)
             <tr>
-                <td><strong>Total crédito:</strong></td>
-                <td class="float-r">S/ {{$caja->credito}}</td>
+                <td><strong>Total efectivo USD:</strong></td>
+                <td class="float-r">USD {{$caja->efectivo_usd}}</td>
             </tr>
+            @endif
+            @if($caja->credito_usd > 0)
+                <tr>
+                    <td><strong>Total crédito USD:</strong></td>
+                    <td class="float-r">USD {{$caja->credito_usd}}</td>
+                </tr>
+            @endif
         @endif
         <tr>
             <td colspan="2">
@@ -296,16 +310,30 @@
             <td><strong>Descuadre:</strong></td>
             <td class="float-r">S/ {{$caja->descuadre??'0.00'}}</td>
         </tr>
-        @if($caja->credito > 0)
+        @if($caja->credito > 0 || $caja->efectivo_usd > 0 || $caja->credito_usd > 0)
             <tr>
                 <td colspan="2">
                     <hr style="border: 1px dashed black">
                 </td>
             </tr>
-            <tr>
-                <td><strong>Total crédito:</strong></td>
-                <td class="float-r">S/ {{$caja->credito}}</td>
-            </tr>
+            @if($caja->credito > 0)
+                <tr>
+                    <td><strong>Total crédito:</strong></td>
+                    <td class="float-r">S/ {{$caja->credito}}</td>
+                </tr>
+            @endif
+            @if($caja->efectivo_usd > 0)
+                <tr>
+                    <td><strong>Total efectivo USD:</strong></td>
+                    <td class="float-r">USD {{$caja->efectivo_usd}}</td>
+                </tr>
+            @endif
+            @if($caja->credito_usd > 0)
+                <tr>
+                    <td><strong>Total crédito USD:</strong></td>
+                    <td class="float-r">USD {{$caja->credito_usd}}</td>
+                </tr>
+            @endif
         @endif
         <tr>
             <td colspan="2">

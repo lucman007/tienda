@@ -22,24 +22,37 @@
         </thead>
         <tbody>
         @php
-        $sum=0;
+        $sum_soles=0;
+        $sum_usd=0;
         @endphp
 
         @foreach($pedidos as $item)
             <tr class="item-borde">
                 <td style="width: 12mm">{{$item->facturacion->serie}}-{{+$item->facturacion->correlativo}}</td>
                 <td style="width: 30mm">{{$item->cliente->persona->nombre}}</td>
-                <td style="width: 18mm">{{$item->total_venta}}</td>
+                <td style="width: 18mm">{{$item->facturacion->codigo_moneda=='PEN'?'S/':'USD'}}{{$item->total_venta}}</td>
             </tr>
             @php
-                $sum+=$item->total_venta;
+                if($item->facturacion->codigo_moneda=='PEN'){
+                    $sum_soles+=$item->total_venta;
+                } else {
+                    $sum_usd+=$item->total_venta;
+                }
+
             @endphp
         @endforeach
         <tr>
             <td></td>
             <td>Total pedidos atendidos:</td>
-            <td>S/ {{$sum}}</td>
+            <td>S/ {{$sum_soles}}</td>
         </tr>
+        @if($sum_usd > 0)
+        <tr>
+            <td></td>
+            <td>Total pedidos atendidos:</td>
+            <td>USD {{$sum_usd}}</td>
+        </tr>
+        @endif
         </tbody>
     </table>
 </div>
