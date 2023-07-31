@@ -99,7 +99,7 @@
                     </tr>
                     @elseif($documento->codigo_transporte == '02')
                     <tr>
-                        <td style="width: 80px"><strong>Vehículo:</strong></td>
+                        <td style="width: 80px"><strong>Placa de vehículo:</strong></td>
                         <td style="width:42mm">{{$documento->placa_vehiculo}}</td>
                     </tr>
                     <tr>

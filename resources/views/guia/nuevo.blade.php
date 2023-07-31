@@ -614,7 +614,7 @@
                                 this.guia_datos_adicionales.categoria_vehiculo='M1_L';
                             } else {
                                 this.guia_datos_adicionales={
-                                    direccion:'',
+                                    direccion:datos.cliente.direccion,
                                     ubigeo:'',
                                     peso:'',
                                     bultos:'',

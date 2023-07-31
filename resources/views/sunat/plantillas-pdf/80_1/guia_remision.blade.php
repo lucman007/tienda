@@ -114,6 +114,10 @@
                         <td style="width: 80px"><strong>Vehículo M1 o L:</strong></td>
                         <td style="width:42mm">SÍ</td>
                     </tr>
+                    <tr>
+                        <td><strong>Vehículo:</strong> {{$documento->placa_vehiculo}}</td>
+                        <td style="width:150mm"></td>
+                    </tr>
                 @endif
             </table>
         </div>

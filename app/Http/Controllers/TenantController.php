@@ -34,10 +34,13 @@ class TenantController extends Controller
     }
 
     public function mostrarTenants() {
-        $artisan = Artisan::call("domain:list");
+        Artisan::call("domain:list");
         $output = Artisan::output();
-        $list = explode('-',$output);
-        return Redirect::back()->with('tenants_list',$list);
+        $patron = '/Domain: ([^\s]+)/';
+        preg_match_all($patron, $output, $matches);
+        $dominios = $matches[1];
+
+        return Redirect::back()->with('tenants_list',$dominios);
     }
 
     public function guardarConfigTenant(Request $request) {

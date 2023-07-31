@@ -52,10 +52,13 @@
         @if (\Session::has('tenants_list'))
             @php
                 $tenants = \Session::get('tenants_list');
-                $i = 0;
+                $i = 1;
             @endphp
             @foreach($tenants as $tenant)
-                <div class="alert alert-info mt-3">{{$tenant}}</div>
+                <div class="alert alert-info mt-3">{{$i.'. '.$tenant}}</div>
+                @php
+                    $i++;
+                @endphp
             @endforeach
         @endif
     </form>

@@ -96,7 +96,7 @@
                     </tr>
                     @elseif($documento->codigo_transporte == '02')
                     <tr>
-                        <td><strong>Vehículo:</strong></td>
+                        <td><strong>Placa de vehículo:</strong></td>
                         <td style="width:150mm">{{$documento->placa_vehiculo}}</td>
                     </tr>
                     <tr>
@@ -108,6 +108,10 @@
                     <tr>
                         <td><strong>Indicador de traslado en vehículos de categoría M1 o L:</strong></td>
                         <td style="width:150mm">SÍ</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Placa de vehículo:</strong> {{$documento->placa_vehiculo}}</td>
+                        <td style="width:150mm"></td>
                     </tr>
                 @endif
             </table>
