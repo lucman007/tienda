@@ -3,6 +3,7 @@
 @section('contenido')
     @php
         $buscador_alternativo = json_decode(cache('config')['interfaz'], true)['buscador_productos_alt']??false;
+        $colapsar = json_decode(cache('config')['interfaz'], true)['colapsar_categorias']??false;
     @endphp
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}} interfaz_3">
         <div class="row">
@@ -331,6 +332,7 @@
             ref="agregarPlato"
             :categorias="{{$categorias}}"
             :isdesktop="{{json_encode($agent->isDesktop())}}"
+            :colapsar="{{json_encode($colapsar)}}"
             v-on:agregar="agregarProducto"
             v-on:guardar="guardarPedido">
     </modal-agregar-producto>

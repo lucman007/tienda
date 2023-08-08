@@ -242,6 +242,8 @@ class MainHelper extends Controller
     {
         $consulta=trim($search);
         $filtro = $request->filtro;
+        $orderby = json_decode(cache('config')['interfaz_pedidos'], true)['orderby']??'nombre';
+        $sort = json_decode(cache('config')['interfaz_pedidos'], true)['sort']??'asc';
 
         if($filtro && $filtro != -1){
             switch ($filtro) {
@@ -266,10 +268,8 @@ class MainHelper extends Controller
         } else {
             if(is_numeric($search)){
                 $productos=Producto::where('eliminado',0)
-                    ->where(function ($query) use ($consulta) {
-                        $query->orWhere('cod_producto',$consulta);
-                    })
-                    ->orderby('nombre','asc')
+                    ->where('cod_producto',$consulta)
+                    ->orderby($orderby,$sort)
                     ->take(10)
                     ->get();
             } else {
@@ -279,13 +279,11 @@ class MainHelper extends Controller
                             ->orWhere('cod_producto',$consulta)
                             ->orWhere('presentacion','like','%'.$consulta.'%');
                     })
-                    ->orderby('idproducto','desc')
+                    ->orderby($orderby,$sort)
                     ->take(10)
                     ->get();
             }
         }
-
-
 
         foreach ($productos as $producto) {
             $producto->stock = $producto->inventario()->first()->saldo;
@@ -562,6 +560,7 @@ class MainHelper extends Controller
                 }
             } else {
                 $inventario = new Inventario();
+                $inventario->fecha = date('Y-m-d H:i:s');
                 $inventario->idproducto = $item['idproducto'];
                 $inventario->idempleado = auth()->user()->idempleado??-1;
                 $inventario->idventa = $idventa;

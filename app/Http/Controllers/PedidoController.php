@@ -147,7 +147,7 @@ class PedidoController extends Controller
     public function mas_vendidos($skip){
 
         $fechaHasta = Carbon::now();
-        $fechaDesde = $fechaHasta->clone()->subDays(15);
+        $fechaDesde = $fechaHasta->clone()->subDays(10);
 
         $productos = DB::table('productos')
             ->join('inventario', 'productos.idproducto', '=', 'inventario.idproducto')

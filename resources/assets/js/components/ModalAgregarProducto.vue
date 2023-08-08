@@ -72,10 +72,11 @@
                                 <div class="card">
                                     <div class="card-body categorias-container" id="box-categorias">
                                         <div class="row">
-                                            <div v-for="categoria in categorias" class="col-6 col-sm-4 col-lg-4 menu-categorias" @click="getMenuCategoria(categoria.idcategoria)">
+                                            <div v-for="categoria in categorias" :id="'cat-'+categoria.idcategoria" class="col-6 col-sm-4 col-lg-4 menu-categorias" @click="getMenuCat(categoria.idcategoria)">
                                                 <span :style="{'background':categoria.color,'font-size':categoria.nombre.length>33?'10px':'13px'}">
                                                         {{categoria.nombre}}
                                                 </span>
+                                                <button @click.stop @click="closeCat" :id="'close-'+categoria.idcategoria" class="btn btn-warning cerrar-categoria"><i class="fas fa-times"></i></button>
                                             </div>
                                         </div>
                                     </div>
@@ -98,7 +99,7 @@
 
     export default {
         name: 'modal-agregar-producto',
-        props: ['categorias','isdesktop'],
+        props: ['categorias','isdesktop','colapsar'],
         data() {
             return {
                 productos:[],
@@ -109,6 +110,7 @@
                 showCategorias:true,
                 idcategoria: -1,
                 currentItem: 0,
+                enabledSearch:true
             }
         },
         created() {
@@ -126,6 +128,13 @@
             window.removeEventListener('keydown', this.handler);
         },
         methods: {
+            ocultarCategorias(){
+                this.showCategorias=false;
+            },
+            mostrarCategorias(){
+                this.showCategorias=true;
+                this.query = '';
+            },
             init(){
                 this.focusBuscador();
                 let width = window.innerWidth
@@ -147,6 +156,44 @@
                     Object.assign(box_categorias.style, {height:h_box_categorias+'px'});
                 }
             },
+            getMenuCat(val){
+
+                if(!this.isdesktop && this.colapsar){
+                    let categorias = document.getElementsByClassName("menu-categorias");
+                    let closes_btn = document.getElementsByClassName("cerrar-categoria");
+                    for (let i = 0; i < categorias.length; i++) {
+                        categorias[i].style.display = "none";
+                        closes_btn[i].style.display = "none";
+                    }
+                    let categoria = document.getElementById('cat-'+val);
+                    if (categoria) {
+                        categoria.style.display = "block";
+                        categoria.classList.remove("col-6");
+                        categoria.classList.remove("col-sm-4");
+                        categoria.classList.remove("col-lg-3");
+                        categoria.classList.add("col-12");
+                    }
+                    let close_btn = document.getElementById('close-'+val);
+                    if (close_btn) {
+                        close_btn.style.display = "block";
+                    }
+                }
+
+                this.getMenuCategoria(val)
+
+            },
+            closeCat(){
+                let categorias = document.getElementsByClassName("menu-categorias");
+                let closes_btn = document.getElementsByClassName("cerrar-categoria");
+                for (let i = 0; i < categorias.length; i++) {
+                    categorias[i].style.display = "block";
+                    categorias[i].classList.remove("col-12");
+                    categorias[i].classList.add("col-6");
+                    categorias[i].classList.add("col-sm-4");
+                    categorias[i].classList.add("col-lg-3");
+                    closes_btn[i].style.display = "none";
+                }
+            },
             navigate(event){
                 switch (event.code) {
                     case 'ArrowUp':
@@ -161,16 +208,16 @@
                         break;
                     case 'Enter':
                     case 'NumpadEnter':
-                        if (this.productos.length > 0) {
+                        if (this.productos.length > 0 && this.enabledSearch) {
                             this.agregarProducto(this.productos[this.currentItem]);
                         } else{
                             axios.get('/helper/agregar-producto' + '/' + this.query)
                                 .then(response => {
-                                    this.productos = response.data;
-                                    if((Object.keys(this.productos).length === 0)){
+                                    let obj = response.data;
+                                    if((Object.keys(obj).length === 0)){
                                         alert('No se ha encontrado el producto con el código marcado');
                                     } else{
-                                        this.agregarProducto(this.productos[this.currentItem]);
+                                        this.agregarProducto(obj);
                                     }
                                 });
                         }
@@ -215,6 +262,7 @@
                 this.getMenuCategoria(this.idcategoria||-1);
             },
             getMenuCategoria(val){
+
                 this.mostrarSpinner = true;
                 this.idcategoria = val;
                 axios.post('/pedidos/productos_por_categoria', {
@@ -231,6 +279,7 @@
                     });
             },
             buscarProducto(){
+                this.enabledSearch=false;
                 if (this.timer) {
                     clearTimeout(this.timer);
                     this.timer = null;
@@ -241,9 +290,15 @@
                         axios.get('/helper/obtener-productos' + '/' + this.query)
                             .then(response => {
                                 this.productos = response.data;
+                                this.enabledSearch = true;
+                            })
+                            .catch(error => {
+                                alert('Ha ocurrido un error.');
+                                console.log(error);
                             });
                     }
                 }, 400);
+
             },
             closeModal(){
                 this.$emit('guardar');
@@ -256,12 +311,15 @@
             agregarProducto(producto){
                 let spinner = document.getElementById("spinner_"+producto.idproducto);
                 this.$emit('agregar',producto);
-                setTimeout(() => {
-                    spinner.classList.remove('d-inline-block');
-                    spinner.classList.add('d-none');
-                },400);
-                spinner.classList.remove('d-none');
-                spinner.classList.add('d-inline-block');
+                if(spinner){
+                    setTimeout(() => {
+                        spinner.classList.remove('d-inline-block');
+                        spinner.classList.add('d-none');
+                    },400);
+                    spinner.classList.remove('d-none');
+                    spinner.classList.add('d-inline-block');
+                }
+
             },
             extracto(string){
                 string = _.truncate(string, {
@@ -317,5 +375,11 @@
     }
     .codigo_producto{
         color:#8b8b8b;
+    }
+    .cerrar-categoria{
+        top: 0;
+        position: absolute;
+        right: 0;
+        display: none;
     }
 </style>
