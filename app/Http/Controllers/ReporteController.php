@@ -19,6 +19,7 @@ use sysfact\Exports\MasVendidosExport;
 use sysfact\Exports\ReporteComprobantes;
 use sysfact\Exports\StockBajoExport;
 use sysfact\Exports\VentasDiariasExport;
+use sysfact\Exports\VentasEliminadasExport;
 use sysfact\Exports\VentasMensualExport;
 use sysfact\Exports\VentasResumenExport;
 use sysfact\Gastos;
@@ -48,12 +49,13 @@ class ReporteController extends Controller
 	}
 
 	public function getHasta($hasta){
-        if($this->hora_fin < $this->hora_inicio){
-            $fecha = new Carbon($hasta);
+        $fecha = new Carbon($hasta);
+
+        if ($this->hora_fin < $this->hora_inicio) {
             $fecha->addDays(1);
-            return $fecha->format('Y-m-d');
         }
-        return $hasta;
+
+        return $fecha->format('Y-m-d');
     }
 
     public function func_filter($query){
@@ -80,39 +82,42 @@ class ReporteController extends Controller
 
             $filtros = ['desde' => $desde, 'hasta' => $hasta, 'filtro'=>$filtro,'buscar'=>$buscar];
 
-            if($esExportable == 'true'){
-                switch ($filtro) {
-                    case 'fecha':
-                        $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
-                            ->where('eliminado', '=', 0)
-                            ->whereHas('facturacion', function($query) {
-                                $this->func_filter($query);
-                            })
-                            ->orderby('idventa', 'desc')
-                            ->get();
-                        break;
-                    case 'documento':
-                    case 'moneda':
-                        switch ($filtro) {
-                            case 'documento':
-                                switch ($buscar) {
-                                    case 'factura':
-                                        $buscar = '01';
-                                        break;
-                                    case 'boleta':
-                                        $buscar = '03';
-                                        break;
-                                    case 'recibo':
-                                        $buscar = '30';
-                                        break;
-                                }
-                                $filtro = 'codigo_tipo_documento';
-                                break;
-                            case 'moneda':
-                                $filtro = 'codigo_moneda';
-                                break;
-                        }
-                        $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
+            switch ($filtro) {
+                case 'fecha':
+                    $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
+                        ->where('eliminado', '=', 0)
+                        ->whereHas('facturacion', function($query) {
+                            $this->func_filter($query);
+                        })
+                        ->orderby('idventa', 'desc')
+                        ->when($esExportable, function ($query) {
+                            return $query->get();
+                        }, function ($query) {
+                            return $query->paginate(30);
+                        });
+                    break;
+                case 'documento':
+                case 'moneda':
+                    switch ($filtro) {
+                        case 'documento':
+                            switch ($buscar) {
+                                case 'factura':
+                                    $buscar = '01';
+                                    break;
+                                case 'boleta':
+                                    $buscar = '03';
+                                    break;
+                                case 'recibo':
+                                    $buscar = '30';
+                                    break;
+                            }
+                            $filtro = 'codigo_tipo_documento';
+                            break;
+                        case 'moneda':
+                            $filtro = 'codigo_moneda';
+                            break;
+                    }
+                    $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
                         ->where('eliminado', '=', 0)
                         ->orderby('idventa', 'desc')
                         ->whereHas('facturacion', function ($query) use ($filtro, $buscar) {
@@ -122,155 +127,81 @@ class ReporteController extends Controller
                                     $this->func_filter($query);
                                 });
                         })
-                        ->get();
-                        break;
+                        ->when($esExportable, function ($query) {
+                            return $query->get();
+                        }, function ($query) {
+                            return $query->paginate(30);
+                        });
+                    break;
 
-                    case 'tipo-de-pago':
-                        $pago = DataTipoPago::getTipoPago();
-                        $find = array_search($buscar, array_column($pago,'text_val'));
-                        $buscar = $pago[$find]['num_val'];
+                case 'tipo-de-pago':
+                    $pago = DataTipoPago::getTipoPago();
+                    $find = array_search($buscar, array_column($pago,'text_val'));
+                    $buscar = $pago[$find]['num_val'];
 
-                        $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
-                            ->where('eliminado', 0)
-                            ->whereHas('pago', function($query) use ($buscar){
-                                $query->where('tipo',$buscar);
-                            })
-                            ->whereHas('facturacion', function($query) {
-                                $this->func_filter($query);
-                            })
-                            ->orderby('idventa', 'desc')
-                            ->get();
-                        break;
-                    case 'cliente':
-                        $filtro = 'nombre';
-                        $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
-                            ->where('eliminado', '=', 0)
-                            ->orderby('idventa', 'desc')
-                            ->whereHas('persona', function ($query) use ($filtro, $buscar) {
-                                $query->where($filtro, 'LIKE', '%' . $buscar . '%');
-                            })
-                            ->whereHas('facturacion', function($query) {
-                                $this->func_filter($query);
-                            })
-                            ->get();
-                        break;
-                    case 'vendedor':
-                        $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
-                            ->where('eliminado', 0)
-                            ->where('idempleado', $buscar)
-                            ->whereHas('facturacion', function($query) {
-                                $this->func_filter($query);
-                            })
-                            ->orderby('idventa', 'desc')
-                            ->get();
-                        break;
-                    case 'cajero':
-                        $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
-                            ->where('eliminado', 0)
-                            ->where('idcajero', $buscar)
-                            ->whereHas('facturacion', function($query) {
-                                $this->func_filter($query);
-                            })
-                            ->orderby('idventa', 'desc')
-                            ->get();
-                        break;
-                }
+                    $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
+                        ->where('eliminado', 0)
+                        ->whereHas('pago', function($query) use ($buscar){
+                            $query->where('tipo',$buscar);
+                        })
+                        ->whereHas('facturacion', function($query) {
+                            $this->func_filter($query);
+                        })
+                        ->orderby('idventa', 'desc')
+                        ->when($esExportable, function ($query) {
+                            return $query->get();
+                        }, function ($query) {
+                            return $query->paginate(30);
+                        });
+                    break;
+                case 'cliente':
+                    $filtro = 'nombre';
+                    $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
+                        ->where('eliminado', '=', 0)
+                        ->orderby('idventa', 'desc')
+                        ->whereHas('persona', function ($query) use ($filtro, $buscar) {
+                            $query->where($filtro, 'LIKE', '%' . $buscar . '%');
+                        })
+                        ->whereHas('facturacion', function($query) {
+                            $this->func_filter($query);
+                        })
+                        ->when($esExportable, function ($query) {
+                            return $query->get();
+                        }, function ($query) {
+                            return $query->paginate(30);
+                        });
+                    break;
+                case 'vendedor':
+                    $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
+                        ->where('eliminado', 0)
+                        ->where('idempleado', $buscar)
+                        ->whereHas('facturacion', function($query) {
+                            $this->func_filter($query);
+                        })
+                        ->orderby('idventa', 'desc')
+                        ->when($esExportable, function ($query) {
+                            return $query->get();
+                        }, function ($query) {
+                            return $query->paginate(30);
+                        });
+                    break;
+                case 'cajero':
+                    $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
+                        ->where('eliminado', 0)
+                        ->where('idcajero', $buscar)
+                        ->whereHas('facturacion', function($query) {
+                            $this->func_filter($query);
+                        })
+                        ->orderby('idventa', 'desc')
+                        ->when($esExportable, function ($query) {
+                            return $query->get();
+                        }, function ($query) {
+                            return $query->paginate(30);
+                        });
+                    break;
             }
-            else{
-                switch ($filtro) {
-                    case 'fecha':
-                        $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
-                            ->where('eliminado', '=', 0)
-                            ->whereHas('facturacion', function ($query){
-                                $this->func_filter($query);
-                            })
-                            ->orderby('idventa', 'desc')
-                            ->paginate(30);
-                        break;
-                    case 'documento':
-                    case 'moneda':
-                        switch ($filtro) {
-                            case 'documento':
-                                switch ($buscar) {
-                                    case 'factura':
-                                        $buscar = '01';
-                                        break;
-                                    case 'boleta':
-                                        $buscar = '03';
-                                        break;
-                                    case 'recibo':
-                                        $buscar = '30';
-                                        break;
-                                }
-                                $filtro = 'codigo_tipo_documento';
-                                break;
-                            case 'moneda':
-                                $filtro = 'codigo_moneda';
-                                break;
-                        }
-                        $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
-                            ->where('eliminado', '=', 0)
-                            ->orderby('idventa', 'desc')
-                            ->whereHas('facturacion', function ($query) use ($filtro, $buscar) {
-                                $query
-                                    ->where($filtro, $buscar)
-                                    ->where(function ($query) {
-                                        $this->func_filter($query);
-                                    });
-                            })
-                            ->paginate(30);
-                        break;
 
-                    case 'tipo-de-pago':
-                        $pago = DataTipoPago::getTipoPago();
-                        $find = array_search($buscar, array_column($pago,'text_val'));
-                        $buscar = $pago[$find]['num_val'];
-
-                        $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
-                            ->where('eliminado', 0)
-                            ->whereHas('pago', function($query) use ($buscar){
-                                $query->where('tipo',$buscar);
-                            })
-                            ->whereHas('facturacion', function($query) {
-                                $this->func_filter($query);
-                            })
-                            ->orderby('idventa', 'desc')
-                            ->paginate(30);
-                        break;
-                    case 'cliente':
-                        $filtro = 'nombre';
-                        $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
-                            ->where('eliminado', '=', 0)
-                            ->orderby('idventa', 'desc')
-                            ->whereHas('persona', function ($query) use ($filtro, $buscar) {
-                                $query->where($filtro, 'LIKE', '%' . $buscar . '%');
-                            })
-                            ->whereHas('facturacion', function($query) {
-                                $this->func_filter($query);
-                            })
-                            ->paginate(30);
-                        break;
-                    case 'vendedor':
-                        $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
-                            ->where('eliminado', 0)
-                            ->where('idempleado', $buscar)
-                            ->whereHas('facturacion', function($query) {
-                                $this->func_filter($query);
-                            })
-                            ->orderby('idventa', 'desc')
-                            ->paginate();
-                        break;
-                    case 'cajero':
-                        $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
-                            ->where('eliminado', 0)
-                            ->where('idcajero', $buscar)
-                            ->whereHas('facturacion', function($query) {
-                                $this->func_filter($query);
-                            })
-                            ->orderby('idventa', 'desc')
-                            ->paginate();
-                        break;
-                }
+            if(!$esExportable){
                 $ventas->appends($_GET)->links();
             }
 
@@ -294,13 +225,7 @@ class ReporteController extends Controller
                     }
                 }
 
-
-
-                /*$pago = DataTipoPago::getTipoPago();
-                $find = array_search($item->tipo_pago, array_column($pago,'num_val'));
-                $item->tipo_pago = mb_strtoupper($pago[$find]['label']);*/
             }
-
 
             return ['ventas'=>$ventas,'filtros'=>$filtros,'usuario'=>auth()->user()->persona];
         } catch (\Exception $e){
@@ -310,7 +235,7 @@ class ReporteController extends Controller
 
     public function reporte_ventas(Request $request, $desde=null,$hasta=null){
 
-        $esExportable = $request->get('export','false');
+        $esExportable = $request->get('export',false);
         $esMail = $request->get('mail','false');
         $filtro = $request->filtro;
         $buscar = $request->buscar;
@@ -1519,6 +1444,47 @@ class ReporteController extends Controller
             $cajero->persona;
         }
         return $cajeros;
+    }
+
+    public function reporte_anulados(Request $request){
+
+        $esExportable = $request->get('export',false);
+        $tipo = $request->tipo;
+        $desde=$request->get('desde', date('Y-m-d'));
+        $hasta=$request->get('hasta', date('Y-m-d'));
+
+        $filtros = ['desde'=>$desde,'hasta'=>$hasta, 'tipo'=>$tipo];
+
+        $ventas=Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
+            ->where(function($q){
+                $q->where('eliminado',1)
+                    ->orwhereHas('facturacion', function($query){
+                        $query->whereIn('codigo_tipo_documento', [01,03])
+                            ->where(function ($query) {
+                                $query->where('estado', 'ANULADO');
+                            });
+                    });
+            })
+            ->orderby('idventa','desc')
+            ->when($esExportable, function ($query) {
+                return $query->get();
+            }, function ($query) {
+                return $query->paginate(30);
+            });
+
+        if($esExportable){
+            return Excel::download(new VentasEliminadasExport($ventas), 'reporte_ventas_eliminadas.xlsx');
+        } else {
+            $ventas->appends($_GET)->links();
+
+            return view('reportes.ventas_anuladas',[
+                    'ventas'=>$ventas,
+                    'filtros'=>$filtros,
+                    'usuario'=>auth()->user()->persona
+                ]
+            );
+        }
+
     }
 
 }

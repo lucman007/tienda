@@ -7,13 +7,16 @@
             <div class="container">
                 <div class="row">
                     <ul class="list-group w-100">
-                        <li v-on:click="agregarDescuento(item.monto_desc)" style="cursor:pointer" class="list-group-item d-flex"
+                        <li v-on:click="agregarDescuento(item.monto_desc, item.cantidad_min)" style="cursor:pointer" class="list-group-item d-flex"
                             v-for="(item,index) in descuentos">
-                            <div class="col-lg">
+                            <div class="col-lg-6">
                                 MAYOR O IGUAL A <strong>{{item.cantidad_min}}</strong> UND
                             </div>
-                            <div class="col-lg">
-                                S/{{(item.monto_desc)}}
+                            <div class="col-lg-4">
+                                S/{{(item.monto_desc)}} C/U
+                            </div>
+                            <div class="col-lg-2">
+                                <span class="badge badge-warning">{{item.etiqueta}}</span>
                             </div>
                         </li>
                     </ul>
@@ -47,9 +50,10 @@
                         console.log(error);
                     });
             },
-            agregarDescuento(precio){
+            agregarDescuento(precio,cantidad){
                 let data = {
-                    precio: precio
+                    precio: precio,
+                    cantidad: cantidad
                 };
                 this.$emit('agregar', data);
                 this.$refs['modal-producto-descuento'].hide()

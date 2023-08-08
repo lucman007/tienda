@@ -14,6 +14,7 @@
                     <b-nav-item href="{{action('ReporteController@reporte_ventas')}}" active>Resumen de ventas</b-nav-item>
                     <b-nav-item href="{{url('/reportes/ventas/diario').'/'.date('Y-m')}}">Ventas por día</b-nav-item>
                     <b-nav-item href="{{url('/reportes/ventas/mensual').'/'.date('Y')}}">Ventas por mes</b-nav-item>
+                    <b-nav-item href="{{url('/reportes/anulados').'?tipo=ventas'}}">Ventas anuladas</b-nav-item>
                 </b-nav>
                 <div class="row mt-4">
                     <div class="col-lg-9">

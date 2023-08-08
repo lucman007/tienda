@@ -1,12 +1,14 @@
 <?php
 
 namespace sysfact\Http\Controllers;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Spipu\Html2Pdf\Html2Pdf;
 use sysfact\Categoria;
+use sysfact\Descuento;
 use sysfact\Emisor;
 use sysfact\Http\Controllers\Helpers\DataTipoPago;
 use sysfact\Http\Controllers\Helpers\MainHelper;
@@ -128,7 +130,7 @@ class PedidoController extends Controller
                 $descuento=$producto->descuento()->orderby('monto_desc','asc')->first();
                 $producto->precioPorMayor = $descuento['monto_desc'];
                 $producto->cantidadPorMayor = $descuento['cantidad_min'];
-
+                $producto->etiqueta = $descuento['etiqueta'];
                 if($producto->stock <= 0){
                     $producto->badge_stock = 'badge-danger';
                 } else if($producto->stock <= $producto->stock_bajo){
@@ -137,29 +139,52 @@ class PedidoController extends Controller
             }
             return $productos->toJson();
         } else {
-            return [];
+            return $this->mas_vendidos($request->skip);
         }
-
-
-
 
     }
 
-    public function mas_vendidos(){
-        $productos=$ventas = DB::table('ventas')
-            ->join('ventas_detalle', 'ventas_detalle.idventa', '=', 'ventas.idventa')
-            ->join('productos', 'productos.idproducto', '=', 'ventas_detalle.idproducto')
-            ->selectRaw('sum(ventas_detalle.cantidad) as vendidos,ventas_detalle.idproducto, productos.nombre, productos.imagen, productos.precio, productos.presentacion')
-            ->where('ventas.eliminado', 0)
+    public function mas_vendidos($skip){
+
+        $fechaHasta = Carbon::now();
+        $fechaDesde = $fechaHasta->clone()->subDays(15);
+
+        $productos = DB::table('productos')
+            ->join('inventario', 'productos.idproducto', '=', 'inventario.idproducto')
+            ->select(
+                'productos.*',
+                DB::raw('SUM(inventario.cantidad) as total_vendido'),
+                DB::raw('(SELECT saldo FROM inventario AS i2 WHERE i2.idproducto = productos.idproducto ORDER BY i2.fecha DESC LIMIT 1) as stock')
+            )
             ->where('productos.eliminado', 0)
-            ->groupBy('ventas_detalle.idproducto')
-            ->orderby('productos.nombre','asc')
-            ->limit(12)
+            ->whereNotNull('inventario.idventa')
+            ->whereBetween('inventario.fecha', [$fechaDesde, $fechaHasta])
+            ->groupBy('productos.idproducto')
+            ->orderBy('total_vendido', 'asc')
+            ->skip($skip)
+            ->limit(10)
             ->get();
+
+        foreach ($productos as $producto) {
+            $producto->moneda = $producto->moneda=='PEN'?'S/':'USD';
+            $producto->unidad = explode('/',$producto->unidad_medida)[1];
+            $producto->badge_stock = 'badge-success';
+            $producto->items_kit = json_decode($producto->items_kit, true);
+            $descuento = Descuento::where('idproducto',$producto->idproducto)->orderby('monto_desc','asc')->first();
+            $producto->precioPorMayor = $descuento['monto_desc'];
+            $producto->cantidadPorMayor = $descuento['cantidad_min'];
+            $producto->etiqueta = $descuento['etiqueta'];
+            if($producto->stock <= 0){
+                $producto->badge_stock = 'badge-danger';
+            } else if($producto->stock <= $producto->stock_bajo){
+                $producto->badge_stock = 'badge-warning';
+            }
+        }
+
         return $productos;
     }
 
-    public function obtenerProductos($search)
+    /*public function obtenerProductos($search)
     {
         $consulta=trim($search);
 
@@ -180,12 +205,13 @@ class PedidoController extends Controller
             $descuento=$producto->descuento()->orderby('monto_desc','asc')->first();
             $producto->precioPorMayor = $descuento['monto_desc'];
             $producto->cantidadPorMayor = $descuento['cantidad_min'];
+            $producto->etiqueta = $descuento['etiqueta'];
             $producto->items_kit = json_decode($producto->items_kit, true);
             $producto->stock = $producto->inventario()->first()->saldo;
         }
 
         return response()->json($productos);
-    }
+    }*/
 
     public function store(Request $request)
     {

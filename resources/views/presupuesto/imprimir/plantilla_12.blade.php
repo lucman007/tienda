@@ -138,7 +138,7 @@
     @foreach($presupuesto['productos'] as $item)
         <tr class="items-tr">
             <td style="width: 5mm">{{$i++}}</td>
-            <td style="width: 85mm"><strong>{{$item->nombre}}</strong><br> {!!$item->detalle['descripcion']!!}</td>
+            <td style="width: 85mm; padding-right: 5mm"><strong>{{$item->nombre}}</strong><br> {!!$item->detalle['descripcion']!!}</td>
             <td style="width: 20mm">{{floatval($item->detalle['cantidad'])}}</td>
             <td style="width: 10mm">{{explode('/',$item->unidad_medida)[1]}}</td>
             <td style="width: 20mm; text-align: right">@if(!$presupuesto->ocultar_precios){{number_format($item->monto, 3)}}@endif</td>

@@ -1446,10 +1446,10 @@ table tr td, table tr th{
         overflow-y: auto;
         height: auto;
     }
-    #modal-agregar-producto .modal-dialog {
+    #modal-agregar-producto .modal-dialog, #modal-agregar-producto-alt .modal-dialog {
         max-width: 80%;
     }
-    #modal-agregar-producto .categorias-container{
+    #modal-agregar-producto .categorias-container, #modal-agregar-producto-alt .categorias-container{
         height: auto !important;
         max-height: 500px;
     }
@@ -1480,11 +1480,11 @@ table tr td, table tr th{
     .active-order{
         font-size: 16px;
     }
-    #modal-agregar-producto .modal-body{
+    #modal-agregar-producto .modal-body,#modal-agregar-producto-alt .modal-body{
         padding-right: 0;
         padding-left: 0;
     }
-    #modal-agregar-producto .modal-dialog {
+    #modal-agregar-producto .modal-dialog,#modal-agregar-producto-alt .modal-dialog {
         max-width: none;
     }
     .middle-header .nav-item a {
@@ -1519,7 +1519,7 @@ table tr td, table tr th{
         height: auto;
     }
 
-    #modal-agregar-producto .menu-categorias span{
+    #modal-agregar-producto .menu-categorias span, #modal-agregar-producto-alt .menu-categorias span{
         height: 55px;
     }
 

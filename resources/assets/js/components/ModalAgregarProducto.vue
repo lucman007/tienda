@@ -29,10 +29,10 @@
                                                                 <span style="font-size: 11px; color: #0b870b;" v-for="item in producto.items_kit">+ ({{ item.cantidad }}) {{item['nombre']}} </span>
                                                                 <span class="presentacion">{{extracto(producto.presentacion)}}</span>
                                                             </div>
-                                                            <div class="col-lg-3">{{producto.moneda+producto.precio}} <br>
-                                                                <span v-show="producto.precioPorMayor" class="presentacion">{{producto.cantidadPorMayor}}{{producto.unidad}} a {{producto.moneda+producto.precioPorMayor}}</span>
+                                                            <div class="col-lg-4">{{producto.moneda+producto.precio}} <br>
+                                                                <span v-show="producto.precioPorMayor" class="presentacion">{{producto.moneda+producto.precioPorMayor}} <i class="badge badge-pill badge-secondary">{{producto.etiqueta}}</i> <br v-if="isdesktop"> Desde {{producto.cantidadPorMayor}}{{producto.unidad}}</span>
                                                             </div>
-                                                            <div class="col-lg-3"><span :class="'badge '+producto.badge_stock">{{producto.stock+producto.unidad}}</span></div>
+                                                            <div class="col-lg-2"><span :class="'badge '+producto.badge_stock">{{producto.stock+' '+producto.unidad}}</span></div>
                                                             <div :id="'spinner_'+producto.idproducto" class="alert alert-success mb-0 d-none"
                                                                  style="padding: 5px 20px;position: absolute;right: 5px;bottom: 4px;">
                                                                 <strong style="font-size: 16px;">
@@ -61,7 +61,7 @@
                             <div v-if="!isdesktop" class="order-2 col-lg-12 mb-2">
                                 <div class="card">
                                     <div class="card-body" style="overflow: auto;">
-                                        <input @keyup="buscarProducto" type="text" v-model="query" class="form-control py-md-1" autocomplete="nope"
+                                        <input id="buscador-movil" @keyup="buscarProducto" type="text" v-model="query" class="form-control py-md-1" autocomplete="nope"
                                                placeholder="Buscar producto..." @focus="ocultarCategorias">
                                         <i class="fas fa-times-circle borrarProducto" v-show="!showCategorias" style="right: 30px;"
                                            v-on:click="mostrarCategorias"></i>
@@ -128,7 +128,6 @@
         methods: {
             init(){
                 this.focusBuscador();
-
                 let width = window.innerWidth
                     || document.documentElement.clientWidth
                     || document.body.clientWidth;
@@ -210,11 +209,10 @@
                 this.query = '';
             },
             focusBuscador(){
-                if(this.isdesktop){
-                    let input = document.getElementById("buscador");
-                    input.focus();
-                    this.getMenuCategoria(this.idcategoria||-1);
+                if (this.isdesktop) {
+                    document.getElementById('buscador').focus();
                 }
+                this.getMenuCategoria(this.idcategoria||-1);
             },
             getMenuCategoria(val){
                 this.mostrarSpinner = true;
@@ -253,6 +251,7 @@
                 this.query='';
                 this.showCategorias = true;
                 this.$refs['modal-agregar-producto'].hide();
+                this.idcategoria = -1;
             },
             agregarProducto(producto){
                 let spinner = document.getElementById("spinner_"+producto.idproducto);
@@ -308,13 +307,13 @@
         color: #45463e;
     }
     .active_item {
-        background-color: #9fcdff;
-        color: white;
+        background-color: #e1e1e1;
+        color: black;
     }
 
     .list-group-item:hover {
-        background-color: #9fcdff;
-        color: white
+        background-color: #e1e1e1 !important;
+        color: black;
     }
     .codigo_producto{
         color:#8b8b8b;

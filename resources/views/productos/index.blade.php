@@ -308,15 +308,33 @@
                                 <div class="row">
                                     <div class="col-lg-12" v-for="(descuento,index) in descuentos" :key="index">
                                         <div class="row">
-                                            <div class="col-lg-5 form-group">
-                                                <label for="precio">Cantidad mayor o igual a:</label>
-                                                <input class="form-control" v-model="descuento.cantidad" type="number" placeholder="cantidad">
+                                            <div class="col-lg-4">
+                                                <label for="precio">Cantidad:</label>
+                                                <b-input-group>
+                                                    <input onfocus="this.select()" class="form-control" v-model="descuento.cantidad" type="number" placeholder="cantidad">
+                                                    <b-input-group-append>
+                                                        <b-input-group-text>
+                                                            @{{(medida.split('/'))[1]}}
+                                                        </b-input-group-text>
+                                                    </b-input-group-append>
+                                                </b-input-group>
                                             </div>
-                                            <div class="col-lg-5 form-group">
-                                                <label for="precio">Precio:</label>
-                                                <input class="form-control" v-model="descuento.precio" type="number" placeholder="precio">
+                                            <div class="col-lg-3 form-group">
+                                                <label for="precio">Precio por @{{(medida.split('/'))[1]}}:</label>
+                                                <b-input-group>
+                                                    <input onfocus="this.select()"  class="form-control" v-model="descuento.precio" type="number" placeholder="precio">
+                                                    <b-input-group-append>
+                                                        <b-input-group-text>
+                                                            @{{moneda}}
+                                                        </b-input-group-text>
+                                                    </b-input-group-append>
+                                                </b-input-group>
                                             </div>
-                                            <div class="col-lg-2">
+                                            <div class="col-lg-4 form-group">
+                                                <label for="precio">Etiqueta (Opcional):</label>
+                                                <input onfocus="this.select()"  class="form-control" v-model="descuento.etiqueta" type="text" maxlength="50" placeholder="Promo, por mayor, etc">
+                                            </div>
+                                            <div class="col-lg-1">
                                                 <button @click="borrarDescuento(index)" style="margin-top: 20px" class="btn btn-danger"><i class="fas fa-trash"></i></button>
                                             </div>
                                         </div>
@@ -773,7 +791,8 @@
                 agregarDescuento(){
                     this.descuentos.push({
                         cantidad: 0,
-                        precio: '0.00'
+                        precio: '0.00',
+                        etiqueta: ''
                     });
                 },
                 borrarDescuento(index){

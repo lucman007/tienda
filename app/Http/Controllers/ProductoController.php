@@ -256,6 +256,7 @@ class ProductoController extends Controller
                     $descuento=new Descuento();
                     $descuento->cantidad_min=$item['cantidad'];
                     $descuento->monto_desc=$item['precio'];
+                    $descuento->etiqueta=mb_strtoupper($item['etiqueta']);
                     $producto->descuento()->save($descuento);
                 }
             }
@@ -278,7 +279,7 @@ class ProductoController extends Controller
         }
 
 		$producto=Producto::find($id);
-		$descuentos = Descuento::select('cantidad_min as cantidad','monto_desc as precio')->where('idproducto',$id)->get();
+		$descuentos = Descuento::select('cantidad_min as cantidad','monto_desc as precio','etiqueta')->where('idproducto',$id)->get();
 		$inventario=Inventario::select('cantidad')->where('idproducto',$id)->get();
 		$almacen = DB::table('almacen_productos')
             ->where('idproducto',$id)
@@ -396,6 +397,7 @@ class ProductoController extends Controller
                     $descuento=new Descuento();
                     $descuento->cantidad_min=$item['cantidad'];
                     $descuento->monto_desc=$item['precio'];
+                    $descuento->etiqueta=mb_strtoupper($item['etiqueta']);
                     $producto->descuento()->save($descuento);
                 }
             }

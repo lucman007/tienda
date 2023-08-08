@@ -1,5 +1,5 @@
 @extends('layouts.main')
-@section('titulo', 'Reporte de ventas')
+@section('titulo', 'Reporte de ventas mensual')
 @section('contenido')
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
@@ -13,6 +13,7 @@
                     <b-nav-item href="{{action('ReporteController@reporte_ventas')}}">Resumen de ventas</b-nav-item>
                     <b-nav-item href="{{url('/reportes/ventas/diario').'/'.date('Y-m')}}">Ventas por día</b-nav-item>
                     <b-nav-item href="{{url('/reportes/ventas/mensual').'/'.date('Y')}}" active>Ventas por mes</b-nav-item>
+                    <b-nav-item href="{{url('/reportes/anulados').'?tipo=ventas'}}">Ventas anuladas</b-nav-item>
                 </b-nav>
                 <div class="row mt-4">
                     <div class="col-lg-9">

@@ -64,7 +64,7 @@ Route::group(['middleware' => ['can:Mantenimiento: categorías']], function () {
     Route::resource('categorias', 'CategoriaController');
     Route::post('/categorias/store', 'CategoriaController@store')->name('guardarCategoria');
     Route::delete('/categorias/destroy/{id}', 'CategoriaController@destroy')->name('eliminarCategoria');
-    Route::get('/categorias/show', 'CategoriaController@show')->name('obtenerCategorias');
+    Route::get('/categorias/show', 'CategoriaController@show');
     Route::get('/categorias/edit/{id}', 'CategoriaController@edit')->name('editarCategorias');
     Route::put('/categorias/update', 'CategoriaController@update')->name('actualizarCategoria');
 });
@@ -108,7 +108,7 @@ Route::group(['middleware' => ['can:Pedido']], function () {
     //Route::get('pedidos/obtener-mesas','PedidoController@obtener_mesas');
     Route::get('pedidos/obtener-pedidos','PedidoController@obtener_pedidos');
     Route::post('pedidos/productos_por_categoria', 'PedidoController@productos_por_categoria');
-    Route::get('pedidos/productos/{search}', 'PedidoController@obtenerProductos');
+    //Route::get('pedidos/productos/{search}', 'PedidoController@obtenerProductos');
     Route::post('pedidos/store', 'PedidoController@store');
     Route::post('pedidos/update', 'PedidoController@update');
     Route::get('pedidos/editar/{idpedido}','PedidoController@editar_pedido');
@@ -220,9 +220,6 @@ Route::group(['middleware' => ['can:Facturación: facturar']], function () {
 Route::group(['middleware' => ['can:Facturación: comprobantes']], function () {
 //Rutas para comprobantes
     Route::get('comprobantes/detalle-resumen/{id}', 'ComprobanteController@detalle_resumen');
-    /*Route::get('comprobantes/{filtro}/{param_1}/{param_2}/{param_3}','ComprobanteController@comprobantesEmitidos');
-    Route::get('comprobantes/{filtro}/{param_1}/{param_2}','ComprobanteController@comprobantesEmitidos');
-    Route::get('comprobantes/{filtro}/{param_1}','ComprobanteController@comprobantesEmitidos');*/
     Route::get('comprobantes/consulta-cdr', 'ComprobanteController@consulta');
     Route::get('comprobantes/anular', 'ComprobanteController@anular');
     Route::post('comprobantes/anular-facturas', 'ComprobanteController@anular_facturas');
@@ -259,6 +256,9 @@ Route::group(['middleware' => ['can:Reportes']], function () {
     Route::get('reportes/ventas/badge/{desde}/{hasta}','ReporteController@reporte_ventas_badge');
     Route::get('reportes/ventas/mail/{desde}/{hasta}','ReporteController@reporte_ventas_por_email');
     Route::get('reportes/ventas/imprimir/{desde}/{hasta}','ReporteController@reporte_ventas_imprimir');
+    Route::get('reportes/ventas/eliminadas','ReporteController@obtener_ventas_eliminadas');
+    Route::get('reportes/ordenes/eliminadas','ReporteController@obtener_ordenes_eliminadas');
+    Route::get('reportes/anulados','ReporteController@reporte_anulados');
 
     Route::get('reportes/gastos/{desde}/{hasta}','ReporteController@reporte_gastos');
     Route::get('reportes/gastos','ReporteController@reporte_gastos');

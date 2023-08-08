@@ -294,6 +294,7 @@ class MainHelper extends Controller
             $descuento=$producto->descuento()->orderby('monto_desc','asc')->first();
             $producto->precioPorMayor = $descuento['monto_desc'];
             $producto->cantidadPorMayor = $descuento['cantidad_min'];
+            $producto->etiqueta = $descuento['etiqueta'];
             $producto->items_kit = json_decode($producto->items_kit, true);
             $producto->badge_stock = 'badge-success';
             if($producto->stock <= 0){

@@ -32,7 +32,7 @@
             <div class="col-sm-12 mt-4">
                 <div class="card">
                     <div class="card-header">
-                        <span class="titulo-tabla-reporte">Lista de comprobantes</span>
+                        <span class="titulo-tabla-reporte">Lista de cajas</span>
                         <div class="form-group float-right mb-0">
                             @if(count($cajas)!=0)
                                 <a href="{{str_contains(url()->full(),'?')?url()->full().'&export=true':url()->current().'?export=true'}}" class="btn btn-primary d-block"><i class="fas fa-file-export"></i> Exportar excel</a>
@@ -65,9 +65,9 @@
                                     @foreach($cajas as $caja)
                                         <tr>
                                             <td></td>
-                                            <td>{{$caja->empleado->nombre}}</td>
+                                            <td>{{mb_strtoupper($caja->empleado->nombre)}}</td>
                                             <td>{{date('d/m/Y H:m',strtotime($caja->fecha_a))}}</td>
-                                            <td>{{date('d/m/Y H:m',strtotime($caja->fecha_c))}}</td>
+                                            <td>{{!$caja->fecha_c?'-':date('d/m/Y H:m',strtotime($caja->fecha_c))}}</td>
                                             <td>TURNO {{$caja->turno}}</td>
                                             <td>S/ {{$caja->apertura}}</td>
                                             <td>S/ {{$caja->total_ventas}}</td>

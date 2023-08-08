@@ -320,6 +320,9 @@
     </modal-facturacion>
     @if($buscador_alternativo)
     <modal-agregar-producto-alt
+            ref="agregarPlato"
+            :categorias="{{$categorias}}"
+            :isdesktop="{{json_encode($agent->isDesktop())}}"
             v-on:agregar="agregarProducto"
             v-on:guardar="guardarPedido">
     </modal-agregar-producto-alt>
@@ -411,6 +414,7 @@
                     agregarDescuento(obj){
                         let producto = this.productosSeleccionados[this.index];
                         producto['precio'] = obj.precio;
+                        producto['cantidad'] = obj.cantidad;
                         this.actualizarDetalle(null);
                     },
                     editarItem(item, index = null){

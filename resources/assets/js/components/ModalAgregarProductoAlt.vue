@@ -1,43 +1,94 @@
 <template>
     <div>
-        <b-modal no-d id="modal-agregar-producto-alt" ref="modal-agregar-producto-alt" ok-only hide-header size="xl" @shown="focusBuscador" @hidden="closeModal">
+        <b-modal no-d id="modal-agregar-producto-alt" ref="modal-agregar-producto-alt" hide-header :hide-footer="!isdesktop" size="xl" @shown="init" @hidden="closeModal">
             <div class="container-fluid">
                 <div class="row">
-                    <div class="col-lg-6 mt-4">
-                        <input type="text" v-model="query" class="form-control"
-                               placeholder="Busca por nombre o código..." id="buscador" autocomplete="off" v-on:keyup="navigate">
+                    <div class="order-2 order-lg-1 lista-menu" :class="isdesktop?'col-lg-12':'col-lg-7'">
+                        <div class="row">
+                            <div v-if="isdesktop" class="col-lg-12 mb-2">
+                                <div class="card">
+                                    <div class="card-body" style="overflow: auto;">
+                                        <input type="text" v-model="query" class="form-control"
+                                               placeholder="Buscar producto..." id="buscador" autocomplete="off" v-on:keyup="navigate">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="card">
+                                    <div v-if="isdesktop" class="container" style="background: #474747; color: white;">
+                                        <div class="row py-2">
+                                            <div class="col-lg-6"><strong>Producto</strong></div>
+                                            <div class="col-lg-2"><strong>Precio</strong></div>
+                                            <div class="col-lg-2"><strong>Otro precio</strong></div>
+                                            <div class="col-lg-2"><strong>Stock</strong></div>
+                                        </div>
+                                    </div>
+                                    <div class="card-body" id="section_productos" style="height: 500px" @scroll="getProductos">
+                                        <div class="row mb-5">
+                                            <div class="col-lg-12">
+                                                <b-list-group v-show="!mostrarSpinner">
+                                                    <b-list-group-item variant="primary"
+                                                                       v-bind:class='{"active_item": currentItem === index}'
+                                                                       @click="agregarProducto(producto)"
+                                                                       v-for="(producto, index) in productos" button
+                                                                       :key="index">
+                                                        <div class="row">
+                                                            <div class="col-lg-6"><span class="codigo_producto">{{producto.cod_producto?producto.cod_producto+' - ':''}}</span>{{producto.nombre}}<span v-show="producto.tipo_producto==3" class="badge badge-warning"><i class="far fa-star"></i> KIT</span> <br>
+                                                                <span style="font-size: 11px; color: #0b870b;" v-for="item in producto.items_kit">+ ({{ item.cantidad }}) {{item['nombre']}} </span>
+                                                                <span class="presentacion">{{extracto(producto.presentacion)}}</span>
+                                                            </div>
+                                                            <div class="col-lg-2">{{producto.moneda+producto.precio}}</div>
+                                                            <div class="col-lg-2">
+                                                                <span v-show="producto.precioPorMayor">{{producto.moneda+producto.precioPorMayor}}</span> <i class="badge badge-pill badge-secondary">{{producto.etiqueta}}</i><br v-if="isdesktop">
+                                                                <span v-show="producto.precioPorMayor" class="presentacion"> Desde {{producto.cantidadPorMayor}}{{producto.unidad}}</span>
+                                                            </div>
+                                                            <div class="col-lg-2"><span :class="'badge '+producto.badge_stock">{{producto.stock+' '+producto.unidad}}</span></div>
+                                                            <div :id="'spinner_'+producto.idproducto" class="alert alert-success mb-0 d-none"
+                                                                 style="padding: 5px 20px;position: absolute;right: 5px;bottom: 4px;">
+                                                                <strong style="font-size: 16px;">
+                                                                    <i class="far fa-check-circle"></i>
+                                                                </strong>
+                                                            </div>
+                                                        </div>
+                                                    </b-list-group-item>
+                                                </b-list-group>
+                                            </div>
+                                            <div class="text-center col-lg-12"
+                                                 v-show="productos.length <= 0 && !mostrarSpinner">
+                                                <h5 class="mt-4">No hay productos para mostrar</h5>
+                                            </div>
+                                            <div class="loader" v-show="mostrarSpinner">
+                                                <b-spinner label="Cargando..."></b-spinner>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-lg-12" style="height: 400px; overflow-y: scroll">
-                        <div class="table-responsive mt-4">
-                            <table class="table table-striped table-hover table-sm">
-                                <thead class="bg-custom-green">
-                                <tr>
-                                    <th scope="col">Código</th>
-                                    <th style="width: 40%" scope="col">Nombre y caracteristicas</th>
-                                    <th scope="col">Stock</th>
-                                    <th scope="col">Precio</th>
-                                    <th scope="col">Por mayor</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr v-bind:class='{"active_item": currentItem === index}' v-show="!mostrarSpinner" v-for="(producto,index) in productos" :key="index" @click="agregarProducto(producto)" style="cursor: pointer">
-                                    <td>{{producto.cod_producto}}</td>
-                                    <td><strong>{{producto.nombre}}</strong> <br> {{producto.presentacion}}</td>
-                                    <td v-show="producto.tipo_producto===1"><span :class="'badge '+producto.badge_stock">{{producto.stock+producto.unidad}}</span></td>
-                                    <td v-show="producto.tipo_producto==2">-</td>
-                                    <td>{{producto.moneda+producto.precio}}</td>
-                                    <td v-if="producto.precioPorMayor">{{producto.moneda+producto.precioPorMayor}}</td>
-                                    <td v-else>-</td>
-                                </tr>
-                                <tr v-show="mostrarSpinner">
-                                    <td colspan="6" class="text-center"><b-spinner label="Cargando..."></b-spinner></td>
-                                </tr>
-                                </tbody>
-                            </table>
+                    <div v-if="!isdesktop" class="col-lg-5 order-1 order-lg-2 platos-seleccionar mb-2">
+                        <div class="row">
+                            <div class="order-2 col-lg-12 mb-2">
+                                <div class="card">
+                                    <div class="card-body" style="overflow: auto;">
+                                        <input id="buscador-movil" @keyup="buscarProducto" type="text" v-model="query" class="form-control py-md-1" autocomplete="nope"
+                                               placeholder="Buscar producto...">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 offset-lg-6 col-lg-6 mt-3 mb-3 order-1 order-lg-2">
+                                <b-button class="float-right" style="width: 100%;height: 60px;" @click="closeModal"
+                                          variant="danger"><i class="fas fa-times-circle"></i>
+                                    Salir
+                                </b-button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+            <template v-if="isdesktop" #modal-footer="{cancel}">
+                <b-button style="width: 190px" variant="danger" @click="cancel()">Salir</b-button>
+            </template>
         </b-modal>
     </div>
 </template>
@@ -73,6 +124,24 @@
             window.removeEventListener('keydown', this.handler);
         },
         methods: {
+            init(){
+                this.focusBuscador();
+                let width = window.innerWidth
+                    || document.documentElement.clientWidth
+                    || document.body.clientWidth;
+
+                if(width > 992) {
+
+                    let height = window.innerHeight
+                        || document.documentElement.clientHeight
+                        || document.body.clientHeight;
+
+                    let h_box_productos = height - 90 - 180;
+
+                    let box_productos = document.getElementById('section_productos');
+                    Object.assign(box_productos.style, {height:h_box_productos+'px'});
+                }
+            },
             navigate(event){
                 switch (event.code) {
                     case 'ArrowUp':
@@ -113,7 +182,7 @@
                 let bottom = div.scrollHeight;
                 let offset = div.offsetHeight;
                 let top = div.scrollTop;
-                if ((offset + top) === bottom) {
+                if ((offset + top) >= bottom) {
                     axios.post('/pedidos/productos_por_categoria', {
                         'idcategoria': this.idcategoria,
                         'skip':this.productos.length || 0
@@ -127,16 +196,15 @@
                         });
                 }
             },
-            ocultarCategorias(){
-                this.showCategorias=false;
-            },
-            mostrarCategorias(){
-                this.showCategorias=true;
-                this.query = '';
-            },
             focusBuscador(){
-                let input = document.getElementById("buscador");
-                input.focus();
+                if (this.isdesktop) {
+                    document.getElementById('buscador').focus();
+                } else {
+                    setTimeout(() => {
+                        document.getElementById('buscador-movil').focus();
+                    }, 50);
+                }
+                this.getMenuCategoria(this.idcategoria||-1);
             },
             getMenuCategoria(val){
                 this.mostrarSpinner = true;
@@ -179,6 +247,7 @@
                 this.query='';
                 this.showCategorias = true;
                 this.$refs['modal-agregar-producto-alt'].hide();
+                this.idcategoria = -1;
             },
             agregarProducto(producto){
                 let spinner = document.getElementById("spinner_"+producto.idproducto);
@@ -190,23 +259,40 @@
                 spinner.classList.remove('d-none');
                 spinner.classList.add('d-inline-block');
             },
+            extracto(string){
+                string = _.truncate(string, {
+                    'length': 250,
+                    'separator': ' '
+                });
+                return string;
+            }
         }
     }
 </script>
 <style>
-    #modal-agregar-producto-alt .modal-dialog{
-        max-width: 80%;
-    }
     #modal-agregar-producto-alt .modal-content{
         background: #eceff1;
+    }
+
+    #modal-agregar-producto-alt .menu-categorias{
+        padding: 5px;
+        display: inline-grid;
+        align-items: center;
+    }
+
+    #modal-agregar-producto-alt .menu-categorias span{
+        text-align: center;
+        margin: 0;
+        word-break: break-word;
+        padding: 15px 10px;
     }
 
     #modal-agregar-producto-alt .card-body{
         overflow-y: scroll;
     }
 
-    #modal-agregar-producto-alt table td{
-        padding: 10px 0;
+    #modal-agregar-producto-alt .categorias-container{
+        height: 500px;
     }
     .badge {
         font-size: 85%;
@@ -214,15 +300,18 @@
     }
     .presentacion{
         font-size: 12px;
-        color: #7e7d7d;
+        color: #45463e;
     }
     .active_item {
-        background-color: #2a90ff !important;
-        color: white;
+        background-color: #e1e1e1;
+        color: black;
     }
 
     .list-group-item:hover {
-        background-color: #9fcdff;
-        color: white
+        background-color: #e1e1e1 !important;
+        color: black;
+    }
+    .codigo_producto{
+        color:#8b8b8b;
     }
 </style>
