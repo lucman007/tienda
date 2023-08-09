@@ -68,7 +68,7 @@
                                             <td>{{mb_strtoupper($caja->empleado->nombre)}}</td>
                                             <td>{{date('d/m/Y H:m',strtotime($caja->fecha_a))}}</td>
                                             <td>{{!$caja->fecha_c?'-':date('d/m/Y H:m',strtotime($caja->fecha_c))}}</td>
-                                            <td>TURNO {{$caja->turno}}</td>
+                                            <td><a href="/caja/{{date('Y-m-d',strtotime($caja->fecha_a))}}?turno={{$caja->turno}}">TURNO {{$caja->turno}}</a></td>
                                             <td>S/ {{$caja->apertura}}</td>
                                             <td>S/ {{$caja->total_ventas}}</td>
                                             <td>S/ {{$caja->efectivo_teorico}}</td>

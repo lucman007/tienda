@@ -10,6 +10,7 @@
         <div class="card">
             <div class="card-body">
                 <b-nav tabs>
+                    <b-nav-item href="{{url('/reportes/productos/resumen-diario')}}">Resumen diario</b-nav-item>
                     <b-nav-item href="{{url('/reportes/productos/mas-vendidos')}}">Más vendidos</b-nav-item>
                     <b-nav-item href="{{url('/reportes/productos/stock_bajo')}}" active>Stock bajo</b-nav-item>
                 </b-nav>
@@ -33,11 +34,10 @@
                                                 <thead class="bg-custom-green">
                                                 <tr>
                                                     <th scope="col"></th>
-                                                    <th scope="col">Código</th>
                                                     <th scope="col">Producto</th>
                                                     <th scope="col">Características</th>
                                                     <th scope="col">Stock actual</th>
-                                                    <th scope="col"></th>
+                                                    <th scope="col">Kardex</th>
                                                 </tr>
                                                 </thead>
                                                 <tbody>
@@ -45,8 +45,7 @@
                                                     @foreach($productos as $producto)
                                                         <tr>
                                                             <td></td>
-                                                            <td>{{ $producto->cod_producto }}</td>
-                                                            <td>{{ $producto->nombre }}</td>
+                                                            <td style="width: 30%">{{ str_pad($producto->cod_producto,5,'0',STR_PAD_LEFT) }} - {{ $producto->nombre }}</td>
                                                             <td style="width: 30%">{{ \Illuminate\Support\Str::words($producto->presentacion,40,'...')}}</td>
                                                             <td style="color:{{$producto->saldo <= 0?'red':'green'}}">{{ $producto->saldo}}</td>
                                                             <td><a href="{{url('/productos/inventario/'.$producto->idproducto)}}"><i class="fas fa-indent"></i> Ver kardex</a></td>

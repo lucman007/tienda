@@ -109,7 +109,7 @@
                                         <b-dropdown-item @cannot('Reportes: ventas') class="disabled" disabled @endcannot href="{{action('ReporteController@reporte_ventas')}}"><i class="fas fa-chart-line"></i> Reporte de ventas</b-dropdown-item>
                                         <b-dropdown-item @cannot('Reportes: gastos') class="disabled" disabled @endcannot href="{{url('/reportes/gastos')}}"><i class="fas fa-coins"></i> Reporte de gastos</b-dropdown-item>
                                         <b-dropdown-item @cannot('Reportes: comprobantes') class="disabled" disabled @endcannot href="{{action('ReporteController@reporte_comprobantes')}}"><i class="fas fa-file-invoice-dollar"></i> Reporte de comprobantes</b-dropdown-item>
-                                        <b-dropdown-item @cannot('Reportes: productos') class="disabled" disabled @endcannot href="{{url('/reportes/productos/mas-vendidos')}}"><i class="fas fa-dolly"></i> Reporte de productos</b-dropdown-item>
+                                        <b-dropdown-item @cannot('Reportes: productos') class="disabled" disabled @endcannot href="{{url('/reportes/productos/resumen-diario')}}"><i class="fas fa-dolly"></i> Reporte de productos</b-dropdown-item>
                                     </b-nav-item-dropdown>
                                     @can('Créditos')
                                         <b-nav-item href="{{action('CreditoController@index')}}">
@@ -203,7 +203,7 @@
                                         <b-dropdown-item @cannot('Reportes: gastos') class="disabled" disabled @endcannot href="{{url('/reportes/gastos/diario').'/'.date('Y-m')}}"><i class="fas fa-coins"></i> Reporte de gastos</b-dropdown-item>
                                         <b-dropdown-item @cannot('Reportes: ventas') class="disabled" disabled @endcannot href="{{action('ReporteController@reporte_caja')}}"><i class="fas fa-cash-register"></i> Reporte de caja</b-dropdown-item>
                                         <b-dropdown-item @cannot('Reportes: comprobantes') class="disabled" disabled @endcannot href="{{action('ReporteController@reporte_comprobantes')}}"><i class="fas fa-file-invoice-dollar"></i> Reporte de comprobantes</b-dropdown-item>
-                                        <b-dropdown-item @cannot('Reportes: productos') class="disabled" disabled @endcannot href="{{url('/reportes/productos/mas-vendidos')}}"><i class="fas fa-dolly"></i> Reporte de productos</b-dropdown-item>
+                                        <b-dropdown-item @cannot('Reportes: productos') class="disabled" disabled @endcannot href="{{url('/reportes/productos/resumen-diario')}}"><i class="fas fa-dolly"></i> Reporte de productos</b-dropdown-item>
                                     </b-nav-item-dropdown>
                                     <b-nav-item-dropdown @cannot('Mantenimiento') class="disabled" disabled @endcannot left>
                                         <template v-slot:button-content>

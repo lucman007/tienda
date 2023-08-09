@@ -16,6 +16,7 @@ use sysfact\Exports\CajaExport;
 use sysfact\Exports\GastosDiariosExport;
 use sysfact\Exports\GastosMensualExport;
 use sysfact\Exports\MasVendidosExport;
+use sysfact\Exports\ProductosResumenDiarioExport;
 use sysfact\Exports\ReporteComprobantes;
 use sysfact\Exports\StockBajoExport;
 use sysfact\Exports\VentasDiariasExport;
@@ -37,7 +38,6 @@ class ReporteController extends Controller
 {
     private $hora_inicio;
     private $hora_fin;
-    private $hasta_offset;
     private $solo_comprobantes;
 
 	public function __construct()
@@ -410,34 +410,48 @@ class ReporteController extends Controller
 
     }
 
-    public function reporte_ventas_diario_data($mes, $moneda, $tipo_cambio){
-
-        $ventas=Venta::whereBetween('fecha',[$mes.'-01 '.$this->hora_inicio,$mes.'-31 '.$this->hora_fin])
-            ->where('eliminado', '=', 0)
-            ->orderby('fecha', 'desc')
+    public function reporte_ventas_diario_data($mes, $moneda, $tipo_cambio)
+    {
+        $ventas = Venta::whereBetween('fecha', ["$mes-01 " . $this->hora_inicio, "$mes-31 " . $this->hora_fin])
+            ->where('eliminado', 0)
+            ->with(['facturacion'])
             ->whereHas('facturacion', function ($query) use ($moneda) {
-                $query
-                    ->where('codigo_moneda', $moneda)
-                    ->where(function ($query) {
-                        $this->func_filter($query);
-                    });
-
+                $query->where('codigo_moneda', $moneda);
+                $this->func_filter($query);
             })
-            ->orderBy('fecha', 'desc')->get();
+            ->orderBy('fecha', 'desc')
+            ->get();
 
-        $ventas_brutas=0;
-        $costos = 0;
-        $impuestos = 0;
-        $fecha_anterior=null;
-        $totales_del_dia=[];
+        $tc = round(cache('opciones')['tipo_cambio_compra'],2);
 
-        foreach ($ventas as $item){
+        $totales_del_dia = [];
 
-            //costos
+        foreach ($ventas as $item) {
+
+            if($tipo_cambio !='fecha-actual'){
+                $tc = $item->tipo_cambio;
+            }
+
+            // Ventas
+            $fecha_venta = date("d-m-Y", strtotime($item->fecha));
+
+            if (!isset($totales_del_dia[$fecha_venta])) {
+                $totales_del_dia[$fecha_venta] = [
+                    'fecha' => $fecha_venta,
+                    'ventas_brutas' => 0,
+                    'ventas_netas' => 0,
+                    'costos' => 0,
+                    'utilidad' => 0,
+                    'impuestos' => 0,
+                    'tipo_cambio' => $tc,
+                ];
+            }
+
+            $totales_del_dia[$fecha_venta]['ventas_brutas'] += $item->total_venta;
+
+            // Costos
             $inventario = $item->inventario;
             $costo = 0;
-            $tc = $tipo_cambio=='fecha-actual'?cache('opciones')['tipo_cambio_compra']:$item->tipo_cambio;
-
             foreach ($inventario as $inv){
                 if($inv->moneda == 'USD'){
                     $costo += $inv->costo * $inv->tipo_cambio * ($inv->cantidad * -1);
@@ -445,80 +459,43 @@ class ReporteController extends Controller
                     $costo += $inv->costo * ($inv->cantidad * -1);
                 }
             }
+            $totales_del_dia[$fecha_venta]['costos'] += $costo;
 
-            //impuestos
+            // Impuestos
             $factura = $item->facturacion;
-            $igv = 0;
-
-            if($factura->codigo_tipo_documento == 01 || $factura->codigo_tipo_documento == 03){
-                if($factura->codigo_moneda == 'USD'){
-                    $igv = $factura->igv * $tc;
-                } else{
-                    $igv = $factura->igv;
-                }
-            }
-
-            //ventas
-            $fecha_venta=date("d-m-Y",strtotime($item->fecha));
-
-            if($fecha_venta!=$fecha_anterior){
-                $ventas_brutas = $item->total_venta;
-                $costos = $costo;
-                $impuestos = $igv;
-
-                if($item->facturacion->codigo_moneda=='PEN'){
-                    $ventas_netas = $ventas_brutas - $impuestos;
-                } else{
-                    $ventas_netas = $ventas_brutas * $tc - $impuestos;
-                }
-
-                $utilidad = $ventas_netas - $costos;
-
-                $totales_del_dia[]=[
-                    'fecha'=>$fecha_venta,
-                    'ventas_brutas'=>$ventas_brutas,
-                    'ventas_netas'=>$ventas_netas,
-                    'costos'=>$costos,
-                    'utilidad'=>$utilidad,
-                    'impuestos'=>$impuestos,
-                    'tipo_cambio'=>$tc
-                ];
-                $fecha_anterior=date("d-m-Y",strtotime($item->fecha));
-
-            } else{
-                $ventas_brutas += $item->total_venta;
-                $costos += $costo;
-                $impuestos += $igv;
-
-                if($item->facturacion->codigo_moneda=='PEN'){
-                    $ventas_netas = $ventas_brutas - $impuestos;
-                } else{
-                    $ventas_netas = $ventas_brutas * $tc - $impuestos;
-                }
-
-                $utilidad = $ventas_netas - $costos;
-
-                $totales_del_dia[count($totales_del_dia)-1]['fecha']=$fecha_venta;
-                $totales_del_dia[count($totales_del_dia)-1]['ventas_brutas']=$ventas_brutas;
-                $totales_del_dia[count($totales_del_dia)-1]['costos']=$costos;
-                $totales_del_dia[count($totales_del_dia)-1]['utilidad']=$utilidad;
-                $totales_del_dia[count($totales_del_dia)-1]['impuestos']=$impuestos;
-                $totales_del_dia[count($totales_del_dia)-1]['ventas_netas']=$ventas_netas;
-
+            if ($factura->codigo_tipo_documento == 01 || $factura->codigo_tipo_documento == 03) {
+                $igv = $factura->codigo_moneda == 'USD' ? $factura->igv * $tc : $factura->igv;
+                $totales_del_dia[$fecha_venta]['impuestos'] += $igv;
             }
 
         }
 
-        usort($totales_del_dia, function ($a, $b) {
-            return strtotime($a['fecha']) - strtotime($b['fecha']);
-        });
+        $totales_badge = [
+            'bruto'=>0,
+            'impuesto'=>0,
+            'neto'=>0,
+        ];
 
-        return $totales_del_dia;
+        // Calcular ventas netas y utilidad
+        foreach ($totales_del_dia as &$total) {
+            if ($moneda == 'PEN') {
+                $total['ventas_netas'] = $total['ventas_brutas'] - $total['impuestos'];
+            } else {
+                $total['ventas_netas'] = $total['ventas_brutas'] * $total['tipo_cambio'] - $total['impuestos'];
+            }
+            $total['utilidad'] = $total['ventas_netas'] - $total['costos'];
+
+            $totales_badge['bruto'] += $total['ventas_brutas'];
+            $totales_badge['impuesto'] += $total['impuestos'];
+            $totales_badge['neto'] += $total['ventas_netas'];
+        }
+
+        return [array_values($totales_del_dia),$totales_badge];
     }
 
     public function reporte_ventas_diario(Request $request, $mes=null){
 
-        $esExportable = $request->get('export','false');
+        $esExportable = $request->get('export',false);
         $moneda = $request->moneda??'PEN';
         $tipo_cambio = $request->tc??'fecha-actual';
 
@@ -528,8 +505,8 @@ class ReporteController extends Controller
 
         $ventas=$this->reporte_ventas_diario_data($mes, $moneda, $tipo_cambio);
 
-        if($esExportable == 'true'){
-            return Excel::download(new VentasDiariasExport($this->reporte_ventas_diario_data($mes, $moneda, $tipo_cambio),$moneda), 'ventas_diario.xlsx');
+        if($esExportable){
+            return Excel::download(new VentasDiariasExport($ventas,$moneda), 'ventas_diario.xlsx');
         } else {
             return view('reportes.ventas_diario',
                 [
@@ -543,37 +520,59 @@ class ReporteController extends Controller
 
     }
 
-    public function reporte_ventas_mensual_data($anio, $moneda, $tipo_cambio){
+    //Reporte de venta mensual
 
-        $ventas=Venta::whereBetween('fecha',[$anio.'-01-01 '.$this->hora_inicio,$anio.'-12-31 '.$this->hora_fin])
+    public function reporte_ventas_mensual_data($anio, $moneda, $tipo_cambio)
+    {
+        $ventas = Venta::whereBetween('fecha', [$anio . '-01-01 ' . $this->hora_inicio, $anio . '-12-31 ' . $this->hora_fin])
             ->where('eliminado', '=', 0)
-            ->orderby('fecha', 'desc')
             ->whereHas('facturacion', function ($query) use ($moneda) {
-                $query
-                    ->where('codigo_moneda', $moneda)
-                    ->where(function ($query) {
-                        $this->func_filter($query);
-                    });
-
+                $query->where('codigo_moneda', $moneda);
+                $this->func_filter($query);
             })
-            ->orderBy('fecha', 'desc')->get();
+            ->with(['facturacion'])
+            ->orderBy('fecha', 'asc')
+            ->get();
 
         if($ventas && count($ventas) > 6000){
             return [];
         }
 
-        $ventas_brutas=0;
-        $costos = 0;
-        $impuestos = 0;
-        $fecha_anterior=null;
-        $totales_del_mes=[];
+        $totales_del_mes = [];
 
-        foreach ($ventas as $item){
+        $meses_en_espanol = [
+            'Jan' => 'Ene',
+            'Feb' => 'Feb',
+            'Mar' => 'Mar',
+            'Apr' => 'Abr',
+            'May' => 'May',
+            'Jun' => 'Jun',
+            'Jul' => 'Jul',
+            'Aug' => 'Ago',
+            'Sep' => 'Sep',
+            'Oct' => 'Oct',
+            'Nov' => 'Nov',
+            'Dec' => 'Dic',
+        ];
+
+        $tc = round(cache('opciones')['tipo_cambio_compra'],2);
+
+        foreach ($ventas as $item) {
+
+            if($tipo_cambio !='fecha-actual'){
+                $tc = $item->tipo_cambio;
+            }
+
+            $mes = date("M Y", strtotime($item->fecha));
+
+            $mes_anio_ingles = explode(' ',$mes);
+            $mes_anio_espanol = strtr($mes_anio_ingles[0], $meses_en_espanol).' '.$mes_anio_ingles[1];
+
+            $ventas_brutas = $item->total_venta;
 
             //costos
             $inventario = $item->inventario;
             $costo = 0;
-            $tc = $tipo_cambio=='fecha-actual'?round(cache('opciones')['tipo_cambio_compra'],2):$item->tipo_cambio;
 
             foreach ($inventario as $inv){
                 if($inv->moneda == 'USD'){
@@ -583,80 +582,83 @@ class ReporteController extends Controller
                 }
             }
 
-            //impuestos
-            $factura = $item->facturacion;
-            $igv = 0;
+            $igv = $this->calcularImpuestos($item->facturacion);
 
-            if($factura->codigo_tipo_documento == 01 || $factura->codigo_tipo_documento == 03){
-                if($factura->codigo_moneda == 'USD'){
-                    $igv = $factura->igv * $tc;
-                } else{
-                    $igv = $factura->igv;
-                }
-            }
+            $ventas_netas = $this->calcularVentasNetas($item->facturacion, $ventas_brutas, $igv, $tc);
 
-            //ventas
-            $fecha_venta=date("M Y",strtotime($item->fecha));
+            $utilidad = $this->calcularUtilidad($ventas_netas, $costo);
 
-            if($fecha_venta!=$fecha_anterior){
-                $ventas_brutas = $item->total_venta;
-                $costos = $costo;
-                $impuestos = $igv;
-
-                if($item->facturacion->codigo_moneda=='PEN'){
-                    $ventas_netas = $ventas_brutas - $impuestos;
-                } else{
-                    $ventas_netas = $ventas_brutas * $tc - $impuestos;
-                }
-
-                $utilidad = $ventas_netas - $costos;
-
-                $totales_del_mes[]=[
-                    'fecha'=>$fecha_venta,
-                    'ventas_brutas'=>$ventas_brutas,
-                    'ventas_netas'=>$ventas_netas,
-                    'costos'=>$costos,
-                    'utilidad'=>$utilidad,
-                    'impuestos'=>$impuestos,
-                    'tipo_cambio'=>$tc,
+            if (!isset($totales_del_mes[$mes])) {
+                $totales_del_mes[$mes] = [
+                    'mes' => $mes,
+                    'fecha' => $mes_anio_espanol,
+                    'ventas_brutas' => 0,
+                    'ventas_netas' => 0,
+                    'costos' => 0,
+                    'utilidad' => 0,
+                    'impuestos' => 0,
+                    'tipo_cambio' => $tc,
                 ];
-                $fecha_anterior=date("M Y",strtotime($item->fecha));
-
-            } else{
-                $ventas_brutas += $item->total_venta;
-                $costos += $costo;
-                $impuestos += $igv;
-
-                if($item->facturacion->codigo_moneda=='PEN'){
-                    $ventas_netas = $ventas_brutas - $impuestos;
-                } else{
-                    $ventas_netas = $ventas_brutas * $tc - $impuestos;
-                }
-
-                $utilidad = $ventas_netas - $costos;
-
-                $totales_del_mes[count($totales_del_mes)-1]['fecha']=$fecha_venta;
-                $totales_del_mes[count($totales_del_mes)-1]['ventas_brutas']=$ventas_brutas;
-                $totales_del_mes[count($totales_del_mes)-1]['costos']=$costos;
-                $totales_del_mes[count($totales_del_mes)-1]['utilidad']=$utilidad;
-                $totales_del_mes[count($totales_del_mes)-1]['impuestos']=$impuestos;
-                $totales_del_mes[count($totales_del_mes)-1]['ventas_netas']=$ventas_netas;
-                $totales_del_mes[count($totales_del_mes)-1]['tipo_cambio']=$tc;
-
             }
+
+            $totales_del_mes[$mes]['ventas_brutas'] += $item->total_venta;
+            $totales_del_mes[$mes]['ventas_netas'] += $ventas_netas;
+            $totales_del_mes[$mes]['costos'] += $costo;
+            $totales_del_mes[$mes]['utilidad'] += $utilidad;
+            $totales_del_mes[$mes]['impuestos'] += $igv;
+
 
         }
 
-        usort($totales_del_mes, function ($a, $b) {
-            return strtotime($a['fecha']) - strtotime($b['fecha']);
-        });
+        $totales_badge = [
+            'bruto'=>0,
+            'impuesto'=>0,
+            'neto'=>0,
+        ];
 
-        return $totales_del_mes;
+        foreach ($totales_del_mes as $total) {
+            $totales_badge['bruto'] += $total['ventas_brutas'];
+            $totales_badge['impuesto'] += $total['impuestos'];
+            $totales_badge['neto'] += $total['ventas_netas'];
+        }
+
+        return [array_values($totales_del_mes),$totales_badge];
+    }
+
+    private function calcularImpuestos($factura)
+    {
+        $igv = 0;
+
+        if ($factura->codigo_tipo_documento == 01 || $factura->codigo_tipo_documento == 03) {
+            $tc = cache('opciones')['tipo_cambio_compra'];
+
+            if ($factura->codigo_moneda == 'USD') {
+                $igv = $factura->igv * $tc;
+            } else {
+                $igv = $factura->igv;
+            }
+        }
+
+        return $igv;
+    }
+
+    private function calcularVentasNetas($factura, $ventas_brutas, $igv, $tipo_cambio)
+    {
+        if ($factura->codigo_moneda == 'PEN') {
+            return $ventas_brutas - $igv;
+        } else {
+            return $ventas_brutas * $tipo_cambio - $igv;
+        }
+    }
+
+    private function calcularUtilidad($ventas_netas, $costos)
+    {
+        return $ventas_netas - $costos;
     }
 
     public function reporte_ventas_mensual(Request $request, $anio=null){
 
-        $esExportable = $request->get('export','false');
+        $esExportable = $request->get('export',false);
         $moneda = $request->moneda??'PEN';
         $tipo_cambio = $request->tc??'fecha-actual';
         $reporte_ventas_manual = json_decode(cache('config')['interfaz'], true)['reporte_ventas_manual']??false;
@@ -704,7 +706,7 @@ class ReporteController extends Controller
             $manual = 0;
         }
 
-        if($esExportable == 'true'){
+        if($esExportable){
             return Excel::download(new VentasMensualExport($ventas,$moneda), 'ventas_mensual.xlsx');
         } else {
             return view('reportes.ventas_mensual',
@@ -993,53 +995,30 @@ class ReporteController extends Controller
 
         try{
             $filtros = ['desde' => $desde, 'hasta' => $hasta];
-            if($esExportable == 'true'){
-                $productos = DB::table('ventas')
-                    ->join('ventas_detalle', 'ventas_detalle.idventa', '=', 'ventas.idventa')
-                    ->join('productos', 'productos.idproducto', '=', 'ventas_detalle.idproducto')
-                    ->join('facturacion', 'ventas.idventa', '=', 'facturacion.idventa')
-                    ->selectRaw('sum(ventas_detalle.cantidad) as vendidos,sum(ventas_detalle.monto * ventas_detalle.cantidad) as monto_total,ventas_detalle.idproducto, productos.nombre, productos.unidad_medida, productos.presentacion, productos.cod_producto, productos.precio, productos.tipo_producto')
-                    ->whereBetween('ventas.fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
-                    ->where('ventas.eliminado', 0)
-                    ->where(function($query) {
-                        $query->where(function ($query) {
-                            $query->where('facturacion.codigo_tipo_documento',01)
-                                ->orWhere('facturacion.codigo_tipo_documento',03)
-                                ->orWhere('facturacion.codigo_tipo_documento',30);
-                        })
-                            ->where(function ($query){
-                                $query->where('facturacion.estado','ACEPTADO')
-                                    ->orWhere('facturacion.estado','PENDIENTE');
-                            })
-                            ->orWhere('facturacion.estado','-');
-                    })
-                    ->groupBy('ventas_detalle.idproducto')
-                    ->orderby('vendidos','desc')
-                    ->get();
-            } else {
-                $productos = DB::table('ventas')
-                    ->join('ventas_detalle', 'ventas_detalle.idventa', '=', 'ventas.idventa')
-                    ->join('productos', 'productos.idproducto', '=', 'ventas_detalle.idproducto')
-                    ->join('facturacion', 'ventas.idventa', '=', 'facturacion.idventa')
-                    ->selectRaw('sum(ventas_detalle.cantidad) as vendidos,sum(ventas_detalle.monto * ventas_detalle.cantidad) as monto_total,ventas_detalle.idproducto, productos.nombre, productos.unidad_medida, productos.presentacion, productos.cod_producto, productos.precio, productos.tipo_producto')
-                    ->whereBetween('ventas.fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
-                    ->where('ventas.eliminado', 0)
-                    ->where(function($query) {
-                        $query->where(function ($query) {
-                            $query->where('facturacion.codigo_tipo_documento',01)
-                                ->orWhere('facturacion.codigo_tipo_documento',03)
-                                ->orWhere('facturacion.codigo_tipo_documento',30);
-                        })
-                            ->where(function ($query){
-                                $query->where('facturacion.estado','ACEPTADO')
-                                    ->orWhere('facturacion.estado','PENDIENTE');
-                            })
-                            ->orWhere('facturacion.estado','-');
-                    })
-                    ->groupBy('ventas_detalle.idproducto')
-                    ->orderby('vendidos','desc')
-                    ->paginate(30);
+            $productos = DB::table('ventas')
+                ->join('ventas_detalle', 'ventas_detalle.idventa', '=', 'ventas.idventa')
+                ->join('productos', 'productos.idproducto', '=', 'ventas_detalle.idproducto')
+                ->join('facturacion', 'ventas.idventa', '=', 'facturacion.idventa')
+                ->selectRaw('sum(ventas_detalle.cantidad) as vendidos,sum(ventas_detalle.monto * ventas_detalle.cantidad) as monto_total,ventas_detalle.idproducto, productos.nombre, productos.unidad_medida, productos.presentacion, productos.cod_producto, productos.precio, productos.tipo_producto')
+                ->whereBetween('ventas.fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
+                ->where('ventas.eliminado', 0)
+                ->where(function($query) {
+                    $query->whereIn('codigo_tipo_documento', [01, 03, 30])
+                        ->where(function ($query){
+                            $query->where('facturacion.estado','ACEPTADO')
+                                ->orWhere('facturacion.estado','PENDIENTE')
+                                ->orWhere('facturacion.estado','-');
+                        });
+                })
+                ->groupBy('ventas_detalle.idproducto')
+                ->orderby('vendidos','desc')
+                ->when($esExportable, function ($query) {
+                    return $query->get();
+                }, function ($query) {
+                    return $query->paginate(30);
+                });
 
+            if(!$esExportable){
                 $productos->appends($_GET)->links();
             }
 
@@ -1054,7 +1033,7 @@ class ReporteController extends Controller
     public function mas_vendidos(Request $request){
 
 
-        $esExportable = $request->get('export','false');
+        $esExportable = $request->get('export',false);
         $desde=$request->get('desde',date('Y-m-d'));
         $hasta=$request->get('hasta',date('Y-m-d'));
 
@@ -1096,98 +1075,61 @@ class ReporteController extends Controller
             $ventas = null;
             $filtros = ['desde' => $desde, 'hasta' => $hasta, 'filtro'=>$filtro,'buscar'=>$buscar];
 
+            switch ($filtro) {
+                case 'fecha':
+                    $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
+                        ->where('eliminado', '=', 0)
+                        ->whereHas('facturacion', function($query) {
+                            $query->where('codigo_tipo_documento',01)
+                                ->orWhere('codigo_tipo_documento',03)
+                                ->orWhere('codigo_tipo_documento',07)
+                                ->orWhere('codigo_tipo_documento','08');
+                        })
+                        ->orderby('fecha', 'desc')
+                        ->when($esExportable, function ($query) {
+                            return $query->get();
+                        }, function ($query) {
+                            return $query->paginate(30);
+                        });
+                    break;
+                case 'documento':
+                case 'estado':
+                    switch ($filtro) {
+                        case 'documento':
+                            switch ($buscar) {
+                                case 'factura':
+                                    $buscar = '01';
+                                    break;
+                                case 'boleta':
+                                    $buscar = '03';
+                                    break;
+                                case 'nota-de-credito':
+                                    $buscar = '07';
+                                    break;
+                                case 'nota-de-debito':
+                                    $buscar = '08';
+                                    break;
+                            }
+                            $filtro = 'codigo_tipo_documento';
+                            break;
+                    }
 
-            if($esExportable == 'true'){
-                switch ($filtro) {
-                    case 'fecha':
-                        $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
-                            ->where('eliminado', '=', 0)
-                            ->whereHas('facturacion', function($query) {
-                                $query->where('codigo_tipo_documento',01)
-                                    ->orWhere('codigo_tipo_documento',03)
-                                    ->orWhere('codigo_tipo_documento',07)
-                                    ->orWhere('codigo_tipo_documento','08');
-                            })
-                            ->orderby('fecha', 'desc')
-                            ->get();
-                        break;
-                    case 'documento':
-                    case 'estado':
-                        switch ($filtro) {
-                            case 'documento':
-                                switch ($buscar) {
-                                    case 'factura':
-                                        $buscar = '01';
-                                        break;
-                                    case 'boleta':
-                                        $buscar = '03';
-                                        break;
-                                    case 'nota-de-credito':
-                                        $buscar = '07';
-                                        break;
-                                    case 'nota-de-debito':
-                                        $buscar = '08';
-                                        break;
-                                }
-                                $filtro = 'codigo_tipo_documento';
-                                break;
-                        }
-
-                        $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
+                    $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
                         ->where('eliminado', '=', 0)
                         ->orderby('fecha', 'desc')
                         ->whereHas('facturacion', function ($query) use ($filtro, $buscar) {
                             $query->where($filtro, $buscar);
                         })
-                        ->get();
-                        break;
-                }
-            } else{
-                switch ($filtro) {
-                    case 'fecha':
-                        $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
-                            ->where('eliminado', '=', 0)
-                            ->whereHas('facturacion', function($query) {
-                                $query->where('codigo_tipo_documento',01)
-                                    ->orWhere('codigo_tipo_documento',03)
-                                    ->orWhere('codigo_tipo_documento',07)
-                                    ->orWhere('codigo_tipo_documento','08');
-                            })
-                            ->orderby('fecha', 'desc')
-                            ->paginate(30);
-                        break;
-                    case 'documento':
-                    case 'estado':
-                        switch ($filtro) {
-                            case 'documento':
-                                switch ($buscar) {
-                                    case 'factura':
-                                        $buscar = '01';
-                                        break;
-                                    case 'boleta':
-                                        $buscar = '03';
-                                        break;
-                                    case 'nota-de-credito':
-                                        $buscar = '07';
-                                        break;
-                                    case 'nota-de-debito':
-                                        $buscar = '08';
-                                        break;
-                                }
-                                $filtro = 'codigo_tipo_documento';
-                                break;
-                        }
+                        ->when($esExportable, function ($query) {
+                            return $query->get();
+                        }, function ($query) {
+                            return $query->paginate(30);
+                        });
+                    break;
+            }
 
-                        $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
-                            ->where('eliminado', '=', 0)
-                            ->orderby('fecha', 'desc')
-                            ->whereHas('facturacion', function ($query) use ($filtro, $buscar) {
-                                $query->where($filtro, $buscar);
-                            })
-                            ->paginate(30);
-                        break;
-                }
 
+            if(!$esExportable){
                 $ventas->appends($_GET)->links();
             }
 
@@ -1268,7 +1210,7 @@ class ReporteController extends Controller
 
     public function reporte_comprobantes(Request $request, $desde=null,$hasta=null){
 
-        $esExportable = $request->get('export','false');
+        $esExportable = $request->get('export',false);
         $filtro = $request->filtro;
         $buscar = $request->buscar;
 
@@ -1280,7 +1222,7 @@ class ReporteController extends Controller
 
         $comprobantes=$this->reporte_comprobantes_data($desde, $hasta, $filtro, $buscar, $esExportable);
 
-        if($esExportable == 'true'){
+        if($esExportable){
             return Excel::download(new ReporteComprobantes($comprobantes['comprobantes']), 'reporte_comprobantes.xlsx');
         } else {
             return view('reportes.comprobantes',$comprobantes);
@@ -1296,21 +1238,27 @@ class ReporteController extends Controller
             $cajas = null;
             $filtros = ['desde' => $desde, 'hasta' => $hasta, 'filtro'=>$filtro,'buscar'=>$buscar];
 
+            $cajas = Caja::whereBetween('fecha_a', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
+                ->orderby('fecha_a', 'desc')
+                ->when($esExportable, function ($query) {
+                    return $query->get();
+                }, function ($query) {
+                    return $query->paginate(30);
+                });
 
-            if($esExportable == 'true'){
-                $cajas = Caja::whereBetween('fecha_a', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
-                    ->orderby('fecha_a', 'desc')
-                    ->get();
-            } else{
-                $cajas = Caja::whereBetween('fecha_a', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
-                    ->orderby('fecha_a', 'desc')
-                    ->paginate(30);
+            if(!$esExportable){
                 $cajas->appends($_GET)->links();
             }
 
             foreach ($cajas as $caja) {
-                $suma = $caja->efectivo + $caja->tarjeta + $caja->tarjeta_1 + $caja->tarjeta_2 + $caja->yape + $caja->plin + $caja->otros;
+                $suma = Venta::where('idcaja', $caja->idcaja)
+                    ->where('eliminado', '=', 0)
+                    ->where('tipo_pago', '!=', 2)
+                    ->sum('total_venta');
+
                 $caja->total_ventas = number_format($suma, 2);
+                $caja->otros_medios = $caja->yape + $caja->plin + $caja->otros +
+                    $caja->transferencia + $caja->tarjeta + $caja->tarjeta_1 + $caja->tarjeta_2 + $caja->rappi + $caja->pedidosya + $caja->deliverygo;
             }
 
             return [
@@ -1326,7 +1274,7 @@ class ReporteController extends Controller
 
     public function reporte_caja(Request $request, $desde=null,$hasta=null){
 
-        $esExportable = $request->get('export','false');
+        $esExportable = $request->get('export',false);
         $filtro = $request->filtro;
         $buscar = $request->buscar;
 
@@ -1410,7 +1358,7 @@ class ReporteController extends Controller
             $html = $view->render();
 
             $pdf=new Html2Pdf('P',[72,250],'es');
-            $pdf->pdf->SetTitle('RESUMEN DE VENTAS');
+            $pdf->pdf->SetTitle('REPORTE DE VENTAS');
             $pdf->writeHTML($html);
 
             if($request->rawbt){
@@ -1484,6 +1432,147 @@ class ReporteController extends Controller
                 ]
             );
         }
+
+    }
+
+    public function productos_resumen_diario(Request $request){
+
+        $esExportable = $request->get('export',false);
+        $tipo = $request->tipo;
+        $desde=$request->get('desde', date('Y-m-d'));
+        $hasta=$request->get('hasta', date('Y-m-d'));
+
+        $filtros = ['desde'=>$desde,'hasta'=>$hasta, 'tipo'=>$tipo];
+
+        $productos = DB::table('inventario')
+            ->join('productos', 'inventario.idproducto', '=', 'productos.idproducto')
+            ->select(
+                'inventario.fecha','inventario.cantidad',
+                'productos.idproducto','productos.cod_producto','productos.nombre','productos.precio','productos.presentacion','unidad_medida','tipo_producto',
+                DB::raw('SUM(inventario.cantidad) as vendidos')
+            )
+            ->where('tipo_producto','!=',4)
+            ->whereNotNull('inventario.idventa')
+            ->whereBetween('inventario.fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
+            ->groupBy(DB::raw('DATE(inventario.fecha)'),'inventario.idproducto')
+            ->orderBy(DB::raw('DATE_FORMAT(inventario.fecha, "%Y-%m-%d")'), 'desc')
+            ->orderBy('vendidos', 'asc')
+            ->when($esExportable, function ($query) {
+                return $query->get();
+            }, function ($query) {
+                return $query->paginate(30);
+            });
+
+        if ($esExportable) {
+            return Excel::download(new ProductosResumenDiarioExport($productos,$desde, $hasta), 'productos_resumen_diario.xlsx');
+        } else {
+
+            $productos->appends($_GET)->links();
+
+            return view('reportes.productos_diarios', [
+                    'productos' => $productos,
+                    'filtros' => $filtros,
+                    'usuario' => auth()->user()->persona
+                ]
+            );
+
+        }
+
+    }
+
+    public function productos_resumen_diario_badge(Request $request){
+
+        $desde=$request->get('desde', date('Y-m-d'));
+        $hasta=$request->get('hasta', date('Y-m-d'));
+
+        $productos = DB::table('inventario')
+            ->join('productos', 'inventario.idproducto', '=', 'productos.idproducto')
+            ->select(
+                'inventario.fecha','inventario.cantidad',
+                'productos.idproducto','productos.cod_producto','productos.nombre','productos.precio','productos.presentacion','unidad_medida','tipo_producto',
+                DB::raw('SUM(inventario.cantidad) as vendidos')
+            )
+            ->where('tipo_producto','!=',4)
+            ->whereNotNull('inventario.idventa')
+            ->whereBetween('inventario.fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
+            ->groupBy(DB::raw('DATE(inventario.fecha)'),'inventario.idproducto')
+            ->orderBy(DB::raw('DATE_FORMAT(inventario.fecha, "%Y-%m-%d")'), 'desc')
+            ->orderBy('vendidos', 'asc')
+            ->get();
+
+        $suma = 0;
+
+        foreach ($productos as $producto){
+            Log::info(json_encode($producto));
+            $suma += $producto->vendidos;
+        }
+
+        return abs($suma);
+
+
+    }
+
+    public function productos_resumen_diario_detalle(Request $request){
+
+        $fecha= date('Y-m-d', strtotime($request->fecha));
+        $hasta= date('Y-m-d', strtotime($request->hasta));
+        $desde = date('Y-m-d', strtotime($request->desde));
+
+        $productosDetalle = DB::table('ventas_detalle')
+            ->join('productos', 'ventas_detalle.idproducto', '=', 'productos.idproducto')
+            ->join('ventas', 'ventas_detalle.idventa', '=', 'ventas.idventa')
+            ->join('facturacion', 'ventas.idventa', '=', 'facturacion.idventa')
+            ->join('persona as client', 'ventas.idcliente', '=', 'client.idpersona')
+            ->join('persona as cajero', 'ventas.idcajero', '=', 'cajero.idpersona')
+            ->join('persona as mozo', 'ventas.idempleado', '=', 'mozo.idpersona')
+            ->select(
+                'ventas.idventa','ventas.fecha','productos.nombre','productos.precio','productos.tipo_producto','ventas_detalle.items_kit','client.nombre as cliente','mozo.nombre as atiende','cajero.nombre as caja','ventas_detalle.monto','ventas_detalle.cantidad','facturacion.codigo_moneda')
+            ->where(function($q) use ($request){
+                $q->where('ventas_detalle.idproducto', $request->idproducto)
+                    ->orWhereRaw("JSON_CONTAINS(ventas_detalle.items_kit, '{\"idproducto\": $request->idproducto}')");
+            })
+            ->whereBetween('ventas.fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
+            ->where('ventas.fecha','LIKE', $fecha.'%')
+            ->where('ventas.eliminado',0)
+            ->whereIn('facturacion.codigo_tipo_documento', [01, 03, 30])
+            ->where(function ($query){
+                $query->where('facturacion.estado','ACEPTADO')
+                    ->orWhere('facturacion.estado','PENDIENTE')
+                    ->orWhere('facturacion.estado','-');
+            })
+            ->orderBy('idventa','desc')
+            ->get();
+
+
+        $productosDetalleFinal = [];
+
+        foreach ($productosDetalle as $producto){
+            $producto->total = $producto->monto * $producto->cantidad;
+            $producto->fecha = date('d/m/Y H:i:s', strtotime($producto->fecha));
+            if($producto->tipo_producto == 3){
+                $producto->monto = -1;
+                $kit = json_decode($producto->items_kit, true);
+                foreach ($kit as $item) {
+                    if (isset($item['idproducto']) && $item['idproducto'] == $request->idproducto) {
+                        // Duplicar el producto
+                        $nuevoProducto = clone $producto;
+
+                        // Modificar las propiedades del producto duplicado
+                        $nuevoProducto->cantidad = $item['cantidad'] * $producto->cantidad;
+                        $nuevoProducto->nombre = $item['nombre'] . " (KIT: " . $nuevoProducto->nombre . ")";
+                        $nuevoProducto->precio = $nuevoProducto->precio . " (KIT)";
+
+                        // Agregar el producto duplicado a la lista final
+                        $productosDetalleFinal[] = $nuevoProducto;
+                    }
+                }
+
+            } else {
+                $productosDetalleFinal[] = $producto;
+            }
+        }
+
+        return $productosDetalleFinal;
 
     }
 

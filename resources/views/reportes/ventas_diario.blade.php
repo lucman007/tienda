@@ -83,6 +83,31 @@
                             <div class="col-lg-12 mt-3">
                                 <div class="card no-shadow">
                                     <div class="card-body">
+                                        <div class="row mb-3">
+                                            <div class="col-lg-12">
+                                                <div class="card no-shadow">
+                                                    <div class="card-body">
+                                                        <div class="row">
+                                                            <div class="col-md-2 col-sm-6">
+                                                                <p class="mb-0">Total ventas <br>
+                                                                    <span style="font-size: 30px;"><strong>S/ {{number_format($ventas[1]['bruto'],2)}}</strong></span>
+                                                                </p>
+                                                            </div>
+                                                            <div class="col-md-2 col-sm-6">
+                                                                <p class="mb-0">Total impuestos<br>
+                                                                    <span style="font-size: 30px;"><strong>S/ {{number_format($ventas[1]['impuesto'],2)}}</strong></span>
+                                                                </p>
+                                                            </div>
+                                                            <div class="col-md-2 col-sm-6">
+                                                                <p class="mb-0">Total neto<br>
+                                                                    <span style="font-size: 30px;"><strong>S/ {{number_format($ventas[1]['neto'],2)}}</strong></span>
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                         <div class="table-responsive tabla-gestionar">
                                             <table class="table table-striped table-hover table-sm">
                                                 <thead class="bg-custom-green">
@@ -99,8 +124,8 @@
                                                 </tr>
                                                 </thead>
                                                 <tbody>
-                                                @if($ventas)
-                                                    @foreach($ventas as $item)
+                                                @if($ventas[0])
+                                                    @foreach($ventas[0] as $item)
                                                         <tr>
                                                             <td>{{ $item['fecha']}}</td>
                                                             <td>{{$moneda=='PEN'?'S/':'USD '}}{{number_format($item['ventas_brutas'],2)}}</td>
@@ -138,7 +163,7 @@
             el: '.app',
             data: {
                 mes: '{{$mes}}',
-                ventas: <?php echo json_encode($ventas) ?> ,
+                ventas: <?php echo json_encode($ventas[0]) ?> ,
                 chartValues: [],
                 labels:[],
             },
@@ -160,11 +185,11 @@
                         }
                         this.chartValues=[
                             {
-                                data: datos,
+                                data: datos.reverse(),
                                 type: 'line'
                             }
                         ];
-                        this.labels = labels;
+                        this.labels = labels.reverse();
                     }
 
                 },

@@ -245,6 +245,9 @@ Route::group(['middleware' => ['can:Reportes']], function () {
 
     Route::get('reportes/productos/stock_bajo','ReporteController@reporte_stock_bajo');
     Route::get('reportes/productos/mas-vendidos','ReporteController@mas_vendidos');
+    Route::get('reportes/productos/resumen-diario','ReporteController@productos_resumen_diario');
+    Route::get('reportes/productos/resumen-diario-badge','ReporteController@productos_resumen_diario_badge');
+    Route::post('reportes/productos/resumen-diario-detalle','ReporteController@productos_resumen_diario_detalle');
     Route::get('reportes/productos/badge','ReporteController@mas_vendidos_badge');
 
     Route::get('reportes/comprobantes/{desde}/{hasta}','ReporteController@reporte_comprobantes');

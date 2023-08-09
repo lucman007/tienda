@@ -16,7 +16,7 @@
     <tbody>
     @foreach($ventas as $item)
         <tr>
-            <td>{{ $item['fecha']}}</td>
+            <td>{{ date('d/m/Y', strtotime($item['fecha']))}}</td>
             <td>{{ $moneda}}</td>
             <td>{{round($item['ventas_brutas'],2)}}</td>
             @if($moneda == 'USD')

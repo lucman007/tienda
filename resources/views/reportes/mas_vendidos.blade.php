@@ -10,6 +10,7 @@
         <div class="card">
             <div class="card-body">
                 <b-nav tabs>
+                    <b-nav-item href="{{url('/reportes/productos/resumen-diario')}}">Resumen diario</b-nav-item>
                     <b-nav-item href="{{url('/reportes/productos/mas-vendidos')}}" active>Más vendidos</b-nav-item>
                     <b-nav-item href="{{url('/reportes/productos/stock_bajo')}}">Stock bajo</b-nav-item>
                 </b-nav>
@@ -48,12 +49,12 @@
                                 <div class="row">
                                     <div class="col-md-2 col-sm-6">
                                         <p class="mb-0">Productos vendidos <br>
-                                            <span style="font-size: 25px;"><strong>@{{resumen['cantidad']}}</strong></span>
+                                            <span style="font-size: 30px;"><strong>@{{resumen['cantidad']}}</strong></span>
                                         </p>
                                     </div>
                                     <div class="col-md-2 col-sm-6">
                                         <p class="mb-0">Total venta<br>
-                                            <span style="font-size: 25px;"><strong>S/ @{{resumen['total'].toFixed(2)}}</strong></span>
+                                            <span style="font-size: 30px;"><strong>S/ @{{resumen['total'].toFixed(2)}}</strong></span>
                                         </p>
                                     </div>
                                 </div>
@@ -72,12 +73,11 @@
                                                 <thead class="bg-custom-green">
                                                 <tr>
                                                     <th scope="col"></th>
-                                                    <th scope="col">Código</th>
                                                     <th scope="col">Producto</th>
                                                     <th scope="col">Características</th>
-                                                    <th scope="col">Vendidos</th>
+                                                    <th scope="col">Cantidad</th>
                                                     <th scope="col">Total</th>
-                                                    <th scope="col"></th>
+                                                    <th scope="col">Kardex</th>
                                                     <th></th>
                                                 </tr>
                                                 </thead>
@@ -90,13 +90,12 @@
                                                         @if($producto->tipo_producto != 4)
                                                             <tr>
                                                                 <td></td>
-                                                                <td>{{ $producto->cod_producto }}</td>
-                                                                <td>{{ $producto->nombre }}</td>
-                                                                <td style="width: 30%">{{ \Illuminate\Support\Str::words($producto->presentacion,40,'...')}}</td>
+                                                                <td>{{ str_pad($producto->cod_producto,5,'0',STR_PAD_LEFT) }} - {{ $producto->nombre }}</td>
+                                                                <td  style="width: 30%">{{ \Illuminate\Support\Str::words($producto->presentacion,40,'...')}}</td>
                                                                 <td>{{ floatval($producto->vendidos).' '.$unidad[1]}}</td>
                                                                 <td>S/ {{ number_format($producto->monto_total,3)}}</td>
-                                                                <td></td>
                                                                 <td><a href="{{url('/productos/inventario/'.$producto->idproducto.'?desde='.$filtros['desde'].'&hasta='.$filtros['hasta'])}}"><i class="fas fa-indent"></i> Ver kardex</a></td>
+                                                                <td></td>
                                                             </tr>
                                                         @endif
                                                     @endforeach

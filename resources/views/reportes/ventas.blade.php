@@ -196,7 +196,7 @@
                                     </div>
                                     <div class="col-md col-sm-6">
                                         <p class="mb-0">Utilidad <i class="fas fa-info-circle" id="tooltip-utilidad-pen"></i><br>
-                                            <span style="font-size: 25px;">S/@{{ penReport.utilidad.toFixed(2) }}</span>
+                                            <span style="font-size: 25px;" :style="penReport.utilidad<0?'color:red':'color:inherit'">S/@{{ penReport.utilidad.toFixed(2) }}</span>
                                         </p>
                                     </div>
                                     <b-tooltip target="tooltip-utilidad-pen" triggers="hover">
@@ -249,7 +249,7 @@
                                     </div>
                                     <div class="col-md col-sm-6">
                                         <p class="mb-0">Utilidad <i class="fas fa-info-circle" id="tooltip-utilidad-usd"></i><br>
-                                            <span style="font-size: 25px;">S/@{{ usdReport.utilidad.toFixed(2) }}</span>
+                                            <span style="font-size: 25px;" :style="usdReport.utilidad<0?'color:red':'color:inherit'">S/@{{ usdReport.utilidad.toFixed(2) }}</span>
                                         </p>
                                     </div>
                                     <b-tooltip target="tooltip-utilidad-usd" triggers="hover">

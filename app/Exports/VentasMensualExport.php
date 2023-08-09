@@ -14,7 +14,7 @@ class VentasMensualExport implements FromView, ShouldAutoSize
 
     public function __construct($datos, $moneda)
     {
-       $this->datos=$datos;
+       $this->datos=$datos[0];
        $this->moneda=$moneda;
     }
 
