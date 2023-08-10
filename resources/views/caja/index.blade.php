@@ -113,7 +113,7 @@
                                                             </tr>
                                                             <tr>
                                                                 <td><strong>Responsable de caja:</strong></td>
-                                                                <td>{{ $caja->empleado->nombre }} {{ $caja->empleado->apellidos }}</td>
+                                                                <td>{{ mb_strtoupper($caja->empleado->nombre.' '.$caja->empleado->apellidos) }}</td>
                                                             </tr>
                                                         @else
                                                             <tr>

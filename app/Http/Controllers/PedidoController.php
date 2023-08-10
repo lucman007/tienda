@@ -541,6 +541,7 @@ class PedidoController extends Controller
                 'total_soles'=>$total_soles,
                 'total_dolares'=>$total_dolares,
                 'agent'=>$agent,
+                'disabledVentas'=>MainHelper::disabledVentas()[1],
                 'idcaja'=>$idcaja
             ]);
         }

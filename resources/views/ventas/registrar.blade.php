@@ -1,7 +1,10 @@
 @extends('layouts.main')
 @section('titulo', 'Registrar')
 @section('contenido')
-    @php $agent = new \Jenssegers\Agent\Agent() @endphp
+    @php
+        $agent = new \Jenssegers\Agent\Agent();
+        $emitir_solo_ticket = json_decode(cache('config')['interfaz'], true)['emitir_solo_ticket']??false;
+    @endphp
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
             <div class="col-sm-12">
@@ -26,13 +29,14 @@
                                 <select :disabled="inhabilitarComprobante" v-model="comprobante" name="comprobante"
                                         class="custom-select" id="selectComprobante">
                                     <option value="30">Ninguno</option>
+                                    @if(!($emitir_solo_ticket || $disabledVentas))
                                     <option value="03">Boleta</option>
                                     <option value="01">Factura</option>
                                     <option value="07.01">Nota de crédito (Boleta)</option>
                                     <option value="07.02">Nota de crédito (Factura)</option>
                                     <option value="08.01">Nota de débito (Boleta)</option>
                                     <option value="08.02">Nota de débito (Factura)</option>
-                                    {{--<option value="20">Proforma</option>--}}
+                                    @endif
                                 </select>
                             </div>
                             <div class="col-lg-3 form-group">
@@ -1255,7 +1259,11 @@
                                 this.moneda = 'S/';
                             }
                             if (this.comprobante == '30' || this.comprobante == '03' || this.comprobante == '01') {
-                                this.comprobante = datos.facturacion.codigo_tipo_documento;
+                                @if($emitir_solo_ticket || $disabledVentas)
+                                    this.comprobante = 30;
+                                @else
+                                    this.comprobante = datos.facturacion.codigo_tipo_documento;
+                                @endif
                                 this.comprobanteReferencia = null;
                                 this.inhabilitarComprobante = false;
                             } else {

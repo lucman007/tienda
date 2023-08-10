@@ -62,6 +62,7 @@ class VentaController extends Controller
             'ruc_emisor'=>json_encode($emisor->ruc),
             'ultimo_id'=>json_encode($ultimo_id_registrado),
             'usuario' => auth()->user()->persona,
+            'disabledVentas'=>MainHelper::disabledVentas()[1],
             'serie_comprobantes'=>$serie_comprobates
         ]);
 

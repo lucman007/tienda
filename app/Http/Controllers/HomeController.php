@@ -133,13 +133,13 @@ class HomeController extends Controller
             'total_impuestos'=>0
         ];
 
-        foreach ($ventas_usd as $item) {
+        foreach ($ventas_usd[0] as $item) {
             $data['dolares']['total_neto'] += $item['ventas_netas'];
             $data['dolares']['total_costos'] += $item['costos'];
             $data['dolares']['total_impuestos'] += $item['impuestos'];
         }
 
-        foreach ($ventas_pen as $item) {
+        foreach ($ventas_pen[0] as $item) {
             $data['soles']['total_neto'] += $item['ventas_netas'];
             $data['soles']['total_costos'] += $item['costos'];
             $data['soles']['total_impuestos'] += $item['impuestos'];

@@ -299,6 +299,9 @@
             }
         },
         methods: {
+            mostrarModal(){
+              this.$refs['modal-facturar'].show()
+            },
             agregarFraccionado(){
                 this.pago_fraccionado.push({monto: '0.00', tipo: '1'});
             },

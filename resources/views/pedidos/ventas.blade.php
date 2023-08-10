@@ -89,14 +89,19 @@
                                                 <b-dropdown id="dropdown-1" text="Más" class="m-md-2 " variant="warning">
                                                     <b-dropdown-item href="{{url('facturacion/documento').'/'.$item->idventa}}"><i class="fas fa-stream"></i> Ver detalle</b-dropdown-item>
                                                     @can('Facturación: facturar')
-                                                        <b-dropdown-item id="btn_facturar_{{$item->idventa}}" @if($item->facturacion->codigo_tipo_documento != '30') disabled @else v-b-modal.modal-facturar @endif @click="facturar({{$item}})"><i class="fas fa-file-import"></i> Crear Boleta / Factura</b-dropdown-item>
+                                                        <b-dropdown-item id="btn_facturar_{{$item->idventa}}" :disabled="{{$item->facturacion->codigo_tipo_documento}}!= '30' || disabledVentas" @click="facturar({{$item}})">
+                                                            <i class="fas fa-file-import"></i> Crear Boleta / Factura
+                                                        </b-dropdown-item>
+                                                        <b-dropdown-item id="btn_facturar_alt_{{$item->idventa}}" class="d-none" disabled><i class="fas fa-file-import"></i> Crear Boleta / Factura</b-dropdown-item>
                                                     @endcan
                                                     @if($item->facturacion->codigo_tipo_documento == '30')
-                                                    <b-dropdown-item @click="imprimir('{{$item->idventa}}')"><i class="fas fa-receipt"></i> Imprimir nota de venta</b-dropdown-item>
+                                                    <b-dropdown-item id="btn_imprimir_{{$item->idventa}}" @click="imprimir('{{$item->idventa}}')"><i class="fas fa-receipt"></i> Imprimir nota de venta</b-dropdown-item>
                                                     @else
-                                                    <b-dropdown-item id="btn_imprimir_{{$item->idventa}}" @click="imprimir('{{$item->idventa}}')"><i class="fas fa-file-invoice-dollar"></i> Imprimir comprobante</b-dropdown-item>
+                                                    <b-dropdown-item @click="imprimir('{{$item->idventa}}')"><i class="fas fa-file-invoice-dollar"></i> Imprimir comprobante</b-dropdown-item>
                                                     @endif
-                                                    <b-dropdown-item id="btn_anular_{{$item->idventa}}" @click="abrir_modal('anulacion',{{$item}})" @if($item->facturacion->codigo_tipo_documento == '30') disabled @endif><i class="fas fa-times"></i> Anular comprobante</b-dropdown-item>
+                                                    <b-dropdown-item id="btn_anular_{{$item->idventa}}" @click="abrir_modal('anulacion',{{$item}})" :disabled="{{$item->facturacion->codigo_tipo_documento}} == 30">
+                                                        <i class="fas fa-times"></i> Anular comprobante
+                                                    </b-dropdown-item>
                                                     <b-dropdown-item @click="text_whatsapp = '{{$item->text_whatsapp}}'" v-b-modal.modal-whatsapp><i style="width: 2em;" class="fab fa-whatsapp"></i> Enviar por whatsapp</b-dropdown-item>
                                                 </b-dropdown>
                                                 <button id="btn_borrar_{{$item->idventa}}" @if($item->facturacion->codigo_tipo_documento!='30') disabled style="opacity: 0.2" @endif @click="eliminar({{$item->idventa}})"
@@ -232,12 +237,14 @@
 </b-modal>
 <!--FIN MODAL ANULACION -->
     <modal-facturacion
+            ref="modalFacturacion"
             :idventa="idventa"
             :total="totalVenta"
             :origen="'ventas'"
             :fecha="'{{date('Y-m-d', strtotime(date('Y-m-d').' + 1 days'))}}'"
             :tipo_de_pago="{{json_encode(\sysfact\Http\Controllers\Helpers\DataTipoPago::getTipoPago())}}"
             v-on:imprimir="imprimir"
+            v-on:countcomprobantes="obtener_num_comprobantes"
             v-on:after-save="after_save">
     </modal-facturacion>
     <modal-whatsapp :text="text_whatsapp" :link="'{{$agent->isDesktop()?'https://web.whatsapp.com':'https://api.whatsapp.com'}}'"></modal-whatsapp>
@@ -275,13 +282,21 @@
                 anulacionSuccess:true,
                 anulacion:{},
                 anulacionDisabled:false,
-                text_whatsapp: ''
+                text_whatsapp: '',
+                disabledVentas: !!'<?php echo $disabledVentas ?>'
             },
             methods:{
+                obtener_num_comprobantes(){
+                    app_menu.$refs['panelNotificacion'].countComprobantes();
+                },
+                disabled_ventas(){
+                    this.disabledVentas = true;
+                },
                 facturar(item){
                     this.idventa = item.idventa;
                     this.venta = item;
                     this.totalVenta = item.total_venta;
+                    this.$refs.modalFacturacion.mostrarModal();
                 },
                 eliminar(idventa){
                     if (confirm('¿Está seguro de eliminar la venta?')) {
@@ -358,13 +373,19 @@
                         badge_class = 'badge-warning';
                     }
                     document.querySelector('#comp_'+data.idventa).innerHTML = '<span class="badge '+ badge_class +'">'+comp[2]+'-'+comp[3]+'</span>';
-                    document.querySelector('#btn_imprimir_'+data.idventa).classList.remove('disabled');
+                    document.querySelector('#btn_imprimir_'+data.idventa).innerHTML = '<i class="fas fa-file-invoice-dollar"></i> Imprimir comprobante';
                     document.querySelector('#btn_anular_'+data.idventa).classList.remove('disabled');
-                    document.querySelector('#btn_facturar_'+data.idventa).classList.add('disabled');
+                    document.querySelector('#btn_facturar_'+data.idventa).remove();
                     document.querySelector('#btn_borrar_'+data.idventa).classList.add('disabled');
-                    document.querySelector('#btn_borrar_'+data.idventa).setAttribute('disabled',"");
+                    document.querySelector('#btn_borrar_'+data.idventa).disabled = true;
+                    document.querySelector('#btn_borrar_'+data.idventa).style.opacity = '0.2';
+
+                    const elementoHijo = document.querySelector('#btn_facturar_alt_'+data.idventa);
+                    const elementoPadre = elementoHijo.parentNode;
+                    elementoPadre.classList.remove('d-none');
                 },
                 abrir_modal(nombre, obj){
+                    console.log('aaa'+nombre)
                     switch (nombre) {
                         case 'fraccionado':
                             this.$refs['mod-fraccionado'].show();
