@@ -19,8 +19,8 @@
                 <h3 class="titulo-admin-1">Productos</h3>
                 <b-button class="mr-2" v-b-modal.modal-nuevo-producto @click="tipo_producto = 1" variant="primary"><i class="fas fa-plus"></i> Nuevo</b-button>
                 <b-button class="mr-2" v-b-modal.modal-2 variant="primary"><i class="fas fa-file-import"></i> Importar</b-button>
-                <b-button class="mr-2"href="{{action('ProductoController@exportar')}}" variant="primary"><i class="fas fa-file-export"></i> Exportar...</b-button>
-                <b-button class="mr-2" v-b-modal.modal-nuevo-producto @click="tipo_producto = 3" variant="success"><i class="fas fa-cube"></i> Kit de productos
+                <b-button class="mr-2" href="{{action('ProductoController@exportar')}}" variant="primary"><i class="fas fa-file-export"></i> Exportar...</b-button>
+                <b-button class="mr-2" v-b-modal.modal-nuevo-producto @click="tipo_producto = 3" variant="primary"><i class="fas fa-cube"></i> Kit de productos
                 </b-button>
 {{--
                 <b-button class="mr-2" href="{{action('ProductoController@exportar')}}" variant="success"><i class="fas fa-edit"></i> Edición múltiple</b-button>
@@ -42,12 +42,24 @@
             <div class="col-sm-12 mt-4">
                 <div class="card">
                     <div class="card-body">
-                        <b-button variant="secondary" v-b-modal.modal-col class="float-right mb-3">Mostrar / ocultar columnas</b-button>
+                        <b-dropdown id="dropdown-opc" left text="Opciones" variant="success" class="float-left mr-3">
+                            <b-dropdown-item href="/productos/descargar-barcodes"><i style="width: 2em" class="fa-solid fa-barcode"></i> Descargar códigos de barra
+                            </b-dropdown-item>
+                            <b-dropdown-item href="#" @click="selectMultiple(1)"><i class="fas fa-edit"></i> Edición múltiple
+                            </b-dropdown-item>
+                            <b-dropdown-item href="#" @click="selectMultiple(2)"><span class="text-danger"><i class="fas fa-trash"></i> Borrado múltiple</span>
+                            </b-dropdown-item>
+                        </b-dropdown>
+                        <b-button variant="primary" v-b-modal.modal-edicion-multiple :disabled="!count_seleccionados" v-show="showSelectColumn && tipoEdicion==1"><i class="fas fa-edit"></i> Editar</b-button>
+                        <b-button variant="danger" @click="borrarMultiple" :disabled="!count_seleccionados" v-show="showSelectColumn && tipoEdicion==2"><i class="fas fa-trash"></i> Borrar</b-button>
+                        <b-button variant="outline-secondary" v-show="showSelectColumn" @click="cancelarMultiple"><i class="fas fa-times"></i> Cancelar</b-button>
+                        <b-button variant="success" v-b-modal.modal-col class="float-right mb-3"><i class="fas fa-columns"></i> Columnas</b-button>
                         <div class="table-responsive tabla-gestionar">
                             <table class="table table-striped table-hover table-sm">
                                 <thead class="bg-custom-green">
                                 <tr>
                                     <th scope="col"></th>
+                                    <th v-show="showSelectColumn"><b-form-checkbox v-model="selAll"  @change="seleccionarTodo($event)"></b-form-checkbox></th>
                                     <th @if(!$columnas['ubicacion']) style="display: none;" @endif scope="col">Ubicación</th>
                                     <th @if(!$columnas['codigo']) style="display: none;" @endif scope="col"><a href="{{$filtro == 'Filtro'?'?':url()->full()}}&orderby=cod_producto&order={{$order}}">Código <span class="icon-hover @if($orderby=='cod_producto') icon-hover-active @endif">{!!$order_icon!!}</span></a></th>
                                     <th @if(!$columnas['tipo_producto']) style="display: none;" @endif scope="col">Clasif.</th>
@@ -69,9 +81,10 @@
                                 </thead>
                                 <tbody>
                                 @if(count($productos) > 0)
-                                    @foreach($productos as $producto)
+                                    @foreach($productos as $key=>$producto)
                                         <tr @if(!$agent->isDesktop()) @click="editarProducto({{$producto->idproducto}})" @endif>
                                             <td></td>
+                                            <td v-show="showSelectColumn"><b-form-checkbox v-model="productosSeleccionados[{{$key}}]['seleccionado']" @change="eventSeleccionado($event,{{$key}})"></b-form-checkbox></td>
                                             <td @if(!$columnas['ubicacion']) style="display: none;" @endif>{{$producto->ubicacion}}</td>
                                             <td @if(!$columnas['codigo']) style="display: none;" @endif>{{str_pad($producto->cod_producto,5,'0',STR_PAD_LEFT) }}</td>
                                             <td @if(!$columnas['tipo_producto']) style="display: none;" @endif scope="col">{{$producto->tipo_producto_nombre}}</td>
@@ -240,6 +253,54 @@
     </div>
     </b-modal>
     <!--FIN MODAL COLUMNAS -->
+    <b-modal size="xl" id="modal-edicion-multiple" ref="modal-edicion-multiple" ok-only @hidden="resetModal">
+        <template slot="modal-title">
+            Edición múltiple
+        </template>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="table-responsive tabla-gestionar">
+                        <table class="table table-striped table-hover table-sm">
+                            <thead class="bg-custom-green">
+                            <tr>
+                                <th scope="col" style="width: 15%">Código</th>
+                                <th style="width: 30%" scope="col">Nombre</th>
+                                <th style="width: 30%" scope="col">Características</th>
+                                <th scope="col" style="width: 10%">Moneda</th>
+                                <th scope="col" style="width: 15%">Precio</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr v-for="(producto,index) in productosSeleccionados" v-if="producto.seleccionado" :key="index">
+                                <td><input v-on:keydown="navigate($event)" name="cod_producto" type="text" class="form-control" onfocus="this.select()" v-model="producto.cod_producto"></td>
+                                <td><input v-on:keydown="navigate($event)" name="nombre" type="text" class="form-control" onfocus="this.select()" v-model="producto.nombre"></td>
+                                <td><input v-on:keydown="navigate($event)" name="presentacion" type="text" class="form-control" onfocus="this.select()" v-model="producto.presentacion"></td>
+                                <td>
+                                    <select v-on:keydown="navigate($event, 'select')" name="moneda" v-model="producto.moneda" class="custom-select" :disabled="tipo_producto == 3">
+                                        <option value="PEN">PEN</option>
+                                        <option value="USD">USD</option>
+                                    </select>
+                                </td>
+                                <td><input v-on:keydown="navigate($event, 'number')" name="precio" type="number" class="form-control" onfocus="this.select()" v-model="producto.precio"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <template #modal-footer="{ ok, cancel}">
+            <b-button variant="secondary" @click="cancel()">
+                Cancel
+            </b-button>
+            <b-button :disabled="mostrarProgresoGuardado" variant="primary" @click="guardarEdicionMultiple">
+                <b-spinner v-show="mostrarProgresoGuardado" small label="Loading..." ></b-spinner>
+                <span v-show="!mostrarProgresoGuardado">Guardar cambios</span>
+            </b-button>
+        </template>
+    </b-modal>
+
     <agregar-producto
             ref="modal-producto"
             :ultimo_id="{{$ultimo_id}}"
@@ -249,60 +310,122 @@
             :tipo_de_producto="tipo_producto"
             :origen="'productos'">
     </agregar-producto>
-
 @endsection
 @section('script')
     <script>
         let app = new Vue({
             el: '.app',
             data: {
-                errorDatosProducto: [],
-                errorProducto: 0,
-                tituloModal:'Agregar producto / servicio',
-                accion:'insertar',
-                idproducto: -1,
-                cod_producto: '',
-                nombre: '',
-                presentacion: '',
-                precio: '0.0',
-                costo: '0.0',
-                eliminado: 0,
                 imagen: '',
-                cantidad: 0,
-                cantidad_aux: 0,
-                stock_bajo: '0',
-                idcategoria: -1,
-                medida: 'NIU/UND',
-                categorias: [],
-                tipo_producto: 1,
-                barcode:'',
+                tipo_producto:1,
                 input_file_data:'',
                 mostrarProgresoGuardado:false,
-                observacion: '',
-                moneda: 'PEN',
                 dataFichero: "",
-                moneda_compra:'PEN',
-                tipo_cambio_compra:"{{cache('opciones')['tipo_cambio_compra']}}",
-                descuentos: [],
                 urlImagen: '',
-                almacen:[],
-                idalmacen:-1,
-                ubicacion:[],
-                idubicacion:null,
-                marca:'',
-                modelo:'',
-                param_1:'',
-                param_2:'',
-                param_3:'',
-                param_4:'0.00',
-                param_5:'PEN',
                 columnas: <?php echo json_encode($columnas) ?>,
                 search: '{{$textoBuscado}}',
-                nuevaUbicacion:false,
-                nombreUbicacion:'',
-                items_kit:[],
+                showSelectColumn:false,
+                tipoEdicion:false,
+                productosSeleccionados:<?php echo json_encode($productos->toArray()['data']) ?>,
+                count_seleccionados:false,
+                selAll:false
             },
             methods: {
+                navigate(event,tipo) {
+                    if(event.key === 'ArrowUp' ||
+                        event.key === 'ArrowDown' ||
+                        event.key === 'ArrowRight' ||
+                        event.key === 'ArrowLeft' ||
+                        event.key === 'Enter' ||
+                        event.key === 'NumpadEnter'
+                    )
+                    {
+                        event.preventDefault();
+                        event.stopPropagation();
+
+                        let nextField = event.key === 'ArrowRight' ? 'next' : event.key === 'ArrowLeft' ? 'previous' : null;
+                        let currentInput = event.currentTarget;
+
+                        if (nextField) {
+                            let nextInput = currentInput.parentElement[nextField + 'ElementSibling'];
+                            if (nextInput) {
+                                nextInput = nextInput.querySelector('input') || nextInput.querySelector('select');
+                                nextInput.focus();
+                                if(nextInput.tagName === 'INPUT'){
+                                    nextInput.select();
+                                }
+                            }
+                        } else {
+                            let nextField = 'previous';
+                            if(event.key === 'Enter' || event.key === 'NumpadEnter' || event.key === 'ArrowDown'){
+                                nextField = 'next'
+                            }
+                            let nextInputContainer = currentInput.parentElement.parentElement[nextField + 'ElementSibling'];
+                            if (nextInputContainer) {
+                                let nextInput = nextInputContainer.querySelector(`input[name="${currentInput.name}"]`) || nextInputContainer.querySelector(`select[name="${currentInput.name}"]`);
+
+                                nextInput.focus();
+                                if(nextInput.tagName === 'INPUT'){
+                                    nextInput.select();
+                                }
+                            }
+                        }
+                    }
+
+                },
+                guardarEdicionMultiple(){
+                    this.mostrarProgresoGuardado =true;
+                    axios.post('{{url('/productos/edicion-multiple')}}', {
+                        'productos':JSON.stringify(this.productosSeleccionados),
+                    })
+                        .then((response) => {
+                            this.$swal({
+                                position: 'top',
+                                icon: 'success',
+                                title: response.data.mensaje,
+                                timer: 2000,
+                                showConfirmButton: false,
+                                toast:true
+                            }).then(() => {
+                                window.location.reload(true)
+                            });
+                        })
+                        .catch(error => {
+                            this.mostrarProgresoGuardado=false;
+                            alert('Ha ocurrido un error.');
+                            console.log(error);
+                        });
+                },
+                seleccionarTodo(event){
+                    for(let i=0; i < this.productosSeleccionados.length; i++){
+                        this.eventSeleccionado(event,i)
+                    }
+                },
+                eventSeleccionado(event, index){
+                    this.productosSeleccionados[index]['seleccionado']=event;
+                    this.countSeleccionados();
+                },
+                countSeleccionados(){
+                    for(let i=0; i < this.productosSeleccionados.length; i++){
+                        if(this.productosSeleccionados[i]['seleccionado']){
+                            this.count_seleccionados = true;
+                            break;
+                        } else {
+                            this.count_seleccionados = false;
+                        }
+                    }
+                },
+                selectMultiple(tipo){
+                    this.showSelectColumn = true;
+                    this.tipoEdicion = tipo;
+                },
+                cancelarMultiple(){
+                    this.selAll = false;
+                    this.showSelectColumn = false;
+                    for(let i=0; i < this.productosSeleccionados.length; i++){
+                        this.eventSeleccionado(false,i)
+                    }
+                },
                 buscar(event){
                     if(event.code == 'Enter' || event.code == 'NumpadEnter'){
                         event.preventDefault();
@@ -381,6 +504,31 @@
                                 location.reload(true)
                             })
                             .catch(error => {
+                                console.log(error);
+                            });
+                    }
+                },
+                borrarMultiple(){
+                    if(confirm('¿Está seguro de eliminar los productos seleccionados?')){
+                        this.mostrarProgresoGuardado =true;
+                        axios.post('{{url('/productos/borrado-multiple')}}', {
+                            'productos':JSON.stringify(this.productosSeleccionados),
+                        })
+                            .then((response) => {
+                                this.$swal({
+                                    position: 'top',
+                                    icon: 'success',
+                                    title: response.data.mensaje,
+                                    timer: 2000,
+                                    showConfirmButton: false,
+                                    toast:true
+                                }).then(() => {
+                                    window.location.reload(true)
+                                });
+                            })
+                            .catch(error => {
+                                this.mostrarProgresoGuardado=false;
+                                alert('Ha ocurrido un error.');
                                 console.log(error);
                             });
                     }

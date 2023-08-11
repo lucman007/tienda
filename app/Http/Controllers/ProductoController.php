@@ -90,7 +90,7 @@ class ProductoController extends Controller
                 foreach ($productos as $producto){
                     $producto->cantidad=$producto->inventario->first()->saldo;
                     $producto->presentacion = Str::words($producto->presentacion,40,'...');
-
+                    $producto->seleccionado = false;
                     switch ($producto->tipo_producto){
                         case 1:
                             $producto->tipo_producto_nombre = 'PRODUCTO';
@@ -598,4 +598,98 @@ class ProductoController extends Controller
             return $e->getMessage();
         }
     }
+
+    public function descargar_zip_barcode(){
+
+        $productos = Producto::where('eliminado',0)
+            ->where('cod_producto','!=','00NR')
+            ->get();
+
+        $tempPath = public_path('images/temporal/temp_barcodes');
+        if (!is_dir($tempPath)) {
+            mkdir($tempPath, 0755, true);
+        }
+
+        $zipPath = public_path('images/temporal/barcodes.zip');
+
+        $barcode = new DNS1D();
+
+        foreach ($productos as $producto) {
+            $barcodeData = $barcode->getBarcodePNG($producto->idproducto, "C39+");
+            $decodedBarcodeData = base64_decode($barcodeData);
+            $barcodePath = $tempPath . '/' . $this->cleanFileName($producto->cod_producto).'-'. $this->cleanFileName($producto->nombre).'_' . uniqid() . '.png';
+            file_put_contents($barcodePath, $decodedBarcodeData);
+        }
+
+        $zip = new \ZipArchive();
+        $zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+
+        foreach (glob($tempPath . '/*.png') as $file) {
+            $zip->addFile($file, basename($file));
+        }
+
+        $zip->close();
+
+        foreach (glob($tempPath . '/*.png') as $file) {
+            unlink($file);
+        }
+
+        return response()->download($zipPath)->deleteFileAfterSend(true);
+    }
+
+    function cleanFileName($filename) {
+        $cleanedName = preg_replace('/[^a-zA-Z0-9]/', ' ', $filename);
+        $cleanedName = str_replace(' ', '_', $cleanedName);
+        return $cleanedName;
+    }
+
+    public function edicion_multiple(Request $request){
+        try{
+
+            $productos = json_decode($request->productos, true);
+
+            foreach ($productos as $producto) {
+
+                $productoActualizado = Producto::find($producto['idproducto']);
+                if ($productoActualizado) {
+                    $productoActualizado->cod_producto = mb_strtoupper($producto['cod_producto']);
+                    $productoActualizado->nombre = mb_strtoupper($producto['nombre']);
+                    $productoActualizado->presentacion = mb_strtoupper($producto['presentacion']);
+                    $productoActualizado->moneda = $producto['moneda'];
+                    $productoActualizado->precio = $producto['precio'];
+                    $productoActualizado->save();
+                }
+            }
+
+            return response()->json(['mensaje' => 'Productos actualizados exitosamente']);
+
+        } catch (\Exception $e){
+            Log::error($e);
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function borrado_multiple(Request $request){
+        try{
+
+            $productos = json_decode($request->productos, true);
+            $productosSeleccionados = array_filter($productos, function($producto) {
+                return $producto['seleccionado'] === true;
+            });
+
+            $productosIds = array_column($productosSeleccionados, 'idproducto');
+
+            Producto::whereIn('idproducto', $productosIds)
+                ->update([
+                    'eliminado' => 1
+                ]);
+
+            return response()->json(['mensaje' => 'Los productos se eliminaron exitosamente']);
+
+        } catch (\Exception $e){
+            Log::error($e);
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
 }

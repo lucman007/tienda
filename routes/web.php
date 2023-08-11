@@ -57,6 +57,9 @@ Route::group(['middleware' => ['can:Inventario: productos']], function () {
     Route::get('productos/mostrar-ubicacion/{id}', 'ProductoController@mostrar_ubicacion');
     Route::post('productos/ocultar-columnas', 'ProductoController@ocultar_columnas');
     Route::get('productos/temp-almacen', 'ProductoController@temp_almacen');
+    Route::get('productos/descargar-barcodes', 'ProductoController@descargar_zip_barcode');
+    Route::post('productos/edicion-multiple', 'ProductoController@edicion_multiple');
+    Route::post('productos/borrado-multiple', 'ProductoController@borrado_multiple');
 });
 
 Route::group(['middleware' => ['can:Mantenimiento: categorías']], function () {
