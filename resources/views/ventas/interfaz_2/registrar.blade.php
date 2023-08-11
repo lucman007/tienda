@@ -740,11 +740,6 @@
     <agregar-cliente
             v-on:agregar="agregarClienteNuevo">
     </agregar-cliente>
-    <agregar-producto
-            v-bind:ultimo_id="{{$ultimo_id}}"
-            v-bind:tipo_cambio_compra="{{cache('opciones')['tipo_cambio_compra']}}"
-            v-on:agregar="agregarProductoNuevo">
-    </agregar-producto>
 @endsection
 @section('script')
     <script>

@@ -60,19 +60,19 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div v-if="can_gestionar && origen != 'requerimientos'" v-show="tipo_producto==1" class="col-lg-3">
+                                    <div v-if="(!can_gestionar && accion=='insertar') || can_gestionar && origen != 'requerimientos'" v-show="tipo_producto==1" class="col-lg-3">
                                         <div class="form-group">
                                             <label>Cantidad:</label>
                                             <input onfocus="this.select()" autocomplete="off" type="number" v-model="cantidad" name="cantidad" class="form-control">
                                         </div>
                                     </div>
-                                    <div v-if="can_gestionar && origen != 'requerimientos'" v-show="tipo_producto==1" class="col-lg-3">
+                                    <div v-if="(!can_gestionar && accion=='insertar') || can_gestionar && origen != 'requerimientos'" v-show="tipo_producto==1" class="col-lg-3">
                                         <div class="form-group">
                                             <label>Stock mínimo:</label>
                                             <input onfocus="this.select()" autocomplete="off" type="number" v-model="stock_bajo" name="stock_bajo" class="form-control">
                                         </div>
                                     </div>
-                                    <div v-if="can_gestionar" class="col-lg-4">
+                                    <div v-if="(!can_gestionar && accion=='insertar') || can_gestionar" class="col-lg-4">
                                         <label>Precio de venta:</label>
                                         <b-input-group>
                                             <b-form-input onfocus="this.select()" type="number" v-model="precio"></b-form-input>
@@ -84,7 +84,7 @@
                                             </template>
                                         </b-input-group>
                                     </div>
-                                    <div v-if="can_gestionar" class="col-lg-5" v-show="accion=='editar' && tipo_producto=='1'">
+                                    <div v-if="(!can_gestionar && accion=='insertar') || can_gestionar" class="col-lg-5" v-show="accion=='editar' && tipo_producto=='1'">
                                         <label>Código de barras:</label>
                                         <div class="form-group">
                                             <a :href="'data:image/png;base64,'+barcode" download>
@@ -93,10 +93,10 @@
                                             <b-button variant="success" :href="'data:image/png;base64,'+barcode" download><i class="fas fa-download"></i></b-button>
                                         </div>
                                     </div>
-                                    <div v-if="can_gestionar  && origen != 'requerimientos'" class="col-lg-12 mt-3">
+                                    <div v-if="(!can_gestionar && accion=='insertar') || can_gestionar  && origen != 'requerimientos'" class="col-lg-12 mt-3">
                                         <p><strong>Data para reportes</strong></p>
                                     </div>
-                                    <div v-if="can_gestionar  && origen != 'requerimientos'" class="col-lg-4">
+                                    <div v-if="(!can_gestionar && accion=='insertar') || can_gestionar  && origen != 'requerimientos'" class="col-lg-4">
                                         <label>{{tipo_producto==1?'Precio de compra':'Costo de producción'}}:</label>
                                         <b-input-group>
                                             <b-form-input onfocus="this.select()" type="number" v-model="costo"></b-form-input>
@@ -108,13 +108,13 @@
                                             </template>
                                         </b-input-group>
                                     </div>
-                                    <div v-if="can_gestionar && origen != 'requerimientos'" class="col-lg-3" v-show="moneda_compra == 'USD'">
+                                    <div v-if="(!can_gestionar && accion=='insertar') || can_gestionar && origen != 'requerimientos'" class="col-lg-3" v-show="moneda_compra == 'USD'">
                                         <label>Tipo de cambio</label>
                                         <b-input-group prepend="S/">
                                             <b-form-input onfocus="this.select()" type="number" v-model="tipo_cambio_compra"></b-form-input>
                                         </b-input-group>
                                     </div>
-                                    <div v-if="can_gestionar  && origen != 'requerimientos'" v-show="accion == 'editar' && cantidad != cantidad_aux && tipo_producto==1" class="col-lg-12 mt-2">
+                                    <div v-if="(!can_gestionar && accion=='insertar') || can_gestionar  && origen != 'requerimientos'" v-show="accion == 'editar' && cantidad != cantidad_aux && tipo_producto==1" class="col-lg-12 mt-2">
                                         <div class="form-group">
                                             <label>Indica la razón de haber cambiado manualmente la cantidad:</label>
                                             <input v-model="observacion" class="form-control" type="text">

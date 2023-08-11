@@ -1,6 +1,12 @@
 @extends('layouts.main')
 @section('titulo', 'Orden de producción')
 @section('contenido')
+    @php
+        $agent = new \Jenssegers\Agent\Agent();
+        $tipo_cambio_compra = cache('opciones')['tipo_cambio_compra'];
+        $unidad_medida = \sysfact\Http\Controllers\Helpers\DataUnidadMedida::getUnidadMedida();
+        $can_gestionar = false;
+    @endphp
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
             <div class="col-sm-12">
@@ -315,8 +321,13 @@
             v-on:agregar_cliente="agregarCliente">
     </modal-cliente>
     <agregar-producto
-            v-bind:ultimo_id="{{$ultimo_id}}"
-            v-on:agregar="agregarProductoReciente">
+            :ultimo_id="{{$ultimo_id}}"
+            :tipo_cambio="{{$tipo_cambio_compra}}"
+            :unidad_medida="{{json_encode($unidad_medida)}}"
+            :can_gestionar="{{json_encode($can_gestionar)}}"
+            :tipo_de_producto="1"
+            :origen="'produccion'"
+            v-on:agregar="agregarProductoNuevo">
     </agregar-producto>
     <agregar-cliente
             v-bind:url_guardar="'{{action('ClienteController@store')}}'"
@@ -413,9 +424,11 @@
                     this.nombreCliente = this.clienteSeleccionado['nombre'];
                     this.numDocCliente = this.clienteSeleccionado['num_documento'];
                 },
-                agregarProductoReciente(nombre){
-                    this.buscar = nombre;
-                    this.obtenerProductos();
+                agregarProductoNuevo(nombre){
+                    if(this.$refs['suggest']){
+                        this.$refs['suggest'].query = nombre;
+                        this.$refs['suggest'].autoComplete();
+                    }
                 },
                 agregarClienteReciente(nombre){
                     this.buscar = nombre;

@@ -1,7 +1,12 @@
 @extends('layouts.main')
 @section('titulo', 'Nueva cotización')
 @section('contenido')
-    @php $agent = new \Jenssegers\Agent\Agent() @endphp
+    @php
+        $agent = new \Jenssegers\Agent\Agent();
+        $tipo_cambio_compra = cache('opciones')['tipo_cambio_compra'];
+        $unidad_medida = \sysfact\Http\Controllers\Helpers\DataUnidadMedida::getUnidadMedida();
+        $can_gestionar = false;
+    @endphp
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
             <div class="col-sm-12">
@@ -340,8 +345,12 @@
             v-on:agregar="agregarClienteNuevo">
     </agregar-cliente>
     <agregar-producto
-            v-bind:ultimo_id="{{$ultimo_id}}"
-            v-bind:tipo_cambio_compra="{{cache('opciones')['tipo_cambio_compra']}}"
+            :ultimo_id="{{$ultimo_id}}"
+            :tipo_cambio="{{$tipo_cambio_compra}}"
+            :unidad_medida="{{json_encode($unidad_medida)}}"
+            :can_gestionar="{{json_encode($can_gestionar)}}"
+            :tipo_de_producto="1"
+            :origen="'cotizaciones'"
             v-on:agregar="agregarProductoNuevo">
     </agregar-producto>
     <modal-descuento
@@ -467,8 +476,10 @@
                     this.clienteSeleccionado = {};
                 },
                 agregarProductoNuevo(nombre){
-                    this.buscar = nombre;
-                    this.obtenerProductos();
+                    if(this.$refs['suggest']){
+                        this.$refs['suggest'].query = nombre;
+                        this.$refs['suggest'].autoComplete();
+                    }
                 },
                 agregarClienteNuevo(obj){
                     if(this.$refs['suggestCliente']){

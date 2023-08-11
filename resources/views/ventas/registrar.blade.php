@@ -888,7 +888,7 @@
             :can_gestionar="{{json_encode($can_gestionar)}}"
             :tipo_de_producto="1"
             :origen="'ventas'"
-            v-on:agregar="agregarProductoNuevo">>
+            v-on:agregar="agregarProductoNuevo">
     </agregar-producto>
     <modal-detalle
             :item="item"
