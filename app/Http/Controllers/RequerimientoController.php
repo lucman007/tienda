@@ -42,7 +42,13 @@ class RequerimientoController extends Controller
     }
 
     public function nuevo_requerimiento(){
-	    return view('requerimientos.nuevo',['usuario'=>auth()->user()->persona]);
+        $ultimo_id_registrado=DB::table('productos')
+            ->select('idproducto')
+            ->where('eliminado','=',0)
+            ->orderby('idproducto','desc')
+            ->first();
+        if($ultimo_id_registrado==null)$ultimo_id_registrado=['idproducto'=>1];
+	    return view('requerimientos.nuevo',['ultimo_id'=>json_encode($ultimo_id_registrado),'usuario'=>auth()->user()->persona]);
     }
 
     public function obtenerProveedores(Request $request)
@@ -102,7 +108,14 @@ class RequerimientoController extends Controller
 
         }
 
-        return view('requerimientos.editar',['requerimiento'=>$requerimiento,'productos'=>json_encode($data_productos),'usuario'=>auth()->user()->persona]);
+        $ultimo_id_registrado=DB::table('productos')
+            ->select('idproducto')
+            ->where('eliminado','=',0)
+            ->orderby('idproducto','desc')
+            ->first();
+        if($ultimo_id_registrado==null)$ultimo_id_registrado=['idproducto'=>1];
+
+        return view('requerimientos.editar',['requerimiento'=>$requerimiento,'productos'=>json_encode($data_productos),'ultimo_id'=>json_encode($ultimo_id_registrado),'usuario'=>auth()->user()->persona]);
     }
 
     public function store(Request $request)

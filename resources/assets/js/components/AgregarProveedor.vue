@@ -57,43 +57,43 @@
                             </div>
                             <div class="col-lg-6">
                                 <div class="form-group">
-                                    <label for="direccion">Dirección:</label>
+                                    <label>Dirección:</label>
                                     <input autocomplete="off" type="text"  v-model="direccion" class="form-control">
                                 </div>
                             </div>
                             <div class="col-lg-3">
                                 <div class="form-group">
-                                    <label for="telefono">Teléfono 1:</label>
+                                    <label>Teléfono 1:</label>
                                     <input autocomplete="off" type="text" v-model="telefono" class="form-control">
                                 </div>
                             </div>
                             <div class="col-lg-3">
                                 <div class="form-group">
-                                    <label for="telefono_2">Teléfono 2:</label>
+                                    <label>Teléfono 2:</label>
                                     <input autocomplete="off" type="text" v-model="telefono_2" class="form-control">
                                 </div>
                             </div>
                             <div class="col-lg-5">
                                 <div class="form-group">
-                                    <label for="correo">Correo:</label>
+                                    <label>Correo:</label>
                                     <input autocomplete="off" type="text"  v-model="correo" class="form-control">
                                 </div>
                             </div>
                             <div class="col-lg-4">
                                 <div class="form-group">
-                                    <label for="web">Sitio web:</label>
+                                    <label>Sitio web:</label>
                                     <input autocomplete="off" type="text" v-model="web" class="form-control">
                                 </div>
                             </div>
                             <div class="col-lg-3">
                                 <div class="form-group">
-                                    <label for="contacto">Contacto:</label>
+                                    <label>Contacto:</label>
                                     <input autocomplete="off" type="text" v-model="contacto" class="form-control">
                                 </div>
                             </div>
                             <div class="col-lg-12">
                                 <div class="form-group">
-                                    <label for="contacto">Descripción:</label>
+                                    <label>Descripción:</label>
                                     <textarea v-model="observacion" rows="2" class="form-control"></textarea>
                                 </div>
                             </div>
@@ -299,7 +299,7 @@
                         if(response.data == '1'){
                             alert('El cliente ya existe en la base de datos');
                         } else{
-                            this.$emit('agregar');
+                            this.$emit('agregar',response.data);
                             this.$refs['modal-nuevo-proveedor'].hide();
                         }
                     })

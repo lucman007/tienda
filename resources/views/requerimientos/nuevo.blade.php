@@ -1,6 +1,16 @@
 @extends('layouts.main')
 @section('titulo', 'Requerimiento')
 @section('contenido')
+    @php
+        $tipo_cambio_compra = cache('opciones')['tipo_cambio_compra'];
+        $unidad_medida = \sysfact\Http\Controllers\Helpers\DataUnidadMedida::getUnidadMedida();
+        $can_gestionar = false;
+    @endphp
+    @can('Inventario: gestionar producto')
+        @php
+            $can_gestionar = true
+        @endphp
+    @endcan
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
             <div class="col-sm-12">
@@ -83,9 +93,9 @@
                                     <td style="display:none">@{{producto.idproducto}}</td>
                                     <td><input class="form-control" type="text" v-model="producto.nombre" :disabled="producto.idproducto!=-1"></td>
                                     <td><input class="form-control" type="text" v-model="producto.presentacion" :disabled="producto.idproducto!=-1"></td>
-                                    <td><input @keyup="calcular(index)" class="form-control" type="text"
+                                    <td><input @keyup="calcular(index)" class="form-control" type="number" onfocus="this.select()"
                                                v-model="producto.costo"></td>
-                                    <td><input @keyup="calcular(index)" class="form-control" type="text"
+                                    <td><input @keyup="calcular(index)" class="form-control" type="number" onfocus="this.select()"
                                                v-model="producto.cantidad"></td>
                                     <td style="display: none;"><input @keyup="calcular(index)" class="form-control" type="text" v-model="producto.descuento"></td>
                                     <td>@{{producto.total}}</td>
@@ -149,9 +159,13 @@
             v-on:agregar="agregarProveedorNuevo">
     </agregar-proveedor>
     <agregar-producto
-            v-bind:ultimo_id="1"
-            v-bind:tipo_cambio_compra="{{cache('opciones')['tipo_cambio_compra']}}"
-            v-on:agregar="agregarProductoNuevo">
+            :ultimo_id="{{$ultimo_id}}"
+            :tipo_cambio="{{$tipo_cambio_compra}}"
+            :unidad_medida="{{json_encode($unidad_medida)}}"
+            :can_gestionar="{{json_encode($can_gestionar)}}"
+            :tipo_de_producto="1"
+            :origen="'requerimientos'"
+            v-on:agregar="agregarProductoNuevo">>
     </agregar-producto>
 @endsection
 @section('script')
@@ -191,19 +205,17 @@
             methods: {
                 agregarProveedor(obj){
                     this.proveedorSeleccionado = obj;
-                    this.nombreCliente = this.proveedorSeleccionado['num_documento']+' - '+this.proveedorSeleccionado['nombre'];
                 },
                 borrarProveedor(){
                     this.proveedorSeleccionado = {};
                 },
-                agregarProductoNuevo(nombre){
-                    this.buscar = nombre;
-                },
                 agregarProveedorNuevo(obj){
-                    if(this.$refs['suggestCliente']){
-                        this.$refs['suggestCliente'].agregarCliente(obj);
-                    } else {
-                        this.agregarProveedor(obj)
+                    this.$refs['suggestCliente'].agregarCliente(obj);
+                },
+                agregarProductoNuevo(nombre){
+                    if(this.$refs['suggest']){
+                        this.$refs['suggest'].query = nombre;
+                        this.$refs['suggest'].autoComplete();
                     }
                 },
                 agregarProducto(obj){

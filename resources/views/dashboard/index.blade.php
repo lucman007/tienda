@@ -110,7 +110,6 @@
                             //Setear datos en chart
                             this.chartValues = [
                                 {value: data.total_neto.toFixed(2), name: 'Ventas netas S/'},
-                                {value: data.total_costos.toFixed(2), name: 'Costos S/'},
                                 {value: data.total_impuestos.toFixed(2), name: 'Impuestos S/'}
                             ];
                         })

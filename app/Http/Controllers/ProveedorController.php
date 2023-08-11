@@ -67,7 +67,6 @@ class ProveedorController extends Controller
             $persona->telefono=$request->telefono;
             $persona->correo=$request->correo;
             $persona->save();
-            $id = $persona->idpersona;
 
             $proveedor=new Proveedor();
             $codigo=$this->generar_codigo_proveedor();
@@ -82,7 +81,9 @@ class ProveedorController extends Controller
             $proveedor->eliminado=0;
             $persona->proveedor()->save($proveedor);
 
-            return 0;
+            $proveedor = Proveedor::find($persona->idpersona);
+            $proveedor->persona;
+            return $proveedor;
 
         } catch (\Exception $e){
             Log::error($e);

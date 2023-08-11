@@ -127,27 +127,8 @@ class HomeController extends Controller
             ]
         ];
 
-        $totales = [
-            'total_neto'=>0,
-            'total_costos'=>0,
-            'total_impuestos'=>0
-        ];
-
-        foreach ($ventas_usd[0] as $item) {
-            $data['dolares']['total_neto'] += $item['ventas_netas'];
-            $data['dolares']['total_costos'] += $item['costos'];
-            $data['dolares']['total_impuestos'] += $item['impuestos'];
-        }
-
-        foreach ($ventas_pen[0] as $item) {
-            $data['soles']['total_neto'] += $item['ventas_netas'];
-            $data['soles']['total_costos'] += $item['costos'];
-            $data['soles']['total_impuestos'] += $item['impuestos'];
-        }
-
-        $data['total_neto'] = $data['dolares']['total_neto'] + $data['soles']['total_neto'];
-        $data['total_costos'] = $data['dolares']['total_costos'] + $data['soles']['total_costos'];
-        $data['total_impuestos'] = $data['dolares']['total_impuestos'] + $data['soles']['total_impuestos'];
+        $data['total_neto'] = $ventas_pen[1]['neto'] + $ventas_usd[1]['neto'];
+        $data['total_impuestos'] = $ventas_pen[1]['impuesto'] + $ventas_usd[1]['impuesto'];
 
         return $data;
 

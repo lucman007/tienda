@@ -4,7 +4,15 @@
     @php
         $agent = new \Jenssegers\Agent\Agent();
         $emitir_solo_ticket = json_decode(cache('config')['interfaz'], true)['emitir_solo_ticket']??false;
+        $tipo_cambio_compra = cache('opciones')['tipo_cambio_compra'];
+        $unidad_medida = \sysfact\Http\Controllers\Helpers\DataUnidadMedida::getUnidadMedida();
+        $can_gestionar = false;
     @endphp
+    @can('Inventario: gestionar producto')
+        @php
+            $can_gestionar = true
+        @endphp
+    @endcan
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
             <div class="col-sm-12">
@@ -874,9 +882,13 @@
             v-on:agregar="agregarClienteNuevo">
     </agregar-cliente>
     <agregar-producto
-            v-bind:ultimo_id="{{$ultimo_id}}"
-            v-bind:tipo_cambio_compra="{{cache('opciones')['tipo_cambio_compra']}}"
-            v-on:agregar="agregarProductoNuevo">
+            :ultimo_id="{{$ultimo_id}}"
+            :tipo_cambio="{{$tipo_cambio_compra}}"
+            :unidad_medida="{{json_encode($unidad_medida)}}"
+            :can_gestionar="{{json_encode($can_gestionar)}}"
+            :tipo_de_producto="1"
+            :origen="'ventas'"
+            v-on:agregar="agregarProductoNuevo">>
     </agregar-producto>
     <modal-detalle
             :item="item"
@@ -1172,7 +1184,10 @@
                     this.clienteSeleccionado = {};
                 },
                 agregarProductoNuevo(nombre){
-                    this.buscar = nombre;
+                    if(this.$refs['suggest']){
+                        this.$refs['suggest'].query = nombre;
+                        this.$refs['suggest'].autoComplete();
+                    }
                 },
                 obtenerDocumentos(copiar){
                     let filtro_comprobante = -1;
