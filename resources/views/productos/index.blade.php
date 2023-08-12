@@ -84,7 +84,7 @@
                                     @foreach($productos as $key=>$producto)
                                         <tr @if(!$agent->isDesktop()) @click="editarProducto({{$producto->idproducto}})" @endif>
                                             <td></td>
-                                            <td v-show="showSelectColumn"><b-form-checkbox v-model="productosSeleccionados[{{$key}}]['seleccionado']" @change="eventSeleccionado($event,{{$key}})"></b-form-checkbox></td>
+                                            <td @click.stop v-show="showSelectColumn"><b-form-checkbox v-model="productosSeleccionados[{{$key}}]['seleccionado']" @change="eventSeleccionado($event,{{$key}})"></b-form-checkbox></td>
                                             <td @if(!$columnas['ubicacion']) style="display: none;" @endif>{{$producto->ubicacion}}</td>
                                             <td @if(!$columnas['codigo']) style="display: none;" @endif>{{str_pad($producto->cod_producto,5,'0',STR_PAD_LEFT) }}</td>
                                             <td @if(!$columnas['tipo_producto']) style="display: none;" @endif scope="col">{{$producto->tipo_producto_nombre}}</td>
@@ -331,7 +331,7 @@
                 selAll:false
             },
             methods: {
-                navigate(event,tipo) {
+                navigate(event) {
                     if(event.key === 'ArrowUp' ||
                         event.key === 'ArrowDown' ||
                         event.key === 'ArrowRight' ||
@@ -557,7 +557,7 @@
                             } else if (response.data === 0) {
                                 this.alerta("No se ha encontrado archivo para importar")
                             } else {
-                                this.alerta("El archivo no cumple las condiciones de importación. Verifique los datos ingresados.")
+                                this.alerta(response.data);
                                 document.getElementById("excel_file").value="";
                             }
 

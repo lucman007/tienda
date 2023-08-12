@@ -348,7 +348,9 @@
         },
         methods: {
             init(){
-                this.tipo_cambio_compra = this.tipo_cambio;
+                if(this.accion == 'insertar'){
+                    this.tipo_cambio_compra = this.tipo_cambio;
+                }
                 this.unidad_de_medida = this.unidad_medida;
                 this.tipo_producto = this.tipo_de_producto;
 

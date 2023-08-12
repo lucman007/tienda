@@ -9,12 +9,15 @@
 namespace sysfact\Imports;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use sysfact\Categoria;
 use sysfact\Http\Controllers\ProductoController;
 use sysfact\Producto;
 use sysfact\Ubicacion;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 
 class ProductosFirstSheet implements ToCollection, WithHeadingRow
@@ -28,8 +31,21 @@ class ProductosFirstSheet implements ToCollection, WithHeadingRow
     {
         foreach ($rows as $row)
         {
-            if($row['nombre']==''){
-                break;
+            $rules = [
+                'nombre' => 'required',
+            ];
+
+            $customMessages = [
+                'nombre.required' => 'Existen celdas vacías en la columna NOMBRE.'
+            ];
+
+            $rowData = $row->toArray();
+
+            $validator = Validator::make($rowData, $rules, $customMessages);
+
+            if ($validator->fails()) {
+                $errors = $validator->errors()->all();
+                throw ValidationException::withMessages(['errors' => implode(' ', $errors)]);
             }
 
             //Verificar unidad de medida
@@ -153,14 +169,11 @@ class ProductosFirstSheet implements ToCollection, WithHeadingRow
                 }
             }
 
-            if($row['cantidad']<=0 || $row['cantidad']==''){
-                $tipo_producto = 2;
-            } else {
+            if(is_numeric($row['cantidad'])){
                 $tipo_producto = 1;
-            }
-
-            if($row['cantidad']==''){
+            } else {
                 $row['cantidad']=0;
+                $tipo_producto = 2;
             }
 
             if($row['stock_bajo']==''){
@@ -183,41 +196,48 @@ class ProductosFirstSheet implements ToCollection, WithHeadingRow
                 $row['moneda_precio_min']='PEN';
             }
 
-            $producto=Producto::create([
-                'cod_producto'=> strtoupper($row['codigo']),
-                'nombre'=>mb_strtoupper($row['nombre']),
-                'presentacion'=>mb_strtoupper($row['caracteristicas']),
-                'costo'=>$row['costo'],
-                'precio'=>$row['precio'],
-                'stock_bajo'=>$row['stock_bajo'],
-                'idcategoria'=>$idcategoria,
-                'unidad_medida'=>$row['unidad_de_medida'],
-                'moneda'=>strtoupper($row['moneda']),
-                'tipo_producto'=>$tipo_producto,
-                'marca'=>mb_strtoupper($row['marca']),
-                'modelo'=>mb_strtoupper($row['modelo']),
-                'param_1'=>mb_strtoupper($row['montaje']),
-                'param_2'=>mb_strtoupper($row['capsula']),
-                'param_3'=>mb_strtoupper($row['tipo']),
-                'param_4'=>mb_strtoupper($row['precio_min']),
-                'param_5'=>mb_strtoupper($row['moneda_precio_min']),
-            ]);
+            try{
+                $producto=Producto::create([
+                    'cod_producto'=> strtoupper($row['codigo']),
+                    'nombre'=>mb_strtoupper($row['nombre']),
+                    'presentacion'=>mb_strtoupper($row['caracteristicas']),
+                    'costo'=>$row['costo'],
+                    'precio'=>$row['precio'],
+                    'stock_bajo'=>$row['stock_bajo'],
+                    'idcategoria'=>$idcategoria,
+                    'unidad_medida'=>$row['unidad_de_medida'],
+                    'moneda'=>strtoupper($row['moneda']),
+                    'moneda_compra' => strtoupper($row['moneda_costo']),
+                    'tipo_cambio' => $row['tipo_de_cambio'],
+                    'tipo_producto'=>$tipo_producto,
+                    'marca'=>mb_strtoupper($row['marca']),
+                    'modelo'=>mb_strtoupper($row['modelo']),
+                    'param_1'=>mb_strtoupper($row['montaje']),
+                    'param_2'=>mb_strtoupper($row['capsula']),
+                    'param_3'=>mb_strtoupper($row['tipo']),
+                    'param_4'=>mb_strtoupper($row['precio_min']),
+                    'param_5'=>mb_strtoupper($row['moneda_precio_min']),
+                ]);
 
-            $producto->inventario()->create([
-                'idempleado'=>auth()->user()->idempleado,
-                'cantidad'=>$row['cantidad'],
-                'saldo'=>$row['cantidad'],
-                'operacion'=>'IMPORTADO DESDE EXCEL',
-                'costo'=>$row['costo'],
-                'moneda' => strtoupper($row['moneda_costo']),
-                'tipo_cambio' => $row['tipo_de_cambio'],
-            ]);
+                $producto->inventario()->create([
+                    'idempleado'=>auth()->user()->idempleado,
+                    'fecha'=>date('Y-m-d H:i:s'),
+                    'cantidad'=>$row['cantidad'],
+                    'costo'=>$row['costo'],
+                    'moneda' => strtoupper($row['moneda_costo']),
+                    'tipo_cambio' => $row['tipo_de_cambio'],
+                    'saldo'=>$row['cantidad'],
+                    'operacion'=>'IMPORTADO DESDE EXCEL',
+                ]);
 
 
 
-            $producto->almacen()->attach(1, [
-                'idubicacion'=>$idubicacion,
-            ]);
+                $producto->almacen()->attach(1, [
+                    'idubicacion'=>$idubicacion,
+                ]);
+            } catch (\Exception $e){
+                throw new \Exception($e->getMessage());
+            }
 
         }
     }

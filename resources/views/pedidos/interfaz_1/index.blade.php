@@ -122,7 +122,7 @@
                                                                 @keyup="actualizarDetalle"
                                                                 :id="producto.num_item+'-d'"
                                                                 class="form-control td-dis" type="text"
-                                                                disabled
+                                                                readonly
                                                                 v-model="producto.presentacion"></td>
                                                     <td @click="habilitar(producto.num_item,'p')"><input
                                                                 onblur="app.noFocus(this)"
@@ -130,7 +130,7 @@
                                                                 @keyup="actualizarDetalle"
                                                                 :id="producto.num_item+'-p'"
                                                                 class="form-control td-dis" type="number"
-                                                                disabled
+                                                                readonly
                                                                 v-model="producto.precio" @cannot('Pedido: editar precio') readonly @endcannot></td>
                                                     <td @click="habilitar(producto.num_item,'c')">
                                                         <b-input-group>
@@ -145,7 +145,7 @@
                                                                     @keyup="actualizarDetalle"
                                                                     :id="producto.num_item+'-c'"
                                                                     class="form-control td-dis" type="number"
-                                                                    disabled
+                                                                    readonly
                                                                     v-model="producto.cantidad">
                                                             <b-input-group-append>
                                                                 <b-button @click="cambiarCantidad(index,'+')"
@@ -428,13 +428,13 @@
                         if(input.value != this.current_val){
                             this.actualizarDetalle(null);
                         }
-                        input.setAttribute('disabled',"");
+                        input.setAttribute('readonly',"");
                     },
                     habilitar(num_item, el){
                         this.num_item = num_item;
                         this.element = el;
                         let input = document.getElementById(this.num_item+'-'+this.element)
-                        input.removeAttribute('disabled');
+                        input.removeAttribute('readonly');
                         input.focus();
                         this.current_val=input.value;
                     },
@@ -452,7 +452,7 @@
                         this.mostrarSpinner = true;
                         let inputs = document.getElementsByClassName('td-dis');
                         for(input of inputs){
-                            input.setAttribute('disabled',"");
+                            input.setAttribute('readonly',"");
                         }
                         axios.get('/pedidos/obtener-data-pedido/'+id)
                             .then(response => {
@@ -591,13 +591,14 @@
                                 'item':JSON.stringify(producto)
                             })
                                 .then(response => {
+                                    this.current_val = producto['cantidad'];
                                     producto['loading'] = false;
                                     producto['precio'] = (Number(producto['precio'])).toFixed(2);
                                     if(response.data == 1){
                                         this.obtener_pedidos();
                                         let input = document.getElementById(+this.num_item+"-"+this.element);
                                         if(input){
-                                            input.setAttribute('disabled',"");
+                                            input.setAttribute('readonly',"");
                                         }
                                     } else {
                                         producto['warning'] = true;

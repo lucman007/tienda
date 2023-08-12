@@ -1,6 +1,7 @@
 @extends('layouts.main')
 @section('titulo', 'Categorías')
 @section('contenido')
+    @php $agent = new \Jenssegers\Agent\Agent() @endphp
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
             <div class="col-lg-9">
@@ -26,29 +27,31 @@
                                     <th scope="col">Nombre</th>
                                     <th scope="col">Descripción</th>
                                     <th scope="col">Color</th>
-                                    <th scope="col">Opciones</th>
+                                    <th scope="col"></th>
                                 </tr>
                                 </thead>
                                 <tbody>
+                                @if(count($categorias) > 0)
                                 @foreach($categorias as $categoria)
-                                    <tr>
+                                    <tr @if(!$agent->isDesktop()) @click="editarCategoria({{$categoria->idcategoria}})" @endif>
                                         <td></td>
                                         <td style="display:none">{{$categoria->idcategoria}}</td>
                                         <td>{{$categoria->nombre}}</td>
                                         <td>{{$categoria->descripcion}}</td>
                                         <td><span style="background: {{$categoria->color}};" class="cat-circle-color"></span></td>
-                                        <td class="botones-accion">
-                                            <a @@click="editarCategoria({{$categoria->idcategoria}})" href="javascript:void(0)">
-                                                <button class="btn btn-success" title="Editar categoria"><i
-                                                            class="fas fa-edit"></i></button>
-                                            </a>
-                                            <a @@click="borrarCategoria({{$categoria->idcategoria}})" href="javascript:void(0)">
-                                                <button class="btn btn-danger" title="Eliminar"><i class="fas fa-trash-alt"></i>
-                                                </button>
-                                            </a>
+                                        <td class="botones-accion" style="text-align: right">
+                                            <b-button @click="editarCategoria({{$categoria->idcategoria}})" class="btn btn-success" title="Editar categoria"><i
+                                                        class="fas fa-edit"></i></b-button>
+                                            <button @click="borrarCategoria({{$categoria->idcategoria}})" class="btn btn-danger" title="Eliminar"><i class="fas fa-trash-alt"></i>
+                                            </button>
                                         </td>
                                     </tr>
                                 @endforeach
+                                @else
+                                    <tr class="text-center">
+                                        <td colspan="8">No hay datos que mostrar</td>
+                                    </tr>
+                                @endif
                                 </tbody>
                             </table>
                         </div>

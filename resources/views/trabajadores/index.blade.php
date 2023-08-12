@@ -1,6 +1,7 @@
 @extends('layouts.main')
 @section('titulo', 'Trabajadores')
 @section('contenido')
+    @php $agent = new \Jenssegers\Agent\Agent() @endphp
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
             <div class="col-lg-9">
@@ -43,32 +44,33 @@
                                 <tbody>
                                 @foreach($trabajadores as $trabajador)
                                     @if($trabajador->acceso != 1)
-                                    <tr>
-                                        <td></td>
-                                        <td style="display:none">{{$trabajador->idempleado}}</td>
-                                        <td>{{$trabajador->nombre}} {{$trabajador->apellidos}} <i v-show="{{$trabajador->es_usuario}}==1" class="fas fa-user-circle"></i></td>
-                                        <td>{{$trabajador->dni}}</td>
-                                        <td>{{$trabajador->direccion}} - {{$trabajador->ciudad}}</td>
-                                        <td>{{$trabajador->telefono}}</td>
-                                        <td>{{$trabajador->correo}}</td>
-                                        <td>{{$trabajador->dia_pago}}</td>
-                                        <td class="botones-accion" style="width: 20%">
-                                            <a @@click="editarTrabajador({{$trabajador->idempleado}})" href="javascript:void(0)">
-                                                <button class="btn btn-success" title="Editar trabajador"><i
-                                                            class="fas fa-edit"></i></button>
-                                            </a>
-                                            <a href="{{url('trabajadores/usuario').'/'.$trabajador->idempleado}}">
-                                                <button class="btn btn-info" title="Gestionar accesos"><i class="fas fa-key"></i></button>
-                                            </a>
-                                            <a href="{{url('trabajadores/pagos').'/'.$trabajador->idempleado}}">
-                                                <button class="btn btn-warning" title="Historial de pagos"><i class="fas fa-coins"></i></button>
-                                            </a>
-                                            <a @@click="borrarTrabajador({{$trabajador->idempleado}})" href="javascript:void(0)">
-                                                <button class="btn btn-danger" title="Eliminar"><i class="fas fa-trash-alt"></i>
-                                                </button>
-                                            </a>
-                                        </td>
-                                    </tr>
+                                        <tr @if(!$agent->isDesktop()) @click="editarTrabajador({{$trabajador->idempleado}})" @endif>
+                                            <td></td>
+                                            <td style="display:none">{{$trabajador->idempleado}}</td>
+                                            <td>{{$trabajador->nombre}} {{$trabajador->apellidos}} <i
+                                                        v-show="{{$trabajador->es_usuario}}==1"
+                                                        class="fas fa-user-circle"></i></td>
+                                            <td>{{$trabajador->dni}}</td>
+                                            <td>{{$trabajador->direccion}} - {{$trabajador->ciudad}}</td>
+                                            <td>{{$trabajador->telefono}}</td>
+                                            <td>{{$trabajador->correo}}</td>
+                                            <td>{{$trabajador->dia_pago}}</td>
+                                            <td class="botones-accion" style="width: 20%">
+                                                <b-button @click="editarTrabajador({{$trabajador->idempleado}})" class="btn btn-success" title="Editar trabajador"><i
+                                                            class="fas fa-edit"></i></b-button>
+                                                <a href="{{url('trabajadores/usuario').'/'.$trabajador->idempleado}}">
+                                                    <button class="btn btn-info" title="Gestionar accesos"><i
+                                                                class="fas fa-key"></i></button>
+                                                </a>
+                                                <a href="{{url('trabajadores/pagos').'/'.$trabajador->idempleado}}">
+                                                    <button class="btn btn-warning" title="Historial de pagos"><i
+                                                                class="fas fa-coins"></i></button>
+                                                </a>
+                                                <b-button @click="borrarTrabajador({{$trabajador->idempleado}})" class="btn btn-danger" title="Eliminar"><i
+                                                            class="fas fa-trash-alt"></i>
+                                                </b-button>
+                                            </td>
+                                        </tr>
                                     @endif
                                     @if($trabajador->acceso == 1 && $acceso == 1)
                                         <tr>

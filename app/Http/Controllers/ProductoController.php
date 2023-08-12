@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Maatwebsite\Excel\Facades\Excel;
 use Milon\Barcode\DNS1D;
 use Milon\Barcode\DNS2D;
@@ -447,7 +448,16 @@ class ProductoController extends Controller
             }
             return 0;
 
-        } catch (\Exception $e){
+        } catch (ValidationException $e){
+            $errorString = '';
+            $errors = $e->errors();
+            foreach ($errors['errors'] as $error) {
+                $errorString .= $error . ' ';
+            }
+            $errorString = rtrim($errorString);
+            return $errorString;
+
+        }  catch (\Exception $e) {
             Log::error($e);
             return $e->getMessage();
         }
@@ -486,9 +496,9 @@ class ProductoController extends Controller
             ->orderby('idproducto','desc')
             ->first();
         if($ultimo_id_registrado){
-            return 'PR'.substr(date('Y'),2,2).$ultimo_id_registrado->idproducto;
+            return substr(date('Y'),2,2).$ultimo_id_registrado->idproducto;
         } else {
-            return 'PR'.substr(date('Y'),2,2).'1';
+            return substr(date('Y'),2,2).'1';
         }
 
     }

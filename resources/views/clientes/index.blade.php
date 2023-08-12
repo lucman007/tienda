@@ -1,6 +1,7 @@
 @extends('layouts.main')
 @section('titulo', 'Clientes')
 @section('contenido')
+    @php $agent = new \Jenssegers\Agent\Agent() @endphp
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
             <div class="col-lg-9">
@@ -39,28 +40,34 @@
                                     <th scope="col">Dirección</th>
                                     <th scope="col">Telefono</th>
                                     <th scope="col">E-mail</th>
-                                    <th scope="col">Opciones</th>
+                                    <th scope="col"></th>
                                 </tr>
                                 </thead>
                                 <tbody>
-                                @foreach($clientes as $cliente)
-                                    <tr>
-                                        <td></td>
-                                        <td>{{$cliente->cod_cliente}}</td>
-                                        <td>{{$cliente->nombre}}</td>
-                                        <td>{{$cliente->num_documento}}</td>
-                                        <td style="width: 30%">{{$cliente->direccion}}</td>
-                                        <td>{{$cliente->telefono}}</td>
-                                        <td style="width: 20%">{{$cliente->correo}}</td>
-                                        <td class="botones-accion">
-                                            <button @click="editarCliente({{$cliente->idcliente}})" class="btn btn-success"
-                                                    title="Editar cliente"><i class="fas fa-edit"></i></button>
-                                            <button @click="borrarCliente({{$cliente->idcliente}})" class="btn btn-danger"
-                                                    title="Eliminar"><i class="fas fa-trash-alt"></i>
-                                            </button>
-                                        </td>
+                                @if(count($clientes) > 0)
+                                    @foreach($clientes as $cliente)
+                                        <tr @if(!$agent->isDesktop()) @click="editarCliente({{$cliente->idcliente}})" @endif>
+                                            <td></td>
+                                            <td>{{$cliente->cod_cliente}}</td>
+                                            <td>{{$cliente->nombre}}</td>
+                                            <td>{{$cliente->num_documento}}</td>
+                                            <td style="width: 30%">{{$cliente->direccion}}</td>
+                                            <td>{{$cliente->telefono}}</td>
+                                            <td style="width: 20%">{{$cliente->correo}}</td>
+                                            <td class="botones-accion" style="text-align: right">
+                                                <button @click="editarCliente({{$cliente->idcliente}})" class="btn btn-success"
+                                                        title="Editar cliente"><i class="fas fa-edit"></i></button>
+                                                <button @click="borrarCliente({{$cliente->idcliente}})" class="btn btn-danger"
+                                                        title="Eliminar"><i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                @else
+                                    <tr class="text-center">
+                                        <td colspan="8">No hay datos que mostrar</td>
                                     </tr>
-                                @endforeach
+                                @endif
                                 </tbody>
                             </table>
                         </div>
