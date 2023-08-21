@@ -33,6 +33,7 @@ a:hover{
 input.form-control,textarea{
     font-size: 14px !important;
     font-family: 'Open Sans', sans-serif;
+    border-radius: 10px;
 }
 
 table .form-control, .tabla-facturar{
@@ -43,6 +44,7 @@ table .form-control, .tabla-facturar{
 .btn{
     font-size: 14px;
     font-family: 'Open Sans', sans-serif;
+    border-radius: 10px;
 }
 
 .side-nav {
@@ -1128,7 +1130,7 @@ label{
 
 .info_selected_mesa{
     float: left;
-    margin-right: 40px;
+    margin-right: 20px;
     margin-top: 5px;
 }
 .info_selected_mesa h4{
@@ -1194,7 +1196,7 @@ body#pedidos-style .main-footer{
     background: orange;
     padding: 5px;
     color: white;
-    border-radius: 5px;
+    border-radius: 30px;
     transition: 0.5s all;
 }
 .transicion {

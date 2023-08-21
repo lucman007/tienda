@@ -4,20 +4,19 @@
     @php
         $buscador_alternativo = json_decode(cache('config')['interfaz'], true)['buscador_productos_alt']??false;
         $colapsar = json_decode(cache('config')['interfaz'], true)['colapsar_categorias']??false;
+        $emitir_solo_ticket = json_decode(cache('config')['interfaz'], true)['emitir_solo_ticket']??false;
     @endphp
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}} interfaz_3">
         <div class="row">
             <div class="col-lg-4">
                 <div class="card">
-                    <div class="card-header">
-                        <div class="row">
-                            <div class="col-lg-12 mb-1 @if(!$agent->isDesktop()) d-flex @endif">
-                                <b-button @if(!$agent->isDesktop()) style="width: 50%" @endif :disabled="disabledNuevo" alt="Nuevo pedido"  @click="nuevoDelivery" variant="primary"><i class="fas fa-plus"></i> Nueva venta</b-button>
-                                <b-button @if(!$agent->isDesktop()) style="width: 50%" @endif alt="Resumen del día"  variant="primary" class="ml-2" @cannot('Facturación: facturar') class="disabled" disabled @endcannot href="{{action('PedidoController@ventas')}}">
-                                    <i class="fas fa-list-ul"></i> Resumen del día
-                                </b-button>
-                                <b-button @click="reloadPage" class="ml-2" variant="warning" title="Actualizar"><i class="fas fa-sync"></i></b-button>
-                            </div>
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <b-button :disabled="disabledNuevo" alt="Nuevo pedido"  @click="nuevoDelivery" variant="primary"><i class="fas fa-plus"></i> Nueva venta</b-button>
+                        <div style="display: flex">
+                            <b-button alt="Resumen del día"  variant="primary" class="mx-2" @cannot('Facturación: facturar') class="disabled" disabled @endcannot href="{{action('PedidoController@ventas')}}">
+                                <i class="fas fa-list-ul"></i> Resumen del día
+                            </b-button>
+                            <b-button @click="reloadPage" variant="warning" title="Actualizar"><i class="fas fa-sync"></i></b-button>
                         </div>
                     </div>
                     <div class="card-body scroll-mesas" id="box-pedidos">
@@ -60,36 +59,32 @@
                     <div class="col-lg-12">
                         <div class="card">
                             <div class="card-header" id="top-btns">
-                                <div class="row">
+                                <div class="mb-3 mb-sm-0">
                                     @if($agent->isDesktop())
-                                    <div class="col-12 col-md-12 col-lg-6">
                                         <div v-show="idpedido != -1">
                                             <div class="info_selected_mesa">
                                                 <h4>
                                                     <span class="numero_mesa" :class="{'transicion':mostrarSpinner}">#@{{ idpedido }}</span>
                                                 </h4>
                                             </div>
-                                            <div class="info_selected_mesa float-right float-md-left"><h4>Monto: S/ @{{ Number(totalVenta).toFixed(2) }}</h4></div>
+                                            <div class="info_selected_mesa"><h4>S/@{{ Number(totalVenta).toFixed(2) }}</h4></div>
                                         </div>
-                                    </div>
                                     @endif
-                                    <div class="col-12 col-md-12 col-lg-6 mt-2 mt-md-0">
-                                        <b-button :disabled="idpedido == -1" v-b-modal.modal-entrega class="float-right mr-2" variant="primary" title="Datos de entrega">
-                                            <i class="fas fa-map-marker-alt"></i> {{!($agent->isTablet()||$agent->isDesktop())?'':'Entrega'}}
-                                        </b-button>
-                                        <div class="float-md-right mr-2 d-inline">
-                                            <select @if($idvendedor != -1) disabled @endif @change="cambiarEmpleado" v-model="idvendedor" style="width: 150px" class="custom-select">
-                                                <option value="-1" style="font-weight: bold">Vendedor:</option>
-                                                <option v-for="empleado in empleados" :value="empleado.idempleado">@{{ empleado.persona.nombre }}</option>
-                                            </select>
-                                        </div>
-                                        <b-button v-b-modal.modal-devolucion class="float-right mr-2" variant="success" title="Datos de entrega">
-                                            <i class="fas fa-undo"></i> {{!($agent->isTablet()||$agent->isDesktop())?'':'Devolución'}}
-                                        </b-button>
-                                    </div>
+                                </div>
+                                <div style="display: flex; flex-direction: row; align-items: center;flex-wrap: wrap;justify-content: center;">
+                                    <b-button v-b-modal.modal-devolucion variant="success" title="Datos de entrega">
+                                        <i class="fas fa-undo"></i> {{!($agent->isTablet()||$agent->isDesktop())?'':'Devolución'}}
+                                    </b-button>
+                                    <select @if($idvendedor != -1) disabled @endif @change="cambiarEmpleado" v-model="idvendedor" style="width: 110px" class="custom-select mx-1">
+                                        <option value="-1" style="font-weight: bold">Vendedor:</option>
+                                        <option v-for="empleado in empleados" :value="empleado.idempleado">@{{ empleado.persona.nombre }}</option>
+                                    </select>
+                                    <b-button :disabled="idpedido == -1" v-b-modal.modal-entrega variant="primary" title="Datos de entrega">
+                                        <i class="fas fa-map-marker-alt"></i> {{!($agent->isTablet()||$agent->isDesktop())?'':'Entrega'}}
+                                    </b-button>
                                 </div>
                             </div>
-                            <div class="card-body" style="height: 360px; overflow-y: scroll" id="box-items">
+                            <div class="card-body" style="height: 360px; overflow-y: auto; padding-top:10px;padding-bottom:10px;" id="box-items">
                                 <div class="loader" v-show="mostrarSpinner">
                                     <b-spinner label="Cargando..." ></b-spinner>
                                 </div>
@@ -114,7 +109,7 @@
                                                 <tr v-for="(producto,index) in productosSeleccionados" :key="index">
                                                     <td></td>
                                                     <td>
-                                                        @{{producto.nombre}}<br>
+                                                        @{{producto.nombre}} <br>
                                                         <span style="font-size: 11px; color: #0b870b;" v-for="item in producto.items_kit">+ (@{{ item.cantidad }}) @{{item['nombre']}}<br></span>
                                                     </td>
                                                     <td @click="habilitar(producto.num_item,'d')"><input
@@ -192,7 +187,10 @@
                                                     </thead>
                                                     <tbody>
                                                     <tr v-for="(producto,index) in productosSeleccionados" :key="index" v-b-modal.modal-detalle @click="editarItem(producto)">
-                                                        <td>@{{producto.nombre}} x @{{producto.cantidad}}</td>
+                                                        <td>
+                                                            @{{producto.nombre}} x @{{producto.cantidad}} <br>
+                                                            <span style="font-size: 11px; color: #0b870b;" v-for="item in producto.items_kit">+@{{item['nombre']}} (x@{{ item.cantidad }})<br></span>
+                                                        </td>
                                                         <td>@{{producto.total}}</td>
                                                         <td>
                                                         <span v-show="producto.loading">
@@ -205,7 +203,7 @@
                                                             </b-tooltip>
                                                         </span>
                                                         </td>
-                                                        <td style="width: 20%" @click.stop >
+                                                        <td @click.stop style="width: 20%">
                                                             <button @click="borrarItemVenta(index)"
                                                                     :disabled="mostrarSpinner" class="btn btn-danger"
                                                                     title="Borrar item"><i class="fas fa-trash"></i>
@@ -230,72 +228,56 @@
                 <div class="row mt-2">
                     <div class="col-lg-12">
                         <div class="card" id="bottom-btns">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-lg-12 buttons-mesa">
-                                        @php
-                                            $emitir_solo_ticket = json_decode(cache('config')['interfaz'], true)['emitir_solo_ticket']??false;
-                                        @endphp
-                                        @if(!$agent->isDesktop())
-                                            <div class="row">
-                                                @endif
-                                                <b-button @if(!$agent->isDesktop()) class="col-3 col-md p-md-4"
-                                                          @endif :disabled="idpedido == -1"
-                                                          @if($buscador_alternativo)
-                                                          v-b-modal.modal-agregar-producto-alt
-                                                          @else
-                                                          v-b-modal.modal-agregar-producto
-                                                          @endif
-                                                          @click="productosSeleccionadosAux = [ ...productosSeleccionados ]"
-                                                          variant="primary"><i class="fas fa-plus"></i>
-                                                    Agregar producto
+                            <div class="card-body" @if($agent->isDesktop()) style="padding: 10px" @endif>
+                                <div class="bottom-btns-container">
+                                    <div style="display: flex; justify-content: center;flex-wrap: nowrap;">
+                                        <b-button :disabled="idpedido == -1"
+                                                  @if($buscador_alternativo)
+                                                  v-b-modal.modal-agregar-producto-alt
+                                                  @else
+                                                  v-b-modal.modal-agregar-producto
+                                                  @endif
+                                                  @click="productosSeleccionadosAux = [ ...productosSeleccionados ]"
+                                                  variant="primary"><i class="fas fa-plus"></i>
+                                            Agregar producto
+                                        </b-button>
+                                        <b-button :disabled="idpedido == -1" @click="limpiarPedido"
+                                                  variant="danger"><i class="fas fa-times-circle"></i>
+                                            Anular venta
+                                        </b-button>
+                                        {{--<b-button :disabled="productosSeleccionados == 0"
+                                                  @click="imprimir('entrega')"
+                                                  variant="secondary"><i class="fas fa-print"></i>
+                                            Imprimir entrega
+                                        </b-button>--}}
+                                        <b-button :disabled="productosSeleccionados == 0" @click="imprimir('pedido')"
+                                                  variant="secondary"><i class="fas fa-box-open"></i>
+                                            Imprimir pedido
+                                        </b-button>
+                                    </div>
+                                    <div style="display: flex; justify-content: center;flex-wrap: nowrap;">
+                                        @can('Pedido: procesar')
+                                            <b-button :disabled="disabledTicket"
+                                                      v-b-modal.modal-facturar
+                                                      @click="comprobante='30'"
+                                                      variant="info"><i class="fas fa-receipt"></i>
+                                                Nota de venta
+                                            </b-button>
+                                            @if(!$emitir_solo_ticket)
+                                                <b-button :disabled="productosSeleccionados == 0 || disabledVentas"
+                                                          v-b-modal.modal-facturar
+                                                          @click="comprobante='03'"
+                                                          variant="warning"><i class="fas fa-file-invoice-dollar"></i>
+                                                    Generar boleta
                                                 </b-button>
-                                                <b-button @if(!$agent->isDesktop()) class="col-3 col-md p-md-4"
-                                                          @endif :disabled="idpedido == -1" @click="limpiarPedido"
-                                                          variant="danger"><i class="fas fa-times-circle"></i>
-                                                    Anular venta
+                                                <b-button :disabled="productosSeleccionados == 0 || disabledVentas"
+                                                          v-b-modal.modal-facturar
+                                                          @click="comprobante='01'"
+                                                          variant="warning"><i class="fas fa-file-invoice-dollar"></i>
+                                                    Generar factura
                                                 </b-button>
-                                                <b-button @if(!$agent->isDesktop()) class="col-3 col-md-2 p-md-4"
-                                                          @endif :disabled="productosSeleccionados == 0"
-                                                          @click="imprimir('entrega')"
-                                                          variant="secondary"><i class="fas fa-print"></i>
-                                                    Imprimir entrega
-                                                </b-button>
-                                                <b-button @if(!$agent->isDesktop()) class="col-3 col-md p-md-4"
-                                                          @endif :disabled="productosSeleccionados == 0" @click="imprimir('pedido')"
-                                                          variant="secondary"><i class="fas fa-box-open"></i>
-                                                    Imprimir pedido
-                                                </b-button>
-                                                @can('Pedido: procesar')
-                                                    <b-button @if(!$agent->isDesktop()) class="col-3 col-md p-md-4"
-                                                              @endif :disabled="disabledTicket"
-                                                              v-b-modal.modal-facturar
-                                                              @click="comprobante='30'"
-                                                              variant="info"><i class="fas fa-receipt"></i>
-                                                        Nota de venta
-                                                    </b-button>
-                                                @endcan
-                                                @if(!$emitir_solo_ticket)
-                                                    <b-button
-                                                            @if(!$agent->isDesktop()) class="col-3 col-md p-md-4 order-2 order-lg-1"
-                                                            @endif :disabled="productosSeleccionados == 0 || disabledVentas"
-                                                            v-b-modal.modal-facturar class="float-right ml-1"
-                                                            @click="comprobante='01'"
-                                                            variant="warning"><i class="fas fa-file-invoice-dollar"></i>
-                                                        Generar factura
-                                                    </b-button>
-                                                    <b-button
-                                                            @if(!$agent->isDesktop()) class="col-3 col-md p-md-4 order-1 order-lg-2"
-                                                            @endif :disabled="productosSeleccionados == 0 || disabledVentas"
-                                                            v-b-modal.modal-facturar class="float-right"
-                                                            @click="comprobante='03'"
-                                                            variant="warning"><i class="fas fa-file-invoice-dollar"></i>
-                                                        Generar boleta
-                                                    </b-button>
-                                                @endif
-                                            @if(!$agent->isDesktop())
-                                            </div>
-                                        @endif
+                                            @endif
+                                        @endcan
                                     </div>
                                 </div>
                             </div>
@@ -398,12 +380,12 @@
 
                             let bottom_btns = document.getElementById('bottom-btns').offsetHeight;
                             let top_btns = document.getElementById('top-btns').offsetHeight;
-                            let h_box_pedidos = height - 90 - 150;
+                            let h_box_pedidos = height - 90 - 141;
                             let h_box_items = height - 90 - top_btns - bottom_btns - 100;
 
-                            let box_mesas = document.getElementById('box-pedidos');
+                            let box_pedidos = document.getElementById('box-pedidos');
                             let box_items = document.getElementById('box-items');
-                            Object.assign(box_mesas.style, {height:h_box_pedidos+'px'});
+                            Object.assign(box_pedidos.style, {height:h_box_pedidos+'px'});
                             Object.assign(box_items.style, {height:h_box_items+'px'});
                         }
                     },
@@ -687,6 +669,8 @@
                                 .then(response => {
                                     if(response.data!=1){
                                         alert('Ha ocurrido un error al actualizar el vendedor');
+                                    } else {
+                                        this.obtener_pedidos();
                                     }
                                     this.mostrarSpinner = false;
                                 })
@@ -725,36 +709,42 @@
     </script>
 @endsection
 @section('css')
-    @if(!$agent->isDesktop())
     <style>
-        #modal-agregar-plato .modal-dialog{
-            height: auto !important;
-            position: relative !important;
+        #top-btns{
+            display: flex;
+            justify-content: space-between;
         }
-        .plato-botones, .plato-descripcion{
-            display: none !important;
+        .bottom-btns-container{
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: space-between;
         }
-        .plato-botones-alt{
-            display: flex !important;
-            background: #d5d0d0;
-            padding: 10px;
-            margin-top: -17px;
+        .bottom-btns-container button{
+            display: flex;
+            flex-wrap: wrap;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 3px;
+            max-width: 110px;
+            padding: 10px 15px;
         }
-        .plato-buscador{
-            display: none;
+        @media (max-width: 700px) {
+            .bottom-btns-container{
+                flex-wrap: wrap;
+                justify-content: center;
+            }
         }
-        #modal-agregar-plato .modal-body{
-            padding-right: 0;
-            padding-left: 0;
+        @media (max-width: 532px) {
+            #top-btns {
+                flex-direction: column;
+                flex-wrap: wrap;
+                align-items: center;
+            }
+            .bottom-btns-container button{
+                padding: 8px 10px;
+            }
         }
-        .buttons-mesa button{
-            border: 2px solid white !important;
-        }
-        .plato-lista-menu .card-body{
-            overflow: auto;
-            height: auto !important;
-            min-height: 580px;
-        }
+
     </style>
-    @endif
 @endsection
