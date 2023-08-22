@@ -39,7 +39,7 @@
                                         <td>{{$categoria->nombre}}</td>
                                         <td>{{$categoria->descripcion}}</td>
                                         <td><span style="background: {{$categoria->color}};" class="cat-circle-color"></span></td>
-                                        <td class="botones-accion" style="text-align: right">
+                                        <td @click.stop class="botones-accion" style="text-align: right">
                                             <b-button @click="editarCategoria({{$categoria->idcategoria}})" class="btn btn-success" title="Editar categoria"><i
                                                         class="fas fa-edit"></i></b-button>
                                             <button @click="borrarCategoria({{$categoria->idcategoria}})" class="btn btn-danger" title="Eliminar"><i class="fas fa-trash-alt"></i>

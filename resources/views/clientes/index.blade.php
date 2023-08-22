@@ -54,7 +54,7 @@
                                             <td style="width: 30%">{{$cliente->direccion}}</td>
                                             <td>{{$cliente->telefono}}</td>
                                             <td style="width: 20%">{{$cliente->correo}}</td>
-                                            <td class="botones-accion" style="text-align: right">
+                                            <td @click.stop class="botones-accion" style="text-align: right">
                                                 <button @click="editarCliente({{$cliente->idcliente}})" class="btn btn-success"
                                                         title="Editar cliente"><i class="fas fa-edit"></i></button>
                                                 <button @click="borrarCliente({{$cliente->idcliente}})" class="btn btn-danger"

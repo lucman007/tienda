@@ -1,10 +1,10 @@
 <template>
-    <p style="margin-left:20px" :style="color"><i class="fas fa-dollar-sign color-dollar"></i> Compra {{compra}} / Venta: {{venta}}</p>
+    <p style="margin-left:20px"><i class="fas fa-dollar-sign color-dollar"></i> Compra {{compra}} / Venta: {{venta}}</p>
 </template>
 <script>
     export default {
         name: 'tipo-cambio',
-        props:['cambio','color'],
+        props:['cambio'],
         data() {
             return {
                 compra:0,
@@ -22,10 +22,3 @@
         }
     }
 </script>
-<style>
-    .color-dollar{
-        background: #187c0c;
-        padding: 3px;
-        border-radius: 5px;
-    }
-</style>

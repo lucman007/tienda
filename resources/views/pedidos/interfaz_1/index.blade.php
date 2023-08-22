@@ -449,6 +449,10 @@
                                 } else {
                                     this.disabledTicket=false;
                                 }
+                                window.scrollTo({
+                                    top: document.body.scrollHeight + 500,
+                                    behavior: 'smooth',
+                                });
                             })
                             .catch(error => {
                                 alert('Ha ocurrido un error.');
@@ -509,6 +513,10 @@
                                     this.obtener_pedidos()
                                 }
                                 this.disabledNuevo = false;
+                                window.scrollTo({
+                                    top: document.body.scrollHeight + 500,
+                                    behavior: 'smooth',
+                                });
                             })
                             .catch(error => {
                                 alert('Ha ocurrido un error.');

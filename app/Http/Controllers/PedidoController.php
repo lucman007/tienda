@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Spatie\Permission\Models\Role;
 use Spipu\Html2Pdf\Html2Pdf;
 use sysfact\Categoria;
 use sysfact\Descuento;
@@ -51,35 +52,8 @@ class PedidoController extends Controller
                 $data['idbody']='pedidos-style';
                 return view('pedidos.interfaz_3.index',$data);
             case 'modo_2':
-                $consulta = trim($request->get('textoBuscado'));
-
-                $ordenes = DB::table('orden')
-                    ->join('persona as c', 'c.idpersona', '=', 'orden.idcliente')
-                    ->join('persona as e', 'e.idpersona', '=', 'orden.idempleado')
-                    ->select('orden.*', 'c.nombre as cliente', 'e.nombre as empleado')
-                    ->where(function ($query) use ($consulta) {
-                        $query->where('c.nombre', 'like', '%' . $consulta . '%')
-                            ->orWhere('orden.idorden', 'like', '%' . $consulta . '%');
-                    })
-                    ->orderby('orden.idorden', 'desc')
-                    ->paginate(50);
-
-
-                foreach ($ordenes as $item) {
-
-                    switch ($item->estado) {
-                        case 'EN COLA':
-                            $item->badge_class = 'badge-warning';
-                            break;
-                        case 'PROCESADO':
-                            $item->badge_class = 'badge-success';
-                            break;
-                        default:
-                            $item->badge_class = 'badge-danger';
-                    }
-
-                }
-                return view('pedidos.interfaz_2.index',['ordenes'=>$ordenes,'textoBuscado'=>$consulta,'usuario'=>auth()->user()->persona]);
+                $data['idbody']='pedidos-style';
+                return view('pedidos.interfaz_2.index',$data);
             default:
                 $data['idbody']='pedidos-style';
                 return view('pedidos.interfaz_1.index',$data);
@@ -693,11 +667,19 @@ class PedidoController extends Controller
     }
 
     public function obtenerEmpleados(){
-        $empleados=User::role('Vendedor')
-            ->orwhere('cargo',1)
-            ->where('acceso','!=','1')
-            ->where('eliminado',0)
-            ->get();
+
+        if (Role::where('name', 'Vendedor')->exists()) {
+            $empleados = User::role('Vendedor')
+                ->orWhere('cargo', 1)
+                ->where('acceso', '!=', '1')
+                ->where('eliminado', 0)
+                ->get();
+        } else {
+            $empleados = User::where('cargo', 1)
+                ->where('acceso', '!=', '1')
+                ->where('eliminado', 0)
+                ->get();
+        }
 
         foreach ($empleados as $empleado) {
             $empleado->persona;

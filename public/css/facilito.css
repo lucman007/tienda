@@ -803,6 +803,7 @@ input.link{
 
 .top-header{
     background-color: #23282d;
+    padding: 3px 0;
 }
 
 .top-header .dropdown{
@@ -814,8 +815,13 @@ input.link{
     border: 0;
 }
 
-.top-header .dropdown-toggle:hover{
-    background-color: #383b3e;
+.top-header .dropdown-toggle:hover {
+    background: rgba(0,0,0,0.5);
+}
+
+.show>.btn-outline-secondary.dropdown-toggle {
+    color: #fff;
+    background: rgba(0,0,0,0.5);
 }
 
 .top-header p{
@@ -836,9 +842,8 @@ input.link{
     transition: all 0.3s;
 }
 
-.middle-header .nav-item:hover{
-    background: #2a2d2f;
-    border-radius: 3px;
+.middle-header .nav-item:hover {
+    background: rgba(0,0,0,0.5);
 }
 
 .middle-header .dropdown-item{
@@ -862,8 +867,16 @@ label{
     margin-bottom: 0;
 }
 
-.btn-primary{
-    color:white !important;
+.btn-primary {
+    color: #fff !important;
+    background-color: #742284 !important;
+    border-color: #6d2384 !important;
+}
+
+.btn-info, .btn-success {
+    color: #fff !important;
+    background-color: #15C8B3 !important;
+    border-color: #0fc7c8 !important;
 }
 
 .titulo-admin-3{
@@ -1146,7 +1159,7 @@ label{
     padding: 5px;
 }
 .scroll-mesas{
-    overflow-y: scroll;
+    overflow-y: auto;
     height: 470px;
 }
 
@@ -1226,7 +1239,7 @@ th a .icon-hover-active{
 
 .notificacion {
     float: left;
-    background: #5f536a;
+    background: rgba(0,0,0,0.5);
     color: white !important;
     padding: 3px 8px;
     border-radius: 50%;
@@ -1355,7 +1368,7 @@ th a .icon-hover-active{
 }
 
 .active-order{
-    background: rgb(255, 193, 7) !important;
+    background: rgb(21 200 179 / 51%) !important;
     font-weight: bold;
 }
 .navbar button {
@@ -1426,9 +1439,7 @@ table tr td, table tr th{
 }
 
 .color-dollar {
-    background: #187c0c;
-    padding: 3px;
-    border-radius: 5px;
+    color: #15C8B3;
 }
 
 /*RESPONSIVE*/

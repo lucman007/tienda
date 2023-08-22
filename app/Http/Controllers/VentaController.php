@@ -50,15 +50,7 @@ class VentaController extends Controller
         $serie_comprobates = $this->serie_comprobante->getSeries();
         $emisor=new Emisor();
 
-        switch ($this->interfaz['tipo']) {
-            case 'modo_2':
-                $interfaz = 'ventas/interfaz_2/registrar';
-                break;
-            default:
-                $interfaz = 'ventas/registrar';
-        }
-
-        return view($interfaz, [
+        return view('ventas/registrar', [
             'ruc_emisor'=>json_encode($emisor->ruc),
             'ultimo_id'=>json_encode($ultimo_id_registrado),
             'usuario' => auth()->user()->persona,

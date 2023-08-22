@@ -20,11 +20,15 @@
                         </div>
                         <div class="col-lg-5 form-group">
                             <label>{{tipo_documento_buscar==6?'Número de RUC:':'Número de DNI:'}}</label>
-                            <input v-on:keyup="shortcut_buscar" autocomplete="off" type="number" v-model="ruc_buscar" class="form-control" :maxlength="tipo_documento_buscar==6?11:8">
-                            <b-button @click="buscar_en_sunat" variant="primary" class="boton_adjunto">
-                                <span v-show="!spinnerRuc"><i class="fas fa-search"></i></span>
-                                <b-spinner v-show="spinnerRuc" small label="Loading..." ></b-spinner>
-                            </b-button>
+                            <b-input-group>
+                                <input v-on:keyup="shortcut_buscar" autocomplete="off" type="number" v-model="ruc_buscar" class="form-control" :maxlength="tipo_documento_buscar==6?11:8">
+                                <b-input-group-append>
+                                    <b-button @click="buscar_en_sunat" variant="primary">
+                                        <span v-show="!spinnerRuc"><i class="fas fa-search"></i></span>
+                                        <b-spinner v-show="spinnerRuc" small label="Loading..." ></b-spinner>
+                                    </b-button>
+                                </b-input-group-append>
+                            </b-input-group>
                         </div>
                     </div>
                 </div>
