@@ -8,7 +8,7 @@
                     <img src="{{'images/'.$emisor->logo}}">
                 </div>
             @endif
-            <div class="texto" style="color:#2a5ac5">
+            <div class="texto">
                 <h3><span>{{$emisor->nombre_publicitario}}</span></h3>
                 <p><strong>{{$emisor->razon_social}}</strong> <br> {{$emisor->direccion}}, {{$emisor->urbanizacion}}, {{$emisor->provincia}},
                     {{$emisor->departamento}}, {{$emisor->distrito}} <br> {{$emisor->telefono_1}} / {{$emisor->email}} <br>

@@ -225,6 +225,20 @@ class ReporteController extends Controller
                     }
                 }
 
+                //pago credito
+                $suma_cuotas = 0;
+                $cuotas = $item->pago;
+                foreach ($cuotas as $pago){
+                    if($pago->estado == 2){
+                        $suma_cuotas +=  $pago->monto;
+                    }
+                    if($suma_cuotas >= $item->total_venta){
+                        if($item->facturacion->codigo_tipo_documento != '07' || $item->facturacion->codigo_tipo_documento != '08'){
+                            $item->estado_credito = 'PAGADO';
+                        }
+                    }
+                }
+
             }
 
             return ['ventas'=>$ventas,'filtros'=>$filtros,'usuario'=>auth()->user()->persona];

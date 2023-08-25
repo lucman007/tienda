@@ -199,7 +199,7 @@
                                 <tr v-show="editar" v-for="(producto,index) in productosSeleccionados" :key="producto.index">
                                     <td></td>
                                     <td><input class="form-control" type="text" v-model="producto.nombre" disabled></td>
-                                    <td><textarea class="form-control" rows="1" v-model="producto.presentacion"></textarea></td>
+                                    <td><textarea class="form-control texto-desc" ref="textareas" @input="expandirTextarea" rows="1" v-model="producto.presentacion"></textarea></td>
                                     <td>
                                         <input onfocus="this.select()" @change="guardar_prev_precio(index)" @keyup="calcular(index)" class="form-control navigable nav-precio" :data-i="index" type="text" v-model="producto.precio">
                                     </td>
@@ -208,7 +208,7 @@
                                             <input onfocus="this.select()" @keyup="calcular(index)" class="form-control navigable nav-cantidad" :data-i="index" type="text" v-model="producto.cantidad">
                                             <b-input-group-append>
                                                 <b-input-group-text style="font-size: 10px !important; font-weight: 700;">
-                                                    @{{ producto.unidad_medida }}
+                                                    @{{ (producto.unidad_medida).split('/')[1] || producto.unidad_medida }}
                                                 </b-input-group-text>
                                             </b-input-group-append>
                                         </b-input-group>
@@ -500,7 +500,7 @@
             :origen="'cotizaciones'"
             v-on:agregar="agregarProductoNuevo">
     </agregar-producto>
-    <modal-descuento
+    <modal-descuento ref="descuentos"
             :item="item"
             :moneda="moneda"
             :igv="esConIgv"
@@ -575,7 +575,6 @@
             },
             created(){
                 this.calcularTotalPorItem();
-                this.expandirTextarea();
             },
             methods: {
                 agregarCC(){
@@ -617,7 +616,9 @@
                         producto['porcentaje_descuento']=obj['porcentaje'];
                         producto['descuento']=obj['monto'];
                         producto['descuento_por_und']=obj['porUnidad'];
-                        this.calcular(this.index);
+                        if(obj['recalcular']){
+                            this.calcular(this.index);
+                        }
                     }
                 },
                 editarPresupuesto(){
@@ -628,6 +629,12 @@
                     } else {
                         this.agregarCliente(obj)
                     }
+                    this.$nextTick(() => {
+                        const textareas = this.$refs.textareas;
+                        textareas.forEach(textarea => {
+                            this.expandirTextarea({ target: textarea });
+                        });
+                    });
                 },
                 agregarCliente(obj){
                     this.clienteSeleccionado = obj;
@@ -901,18 +908,6 @@
                         this.alerta("El correo electrónico ingresado no es válido");
                     }
                 },
-                expandirTextarea(e){
-                    if(!this.editar){
-                        let z = document.getElementsByClassName('texto_desc');
-                        for (let i = 0, len = z.length; i < len; i++) {
-                            console.log(z[i])
-                        }
-                    } else {
-                        let element = e.path[0];
-                        let el = element.scrollHeight;
-                        element.style.height = el+'px';
-                    }
-                },
                 guardar_prev_precio(index){
                     let producto = this.productosSeleccionados[index];
                     producto['prev_precio']=producto.precio
@@ -957,6 +952,11 @@
                             alert('Ha ocurrido un error.');
                             console.log(error);
                         });
+                },
+                expandirTextarea(event){
+                    let textarea = event.target;
+                    textarea.style.height = 'auto';
+                    textarea.style.height = textarea.scrollHeight + 'px';
                 },
             },
             watch:{

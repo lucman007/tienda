@@ -89,7 +89,7 @@
                         <td style="width: 18mm">{{$item->detalle->cantidad}}</td>
                         <td style="width: 10mm">{{explode('/',$item->unidad_medida)[1]}}</td>
                         <td style="width: 20mm; text-align: right">{{$item->detalle->monto}}</td>
-                        <td style="width: 15mm; text-align: right">{{$item->detalle->descuento}}</td>
+                        <td style="width: 15mm; text-align: right">{{$item->detalle->tipo_descuento?floatval($item->detalle->porcentaje_descuento).'%':$item->detalle->descuento}}</td>
                         <td style="width: 20mm; text-align: right">{{$item->detalle->total}}</td>
                     </tr>
                 @endforeach

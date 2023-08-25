@@ -299,6 +299,8 @@ class ConfiguracionController extends Controller
         $detalle->total = '118.00';
         $detalle->cantidad = '10';
         $detalle->porcentaje_descuento = 0;
+        $detalle->tipo_descuento = 0;
+        $detalle->descuento = 0;
         $detalle->descripcion = '';
 
         $caja = new Collection();

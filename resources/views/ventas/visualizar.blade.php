@@ -133,7 +133,7 @@
                                     <td style="white-space: break-spaces; width: 250px">@{{ producto.detalle.descripcion}}</td>
                                     <td>@{{ producto.detalle.monto }}</td>
                                     <td>@{{ producto.detalle.cantidad }} @{{ producto.unidad_medida }}<span v-show="producto.detalle.devueltos > 0" class="badge badge-warning w-100">@{{producto.detalle.devueltos}} DEVUELTOS</span></td>
-                                    <td>@{{ parseFloat(producto.detalle.porcentaje_descuento)}}%</td>
+                                    <td>@{{ producto.detalle.tipo_descuento?parseFloat(producto.detalle.porcentaje_descuento)+'%':(Number(producto.detalle.descuento)).toFixed(2)}}</td>
                                     <td>@{{ producto.detalle.subtotal }}</td>
                                     <td>@{{ producto.detalle.igv }}</td>
                                     <td>@{{ producto.detalle.total }}</td>
@@ -196,7 +196,7 @@
                         @endif
                         <div v-show="descuento_global > 0" class="row">
                             <div class="col-lg-2 mt-3">
-                                <strong>Descuento global:</strong> @{{ descuento_global }}%
+                                <strong>Descuento global:</strong> @{{ tipo_descuento_global==1?porcentaje_descuento_global+'%':moneda+' '+(Number(descuento_global)).toFixed(2)}}
                                 <hr>
                             </div>
                         </div>
@@ -464,7 +464,9 @@
                 estado: '<?php echo $venta->facturacion['estado'] ?>',
                 estado_guia: '<?php echo $venta->guia_relacionada['estado'] ?>',
                 productosSeleccionados: <?php echo $venta['productos'] ?>,
-                descuento_global:'<?php echo $venta->facturacion->porcentaje_descuento_global * 100?>',
+                porcentaje_descuento_global:'<?php echo $venta->facturacion->porcentaje_descuento_global * 100?>',
+                descuento_global:'<?php echo $venta->facturacion->descuento_global?>',
+                tipo_descuento_global:'<?php echo $venta->facturacion->tipo_descuento?>',
                 moneda: '<?php echo $venta['codigo_moneda']?>',
                 mail:"<?php echo $venta->persona->correo ?>",
                 conCopia:true,

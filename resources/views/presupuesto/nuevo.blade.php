@@ -173,7 +173,7 @@
                                 <tr v-for="(producto,index) in productosSeleccionados" :key="producto.index">
                                     <td></td>
                                     <td><input class="form-control" type="text" v-model="producto.nombre" disabled></td>
-                                    <td><textarea class="form-control" rows="1" v-model="producto.presentacion"></textarea></td>
+                                    <td><textarea class="form-control texto-desc" ref="textareas" @input="expandirTextarea" rows="1" v-model="producto.presentacion"></textarea></td>
                                     <td>
                                         <input onfocus="this.select()" @change="guardar_prev_precio(index)" @keyup="calcular(index)" class="form-control navigable nav-precio" :data-i="index" type="text" v-model="producto.precio">
                                     </td>
@@ -353,7 +353,7 @@
             :origen="'cotizaciones'"
             v-on:agregar="agregarProductoNuevo">
     </agregar-producto>
-    <modal-descuento
+    <modal-descuento ref="descuentos"
             :item="item"
             :moneda="moneda"
             :igv="esConIgv"
@@ -465,7 +465,9 @@
                         producto['porcentaje_descuento']=obj['porcentaje'];
                         producto['descuento']=obj['monto'];
                         producto['descuento_por_und']=obj['porUnidad'];
-                        this.calcular(this.index);
+                        if(obj['recalcular']){
+                            this.calcular(this.index);
+                        }
                     }
                 },
                 agregarCliente(obj){
@@ -522,6 +524,7 @@
                 },
                 calcular(index){
                     let producto = this.productosSeleccionados[index];
+
                     if(typeof index === 'object'){
                         producto = index;
                     }
@@ -547,6 +550,7 @@
                         producto['subtotal'] = producto['precio']*producto['cantidad'] - monto_descuento;
                         producto['total'] = producto['subtotal'];
                     }
+
                     this.calcularTotalVenta();
 
                 },
@@ -731,6 +735,11 @@
                             alert('Ha ocurrido un error.');
                             console.log(error);
                         });
+                },
+                expandirTextarea(event){
+                    let textarea = event.target;
+                    textarea.style.height = 'auto';
+                    textarea.style.height = textarea.scrollHeight + 'px';
                 },
             },
             watch:{

@@ -8,7 +8,7 @@
                     <img src="{{'images/'.$emisor->logo}}">
                 </div>
             @endif
-            <div class="texto" style="color:#2a5ac5">
+            <div class="texto">
                 <h3><span>{{$emisor->nombre_publicitario}}</span></h3>
                 <p><strong>{{$emisor->razon_social}}</strong> <br> {{$emisor->direccion}}, {{$emisor->urbanizacion}}, {{$emisor->provincia}},
                     {{$emisor->departamento}}, {{$emisor->distrito}} <br> {{$emisor->telefono_1}} / {{$emisor->email}} <br>
@@ -89,7 +89,7 @@
                     <td style="width: 12mm">{{$item->cantidad}}</td>
                     <td style="width: 10mm">{{$item->unidad_medida}}</td>
                     <td style="width: 20mm; text-align: right">{{$item->precio}}</td>
-                    <td style="width: 15mm; text-align: right">{{floatval($item->detalle->porcentaje_descuento)}}%</td>
+                    <td style="width: 15mm; text-align: right">{{$item->detalle->tipo_descuento?floatval($item->detalle->porcentaje_descuento).'%':$item->detalle->descuento}}</td>
                     @if($documento->igv_incluido == 1)
                         <td style="width: 20mm; text-align: right">{{$item->detalle->total}}</td>
                     @else

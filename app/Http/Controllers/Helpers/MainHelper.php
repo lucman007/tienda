@@ -273,15 +273,29 @@ class MainHelper extends Controller
                     ->take(10)
                     ->get();
             } else {
-                $productos=Producto::where('eliminado',0)
-                    ->where(function ($query) use ($consulta) {
-                        $query->where('nombre','LIKE','%'.$consulta.'%')
-                            ->orWhere('cod_producto',$consulta)
-                            ->orWhere('presentacion','like','%'.$consulta.'%');
-                    })
-                    ->orderby($orderby,$sort)
-                    ->take(10)
+                $productosPorNombre = Producto::where('eliminado', 0)
+                    ->where('nombre', 'LIKE', '%' . $consulta . '%')
+                    ->orderby($orderby, $sort)
+                    ->limit(20)
                     ->get();
+
+                $productosPorPresentacion = Producto::where('eliminado', 0)
+                    ->where('presentacion', 'LIKE', '%' . $consulta . '%')
+                    ->orderby($orderby, $sort)
+                    ->limit(20)
+                    ->get();
+
+                $productosPorCodigo = Producto::where('eliminado', 0)
+                    ->where('cod_producto', $consulta)
+                    ->orderby($orderby, $sort)
+                    ->limit(20)
+                    ->get();
+
+                $productos = $productosPorNombre
+                    ->concat($productosPorPresentacion)
+                    ->concat($productosPorCodigo)
+                    ->unique()
+                    ->take(20);
             }
         }
 
@@ -295,6 +309,7 @@ class MainHelper extends Controller
             $producto->etiqueta = $descuento['etiqueta'];
             $producto->items_kit = json_decode($producto->items_kit, true);
             $producto->badge_stock = 'badge-success';
+            $producto->presentacion = Str::words($producto->presentacion,8,'...');
             if($producto->stock <= 0){
                 $producto->badge_stock = 'badge-danger';
             } else if($producto->stock <= $producto->stock_bajo){

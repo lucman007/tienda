@@ -365,6 +365,9 @@
                                                             </span>
                                                             <br>
                                                         @endforeach
+                                                        @if($venta->estado_credito)
+                                                                <a href="{{url('creditos/editar/'.$venta->idventa)}}"><span class="badge badge-secondary">{{$venta->estado_credito}}</span></a>
+                                                        @endif
                                                     </td>
                                                     <td>
                                                         <a target="_blank" href="/facturacion/documento/{{$venta->idventa}}">{{$venta->facturacion->serie.'-'.$venta->facturacion->correlativo}}</a>

@@ -47,7 +47,7 @@
                 </a>
             </div>
             <div style="width: 100%">
-                <div class="top-header" style="background: linear-gradient(180deg, rgba(116,34,132,1) 0%, rgba(82,34,108,1) 100%);">
+                <div class="top-header d-none d-lg-block" style="background: linear-gradient(180deg, rgba(116,34,132,1) 0%, rgba(82,34,108,1) 100%);">
                     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
                         <div class="row no-gutters">
                             <div class="col-sm-12">
@@ -59,7 +59,7 @@
                                 </div>
                                 @if(!(json_decode(cache('config')['conexion'], true)['esProduccion']))
                                     <div class="ml-2 alert alert-danger float-right isDemo" style="background-color: #f72639; color: white">
-                                        MODO DEMO ACTIVADO
+                                        MODO DEMO
                                     </div>
                                 @endif
                                 <div class="float-left float-md-right d-flex">
@@ -84,6 +84,24 @@
                                 <b-navbar-brand class="d-lg-none" href="/"><img src="{{url('images/logo-facilito.png')}}" alt=""></b-navbar-brand>
                                 <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
                                 <b-collapse id="nav-collapse" is-nav>
+                                    <div class="profile mt-2 mb-4 d-flex d-lg-none">
+                                        <div class="profile-avatar">
+                                            <img src="{{url('images/user-icon.png')}}" alt="">
+                                        </div>
+                                        <div class="profile-text ml-2">
+                                            ¡Hola! {{$usuario->nombre}}
+                                        </div>
+                                        <div>
+                                            <a href="{{url('/notificaciones')}}">
+                                                <panel-notificacion ref="panelNotificacion"></panel-notificacion>
+                                            </a>
+                                        </div>
+                                        @if(!(json_decode(cache('config')['conexion'], true)['esProduccion']))
+                                            <div class="ml-2 alert alert-danger float-right isDemo" style="background-color: #f72639; color: white">
+                                                DEMO
+                                            </div>
+                                        @endif
+                                    </div>
                                     <b-navbar-nav>
                                         <b-nav-item @cannot('Pedido: crear pedido') class="disabled" disabled @endcannot href="{{action('PedidoController@index')}}">
                                             <img src="{{url('images/menubar/icons/'.$ruta.'caja.png')}}" alt="">
@@ -144,6 +162,13 @@
                                             <b-dropdown-item @cannot('Mantenimiento: proveedores') class="disabled" disabled @endcannot href="{{action('ProveedorController@index')}}"><i class="fas fa-user-tie"></i> Proveedores</b-dropdown-item>
                                             <b-dropdown-item @cannot('Configuración') class="disabled" disabled style="display: none;" @endcannot href="{{action('ConfiguracionController@index')}}"><i class="fas fa-cogs"></i> Configuración</b-dropdown-item>
                                         </b-nav-item-dropdown>
+                                        <b-nav-item-dropdown left class="d-block d-lg-none">
+                                            <template v-slot:button-content>
+                                                <img src="{{url('images/menubar/icons/facilito/off.png')}}" alt="">
+                                                Cerrar sesion
+                                            </template>
+                                            <b-dropdown-item href="{{url('logout')}}"><i class="fas fa-power-off"></i> Cerrar sesion</b-dropdown-item>
+                                        </b-nav-item-dropdown>
                                     </b-navbar-nav>
                                 </b-collapse>
                             </b-navbar>
@@ -154,7 +179,7 @@
         </header>
     @else
     <header class="fixed-top">
-        <div class="top-header" style="{{json_decode(cache('config')['interfaz'], true)['top_header_style']}}">
+        <div class="top-header d-none d-lg-block" style="{{json_decode(cache('config')['interfaz'], true)['top_header_style']}}">
             <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
                 <div class="row no-gutters">
                     <div class="col-sm-12">
@@ -166,7 +191,7 @@
                         </div>
                         @if(!(json_decode(cache('config')['conexion'], true)['esProduccion']))
                             <div class="ml-2 alert alert-danger float-right isDemo" style="background-color: #f72639; color: white">
-                                MODO DEMO ACTIVADO
+                                MODO DEMO
                             </div>
                         @endif
                         <div class="float-left float-md-right d-flex">
@@ -191,6 +216,24 @@
                         <b-navbar-brand href="/"><img src="{{url('images/'.cache('config')['logo_sistema'])}}" alt=""></b-navbar-brand>
                         <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
                         <b-collapse id="nav-collapse" is-nav>
+                            <div class="profile mt-2 mb-4 d-flex d-lg-none">
+                                <div class="profile-avatar">
+                                    <img src="{{url('images/user-icon.png')}}" alt="">
+                                </div>
+                                <div class="profile-text ml-2">
+                                    ¡Hola! {{$usuario->nombre}}
+                                </div>
+                                <div>
+                                    <a href="{{url('/notificaciones')}}">
+                                        <panel-notificacion ref="panelNotificacion"></panel-notificacion>
+                                    </a>
+                                </div>
+                                @if(!(json_decode(cache('config')['conexion'], true)['esProduccion']))
+                                    <div class="ml-2 alert alert-danger float-right isDemo" style="background-color: #f72639; color: white">
+                                        DEMO
+                                    </div>
+                                @endif
+                            </div>
                             @if(json_decode(cache('config')['interfaz_pedidos'], true)['tipo'] == 'modo_4')
                                 <b-navbar-nav>
                                     <b-nav-item @cannot('Facturación: facturar') class="disabled" disabled @endcannot href="{{action('VentaController@registrar')}}">
@@ -254,6 +297,13 @@
                                         <b-dropdown-item @cannot('Mantenimiento: proveedores') class="disabled" disabled @endcannot href="{{action('ProveedorController@index')}}"><i class="fas fa-user-tie"></i> Proveedores</b-dropdown-item>
                                         <b-dropdown-item @cannot('Configuración') class="disabled" disabled style="display: none;" @endcannot href="{{action('ConfiguracionController@index')}}"><i class="fas fa-cogs"></i> Configuración</b-dropdown-item>
                                     </b-nav-item-dropdown>
+                                    <b-nav-item-dropdown left class="d-block d-lg-none">
+                                        <template v-slot:button-content>
+                                            <img src="{{url('images/menubar/icons/facilito/off.png')}}" alt="">
+                                            Cerrar sesion
+                                        </template>
+                                        <b-dropdown-item href="{{url('logout')}}"><i class="fas fa-power-off"></i> Cerrar sesion</b-dropdown-item>
+                                    </b-nav-item-dropdown>
                                 </b-navbar-nav>
                             @else
                                 <b-navbar-nav>
@@ -315,6 +365,13 @@
                                         <b-dropdown-item @cannot('Mantenimiento: empleados') class="disabled" disabled @endcannot href="{{action('TrabajadorController@index')}}"><i class="fas fa-users"></i> Empleados</b-dropdown-item>
                                         <b-dropdown-item @cannot('Mantenimiento: proveedores') class="disabled" disabled @endcannot href="{{action('ProveedorController@index')}}"><i class="fas fa-user-tie"></i> Proveedores</b-dropdown-item>
                                         <b-dropdown-item @cannot('Configuración') class="disabled" disabled style="display: none;" @endcannot href="{{action('ConfiguracionController@index')}}"><i class="fas fa-cogs"></i> Configuración</b-dropdown-item>
+                                    </b-nav-item-dropdown>
+                                    <b-nav-item-dropdown left class="d-block d-lg-none">
+                                        <template v-slot:button-content>
+                                            <img src="{{url('images/menubar/icons/facilito/off.png')}}" alt="">
+                                            Cerrar sesion
+                                        </template>
+                                        <b-dropdown-item href="{{url('logout')}}"><i class="fas fa-power-off"></i> Cerrar sesion</b-dropdown-item>
                                     </b-nav-item-dropdown>
                                 </b-navbar-nav>
                             @endif

@@ -4,15 +4,12 @@
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
             <div class="col-lg-9">
-                <h3 class="titulo-admin-1">Panel de notificaciones</h3>
+                <h3 class="titulo-admin-1">Notificaciones</h3>
             </div>
         </div>
         <div class="row">
             <div class="col-sm-12 mt-4">
                 <div class="card">
-                    <div class="card-header">
-                        Notificaciones
-                    </div>
                     <div class="card-body">
                         @forelse($notifications as $notification)
                             <div class="alert {{$notification->read_at==null?'alert-primary':'alert-secondary'}}" role="alert">

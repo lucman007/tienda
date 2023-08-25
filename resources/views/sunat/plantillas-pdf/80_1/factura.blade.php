@@ -78,7 +78,13 @@
             <tbody>
             @foreach($items as $item)
                 <tr>
-                    <td style="width: 38mm">{{$item->detalle->cantidad}} {{$item->nombre}} {{$item->detalle->descripcion}}</td>
+                    <td style="width: 38mm">
+                        {{$item->detalle->cantidad}} {{$item->nombre}} {{$item->detalle->descripcion}}
+                        @if($item->detalle->descuento > 0)
+                            <br>
+                            Dscto: {{$item->detalle->tipo_descuento?floatval($item->detalle->porcentaje_descuento).'%':$item->detalle->descuento}}
+                        @endif
+                    </td>
                     <td style="width: 13mm">{{$item->detalle->monto}}</td>
                     <td style="width: 13mm">{{$item->detalle->total}}</td>
                 </tr>
@@ -88,7 +94,7 @@
                     <td><br></td>
                 </tr>
                 <tr>
-                    <td colspan="8">Descuento global ({{$documento->facturacion->porcentaje_descuento_global*100}}):
+                    <td colspan="3">Descuento global ({{$documento->facturacion->porcentaje_descuento_global*100}}):
                         {{$documento->codigo_moneda}} {{$documento->facturacion->descuento_global}}</td>
                 </tr>
             @endif

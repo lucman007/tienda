@@ -1,39 +1,40 @@
 <template>
     <div>
-        <b-modal id="modal-descuento" ref="modal-descuento" size="sm" @hide="limpiar" @show="getData">
+        <b-modal id="modal-descuento" ref="modal-descuento" size="md" @hide="limpiar" @show="getData(item)">
             <template slot="modal-title">
                 {{titulo}}
             </template>
             <div class="container">
                 <div class="row">
-                    <div class="col-12">
-                        <b-form-checkbox @change="convertirPorcentaje" v-model="esDstoEnPorcentaje" switch class="mb-3">
-                            Descuento en porcentaje
-                        </b-form-checkbox>
-                    </div>
-                    <div class="col-12" v-show="!(global || esDstoEnPorcentaje)">
-                        <b-form-checkbox @change="calcularPorUnidad" v-model="porUnidad" switch class="mb-3">
-                            Descuento por cada unidad
-                        </b-form-checkbox>
-                    </div>
-                    <div class="col-12">
-                        <label>Monto descuento</label>
-                        <b-input-group :append="getSufix">
+                    <div class="col-md-5">
+                        <b-input-group>
                             <b-form-input @keyup="convertirPorcentaje(esDstoEnPorcentaje)" v-model="monto" type="number"
                                           onfocus="this.select()"></b-form-input>
+                            <template #append>
+                                <b-dropdown :text="tipo" variant="secondary" class="tipo_conversion">
+                                    <b-dropdown-item @click="convertir(false)">{{moneda}}</b-dropdown-item>
+                                    <b-dropdown-item @click="convertir(true)">%</b-dropdown-item>
+                                </b-dropdown>
+                            </template>
                         </b-input-group>
+                    </div>
+                    <div class="col-md-7 mt-4 mt-sm-1" v-show="!(global || esDstoEnPorcentaje)">
+                        <b-form-checkbox @change="calcularPorUnidad" v-model="convertirPorUnidad" switch class="mb-3">
+                            Descuento por cada unidad
+                        </b-form-checkbox>
                     </div>
                     <div class="col-12 mt-4">
                         <div class="alert alert-info text-center">
                             <label>Total descuento:</label>
-                            <b>{{moneda}} {{(Number(montoConvertido).toFixed(2))}}</b> <br> ({{Number(montoPorcentaje).toFixed(2)}}%)
+                            <b>{{moneda}} {{(Number(montoConvertido).toFixed(2))}}</b>
+                            <span v-show="tipo!='%'"> ({{Number(montoPorcentaje).toFixed(3)}}%)</span>
                         </div>
                     </div>
                 </div>
             </div>
             <template #modal-footer="{ ok, cancel}">
                 <b-button variant="secondary" @click="cancel()">Cancel</b-button>
-                <b-button variant="primary" @click="guardarDatos">OK</b-button>
+                <b-button variant="primary" @click="guardarDatos(true)">OK</b-button>
             </template>
         </b-modal>
     </div>
@@ -50,75 +51,84 @@
                 montoConvertido: '0.00',
                 montoPorcentaje: 0,
                 titulo: 'Descuento de item',
-                porUnidad:false
+                convertirPorUnidad:false,
+                esConIgv:false,
+                item_:{},
+                tipo:'%',
             }
         },
-        computed: {
-            getSufix(){
-                return this.esDstoEnPorcentaje ? '%' : this.moneda;
-            },
-        },
         methods: {
-            getData(){
-                let item = this.item;
+            getData(item){
+                this.item_ = item;
+                this.esConIgv = this.igv;
 
                 if(this.global){
                    this.titulo = 'Descuento global';
-                   item = this.dataDescuento;
+                   this.item_ = this.dataDescuento;
                 } else {
                     this.titulo = 'Descuento de item';
                 }
 
-                this.esDstoEnPorcentaje = !!item['tipo_descuento'];
-                this.montoConvertido = item['descuento'];
-                this.montoPorcentaje = item['porcentaje_descuento'];
-                this.porUnidad = !!item['descuento_por_und'];
+                this.esDstoEnPorcentaje = !!this.item_['tipo_descuento'];
+                this.montoConvertido = this.item_['descuento'];
+                this.montoPorcentaje = this.item_['porcentaje_descuento'];
+                this.convertirPorUnidad = !!this.item_['descuento_por_und'];
 
                 if (this.esDstoEnPorcentaje) {
-                    this.monto = item['porcentaje_descuento'];
-                    if(this.porUnidad){
-                        this.monto = item['porcentaje_descuento'] / item['cantidad'];
+                    this.tipo = '%';
+                    this.monto = this.item_['porcentaje_descuento'];
+                    if(this.convertirPorUnidad){
+                        this.monto = this.item_['porcentaje_descuento'] / this.item_['cantidad'];
                     }
                 } else {
-                    this.monto = item['descuento'];
-                    if(this.porUnidad){
-                        this.monto = item['descuento'] / item['cantidad'];
+                    this.tipo = this.moneda;
+                    this.monto = this.item_['descuento'];
+                    if(this.convertirPorUnidad){
+                        this.monto = this.item_['descuento'] / this.item_['cantidad'];
                     }
                 }
-                this.convertirPorcentaje(this.esDstoEnPorcentaje);
+                this.convertirPorcentaje();
             },
-            convertirPorcentaje(val){
+            convertir(esDstoEnPorcentaje){
+                this.esDstoEnPorcentaje = esDstoEnPorcentaje;
+                this.tipo = esDstoEnPorcentaje?'%':this.moneda;
+                this.convertirPorcentaje();
+            },
+            convertirPorcentaje(){
                 let subtotal = 0;
                 let monto = Number(this.monto);
-                if(val){
-                    this.porUnidad = false;
+                if(this.esDstoEnPorcentaje){
+                    this.convertirPorUnidad = false;
                 }
                 if(this.global){
                     subtotal = this.dataDescuento['gravadas'];
-                    this.montoConvertido = val ? (subtotal * monto / 100):monto;
-                    this.montoPorcentaje = val ? monto:monto / subtotal * 100;
+                    this.montoConvertido = this.esDstoEnPorcentaje ? (subtotal * monto / 100):monto;
+                    this.montoPorcentaje = this.esDstoEnPorcentaje ? monto:monto / subtotal * 100;
                 } else {
-                    if(this.porUnidad){
-                        subtotal = this.igv ? this.item['precio'] / 1.18 : this.item['precio'];
-                        this.montoConvertido = monto * this.item['cantidad'];
-                        this.montoPorcentaje = this.montoConvertido / (subtotal * this.item['cantidad']) * 100;
+
+                    if(this.convertirPorUnidad){
+                        subtotal = this.esConIgv ? this.item_['precio'] / 1.18 : this.item_['precio'];
+                        this.montoConvertido = monto * this.item_['cantidad'];
+                        this.montoPorcentaje = this.montoConvertido / (subtotal * this.item_['cantidad']) * 100;
                     } else{
-                        subtotal = (this.igv ? this.item['precio'] / 1.18 : this.item['precio']) * this.item['cantidad'];
-                        this.montoConvertido = val ? (subtotal * monto / 100):monto;
-                        this.montoPorcentaje = val ? monto:monto / subtotal * 100;
+                        subtotal = (this.esConIgv ? this.item_['precio'] / 1.18 : this.item_['precio']) * this.item_['cantidad'];
+                        this.montoConvertido = this.esDstoEnPorcentaje ? (subtotal * monto / 100):monto;
+                        this.montoPorcentaje = this.esDstoEnPorcentaje ? monto:monto / subtotal * 100;
+
                     }
                 }
             },
             calcularPorUnidad(val){
-                this.porUnidad = val;
+                this.convertirPorUnidad = val;
                 this.convertirPorcentaje(false)
             },
-            guardarDatos(){
+            guardarDatos(calcular){
                 let data = {
                     monto: this.montoConvertido,
-                    porcentaje: this.montoPorcentaje,
+                    porcentaje: (this.montoPorcentaje).toFixed(3),
                     tipo_descuento: this.esDstoEnPorcentaje,
-                    porUnidad: this.porUnidad
+                    porUnidad: this.convertirPorUnidad,
+                    recalcular: calcular
                 };
                 this.$emit('actualizar', data);
                 this.$refs['modal-descuento'].hide()
@@ -127,7 +137,7 @@
                 this.monto = '0';
                 this.montoConvertido = '0.00';
                 this.esDstoEnPorcentaje = false;
-                this.porUnidad = false;
+                this.convertirPorUnidad = false;
             }
         }
     }
@@ -140,5 +150,11 @@
     }
     input[type=number] {
         -moz-appearance: textfield;
+    }
+    .tipo_conversion ul{
+        min-width: 30px !important;
+    }
+    .tipo_conversion ul li a{
+        padding: 8px 30px 8px 30px !important;
     }
 </style>

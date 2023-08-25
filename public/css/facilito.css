@@ -1077,6 +1077,8 @@ label{
     background: white;
     width: 100%;
     box-shadow: 0px 3px 13px 1px rgb(0 0 0 / 17%);
+    overflow-y: auto;
+    max-height: 340px;
 }
 
 .header-platos{
@@ -1373,7 +1375,6 @@ th a .icon-hover-active{
 }
 .navbar button {
     margin: 5px 0;
-    background: black;
 }
 
 input::-webkit-outer-spin-button,
@@ -1442,6 +1443,44 @@ table tr td, table tr th{
     color: #15C8B3;
 }
 
+.lista-afectacion .list-group-item{
+    cursor: pointer;
+}
+
+.texto-desc {
+    overflow: hidden;
+}
+
+.profile{
+    display: flex;
+    align-items: center;
+}
+
+.profile-avatar{
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    background: gray;
+}
+
+.profile-avatar img{
+    width: 100%;
+    border-radius: 10px;
+}
+
+.profile-text{
+    color: white;
+    font-size: 18px;
+}
+
+.navbar-toggler{
+    border:0;
+}
+
+.navbar button:focus {
+    outline: none !important;
+}
+
 /*RESPONSIVE*/
 
 @media (min-width: 576px) {
@@ -1451,6 +1490,49 @@ table tr td, table tr th{
 }
 
 @media (max-width: 992px) {
+    .middle-header .nav-item ul {
+        background: rgba(0,0,0,0.3);
+    }
+
+    .navbar{
+        max-height: 100vh;
+        overflow-y: auto;
+    }
+    .middle-header .nav-item a {
+        font-size: 18px;
+        padding: 10px;
+        padding-left: 25px;
+    }
+
+    .middle-header .nav-item a {
+        font-size: 18px;
+        padding: 10px;
+        padding-left: 25px;
+    }
+
+    .middle-header .nav-item ul li a {
+        font-size: 18px !important;
+        padding: 10px 0 10px 35px !important;
+    }
+
+    .middle-header .nav-item img {
+        margin-right: 20px;
+    }
+
+    .middle-header .dropdown-item {
+        color: #ececec !important;
+    }
+
+    .middle-header{
+        padding: 5px 0;
+    }
+
+    .middle-header .navbar .navbar-collapse.show{
+        padding-bottom: 450px;
+    }
+    .middle-header .navbar .navbar-collapse .dropdown-menu li a{
+        margin-left: 10px;
+    }
     .wrapper{
         padding: 120px 0 0 0px;
     }
@@ -1505,27 +1587,6 @@ table tr td, table tr th{
     }
     #modal-agregar-producto .modal-dialog,#modal-agregar-producto-alt .modal-dialog {
         max-width: none;
-    }
-    .middle-header .nav-item a {
-        font-size: 18px;
-        padding: 10px;
-    }
-
-    .middle-header .nav-item ul li a {
-        font-size: 18px !important;
-        padding: 10px 0 10px 35px !important;
-    }
-
-    .middle-header .nav-item ul {
-        background: #2a2d2f;
-    }
-
-    .middle-header .nav-item img {
-        margin-right: 20px;
-    }
-
-    .middle-header .dropdown-item {
-        color: #ececec !important;
     }
 
     #liveclock {

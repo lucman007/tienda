@@ -217,6 +217,20 @@ class ComprobanteController extends Controller
                         $item->badge_class_guia='badge-danger';
                 }
 
+                //pago credito
+                $suma_cuotas = 0;
+                $cuotas = $item->pago;
+                foreach ($cuotas as $pago){
+                    if($pago->estado == 2){
+                        $suma_cuotas +=  $pago->monto;
+                    }
+                    if($suma_cuotas >= $item->total_venta){
+                        if($item->facturacion->codigo_tipo_documento != '07' || $item->facturacion->codigo_tipo_documento != '08'){
+                            $item->estado_credito = 'PAGADO';
+                        }
+                    }
+                }
+
             }
 
             $ventas->appends($_GET)->links();

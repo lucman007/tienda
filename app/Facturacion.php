@@ -38,6 +38,7 @@ class Facturacion extends Model
         'porcentaje_descuento_global',
         'descuento_global',
         'base_descuento_global',
+        'tipo_descuento_global',
         'motivo_baja',
         'idresumen',
         'retencion',

@@ -83,7 +83,7 @@
                     <td style="width: 18mm">{{$item->cantidad}}</td>
                     <td style="width: 10mm">{{$item->unidad_medida}}</td>
                     <td style="width: 20mm; text-align: right">{{$item->precio}}</td>
-                    <td style="width: 15mm; text-align: right">{{$item->descuento}}</td>
+                    <td style="width: 15mm; text-align: right">{{$item->detalle->tipo_descuento?floatval($item->detalle->porcentaje_descuento).'%':$item->detalle->descuento}}</td>
                     @if($documento->igv_incluido == 1)
                         <td style="width: 20mm; text-align: right">{{$item->detalle->total}}</td>
                     @else

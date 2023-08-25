@@ -260,6 +260,7 @@ class VentaController extends Controller
             $productos=$venta->productos;
             $venta->cliente->persona;
             $venta->facturacion;
+            $venta->facturacion->tipo_descuento_global = $venta->facturacion->tipo_descuento;
 
             if($venta->tipo_pago == 2){
                 //Si es crédito
@@ -275,18 +276,18 @@ class VentaController extends Controller
 
             }
 
-
             foreach ($productos as $producto) {
 
                 $producto->tipoAfectacion = $producto->detalle->afectacion;
                 $producto->porcentaje_descuento = $producto->detalle->porcentaje_descuento;
                 $producto->descuento = $producto->detalle->descuento;
+                $producto->descuento_por_und = $producto->detalle->descuento_por_und;
+                $producto->tipo_descuento = $producto->detalle->tipo_descuento;
                 $producto->stock = $producto->inventario()->first()->saldo;
                 $producto->precio = $producto->detalle->monto;
                 $producto->cantidad = $producto->detalle->cantidad;
                 $producto->presentacion = strip_tags($producto->detalle->descripcion);
                 $producto->subtotal = $producto->detalle->subtotal;
-                $producto->igv = $producto->detalle->igv;
                 $producto->igv = $producto->detalle->igv;
                 $producto->total = $producto->detalle->total;
                 $producto->items_kit = json_decode($producto->detalle->items_kit, true);
@@ -419,6 +420,7 @@ class VentaController extends Controller
             $facturacion->valor_venta_bruto = $request->subtotal;
             $facturacion->porcentaje_descuento_global = $request->porcentaje_descuento_global / 100;
             $facturacion->descuento_global = $request->monto_descuento_global;
+            $facturacion->tipo_descuento = $request->tipo_descuento;
             $facturacion->base_descuento_global = $request->base_descuento_global;
             $facturacion->estado = 'PENDIENTE';
 
@@ -474,6 +476,8 @@ class VentaController extends Controller
                     $detalle['num_item'] = $i;
                     $detalle['cantidad'] = trim($item['cantidad']);
                     $detalle['monto'] = trim($item['precio']);
+                    $detalle['tipo_descuento']=$item['tipo_descuento'];
+                    $detalle['descuento_por_und']=$item['descuento_por_und'];
                     $detalle['descuento'] = trim($item['descuento']);
                     $detalle['descripcion'] = nl2br(trim($item['presentacion']));
                     $detalle['afectacion'] = $item['tipoAfectacion'];
@@ -715,7 +719,9 @@ class VentaController extends Controller
                 $total = round($producto->detalle->monto * $producto->detalle->cantidad*1.18, 2);
                 $producto->tipoAfectacion = '10';
                 $producto->porcentaje_descuento = floatval($producto->detalle->porcentaje_descuento);
-                $producto->descuento = '0.00';
+                $producto->descuento = $producto->detalle->descuento;
+                $producto->descuento_por_und = $producto->detalle->descuento_por_und;
+                $producto->tipo_descuento = $producto->detalle->tipo_descuento;
                 $producto->precio = $producto->detalle->monto;
                 $producto->cantidad = $producto->detalle->cantidad;
                 $producto->presentacion = strip_tags($producto->detalle->descripcion);
@@ -731,7 +737,8 @@ class VentaController extends Controller
             $presupuesto->cliente->direccion=$presupuesto->cliente->persona->direccion;
             $presupuesto->facturacion=new Facturacion();
             $presupuesto->facturacion->porcentaje_descuento_global=floatval($presupuesto->porcentaje_descuento / 100);
-            $presupuesto->facturacion->descuento_global='0.00';
+            $presupuesto->facturacion->descuento_global=$presupuesto->descuento;
+            $presupuesto->facturacion->tipo_descuento_global=$presupuesto->tipo_descuento;
             $presupuesto->facturacion->base_descuento_global='0.00';
             $presupuesto->facturacion->valor_venta_bruto=round($suma_total/1.18,2);
             $presupuesto->facturacion->total_exoneradas='0.00';

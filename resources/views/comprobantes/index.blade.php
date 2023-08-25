@@ -186,6 +186,9 @@
                                                         {{mb_strtoupper($tipo_pago[$index]['label'])}} @if(count($pagos)>1)({{$pago->monto}})@endif <br>
                                                     @endif
                                                 @endforeach
+                                                @if($venta->estado_credito)
+                                                    <a href="{{url('creditos/editar/'.$venta->idventa)}}"><span class="badge badge-secondary">{{$venta->estado_credito}}</span></a>
+                                                @endif
                                             </td>
                                             <td>{{$venta->facturacion->oc_relacionada}}</td>
                                             <td><span class="badge {{$venta->badge_class_documento}} badge_doc">{{$venta->facturacion->serie}}-{{$venta->facturacion->correlativo}}</span><br>

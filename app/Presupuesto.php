@@ -44,7 +44,7 @@ class Presupuesto extends Model
     {
         return $this->belongsToMany(Producto::class, 'presupuesto_detalle', 'idpresupuesto', 'idproducto')
             ->as('detalle')
-            ->withPivot('num_item', 'cantidad', 'monto', 'descripcion', 'descuento', 'porcentaje_descuento','tipo_descuento','descuento_por_und', 'producto_nombre');
+            ->withPivot('num_item', 'cantidad', 'monto', 'descripcion', 'descuento', 'porcentaje_descuento','tipo_descuento','descuento_por_und');
     }
 
     public function trabajador()

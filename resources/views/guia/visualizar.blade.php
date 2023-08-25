@@ -69,8 +69,7 @@
                                 <tr v-for="(producto,index) in productosSeleccionados" :key="producto.index">
                                     <td></td>
                                     <td style="display:none">@{{producto.idproducto}}</td>
-                                    <td v-if="producto.idproducto!=-1">@{{ producto.nombre }}</td>
-                                    <td v-if="producto.idproducto==-1">@{{ producto.detalle.producto_nombre }}</td>
+                                    <td>@{{ producto.nombre }}</td>
                                     <td style="white-space: pre">@{{ producto.detalle.descripcion}}</td>
                                     <td>@{{ producto.detalle.cantidad }}</td>
                                     <td>
