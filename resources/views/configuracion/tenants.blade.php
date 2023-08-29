@@ -1,5 +1,5 @@
 
-<div class="col-lg-6">
+<div class="col-lg-6 mb-4 mb-lg-0">
     <form action="tenant/crear-tenant" method="GET" autocomplete="off">
         <div class="input-group" id="buscador">
             <input type="text" class="form-control" name="dominio" placeholder="empresa.facturacion.xyz">
@@ -14,7 +14,7 @@
         @endif
     </form>
 </div>
-<div class="col-lg-6">
+<div class="col-lg-6 mb-4 mb-lg-0">
     <form action="tenant/eliminar-tenant" method="GET" autocomplete="off">
         <div class="input-group" id="buscador">
             <input type="text" class="form-control" name="dominio" placeholder="empresa.facturacion.xyz">
@@ -29,7 +29,7 @@
         @endif
     </form>
 </div>
-<div class="col-lg-6 my-5">
+<div class="col-lg-6 mb-4 my-lg-5">
     <form action="tenant/config-cache" method="GET" autocomplete="off">
         <div class="input-group" id="buscador">
             <input type="text" class="form-control" name="dominio" placeholder="empresa.facturacion.xyz">
@@ -44,7 +44,7 @@
         @endif
     </form>
 </div>
-<div class="col-lg-6 my-5">
+<div class="col-lg-6 mb-4 my-lg-5">
     <form action="tenant/mostrar-tenants" method="GET" autocomplete="off">
         <b-button variant="primary" type="submit">
             <i class="fas fa-list"></i> Mostrar inquilinos

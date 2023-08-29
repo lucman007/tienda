@@ -12,7 +12,7 @@
         <div class="row">
             <div class="col-lg-10">
                 <div class="row">
-                    <div class="col-lg-3">
+                    <div class="col-lg-3 mb-2 mb-lg-0">
                         <b-input-group>
                             <b-input-group-prepend>
                                 <b-input-group-text>

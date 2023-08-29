@@ -6,7 +6,7 @@
         <div class="row">
             <div class="col-lg-8">
                 <h3 class="titulo-admin-1">Cotizaciones</h3>
-                <b-button href="{{action('PresupuestoController@nuevo_presupuesto')}}" class="mr-2"  variant="primary"><i class="fas fa-plus"></i> Nueva cotización</b-button>
+                <b-button href="{{action('PresupuestoController@nuevo_presupuesto')}}" class="mr-2 mb-2 mb-lg-2"  variant="primary"><i class="fas fa-plus"></i> Nueva cotización</b-button>
             </div>
             <div class="col-lg-4">
                 @include('presupuesto.buscador')

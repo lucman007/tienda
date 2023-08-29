@@ -1,11 +1,12 @@
 @extends('layouts.main')
 @section('titulo', 'Proveedores')
 @section('contenido')
+    @php $agent = new \Jenssegers\Agent\Agent() @endphp
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
             <div class="col-lg-9">
                 <h3 class="titulo-admin-1">Proveedores</h3>
-                <b-button v-b-modal.modal-nuevo-proveedor variant="primary"><i class="fas fa-plus"></i> Nuevo proveedor</b-button>
+                <b-button class="mb-2 mb-lg-2" v-b-modal.modal-nuevo-proveedor variant="primary"><i class="fas fa-plus"></i> Nuevo proveedor</b-button>
             </div>
             <div class="col-lg-3">
                 @include('proveedores.buscador')
@@ -45,7 +46,7 @@
                                 </thead>
                                 <tbody>
                                 @foreach($proveedores as $proveedor)
-                                    <tr>
+                                    <tr @if(!$agent->isDesktop()) @click="editarProveedor({{$proveedor->idproveedor}})" @endif>
                                         @php
                                         $cuentas = $proveedor->cuentas?json_decode($proveedor->cuentas, true):false;
                                         @endphp
@@ -65,7 +66,7 @@
                                         <td>{{$proveedor->telefono_2}}</td>
                                         <td>{{$proveedor->correo}}</td>
                                         <td>{{$proveedor->web}}</td>
-                                        <td class="botones-accion">
+                                        <td @click.stop class="botones-accion">
                                             <button @click="editarProveedor({{$proveedor->idproveedor}})" class="btn btn-success" title="Editar proveedor"><i
                                                         class="fas fa-edit"></i></button>
                                             <button @click="borrarProveedor({{$proveedor->idproveedor}})" class="btn btn-danger" title="Eliminar"><i class="fas fa-trash-alt"></i>

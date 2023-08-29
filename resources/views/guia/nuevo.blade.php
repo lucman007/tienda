@@ -201,21 +201,21 @@
                         Detalle
                     </div>
                     <div class="card-body">
-                        <div class="row mt-4">
+                        <div class="row">
                             @if(json_decode(cache('config')['interfaz'], true)['buscador_clientes'] == 1)
-                                <div class="col-lg-9">
+                                <div class="col-lg-6 order-2 order-lg-1">
                                     <autocomplete-cliente v-on:agregar_cliente="agregarCliente" v-on:borrar_cliente="borrarCliente" ref="suggestCliente"></autocomplete-cliente>
                                 </div>
-                                <div class="col-lg-3 no-gutters">
+                                <div class="col-lg-6 order-1 order-lg-2">
                                     <b-button v-b-modal.modal-nuevo-cliente
-                                              class="mb-4 mt-2 mt-lg-0 float-right float-lg-left" variant="primary"><i class="fas fa-plus"
+                                              class="mb-4" variant="primary"><i class="fas fa-plus"
                                                                                                                        v-show="!mostrarSpinnerCliente"></i>
                                         <b-spinner v-show="mostrarSpinnerCliente" small label="Loading..."></b-spinner>
                                         Nuevo cliente
                                     </b-button>
                                 </div>
                             @else
-                                <div class="col-lg-9">
+                                <div class="col-lg-12">
                                     <b-button v-b-modal.modal-cliente
                                               class="mb-4 mr-2" variant="primary"><i class="fas fa-search-plus"
                                                                                      v-show="!mostrarSpinnerCliente"></i>
@@ -229,7 +229,7 @@
                                         Nuevo cliente
                                     </b-button>
                                 </div>
-                                <div class="col-lg-8">
+                                <div class="col-lg-6">
                                     <input type="text" v-model="nombreCliente" class="form-control mb-2"
                                            placeholder="Cliente" disabled readonly>
                                 </div>
@@ -237,16 +237,16 @@
                         </div>
                         <div class="row mt-4">
                             @if(json_decode(cache('config')['interfaz'], true)['buscador_productos'] == 1)
-                                <div class="col-lg-7">
+                                <div class="col-lg-6 buscar_producto order-2 order-lg-1">
                                     <autocomplete ref="suggest" v-on:agregar_producto="agregarProducto"></autocomplete>
                                 </div>
-                                <div class="col-lg-3">
-                                    <b-button class="mb-4 mt-2 mt-lg-0 float-right float-lg-left"  v-b-modal.modal-nuevo-producto
+                                <div class="col-lg-3 order-1 order-lg-2">
+                                    <b-button v-b-modal.modal-nuevo-producto class="float-right float-lg-left"
                                               variant="primary"><i class="fas fa-plus" v-show="!mostrarSpinnerProducto"></i>
                                         <b-spinner v-show="mostrarSpinnerProducto" small label="Loading..."></b-spinner>
                                         Nuevo producto
                                     </b-button>
-                                    <b-button class="mb-4 mt-2 ml-1 mt-lg-0 float-left" :disabled="disabledNr" @click="agregar_nr('00NR')"
+                                    <b-button class="mb-4 ml-1 mt-lg-0 float-left" :disabled="disabledNr" @click="agregar_nr('00NR')"
                                               variant="success"><i class="fas fa-plus"></i>
                                         <b-spinner v-show="mostrarSpinnerProducto" small label="Loading..."></b-spinner>
                                         NR

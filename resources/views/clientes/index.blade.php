@@ -6,9 +6,9 @@
         <div class="row">
             <div class="col-lg-9">
                 <h3 class="titulo-admin-1">Clientes</h3>
-                <b-button class="mr-2" v-b-modal.modal-nuevo-cliente variant="primary"><i class="fas fa-plus"></i> Nuevo cliente</b-button>
-                <b-button class="mr-2" v-b-modal.modal-2 variant="primary"><i class="fas fa-file-import"></i> Importar</b-button>
-                <b-button href="{{action('ClienteController@exportar')}}" variant="primary"><i class="fas fa-file-export"></i> Exportar...</b-button>
+                <b-button class="mr-2 mb-2 mb-lg-0" v-b-modal.modal-nuevo-cliente variant="primary"><i class="fas fa-plus"></i> Nuevo cliente</b-button>
+                <b-button class="mr-2 mb-2 mb-lg-0" v-b-modal.modal-2 variant="primary"><i class="fas fa-file-import"></i> Importar</b-button>
+                <b-button class="mb-2 mb-lg-0" href="{{action('ClienteController@exportar')}}" variant="primary"><i class="fas fa-file-export"></i> Exportar...</b-button>
             </div>
             <div class="col-lg-3">
                 @include('clientes.buscador')

@@ -4,7 +4,7 @@
     @php $agent = new \Jenssegers\Agent\Agent() @endphp
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
-            <div class="col-lg-9">
+            <div class="col-lg-9 mb-2 mb-lg-2">
                 <h3 class="titulo-admin-1">Categorias</h3>
                 <b-button v-b-modal.modal-1 variant="primary"><i class="fas fa-plus"></i> Nueva categoria</b-button>
             </div>

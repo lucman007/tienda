@@ -9,7 +9,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-lg-2">
+            <div class="col-lg-2 mb-2 mb-lg-0">
                 <b-dropdown variant="primary">
                     <template #button-content>
                         <i class="far fa-file-alt"></i> Comprobantes
@@ -24,7 +24,7 @@
             </div>
             <div class="col-lg-10">
                 <div class="row">
-                    <div class="col-lg-3">
+                    <div class="col-lg-3 mb-2 mb-lg-0">
                         <b-input-group>
                             <b-input-group-prepend>
                                 <b-input-group-text>
@@ -41,7 +41,7 @@
                             </select>
                         </b-input-group>
                     </div>
-                    <div class="col-lg-2" v-show="filtro=='documento'">
+                    <div class="col-lg-2 mb-2 mb-lg-0" v-show="filtro=='documento'">
                         <b-input-group>
                             <b-input-group-prepend>
                                 <b-input-group-text>
@@ -58,7 +58,7 @@
                             </select>
                         </b-input-group>
                     </div>
-                    <div class="col-lg-2" v-show="filtro=='tipo-de-pago'">
+                    <div class="col-lg-2 mb-2 mb-lg-0" v-show="filtro=='tipo-de-pago'">
                         <b-input-group>
                             <b-input-group-prepend>
                                 <b-input-group-text>
@@ -76,7 +76,7 @@
                             </select>
                         </b-input-group>
                     </div>
-                    <div class="col-lg-2" v-show="filtro=='moneda'">
+                    <div class="col-lg-2 mb-2 mb-lg-0" v-show="filtro=='moneda'">
                         <b-input-group>
                             <b-input-group-prepend>
                                 <b-input-group-text>
@@ -90,7 +90,7 @@
                             </select>
                         </b-input-group>
                     </div>
-                    <div class="col-lg-2" v-show="filtro=='estado'">
+                    <div class="col-lg-2 mb-2 mb-lg-0" v-show="filtro=='estado'">
                         <b-input-group>
                             <b-input-group-prepend>
                                 <b-input-group-text>
@@ -106,7 +106,7 @@
                             </select>
                         </b-input-group>
                     </div>
-                    <div class="col-lg-5 form-group" v-show="filtro=='cliente'">
+                    <div class="col-lg-5 form-group mb-2 mb-lg-0" v-show="filtro=='cliente'">
                         <b-input-group>
                             <b-input-group-prepend>
                                 <b-input-group-text>

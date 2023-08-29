@@ -17,10 +17,10 @@
         <div class="row">
             <div class="col-lg-9">
                 <h3 class="titulo-admin-1">Productos</h3>
-                <b-button class="mr-2" v-b-modal.modal-nuevo-producto @click="tipo_producto = 1" variant="primary"><i class="fas fa-plus"></i> Nuevo</b-button>
-                <b-button class="mr-2" v-b-modal.modal-2 variant="primary"><i class="fas fa-file-import"></i> Importar</b-button>
-                <b-button class="mr-2" href="{{action('ProductoController@exportar')}}" variant="primary"><i class="fas fa-file-export"></i> Exportar...</b-button>
-                <b-button class="mr-2" v-b-modal.modal-nuevo-producto @click="tipo_producto = 3" variant="primary"><i class="fas fa-cube"></i> Kit de productos
+                <b-button class="mr-2 mb-2 mb-lg-0" v-b-modal.modal-nuevo-producto @click="tipo_producto = 1" variant="primary"><i class="fas fa-plus"></i> Nuevo</b-button>
+                <b-button class="mr-2 mb-2 mb-lg-0" v-b-modal.modal-2 variant="primary"><i class="fas fa-file-import"></i> Importar</b-button>
+                <b-button class="mr-2 mb-2 mb-lg-0" href="{{action('ProductoController@exportar')}}" variant="primary"><i class="fas fa-file-export"></i> Exportar...</b-button>
+                <b-button class="mr-2 mb-2 mb-lg-0" v-b-modal.modal-nuevo-producto @click="tipo_producto = 3" variant="primary"><i class="fas fa-cube"></i> Kit de productos
                 </b-button>
 {{--
                 <b-button class="mr-2" href="{{action('ProductoController@exportar')}}" variant="success"><i class="fas fa-edit"></i> Edición múltiple</b-button>

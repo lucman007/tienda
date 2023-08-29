@@ -1,6 +1,7 @@
 @extends('layouts.main')
 @section('titulo', 'Gestionar créditos')
 @section('contenido')
+    @php $agent = new \Jenssegers\Agent\Agent() @endphp
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
             <div class="col-lg-9">
@@ -45,7 +46,7 @@
                                 <tbody>
                                 @if(count($creditos) > 0)
                                     @foreach($creditos as $venta)
-                                        <tr>
+                                        <tr @if(!$agent->isDesktop()) @click="abrirCredito({{$venta->idventa}})" @endif>
                                             <td></td>
                                             <td>{{$venta->idventa}}</td>
                                             <td style="width: 15%">{{date("d-m-Y",strtotime($venta->fecha))}}</td>
@@ -57,7 +58,7 @@
                                                 {{$venta->guia_relacionada['correlativo']}}
                                             </td>
                                             <td><span class="badge {{$venta->estado_badge_class}}">{{$venta->estado}}</span></td>
-                                            <td class="botones-accion" style="width: 10%">
+                                            <td @click.stop class="botones-accion" style="width: 10%">
                                                 <a href="{{url('creditos/editar').'/'.$venta->idventa}}">
                                                     <button class="btn btn-success" title="Abrir">
                                                         <i class="fas fa-edit"></i>
@@ -90,7 +91,9 @@
             data: {
             },
             methods: {
-
+                abrirCredito(idventa){
+                    location.href = '/creditos/editar'+'/'+idventa;
+                }
             }
 
         });

@@ -1,11 +1,12 @@
 @extends('layouts.main')
 @section('titulo', 'Requerimientos')
 @section('contenido')
+    @php $agent = new \Jenssegers\Agent\Agent() @endphp
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
             <div class="col-lg-9">
                 <h3 class="titulo-admin-1">Requerimientos</h3>
-                <b-button href="{{action('RequerimientoController@nuevo_requerimiento')}}" class="mr-2" variant="primary"><i class="fas fa-plus"></i> Nueva orden de compra</b-button>
+                <b-button href="{{action('RequerimientoController@nuevo_requerimiento')}}" class="mr-2 mb-2 mb-lg-0" variant="primary"><i class="fas fa-plus"></i> Nueva orden de compra</b-button>
             </div>
             <div class="col-lg-3">
                 @include('requerimientos.buscador')
@@ -42,7 +43,7 @@
                                 <tbody>
                                 @if(count($requerimientos))
                                     @foreach($requerimientos as $requerimiento)
-                                        <tr>
+                                        <tr @if(!$agent->isDesktop()) @click="abrirRequerimiento({{$requerimiento->idrequerimiento}})" @endif>
                                             <td></td>
                                             <td>{{$requerimiento->correlativo}}</td>
                                             <td>{{date("d-m-Y H:i:s",strtotime($requerimiento->fecha_requerimiento))}}</td>
@@ -51,7 +52,7 @@
                                             <td><p class="badge"
                                                    :class="['<?php echo $requerimiento->estado ?>'=='PENDIENTE' ? 'badge-warning' : 'badge-success']">{{$requerimiento->estado}}</p>
                                             </td>
-                                            <td class="botones-accion">
+                                            <td @click.stop class="botones-accion">
                                                 <a href="{{url('requerimientos/editar').'/'.$requerimiento->idrequerimiento}}">
                                                     <button class="btn btn-success" title="Abrir requerimiento">
                                                         <i class="fas fa-folder-open"></i>
@@ -100,6 +101,9 @@
                                 console.log(error);
                             });
                     }
+                },
+                abrirRequerimiento(idrequerimiento){
+                    location.href = '/requerimientos/editar'+'/'+idrequerimiento;
                 }
             }
 

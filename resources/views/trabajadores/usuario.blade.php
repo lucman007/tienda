@@ -30,15 +30,13 @@
                             </div>
                             <div v-show="existe_password" class="col-lg-4 form-group">
                                 <label>Contraseña</label>
-                                <div class="row no-gutters">
-                                    <div class="col-lg-9">
-                                        <input :disabled="password=='password-text'" type="password" v-model="password" name="password" placeholder="Contraseña"
-                                               class="form-control">
-                                    </div>
-                                    <div class="col-lg-3">
+                                <b-input-group>
+                                    <input :disabled="password=='password-text'" type="password" v-model="password" name="password" placeholder="Contraseña"
+                                           class="form-control">
+                                    <b-input-group-append>
                                         <b-button variant="primary" @click="editar_password"><i class="fas fa-edit"></i></b-button>
-                                    </div>
-                                </div>
+                                    </b-input-group-append>
+                                </b-input-group>
                             </div>
                             <div class="col-lg-4 form-group">
                                 <label for="tipo_acceso">Nivel de acceso:</label>

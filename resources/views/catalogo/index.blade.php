@@ -6,7 +6,7 @@
         <div class="row">
             <div class="col-lg-8">
                 <h3 class="titulo-admin-1">Catálogos</h3>
-                <b-button href="{{url('catalogos/nuevo')}}" class="mr-2"  variant="primary"><i class="fas fa-plus"></i> Nuevo catálogo</b-button>
+                <b-button href="{{url('catalogos/nuevo')}}" class="mr-2 mb-2 mb-lg-0"  variant="primary"><i class="fas fa-plus"></i> Nuevo catálogo</b-button>
             </div>
             <div class="col-lg-4">
                 @include('catalogo.buscador')

@@ -11,7 +11,7 @@
                 <b-button href="/reportes/caja" class="btn btn-success float-right" title="Reportes">
                     <i class="fas fa-chart-line"></i> Ir a reportes
                 </b-button>
-                <b-input-group class="d-inline-flex float-right w-50 mr-3">
+                <b-input-group class="d-inline-flex float-left float-md-right w-50 mr-3">
                     <b-input-group-prepend>
                         <b-input-group-text>
                             <i class="fas fa-calendar"></i>
@@ -78,12 +78,12 @@
                                             @endif
                                             <div class="col-lg-12">
                                                 <div class="row">
-                                                    <div class="col-lg-6">
+                                                    <div class="col-lg-6 d-flex justify-content-center justify-content-lg-start mb-2 mb-lg-0">
                                                         @if($caja && !$caja->estado)
                                                             <b-button @click="editarApertura" class="btn btn-success"><i class="fas fa-edit"></i> Editar apertura</b-button>
                                                         @endif
                                                     </div>
-                                                    <div class="col-lg-6">
+                                                    <div class="col-lg-6 d-flex justify-content-between justify-content-lg-end">
                                                         @if(!$caja || ($caja && $caja->estado))
                                                             <b-form-checkbox v-model="detallado" switch size="lg" class="float-right">
                                                                 <p style="font-size: 1rem;">Detallado</p>

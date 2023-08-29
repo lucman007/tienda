@@ -6,7 +6,7 @@
         <div class="row">
             <div class="col-lg-9">
                 <h3 class="titulo-admin-1">Trabajadores</h3>
-                <b-button v-b-modal.modal-1 variant="primary"><i class="fas fa-plus"></i> Nuevo empleado</b-button>
+                <b-button class="mb-2 mb-lg-0" v-b-modal.modal-1 variant="primary"><i class="fas fa-plus"></i> Nuevo empleado</b-button>
             </div>
             <div class="col-lg-3">
                 @include('trabajadores.buscador')

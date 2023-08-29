@@ -6,10 +6,10 @@
             <div class="col-lg-8">
                 <h3 class="titulo-admin-1">Movimientos</h3>
             </div>
-            <div class="col-lg-2 form-group">
+            <div class="col-lg-2 form-group mb-2 mb-lg-0">
                 <range-calendar class="float-right" :inicio="desde + ' 00:00:00'" :fin="hasta + ' 00:00:00'" v-on:setparams="setParams"></range-calendar>
             </div>
-            <div class="col-lg-2">
+            <div class="col-lg-2 mb-2 mb-lg-0">
                 <b-button href="/reportes/caja" class="btn btn-success float-right w-100" title="Reportes">
                     <i class="fas fa-chart-line"></i> Ir a reportes
                 </b-button>
