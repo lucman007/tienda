@@ -350,10 +350,9 @@
             init(){
                 if(this.accion == 'insertar'){
                     this.tipo_cambio_compra = this.tipo_cambio;
+                    this.tipo_producto = this.tipo_de_producto;
                 }
                 this.unidad_de_medida = this.unidad_medida;
-                this.tipo_producto = this.tipo_de_producto;
-
             },
             obtener_categorias(){
                 axios.get('/helper/categorias')
@@ -398,6 +397,7 @@
                 axios.get('/productos/edit' + '/' + id)
                     .then(response => {
                         let datos = response.data;
+                        console.log(datos.tipo_producto)
                         this.cod_producto = datos.cod_producto;
                         this.nombre = datos.nombre;
                         this.costo = datos.costo;

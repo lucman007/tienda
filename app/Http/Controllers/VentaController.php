@@ -776,8 +776,10 @@ class VentaController extends Controller
                 $subtotal=round($producto->precio * $producto->detalle->cantidad,2);
                 $total = round($producto->precio * $producto->detalle->cantidad*1.18, 2);
                 $producto->tipoAfectacion = '10';
-                $producto->porcentaje_descuento = '0';
-                $producto->descuento = '0.00';
+                $producto->porcentaje_descuento = 0;
+                $producto->descuento = 0;
+                $producto->descuento_por_und = false;
+                $producto->tipo_descuento = 1;
                 $producto->cantidad = $producto->detalle->cantidad;
                 $producto->presentacion = strip_tags($producto->detalle->descripcion);
                 $producto->subtotal = $subtotal;
@@ -790,6 +792,8 @@ class VentaController extends Controller
             $guia->cliente->nombre=$guia->cliente->persona->nombre;
             $guia->cliente->direccion=$guia->cliente->persona->direccion;
             $guia->facturacion=new Facturacion();
+            $guia->facturacion->tipo_descuento_global=0;
+            $guia->facturacion->descuento_global=0;
             $guia->facturacion->porcentaje_descuento_global='0.00';
             $guia->facturacion->valor_venta_bruto=round($suma_total/1.18,2);
             $guia->facturacion->total_exoneradas='0.00';

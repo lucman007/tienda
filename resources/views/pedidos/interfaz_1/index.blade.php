@@ -5,6 +5,7 @@
         $buscador_alternativo = json_decode(cache('config')['interfaz'], true)['buscador_productos_alt']??false;
         $colapsar = json_decode(cache('config')['interfaz'], true)['colapsar_categorias']??false;
         $emitir_solo_ticket = json_decode(cache('config')['interfaz'], true)['emitir_solo_ticket']??false;
+        $aumentar_cantidad_producto = json_decode(cache('config')['interfaz'], true)['aumentar_cantidad_producto']??false;
     @endphp
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}} interfaz_3">
         <div class="row">
@@ -237,7 +238,7 @@
                                                   @else
                                                   v-b-modal.modal-agregar-producto
                                                   @endif
-                                                  @click="productosSeleccionadosAux = [ ...productosSeleccionados ]"
+                                                  @click="abrirModalProducto"
                                                   variant="primary"><i class="fas fa-plus"></i>
                                             Agregar producto
                                         </b-button>
@@ -389,6 +390,9 @@
                             Object.assign(box_items.style, {height:h_box_items+'px'});
                         }
                     },
+                    abrirModalProducto(){
+                        this.productosSeleccionadosAux = [ ...this.productosSeleccionados ]
+                    },
                     disabled_ventas(){
                       this.disabledVentas = true;
                     },
@@ -461,16 +465,40 @@
                             });
                     },
                     agregarProducto(obj){
-                        let productos = this.productosSeleccionados.push({ ...obj });
-                        let i = productos - 1;
-                        this.$set(this.productosSeleccionados[i], 'num_item', i+1);
-                        this.$set(this.productosSeleccionados[i], 'loading', false);
-                        this.$set(this.productosSeleccionados[i], 'warning', false);
-                        this.$set(this.productosSeleccionados[i], 'cantidad', 1);
-                        this.$set(this.productosSeleccionados[i], 'descuento', '0.00');
-                        this.$set(this.productosSeleccionados[i], 'total', this.productosSeleccionados[i]['precio']);
-                        this.disabledTicket = false;
-                        this.calcularTotales()
+                        let newItem = obj.newItem;
+                        let item= obj.producto;
+                        let existeProducto = null;
+                        if(!newItem){
+                            let ultimoProductoAgregado = this.productosSeleccionados[this.productosSeleccionados.length - 1]||false;
+                            if(ultimoProductoAgregado){
+                                existeProducto = ultimoProductoAgregado.idproducto === item.idproducto?ultimoProductoAgregado:null;
+                            }
+                        }
+
+                        if (existeProducto && '{{$aumentar_cantidad_producto}}' === '1') {
+                            existeProducto.cantidad++;
+                            existeProducto.total = existeProducto.cantidad * existeProducto.precio;
+                            this.num_item = this.productosSeleccionados.length;
+                            if (this.timer) {
+                                clearTimeout(this.timer);
+                                this.timer = null;
+                            }
+                            this.timer = setTimeout(() => {
+                                this.actualizarDetalle(null)
+                            }, 600);
+                        } else {
+                            let productos = this.productosSeleccionados.push({...item});
+                            let i = productos - 1;
+                            this.$set(this.productosSeleccionados[i], 'num_item', i + 1);
+                            this.$set(this.productosSeleccionados[i], 'loading', false);
+                            this.$set(this.productosSeleccionados[i], 'warning', false);
+                            this.$set(this.productosSeleccionados[i], 'cantidad', 1);
+                            this.$set(this.productosSeleccionados[i], 'descuento', '0.00');
+                            this.$set(this.productosSeleccionados[i], 'total', this.productosSeleccionados[i]['precio']);
+                            this.disabledTicket = false;
+                            this.calcularTotales();
+                        }
+
                     },
                     guardarPedido(){
                         if(this.productosSeleccionados.length != this.productosSeleccionadosAux.length) {

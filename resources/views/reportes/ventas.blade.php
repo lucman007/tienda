@@ -19,7 +19,7 @@
                 <div class="row mt-4">
                     <div class="col-lg-9">
                         <div class="row">
-                            <div class="col-lg-3">
+                            <div class="col-lg-3 mb-2 mb-lg-0">
                                 <b-input-group>
                                     <b-input-group-prepend>
                                         <b-input-group-text>
@@ -37,7 +37,7 @@
                                     </select>
                                 </b-input-group>
                             </div>
-                            <div class="col-lg-2" v-show="filtro=='vendedor'">
+                            <div class="col-lg-2 mb-2 mb-lg-0" v-show="filtro=='vendedor'">
                                 <b-input-group>
                                     <b-input-group-prepend>
                                         <b-input-group-text>
@@ -50,7 +50,7 @@
                                     </select>
                                 </b-input-group>
                             </div>
-                            <div class="col-lg-2" v-show="filtro=='cajero'">
+                            <div class="col-lg-2 mb-2 mb-lg-0" v-show="filtro=='cajero'">
                                 <b-input-group>
                                     <b-input-group-prepend>
                                         <b-input-group-text>
@@ -63,7 +63,7 @@
                                     </select>
                                 </b-input-group>
                             </div>
-                            <div class="col-lg-2" v-show="filtro=='documento'">
+                            <div class="col-lg-2 mb-2 mb-lg-0" v-show="filtro=='documento'">
                                 <b-input-group>
                                     <b-input-group-prepend>
                                         <b-input-group-text>
@@ -78,7 +78,7 @@
                                     </select>
                                 </b-input-group>
                             </div>
-                            <div class="col-lg-2" v-show="filtro=='tipo-de-pago'">
+                            <div class="col-lg-2 mb-2 mb-lg-0" v-show="filtro=='tipo-de-pago'">
                                 <b-input-group>
                                     <b-input-group-prepend>
                                         <b-input-group-text>
@@ -98,7 +98,7 @@
                                     </select>
                                 </b-input-group>
                             </div>
-                            <div class="col-lg-2" v-show="filtro=='moneda'">
+                            <div class="col-lg-2 mb-2 mb-lg-0" v-show="filtro=='moneda'">
                                 <b-input-group>
                                     <b-input-group-prepend>
                                         <b-input-group-text>
@@ -112,7 +112,7 @@
                                     </select>
                                 </b-input-group>
                             </div>
-                            <div class="col-lg-5 form-group" v-show="filtro=='cliente'">
+                            <div class="col-lg-5 form-group mb-2 mb-lg-0" v-show="filtro=='cliente'">
                                 <b-input-group>
                                     <b-input-group-prepend>
                                         <b-input-group-text>

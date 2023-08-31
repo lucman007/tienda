@@ -592,45 +592,47 @@ class PedidoController extends Controller
     {
         try {
             DB::beginTransaction();
-
-            Orden::find($request->idorden)->update(['total' => $request->total]);
-
-            $items = collect(json_decode($request->items, true));
-            DB::table('orden_detalle')->where('idorden', $request->idorden)->delete();
-
-            $detalle = [];
-            $items->each(function ($item, $index) use ($detalle, $request) {
-                $detalle = [
-                    'num_item' => $index + 1,
-                    'cantidad' => $item['cantidad'],
-                    'monto' => $item['precio'],
-                    'descuento' => 0,
-                    'descripcion' => mb_strtoupper($item['presentacion']),
-                    'idproducto' => $item['idproducto'],
-                    'idorden' => $request->idorden,
-                    'items_kit' => json_encode($item['items_kit']),
-                ];
-                DB::table('orden_detalle')->insert($detalle);
-            });
-
-            DB::commit();
-
             $orden = Orden::find($request->idorden);
-            $productos = $orden->productos;
+            if($orden){
+                $orden->update(['total' => $request->total]);
 
-            $productos->each(function ($producto) {
-                $detalle = $producto->detalle;
-                $producto->precio = $detalle->monto;
-                $producto->total = number_format($detalle->monto * $detalle->cantidad, 2);
-                $producto->cantidad = $detalle->cantidad;
-                $producto->num_item = $detalle->num_item;
-                $producto->presentacion = $detalle->descripcion;
-                $producto->items_kit = json_decode($detalle->items_kit, true);
-                $producto->warning = false;
-                $producto->loading = false;
-            });
+                $items = collect(json_decode($request->items, true));
+                DB::table('orden_detalle')->where('idorden', $request->idorden)->delete();
 
-            return $productos;
+                $detalle = [];
+                $items->each(function ($item, $index) use ($detalle, $request) {
+                    $detalle = [
+                        'num_item' => $index + 1,
+                        'cantidad' => $item['cantidad'],
+                        'monto' => $item['precio'],
+                        'descuento' => 0,
+                        'descripcion' => mb_strtoupper($item['presentacion']),
+                        'idproducto' => $item['idproducto'],
+                        'idorden' => $request->idorden,
+                        'items_kit' => json_encode($item['items_kit']),
+                    ];
+                    DB::table('orden_detalle')->insert($detalle);
+                });
+
+                DB::commit();
+
+                $orden = Orden::find($request->idorden);
+                $productos = $orden->productos;
+
+                $productos->each(function ($producto) {
+                    $detalle = $producto->detalle;
+                    $producto->precio = $detalle->monto;
+                    $producto->total = number_format($detalle->monto * $detalle->cantidad, 2);
+                    $producto->cantidad = $detalle->cantidad;
+                    $producto->num_item = $detalle->num_item;
+                    $producto->presentacion = $detalle->descripcion;
+                    $producto->items_kit = json_decode($detalle->items_kit, true);
+                    $producto->warning = false;
+                    $producto->loading = false;
+                });
+
+                return $productos;
+            }
 
         } catch (\Exception $e) {
             DB::rollBack();

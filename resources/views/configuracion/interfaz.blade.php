@@ -70,6 +70,11 @@
     </b-form-checkbox>
 </div>
 <div class="col-lg-3 mt-3">
+    <b-form-checkbox v-model="interfaz.aumentar_cantidad_producto" switch size="lg">
+        <p style="font-size: 14px;">Aumentar cantidad al agregar un producto más de una vez al pedido</p>
+    </b-form-checkbox>
+</div>
+<div class="col-lg-3 mt-3">
     <div class="form-group">
         <label>Impresión:</label>
         <select v-model="interfaz.tipo_impresion" class="custom-select">

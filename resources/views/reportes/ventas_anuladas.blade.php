@@ -19,7 +19,7 @@
                 <div class="row mt-4">
                     <div class="col-lg-9">
                         <div class="row">
-                            <div class="col-lg-3">
+                            <div class="col-lg-3 mb-2 mb-lg-2">
                                 <b-input-group>
                                     <b-input-group-prepend>
                                         <b-input-group-text>

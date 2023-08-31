@@ -43,9 +43,9 @@
                                                                 <span v-show="producto.precioPorMayor" class="presentacion"> Desde {{producto.cantidadPorMayor}}{{producto.unidad}}</span>
                                                             </div>
                                                             <div class="col-lg-2"><span :class="'badge '+producto.badge_stock">{{producto.stock+' '+producto.unidad}}</span></div>
-                                                            <div :id="'spinner_'+producto.idproducto" class="alert alert-success mb-0 d-none"
-                                                                 style="padding: 5px 20px;position: absolute;right: 5px;bottom: 4px;">
+                                                            <div :id="'spinner_'+producto.idproducto" class="alert alert-success mb-0 spinner_add">
                                                                 <strong style="font-size: 16px;">
+                                                                    +{{countClicks}}
                                                                     <i class="far fa-check-circle"></i>
                                                                 </strong>
                                                             </div>
@@ -107,6 +107,9 @@
                 showCategorias:true,
                 idcategoria: -1,
                 currentItem: 0,
+                countClicks:1,
+                idproducto:null,
+                onOpenModalNewItem:false
             }
         },
         created() {
@@ -251,13 +254,33 @@
             },
             agregarProducto(producto){
                 let spinner = document.getElementById("spinner_"+producto.idproducto);
-                this.$emit('agregar',producto);
-                setTimeout(() => {
-                    spinner.classList.remove('d-inline-block');
-                    spinner.classList.add('d-none');
-                },400);
-                spinner.classList.remove('d-none');
-                spinner.classList.add('d-inline-block');
+                let spinnerAll = document.querySelectorAll(".spinner_add");
+                spinnerAll.forEach((spinner) => {
+                    spinner.style.opacity = 0;
+                });
+
+                if(producto.idproducto === this.idproducto){
+                    this.countClicks++;
+                } else {
+                    this.countClicks = 1;
+                    this.idproducto = producto.idproducto;
+                }
+
+                if(this.countClicks > 1){
+                    this.onOpenModalNewItem = false;
+                }
+
+                this.$emit('agregar',{'producto':producto,'newItem':this.onOpenModalNewItem});
+                if(spinner){
+                    if (this.timer) {
+                        clearTimeout(this.timer);
+                        this.timer = null;
+                    }
+                    this.timer = setTimeout(() => {
+                        spinner.style.opacity='0';
+                    }, 800);
+                    spinner.style.opacity='1';
+                }
             },
             extracto(string){
                 string = _.truncate(string, {
@@ -270,6 +293,21 @@
     }
 </script>
 <style>
+    .spinner_add {
+        padding: 5px 20px;
+        position: absolute;
+        right: 5px;
+        top: 4px;
+        -webkit-transition: 0.3s;
+        transition: 0.3s;
+        -webkit-transition-timing-function: ease-out;
+        transition-timing-function: ease-out;
+        opacity: 0;
+        background: #ff9901;
+        color: white;
+        border-radius: 20px;
+    }
+
     #modal-agregar-producto-alt .modal-content{
         background: #eceff1;
     }

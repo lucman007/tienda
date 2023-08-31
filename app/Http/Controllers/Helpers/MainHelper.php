@@ -309,7 +309,6 @@ class MainHelper extends Controller
             $producto->etiqueta = $descuento['etiqueta'];
             $producto->items_kit = json_decode($producto->items_kit, true);
             $producto->badge_stock = 'badge-success';
-            $producto->presentacion = Str::words($producto->presentacion,8,'...');
             if($producto->stock <= 0){
                 $producto->badge_stock = 'badge-danger';
             } else if($producto->stock <= $producto->stock_bajo){

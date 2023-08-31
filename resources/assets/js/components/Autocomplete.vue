@@ -24,7 +24,7 @@
                     v-for="(result,index) in results"
                     v-bind:class='{"active_item": currentItem === index}'>
                     <div class="col-lg-8">
-                        {{result.cod_producto}} {{(result.cod_producto).length==0?"":"-"}} <strong>{{result.nombre }}</strong> {{result.presentacion }}
+                        {{result.cod_producto}} {{(result.cod_producto).length==0?"":"-"}} <strong>{{result.nombre }}</strong> {{generarExtracto(result.presentacion,50) }}
                     </div>
                     <div v-if="origen=='compras'" class="col-lg">
                         {{result.moneda_compra+result.costo }}
@@ -154,6 +154,14 @@ export default{
             this.query = '';
             this.currentItem = 0;
             document.getElementById("buscador").focus();
+        },
+        generarExtracto(texto, longitudMaxima) {
+            if (texto.length <= longitudMaxima) {
+                return texto;
+            } else {
+                let extracto = texto.substring(0, longitudMaxima).trim() + '...';
+                return extracto;
+            }
         }
     }
 }

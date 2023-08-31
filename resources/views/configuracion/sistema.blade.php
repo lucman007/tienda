@@ -48,7 +48,7 @@
     <h4>acciones</h4>
     <div class="row">
         <div class="col-lg-2 mb-2 mb-lg-0">
-            <b-button onclick="return confirm('Confirma esta acción')" href="/configuracion/reiniciar-vistas" class="mr-2" variant="success"><i class="fas fa-power-off"></i> Reiniciar vistas</b-button>
+            <b-button onclick="return confirm('Confirma esta acción')" href="/configuracion/reiniciar-vistas" class="mr-2" variant="success"><i class="fas fa-sync"></i> Reiniciar vistas</b-button>
         </div>
         <div class="col-lg-2">
             <b-button onclick="return confirm('Confirma esta acción')" href="/configuracion/cerrar-sesiones" class="mr-2" variant="danger"><i class="fas fa-power-off"></i> Cerrar sesiones</b-button>

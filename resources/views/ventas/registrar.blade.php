@@ -1523,8 +1523,6 @@
                 },
                 calcularTotalVenta(){
 
-                    //Calcular operaciones gravadas
-
                     let sumas = {
                         gravadas: 0,
                         exoneradas: 0,
@@ -1568,14 +1566,15 @@
                         this.gravadas = (sumas.gravadas - desc_global);
                         this.exoneradas = (sumas.exoneradas);
                         this.inafectas = (sumas.inafectas);
-                        this.igv = (this.gravadas * 0.18);
+                        if(this.codigo_tipo_factura == '0200'){
+                            this.igv = 0;
+                        } else {
+                            this.igv = (this.gravadas * 0.18);
+                        }
                     }
-
 
                     this.gratuitas = (sumas.gratuitas);
                     this.totalVenta = (Number(this.gravadas) + Number(this.exoneradas) + Number(this.inafectas) + Number(this.igv)).toFixed(2);
-                    //this.igv = (Math.round(this.gravadas * 0.18 * 100) / 100).toFixed(2);
-                    //this.totalVenta = (Number(this.gravadas) + Number(this.igv)).toFixed(2);
                     this.base_descuento_global = sumas.gravadas + sumas.inafectas + sumas.exoneradas;
                     this.descuentos = (sumas.descuentos + Number(this.monto_descuento_global)).toFixed(2);
                     this.subtotalVenta = total_venta_bruto.toFixed(3);
