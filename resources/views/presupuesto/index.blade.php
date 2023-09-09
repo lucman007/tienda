@@ -42,7 +42,10 @@
                                     <th>Vend.</th>
                                     @endif
                                     <th scope="col"><a href="?orderby=fecha&order={{$order}}">Fecha <span class="icon-hover @if($orderby=='fecha') icon-hover-active @endif">{!!$order_icon!!}</span></a></th>
-                                    <th scope="col" style="width: 40%"><a href="?orderby=cliente&order={{$order}}">Cliente <span class="icon-hover @if($orderby=='cliente') icon-hover-active @endif">{!!$order_icon!!}</span></a></th>
+                                    <th scope="col" style="width: 30%"><a href="?orderby=cliente&order={{$order}}">Cliente <span class="icon-hover @if($orderby=='cliente') icon-hover-active @endif">{!!$order_icon!!}</span></a></th>
+                                    @if($agent->isDesktop())
+                                        <th>Atención</th>
+                                    @endif
                                     <th scope="col">Total</th>
                                     @if($agent->isDesktop())
                                         <th scope="col"><a href="?orderby=moneda&order={{$order}}">Moneda <span class="icon-hover @if($orderby=='moneda') icon-hover-active @endif">{!!$order_icon!!}</span></a></th>
@@ -64,9 +67,12 @@
                                             @if(!$agent->isDesktop())
                                                 <td style="width: 20%">{{date("d-m-Y",strtotime($item->fecha))}}</td>
                                             @else
-                                                <td style="width: 20%">{{date("d-m-Y H:i:s",strtotime($item->fecha))}}</td>
+                                                <td style="width: 150px">{{date("d-m-Y H:i:s",strtotime($item->fecha))}}</td>
                                             @endif
                                             <td>{{$item->cliente->persona->nombre}}</td>
+                                            @if($agent->isDesktop())
+                                                <td>{{mb_strtoupper($item->atencion)}}</td>
+                                            @endif
                                             @if(!$agent->isDesktop())
                                                 <td>{{$item->moneda=='PEN'?'S/':'USD'}} {{$item->presupuesto}}</td>
                                             @else

@@ -171,7 +171,7 @@
                     this.edicion_password=1;
                 },
                 eliminar_credenciales(){
-                    if(this.es_usuario){
+                    if(!this.es_usuario){
                         if(confirm('Se eliminarán las credenciales de este empleado y dejará de ser usuario del sistema, ¿Desea continuar?')){
 
                             let dataset={

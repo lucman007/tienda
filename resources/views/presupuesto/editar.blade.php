@@ -90,10 +90,10 @@
                             <div v-show="editar" class="col-lg-7">
                                 <div class="row">
                                     @if(json_decode(cache('config')['interfaz'], true)['buscador_clientes'] == 1)
-                                        <div class="col-lg-9">
+                                        <div class="col-lg-9 order-2 order-lg-1">
                                             <autocomplete-cliente v-on:agregar_cliente="agregarCliente" v-on:borrar_cliente="borrarCliente" ref="suggestCliente"></autocomplete-cliente>
                                         </div>
-                                        <div class="col-lg-3 no-gutters">
+                                        <div class="col-lg-3 order-1 order-lg-2">
                                             <b-button v-b-modal.modal-nuevo-cliente
                                                       class="mb-4 mt-2 mt-lg-0 float-right float-lg-left" variant="primary"><i class="fas fa-plus"
                                                                                                                                v-show="!mostrarSpinnerCliente"></i>
@@ -142,10 +142,10 @@
                         </div>
                         <div v-show="editar" class="row mt-4">
                             @if(json_decode(cache('config')['interfaz'], true)['buscador_productos'] == 1)
-                                <div class="col-lg-7">
+                                <div class="col-lg-7 order-2 order-lg-1">
                                     <autocomplete ref="suggest" v-on:agregar_producto="agregarProducto"></autocomplete>
                                 </div>
-                                <div class="col-lg-3">
+                                <div class="col-lg-3 order-1 order-lg-2">
                                     <b-button class="mb-4 mt-2 mt-lg-0 float-right float-lg-left"  v-b-modal.modal-nuevo-producto
                                               variant="primary"><i class="fas fa-plus" v-show="!mostrarSpinnerProducto"></i>
                                         <b-spinner v-show="mostrarSpinnerProducto" small label="Loading..."></b-spinner>
@@ -171,7 +171,7 @@
                                     </b-button>
                                 </div>
                             @endif
-                            <div class="col-lg-2" v-show="!exportacion">
+                            <div class="col-lg-2 order-3 my-2 my-md-0" v-show="!exportacion">
                                 <b-form-checkbox v-model="esConIgv" switch size="sm">
                                     Incluir IGV
                                 </b-form-checkbox>
@@ -213,7 +213,7 @@
                                             </b-input-group-append>
                                         </b-input-group>
                                     </td>
-                                    <td class="text-center">@{{producto.tipo_descuento?producto.porcentaje_descuento+'%':(Number(producto.descuento)).toFixed(2)}}</td>
+                                    <td class="text-center">@{{(Number(producto.descuento)).toFixed(2)}} <br><span v-show="Number(producto.descuento) > 0" style="color:green">(@{{redondearSinCeros(Number(producto.porcentaje_descuento))+'%'}})</span></td>
                                     <td class="text-center">@{{(Number(producto.subtotal)).toFixed(2)}}</td>
                                     <td class="text-center">@{{(Number(producto.igv)).toFixed(2)}}</td>
                                     <td>@{{(Number(producto.total)).toFixed(2)}}</td>
@@ -229,7 +229,7 @@
                                     <td style="white-space: break-spaces" class="text_desc">@{{ producto.presentacion}}</td>
                                     <td>@{{ producto.precio }}</td>
                                     <td>@{{ producto.cantidad }} @{{ producto.unidad_medida }}</td>
-                                    <td style="text-align: center">@{{producto.tipo_descuento?producto.porcentaje_descuento+'%':(Number(producto.descuento)).toFixed(2)}}</td>
+                                    <td class="text-center">@{{(Number(producto.descuento)).toFixed(2)}} <br><span v-show="Number(producto.descuento) > 0" style="color:green">(@{{redondearSinCeros(Number(producto.porcentaje_descuento))+'%'}})</span></td>
                                     <td style="text-align: center">@{{(Number(producto.subtotal)).toFixed(2)}}</td>
                                     <td style="text-align: center">@{{(Number(producto.igv)).toFixed(2)}}</td>
                                     <td>@{{(Number(producto.total)).toFixed(2)}}</td>
@@ -577,6 +577,10 @@
                 this.calcularTotalPorItem();
             },
             methods: {
+                redondearSinCeros(numero) {
+                    let numeroRedondeado = parseFloat(numero.toFixed(3));
+                    return numeroRedondeado.toString().replace(/(\.0*|(?<=(\..*))0*)$/, '');
+                },
                 agregarCC(){
                     this.cc.push({
                         email: '',
@@ -710,11 +714,14 @@
                     producto['igv'] = Number(producto['subtotal']) * 0.18;
                     producto['total'] = Number(producto['subtotal']) + Number(producto['igv']);
 
+                    producto['porcentaje_descuento'] = producto['descuento'] / (precio * producto['cantidad']) * 100;
+
                     if(this.exportacion) {
                         producto['igv'] = 0;
                         producto['subtotal'] = producto['precio']*producto['cantidad'] - monto_descuento;
                         producto['total'] = producto['subtotal'];
                     }
+
                     this.calcularTotalVenta();
 
                 },

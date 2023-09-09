@@ -58,15 +58,12 @@
             created(){
                 for (let permiso of this.permisos_parent) {
                     if(permiso.isSelected){
-                        permiso.isSelected=!permiso.isSelected;
                         this.buscar_submodulos(permiso);
                     }
                 }
             },
             methods: {
                 buscar_submodulos(permiso){
-
-                    permiso.isSelected=!permiso.isSelected;
                     if (permiso.isSelected) {
                         this.seleccionados.push(permiso);
                         for (let privilegio of this.privilegios) {

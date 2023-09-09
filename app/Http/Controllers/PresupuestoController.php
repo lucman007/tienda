@@ -49,7 +49,8 @@ class PresupuestoController extends Controller
                             $query->whereHas('persona', function ($query) use ($consulta){
                                 $query->where('nombre','like','%'.$consulta.'%');
                             })
-                                ->orWhere('correlativo','like','%'.$consulta.'%');
+                                ->orWhere('correlativo','like','%'.$consulta.'%')
+                                ->orWhere('atencion','like','%'.$consulta.'%');
                         })
                         ->orderby($orderby,$order)
                         ->paginate(30);

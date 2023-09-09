@@ -83,7 +83,7 @@
                                                             <b-button @click="editarApertura" class="btn btn-success"><i class="fas fa-edit"></i> Editar apertura</b-button>
                                                         @endif
                                                     </div>
-                                                    <div class="col-lg-6 d-flex justify-content-between justify-content-lg-end">
+                                                    <div class="col-lg-6 d-flex flex-column align-items-center d-md-block ">
                                                         @if(!$caja || ($caja && $caja->estado))
                                                             <b-form-checkbox v-model="detallado" switch size="lg" class="float-right">
                                                                 <p style="font-size: 1rem;">Detallado</p>
@@ -96,7 +96,7 @@
                                                                 <i class="fas fa-check"></i> Cerrar caja
                                                             </b-button>
                                                         @endif
-                                                        <b-button class="mr-2 float-right" :href="'/caja/ventas?idcaja='+idcaja" variant="success">
+                                                        <b-button class="mr-2 float-right mt-2 mt-md-0" :href="'/caja/ventas?idcaja='+idcaja" variant="success">
                                                             <i class="fas fa-list"></i> Ventas del turno
                                                         </b-button>
                                                     </div>

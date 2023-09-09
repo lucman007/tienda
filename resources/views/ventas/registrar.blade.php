@@ -483,7 +483,7 @@
                                             </b-input-group-append>
                                         </b-input-group>
                                     </td>
-                                    <td class="text-center">@{{producto.tipo_descuento?producto.porcentaje_descuento+'%':(Number(producto.descuento)).toFixed(2)}}</td>
+                                    <td class="text-center">@{{(Number(producto.descuento)).toFixed(2)}} <br><span v-show="Number(producto.descuento) > 0" style="color:green">(@{{redondearSinCeros(Number(producto.porcentaje_descuento))+'%'}})</span></td>
                                     <td style="display:none;"><input @keyup="calcular(index)" class="form-control"
                                                                      type="text" v-model="producto.descuento"></td>
                                     <td class="text-center">@{{Number(producto.subtotal).toFixed(2)}}</td>
@@ -1052,6 +1052,10 @@
                 }
             },
             methods: {
+                redondearSinCeros(numero) {
+                    let numeroRedondeado = parseFloat(numero.toFixed(3));
+                    return numeroRedondeado.toString().replace(/(\.0*|(?<=(\..*))0*)$/, '');
+                },
                 setAfectacion(afectacion){
                     let producto = this.productosSeleccionados[this.index];
                     producto['tipoAfectacion']=afectacion;
@@ -1440,14 +1444,14 @@
 
 
                     if(this.codigo_tipo_factura == '0101'){
-                        this.$set(this.productosSeleccionados[i], 'igv', (this.productosSeleccionados[i]['precio'] * 0.18).toFixed(2));
+                        this.$set(this.productosSeleccionados[i], 'igv', this.productosSeleccionados[i]['precio'] * 0.18);
                         this.$set(this.productosSeleccionados[i], 'tipoAfectacion', '10');
-                        this.$set(this.productosSeleccionados[i], 'total', (this.productosSeleccionados[i]['precio'] * 1.18).toFixed(2));
+                        this.$set(this.productosSeleccionados[i], 'total', this.productosSeleccionados[i]['precio'] * 1.18);
 
                         if (this.esConIgv) {
-                            subtotal = (this.productosSeleccionados[i]['precio'] / 1.18).toFixed(2);
+                            subtotal = this.productosSeleccionados[i]['precio'] / 1.18;
                             this.$set(this.productosSeleccionados[i], 'subtotal', subtotal);
-                            this.$set(this.productosSeleccionados[i], 'igv', (this.productosSeleccionados[i]['precio'] - subtotal).toFixed(2));
+                            this.$set(this.productosSeleccionados[i], 'igv', this.productosSeleccionados[i]['precio'] - subtotal);
                             this.$set(this.productosSeleccionados[i], 'total', this.productosSeleccionados[i]['precio']);
                         }
 
@@ -1511,6 +1515,9 @@
                         producto['descuento']=0;
                         producto['descuento_por_und']=0;
                     }
+
+                    let precio = this.esConIgv?producto['precio']/1.18:producto['precio'];
+                    producto['porcentaje_descuento'] = producto['descuento'] / (precio * producto['cantidad']) * 100;
 
                     this.calcularTotalVenta();
                     this.validar_stock(producto);
