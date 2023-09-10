@@ -27,7 +27,7 @@ class CajaController extends Controller
 
         $fecha=$fecha??date('Y-m-d');
         $turno = $request->get('turno')??1;
-        $total_caja = ['total_cierre'=>0];
+        $total_caja = ['total_cierre'=>0,'total_ventas'=>0];
 
         $caja_abierta = null;
 
@@ -59,7 +59,8 @@ class CajaController extends Controller
                 'caja_abierta'=>$caja_abierta,
                 'cajas'=>$cajas_del_dia,
                 'fecha'=>$fecha,
-                'total_caja'=>$total_caja['total_cierre']
+                'total_caja'=>$total_caja['total_cierre'],
+                'total_ventas'=>$total_caja['total_ventas']
             ]);
     }
 
@@ -348,9 +349,12 @@ class CajaController extends Controller
             }
         }
 
-        $total_cierre = $caja->apertura + $sumas['efectivo'] + $sumas['extras'] - $sumas['gastos'] - $sumas['devoluciones'];
+        $total_ventas = $sumas['efectivo'] + $sumas['visa'] + $sumas['mastercard'] +
+            $sumas['plin'] + $sumas['yape'] + $sumas['transferencia'] + $sumas['otros'];
 
-        return array_merge(['idcaja' => $caja->idcaja, 'apertura' => $caja->apertura, 'total_cierre' => $total_cierre], $sumas);
+            $total_cierre = $caja->apertura + $sumas['efectivo'] + $sumas['extras'] - $sumas['gastos'] - $sumas['devoluciones'];
+
+        return array_merge(['idcaja' => $caja->idcaja, 'apertura' => $caja->apertura, 'total_cierre' => $total_cierre, 'total_ventas'=>$total_ventas], $sumas);
     }
 
     public function cierre_automatico($idcaja){

@@ -1,5 +1,5 @@
 @extends('layouts.main')
-@section('titulo', 'Reporte de comprobantes')
+@section('titulo', 'Reporte de caja')
 @section('contenido')
     <div class="container-fluid">
         <div class="row">

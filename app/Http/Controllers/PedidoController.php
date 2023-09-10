@@ -507,6 +507,9 @@ class PedidoController extends Controller
                 $item->tipo_pago = mb_strtoupper($pago[$find]['label']);
 
             }
+
+            $ventas->appends($_GET)->links();
+
             $agent = new Agent();
             return view('pedidos.ventas', [
                 'ventas' => $ventas,

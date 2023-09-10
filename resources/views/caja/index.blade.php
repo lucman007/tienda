@@ -196,6 +196,10 @@
                                                                 <td><strong>Total devoluciones:</strong></td>
                                                                 <td>{{$caja->moneda}} {{ $caja->devoluciones }}</td>
                                                             </tr>
+                                                            <tr style="background: #cce5ff;">
+                                                                <td><strong>SUMATORIA TOTAL VENTAS:</strong></td>
+                                                                <td><strong>{{$caja->moneda}} {{ number_format($total_ventas,2) }}</strong></td>
+                                                            </tr>
                                                         @endif
                                                         </tbody>
                                                     </table>

@@ -38,6 +38,7 @@ class ReporteController extends Controller
 {
     private $hora_inicio;
     private $hora_fin;
+    private $hour_find = false;
     private $solo_comprobantes;
 
 	public function __construct()
@@ -80,11 +81,18 @@ class ReporteController extends Controller
 
             $ventas = null;
 
-            $filtros = ['desde' => $desde, 'hasta' => $hasta, 'filtro'=>$filtro,'buscar'=>$buscar];
+            $filtros = [
+                'desde' => $desde,
+                'hasta' => $hasta,
+                'filtro'=>$filtro,
+                'buscar'=>$buscar,
+                'hdesde' => $this->hora_inicio,
+                'hhasta' => $this->hora_fin,
+            ];
 
             switch ($filtro) {
                 case 'fecha':
-                    $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
+                    $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $hasta.' '.$this->hora_fin])
                         ->where('eliminado', '=', 0)
                         ->whereHas('facturacion', function($query) {
                             $this->func_filter($query);
@@ -260,7 +268,7 @@ class ReporteController extends Controller
             $hasta=date('Y-m-d');
         }
 
-        $ventas=$this->reporte_ventas_data($desde,$hasta,$filtro,$buscar,$esExportable);
+        $ventas=$this->reporte_ventas_data($desde,$this->getHasta($hasta),$filtro,$buscar,$esExportable);
 
         if($esExportable == 'true'){
             $otros_reportes = $this->reporte_ventas_badge($request,$desde,$hasta);

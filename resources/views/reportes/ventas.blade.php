@@ -159,8 +159,11 @@
                         <div class="card no-shadow" style="background: #dcffe5;">
                             <div class="card-body">
                                 <div class="row">
-                                    <div class="col-lg-12">
-                                        <h5 class="d-inline" style="font-size: 24px"><strong>Total ventas en soles</strong></h5>
+                                    <div class="col-lg-12 d-flex justify-content-between align-items-start">
+                                        <div style="width: 350px">
+                                            <h5 style="font-size: 24px; margin-bottom: 0"><strong>Total ventas en soles</strong></h5>
+                                            <p>Del {{date('d/m/Y', strtotime($filtros['desde']))}} {{date('h:iA', strtotime($filtros['hdesde']))}} al {{date('d/m/Y', strtotime($filtros['hasta']))}} {{date('h:iA', strtotime($filtros['hhasta']))}}</p>
+                                        </div>
                                         <button class="btn btn-success float-right" title="Imprimir" @click="imprimir_reporte('totales','pen')">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-printer" viewBox="0 0 16 16">
                                                 <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>
@@ -212,8 +215,11 @@
                         <div class="card no-shadow" style="background: #dcffe5;">
                             <div class="card-body">
                                 <div class="row">
-                                    <div class="col-lg-12">
-                                        <h5 class="d-inline" style="font-size: 24px"><strong>Total ventas en dólares</strong></h5>
+                                    <div class="col-lg-12 d-flex justify-content-between align-items-start">
+                                        <div style="width: 350px">
+                                            <h5 style="font-size: 24px; margin-bottom: 0"><strong>Total ventas en dólares</strong></h5>
+                                            <p>Del {{date('d/m/Y', strtotime($filtros['desde']))}} {{date('h:iA', strtotime($filtros['hdesde']))}} al {{date('d/m/Y', strtotime($filtros['hasta']))}} {{date('h:iA', strtotime($filtros['hhasta']))}}</p>
+                                        </div>
                                         <button class="btn btn-success float-right" title="Imprimir" @click="imprimir_reporte('totales','usd')">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-printer" viewBox="0 0 16 16">
                                                 <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>
@@ -346,7 +352,7 @@
                                                 <tr :class="{'td-anulado':'{{$venta->facturacion->estado}}'=='ANULADO' || '{{$venta->facturacion->estado}}'=='MODIFICADO'}">
                                                     <td></td>
                                                     <td style="width: 5%">{{$venta->idventa}}</td>
-                                                    <td style="width: 15%">{{$venta->fecha}}</td>
+                                                    <td style="width: 15%">{{date('d/m/Y H:i', strtotime($venta->fecha))}}</td>
                                                     <td>{{$venta->caja->idpersona == -1?'-':strtoupper($venta->caja->nombre)}}</td>
                                                     <td>{{$venta->empleado->idpersona == -1?'-':strtoupper($venta->empleado->nombre)}}</td>
                                                     <td>{{$venta->cliente->persona->nombre}}</td>
