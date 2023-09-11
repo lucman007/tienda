@@ -70,7 +70,7 @@
                 </tr>
                 <tr>
                     <td><strong>Punto de partida:</strong></td>
-                    <td style="width:38mm">{{$documento->emisor->direccion_resumida}}</td>
+                    <td style="width:38mm">{{$documento->direccion_partida?$documento->direccion_partida:$documento->emisor->direccion_resumida}}</td>
                 </tr>
                 <tr>
                     <td><strong>Punto de llegada:</strong></td>

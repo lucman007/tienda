@@ -1,8 +1,8 @@
 <template>
     <div>
-        <b-modal size="md" id="modal-ubigeo" ref="modal-ubigeo" @ok="agregarUbigeo" @show="obtenerUbigeo('departamentos')">
+        <b-modal size="md" id="modal-ubigeo" ref="modal-ubigeo" @ok="agregarUbigeo" @hidden="reset()" @show="obtenerUbigeo('departamentos')">
             <template slot="modal-title">
-                Código de ubigeo
+                {{titulo}}
             </template>
             <div class="container">
                 <div class="row">
@@ -29,7 +29,11 @@
                             <option v-for="d in ubigeo.distritos" :value="d.distrito">{{d.nombre}}</option>
                         </select>
                     </div>
-                    <div class="col-lg-12 mt-3">
+                    <div v-if="mostrarDireccion" class="col-lg-12 mt-3">
+                        <label>Direccion:</label>
+                        <input v-model="ubigeo.direccion" type="text" class="form-control">
+                    </div>
+                    <div class="col-lg-12 mt-3" v-else>
                         <label>Ubigeo:</label>
                         <h3>{{ ubigeo.codigo }}</h3>
                     </div>
@@ -42,9 +46,12 @@
     import dataUbigeo from '../ubigeo.json';
     export default {
         name:'modal-ubigeo',
+        props:['es_ubigeo'],
         data() {
             return {
                 lista_ubigeos: dataUbigeo,
+                titulo:'Código de ubigeo',
+                mostrarDireccion:false,
                 ubigeo: {
                     departamentos: [],
                     provincias: [],
@@ -52,13 +59,20 @@
                     dep_seleccionado: '-1',
                     prov_seleccionado: '-1',
                     dist_seleccionado: '-1',
-                    codigo: ''
+                    codigo: '',
+                    direccion:''
                 },
             }
         },
         methods: {
             obtenerUbigeo(tipo){
-
+                if(!this.es_ubigeo){
+                    this.titulo = 'Direccion de partida';
+                    this.mostrarDireccion = true;
+                } else {
+                    this.titulo = 'Código de ubigeo';
+                    this.mostrarDireccion = false;
+                }
                 switch (tipo) {
                     case 'departamentos':
                         this.ubigeo.departamentos = [];
@@ -109,7 +123,30 @@
                 }
             },
             agregarUbigeo(){
-                this.$emit('agregar_ubigeo',this.ubigeo.codigo);
+                if(this.es_ubigeo){
+                    this.$emit('agregar_ubigeo',this.ubigeo.codigo);
+                } else {
+                    if(this.ubigeo.codigo !== ''){
+                        let direccion = '';
+                        let dep = this.ubigeo.departamentos.find(
+                            (d) => d.departamento === this.ubigeo.dep_seleccionado
+                        );
+                        let prov = this.ubigeo.provincias.find(
+                            (d) => d.provincia === this.ubigeo.prov_seleccionado
+                        );
+                        let dist = this.ubigeo.distritos.find(
+                            (d) => d.distrito === this.ubigeo.dist_seleccionado
+                        );
+                        direccion = this.ubigeo.direccion + ' ' + dep.nombre + ' ' + prov.nombre + ' ' + dist.nombre;
+                        this.$emit('cambiar_direccion',{direccion:direccion.toUpperCase(),ubigeo:this.ubigeo.codigo});
+                    }
+                }
+
+            },
+            reset(){
+                this.titulo='Código de ubigeo';
+                this.mostrarDireccion=false;
+                this.ubigeo.direccion='';
             }
         }
     }

@@ -19,6 +19,8 @@ class Guia extends Model
         'estado',
         'ticket',
         'response',
+        'direccion_partida',
+        'direccion_partida_ubigeo',
         'guia_datos_adicionales',
     ];
 

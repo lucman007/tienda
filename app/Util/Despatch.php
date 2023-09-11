@@ -63,6 +63,8 @@ class Despatch {
         $documento->doc_relacionado=$datos_adicionales['doc_relacionado'];
         $documento->fecha_traslado=date('Y-m-d', strtotime($datos_adicionales['fecha_traslado']));
         $documento->categoria_vehiculo = $datos_adicionales['categoria_vehiculo']??'otros';
+        $documento->direccion_partida = $documento->direccion_partida?$documento->direccion_partida:$emisor->direccion_resumida;
+        $documento->direccion_partida_ubigeo = $documento->direccion_partida_ubigeo?$documento->direccion_partida_ubigeo:$emisor->ubigeo;
 
 		$usuario->razon_social=$usuario->persona['nombre'];
 		$this->nombre_fichero=$emisor->ruc.'-09-'.$documento->correlativo;

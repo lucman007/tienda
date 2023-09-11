@@ -158,6 +158,11 @@ class GuiaController extends Controller
             $guia->fecha_emision = $request->fecha . ' ' . date('H:i:s');
             $guia->correlativo = json_decode($correlativo);
 
+            $datos_partida = json_decode($request->direccion_partida, true);
+
+            $guia->direccion_partida = $datos_partida['direccion'];
+            $guia->direccion_partida_ubigeo = $datos_partida['ubigeo'];
+
             if ($request->fecha > date('Y-m-d')) {
                 $guia->fecha_emision = date('Y-m-d H:i:s');
             }

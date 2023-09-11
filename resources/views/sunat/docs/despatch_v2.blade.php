@@ -158,8 +158,8 @@
             </cac:TransportHandlingUnit>
         @endif
         <cac:OriginAddress>
-            <cbc:ID>{{ $emisor->ubigeo }}</cbc:ID>
-            <cbc:StreetName>{{ $emisor->direccion_resumida }}</cbc:StreetName>
+            <cbc:ID>{{ $documento->direccion_partida_ubigeo }}</cbc:ID>
+            <cbc:StreetName>{{ $documento->direccion_partida }}</cbc:StreetName>
         </cac:OriginAddress>
         @if($documento->codigo_puerto)
             <cac:FirstArrivalPortLocation>

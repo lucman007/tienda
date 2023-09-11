@@ -885,6 +885,7 @@
     </b-modal>
     <!--FIN MODAL AFECTACIÓN -->
     <modal-ubigeo
+            :es_ubigeo="true"
             v-on:agregar_ubigeo="agregarUbigeo">
     </modal-ubigeo>
     <modal-producto

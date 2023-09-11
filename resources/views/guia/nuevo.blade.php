@@ -72,7 +72,7 @@
                                 <b-input-group>
                                     <input disabled type="text" v-model="guia_datos_adicionales.ubigeo" class="form-control">
                                     <b-input-group-append>
-                                        <b-button v-b-modal.modal-ubigeo variant="primary">
+                                        <b-button @click="esUbigeo=true" v-b-modal.modal-ubigeo variant="primary">
                                             <i class="fas fa-search"></i>
                                         </b-button>
                                     </b-input-group-append>
@@ -190,6 +190,12 @@
                             <div class="col-lg-2 form-group">
                                 <label>Fecha traslado</label>
                                 <input type="date" v-model="guia_datos_adicionales.fecha_traslado" class="form-control">
+                            </div>
+                            <div class="col-lg-12 d-flex align-items-start">
+                                <b-button @click="esUbigeo=false" v-b-modal.modal-ubigeo variant="primary"><i class="fas fa-map-marker-alt"></i> Cambiar direccion de partida</b-button>
+                                <div v-if="direccion_partida" class="col-lg-6 form-group">
+                                    <input disabled type="text" v-model="direccion_partida.direccion" class="form-control">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -403,6 +409,8 @@
     </b-modal>
     <!--FIN MODAL DOCUMENTO -->
     <modal-ubigeo
+            :es_ubigeo="esUbigeo"
+            v-on:cambiar_direccion="cambiarDireccionPartida"
             v-on:agregar_ubigeo="agregarUbigeo">
     </modal-ubigeo>
     <modal-producto
@@ -480,6 +488,8 @@
                 spinnerRuc:false,
                 domicilioFiscalCliente:true,
                 disabledNr:false,
+                esUbigeo:true,
+                direccion_partida : null
             },
             created(){
                 this.obtenerCorrelativo();
@@ -488,6 +498,9 @@
                 }
             },
             methods: {
+                cambiarDireccionPartida(direccion){
+                    this.direccion_partida = direccion;
+                },
                 agregar_nr(codigo){
                     this.disabledNr = true;
                     axios.get('/helper/agregar-producto'+'/'+codigo)
@@ -709,6 +722,7 @@
                             this.mostrarProgresoGuardado = true;
                             axios.post('{{action('GuiaController@store')}}', {
                                 'idcliente': this.clienteSeleccionado['idcliente'],
+                                'direccion_partida':JSON.stringify(this.direccion_partida),
                                 'num_guia': this.numeroGuia,
                                 'fecha': this.fecha,
                                 'guia_datos_adicionales': JSON.stringify(this.guia_datos_adicionales),
