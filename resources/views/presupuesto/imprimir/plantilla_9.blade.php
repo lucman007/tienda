@@ -140,7 +140,7 @@
                             @php
                                 $img = 'images/temporal/'.$emisor->ruc.'-cotizacion-'.($i-2).'.jpg';
                             @endphp
-                            @if(filesize($img) > 0)
+                            @if(file_exists($img) && @getimagesize($img))
                                 <img style="width: 100%; padding-right:5px " src="{{$img}}" alt="">
                             @else
                                 <img style="width:100%;" src="{{'images/no-image.jpg'}}">

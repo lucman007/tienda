@@ -394,7 +394,7 @@
                 impuesto:"<?php echo $config['impuesto']?>",
                 lugar_entrega:"<?php echo $config['lugar_entrega']?>",
                 contacto:"<?php echo $config['remitente']==''?$usuario->nombre.' '.$usuario->apellidos:$config['remitente']?>",
-                telefonos:"<?php echo $config['remitente_telefonos']?>",
+                telefonos:"<?php echo $config['remitente_telefonos']==''?$usuario->telefono:$config['remitente_telefonos']?>",
                 esConIgv:<?php echo json_encode(json_decode(cache('config')['interfaz'], true)['igv_incluido']) ?>,
                 numeroCotizacion:"",
                 tipoCambio: <?php echo cache('opciones')['tipo_cambio_compra'] ?>,

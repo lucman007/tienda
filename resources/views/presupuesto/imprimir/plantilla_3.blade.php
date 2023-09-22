@@ -166,7 +166,7 @@
                     @endif
                     <tr>
                         <td><strong>Total:</strong></td>
-                        <td style="width: 28mm; text-align: right">{{$presupuesto->moneda}} {{$presupuesto->presupuesto}}</td>
+                        <td style="width: 28mm; text-align: right">{{$presupuesto->moneda}} {{number_format($presupuesto->presupuesto, 2)}}</td>
                     </tr>
                 </table>
             </td>

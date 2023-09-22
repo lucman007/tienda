@@ -519,7 +519,7 @@
                                 <tbody>
                                 <tr v-for="(producto,index) in productosSeleccionados" :key="index" v-b-modal.modal-detalle @click="editarItem(producto, index)">
                                     <td>@{{producto.cod_producto == '00NR'?producto.presentacion:producto.nombre}} x @{{producto.cantidad}}</td>
-                                    <td>@{{(producto.total).toFixed(2)}}</td>
+                                    <td>@{{(Number(producto.total)).toFixed(2)}}</td>
                                     <td @click.stop >
                                         <b-button :disabled="producto['precio']<=0 || producto['cantidad']<=0" v-b-modal.modal-descuento @click="editarItem(producto,index)" variant="success" title="Agregar descuento">
                                             <i class="fas fa-percentage"></i>

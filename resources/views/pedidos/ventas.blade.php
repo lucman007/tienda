@@ -68,11 +68,7 @@
                                                     @php
                                                         $index = array_search($pago->tipo, array_column($tipo_pago,'num_val'));
                                                     @endphp
-                                                    @if($pago->tipo == '101')
-                                                        <span class="badge badge-info">{{strtoupper($tipo_pago[$index]['label'])}} {{$pago->monto}}</span><br>
-                                                    @else
-                                                        {{mb_strtoupper($tipo_pago[$index]['label'])}} @if(count($pagos)>1)({{$item->moneda}}{{$pago->monto}})@endif <br>
-                                                    @endif
+                                                    {{mb_strtoupper($tipo_pago[$index]['label'])}} @if(count($pagos)>1)({{$item->moneda}}{{$pago->monto}})@endif <br>
                                                 @endforeach
                                             </td>
                                             <td id="comp_{{$item->idventa}}">

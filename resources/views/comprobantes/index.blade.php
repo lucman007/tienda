@@ -71,7 +71,9 @@
                                 $tipo_pago = \sysfact\Http\Controllers\Helpers\DataTipoPago::getTipoPago();
                                 @endphp
                                 @foreach($tipo_pago as $pago)
-                                <option value="{{$pago['text_val']}}">{{$pago['label']}}</option>
+                                    @if($pago['num_val'] != 4)
+                                        <option value="{{$pago['text_val']}}">{{$pago['label']}}</option>
+                                    @endif
                                 @endforeach
                             </select>
                         </b-input-group>
@@ -180,11 +182,13 @@
                                                     @php
                                                         $index = array_search($pago->tipo, array_column($tipo_pago,'num_val'));
                                                     @endphp
-                                                    @if($pago->tipo == '101')
-                                                        <span class="badge badge-info">{{mb_strtoupper($tipo_pago[$index]['label'])}} {{$pago->monto}}</span><br>
-                                                    @else
-                                                        {{mb_strtoupper($tipo_pago[$index]['label'])}} @if(count($pagos)>1)({{$pago->monto}})@endif <br>
-                                                    @endif
+                                                    <span @if($filtros['filtro'] == 'tipo-de-pago' && $venta->tipo_pago == 4 && $filtros['buscar'] == $tipo_pago[$index]['text_val'])
+                                                          style="font-weight: bold"
+                                                          @elseif($filtros['filtro'] == 'tipo-de-pago' && $venta->tipo_pago == 4 && $filtros['buscar'] != $tipo_pago[$index]['text_val']) style="opacity: 0.6"
+                                                            @endif>
+                                                                {{mb_strtoupper($tipo_pago[$index]['label'])}} {{$pago->monto}}
+                                                            </span>
+                                                    <br>
                                                 @endforeach
                                                 @if($venta->estado_credito)
                                                     <a href="{{url('creditos/editar/'.$venta->idventa)}}"><span class="badge badge-secondary">{{$venta->estado_credito}}</span></a>

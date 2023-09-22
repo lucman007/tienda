@@ -5,8 +5,8 @@
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
             <div class="col-lg-9">
-                <h3 class="titulo-admin-1">Trabajadores</h3>
-                <b-button class="mb-2 mb-lg-0" v-b-modal.modal-1 variant="primary"><i class="fas fa-plus"></i> Nuevo empleado</b-button>
+                <h3 class="titulo-admin-1">Empleados</h3>
+                <b-button class="mb-2 mb-lg-0" v-b-modal.modal-1 variant="primary"><i class="fas fa-plus"></i> Nuevo</b-button>
             </div>
             <div class="col-lg-3">
                 @include('trabajadores.buscador')
@@ -23,9 +23,6 @@
         <div class="row">
             <div class="col-sm-12 mt-4">
                 <div class="card">
-                    <div class="card-header">
-                        Lista de trabajadores
-                    </div>
                     <div class="card-body">
                         <div class="table-responsive tabla-gestionar">
                             <table class="table table-striped table-hover table-sm">

@@ -23,9 +23,10 @@ class GastoController extends Controller
 
     public function index(Request $request){
 
-        $tipo = $request->tipo??'gastos';
-        $desde= $request->desde??date('Y-m-d');
-        $hasta= $request->hasta??date('Y-m-d');
+        $tipo = $request->get('tipo', 'gastos');
+        $desde = $request->get('desde', date('Y-m-d'));
+        $hasta = $request->get('hasta', date('Y-m-d'));
+        $mostrar = $request->get('mostrar', 'turno');
 
         switch($tipo){
             case 'gastos':
@@ -38,7 +39,7 @@ class GastoController extends Controller
                 $tipo_movimiento=3;
         }
 
-        $data = $this->obtener_datos($desde,$hasta, $tipo_movimiento);
+        $data = $this->obtener_datos($desde,$hasta, $tipo_movimiento, $mostrar);
 
         return view('caja.egresos',[
             'usuario'=>auth()->user()->persona,
@@ -47,13 +48,15 @@ class GastoController extends Controller
             'data'=>$data,
             'desde'=>$desde,
             'hasta'=>$hasta,
+            'filtro'=>$mostrar,
         ]);
     }
 
     public function obtenerTotal(Request $request){
         $tipo = $request->tipo??'gastos';
-        $desde= $request->desde??date('Y-m-d');
-        $hasta= $request->hasta??date('Y-m-d');
+        $desde = $request->desde??date('Y-m-d');
+        $hasta = $request->hasta??date('Y-m-d');
+        $mostrar = $request->get('mostrar', 'turno');
 
         switch($tipo){
             case 'gastos':
@@ -66,7 +69,7 @@ class GastoController extends Controller
                 $tipo_movimiento=3;
         }
 
-        $data = $this->obtener_datos($desde,$hasta, $tipo_movimiento, true);
+        $data = $this->obtener_datos($desde,$hasta, $tipo_movimiento,$mostrar, true);
         $suma = 0;
         foreach ($data as $item) {
             $suma += $item->monto;
@@ -76,21 +79,28 @@ class GastoController extends Controller
 
     }
 
-    public function obtener_datos($desde, $hasta, $tipo_movimiento,$calcular = false){
+    public function obtener_datos($desde, $hasta, $tipo_movimiento,$mostrar,$calcular = false){
 
-        if($calcular){
-            $gasto=Gastos::whereBetween('fecha',[$desde.' 00:00:00',$hasta.' 23:59:59'])
-                ->where('tipo',$tipo_movimiento)
-                ->orderby('idgasto','desc')->get();
-        } else {
-            $gasto=Gastos::whereBetween('fecha',[$desde.' 00:00:00',$hasta.' 23:59:59'])
-                ->where('tipo',$tipo_movimiento)
-                ->orderby('idgasto','desc')->paginate(30);
+        $gasto=Gastos::where('tipo',$tipo_movimiento)
+            ->when($mostrar=='dia', function ($query) use($desde,$hasta) {
+                return $query->whereBetween('fecha',[$desde.' 00:00:00',$hasta.' 23:59:59']);
+            }, function ($query) {
+                return $query->where('idcaja',MainHelper::obtener_idcaja());
+            })
+            ->orderby('idgasto','desc')
+            ->when($calcular, function ($query) {
+                return $query->get();
+            }, function ($query) {
+                return $query->paginate(30);
+            });
+
+        if(!$calcular){
+            $gasto->appends($_GET)->links();
         }
 
         foreach ($gasto as $item){
 
-            $item->caja=strtoupper($item->cajero['nombre']);
+            $item->cajero=strtoupper($item->cajero['nombre']);
 
             switch($item->tipo_egreso){
                 case '1':

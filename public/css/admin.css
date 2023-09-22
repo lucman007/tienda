@@ -1469,6 +1469,10 @@ table tr td, table tr th{
     outline: none !important;
 }
 
+.radiosBtn .custom-control-label:after, .radiosBtn .custom-control-label:before {
+    margin-top: -2px;
+}
+
 /*RESPONSIVE*/
 
 @media (min-width: 576px) {

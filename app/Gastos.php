@@ -32,4 +32,8 @@ class Gastos extends Model
         return $this->hasOne(Persona::class,'idpersona','idcajero');
     }
 
+    public function caja(){
+        return $this->hasOne(Caja::class,'idcaja','idcaja');
+    }
+
 }

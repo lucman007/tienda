@@ -90,7 +90,7 @@
                     @php
                     $img = 'images/temporal/'.$emisor->ruc.'-catalogo-'.$num_loop_producto.'.jpg';
                     @endphp
-                    @if(filesize($img) > 0)
+                    @if(file_exists($img) && @getimagesize($img))
                         <img style="width:100%; height: 80%" src="{{$img}}" alt="">
                     @else
                         <img style="width:100%;" src="{{'images/no-image.jpg'}}">

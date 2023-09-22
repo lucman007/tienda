@@ -32,16 +32,27 @@
                                 </b-nav>
                             </div>
                             <div class="col-lg-12">
-                                <b-button v-show="'{{$tipo_movimiento}}'==1" v-b-modal.modal-1 variant="primary"><i class="fas fa-plus"></i> Agregar gasto</b-button>
-                                <b-button v-show="'{{$tipo_movimiento}}'==2" v-b-modal.modal-ingreso variant="primary" class="ml-1"><i class="fas fa-plus"></i> Agregar efectivo</b-button>
-                                <b-button v-show="'{{$tipo_movimiento}}'==3" v-b-modal.modal-devolucion variant="primary" class="ml-1"><i class="fas fa-plus"></i> Agregar devolución</b-button>
-                                <h4 class="float-right">Total: S/ @{{ total }}</h4>
+                                <div class="row">
+                                    <div class="col-lg-12 d-flex justify-content-between align-items-start">
+                                        <div class="d-flex align-items-start">
+                                            <b-button v-show="'{{$tipo_movimiento}}'==1" v-b-modal.modal-1 variant="primary"><i class="fas fa-plus"></i> Agregar gasto</b-button>
+                                            <b-button v-show="'{{$tipo_movimiento}}'==2" v-b-modal.modal-ingreso variant="primary" class="ml-1"><i class="fas fa-plus"></i> Agregar efectivo</b-button>
+                                            <b-button v-show="'{{$tipo_movimiento}}'==3" v-b-modal.modal-devolucion variant="primary" class="ml-1"><i class="fas fa-plus"></i> Agregar devolución</b-button>
+                                            <b-form-group v-slot="{ ariaDescribedby }" class="d-flex radiosBtn mt-2 mb-0" v-show="'{{$tipo_movimiento}}'!=3">
+                                                <b-form-radio @change="filtrar" v-model="radioBtn" :aria-describedby="ariaDescribedby" value="turno" class="ml-5 d-inline-flex">Movimientos del turno</b-form-radio>
+                                                <b-form-radio @change="filtrar" v-model="radioBtn" :aria-describedby="ariaDescribedby" value="dia" class="ml-5 d-inline-flex">Movimientos del día</b-form-radio>
+                                            </b-form-group>
+                                        </div>
+                                        <h4>Total: S/ @{{ total }}</h4>
+                                    </div>
+                                </div>
                                 <div class="table-responsive tabla-gestionar">
                                     <table class="table table-striped table-hover table-sm">
                                         <thead class="bg-custom-green">
                                         <tr>
                                             <th scope="col"></th>
                                             <th scope="col">Fecha</th>
+                                            <th scope="col">Turno</th>
                                             <th scope="col">Caja</th>
                                             @if($tipo_movimiento == 1)
                                             <th scope="col">Tipo de gasto</th>
@@ -62,7 +73,8 @@
                                                 <tr>
                                                     <td></td>
                                                     <td style="width: 130px">{{date('d/m/Y H:i',strtotime($item->fecha))}}</td>
-                                                    <td style="width: 130px">{{$item->caja}}</td>
+                                                    <td style="width: 130px">TURNO {{$item->caja->turno}}</td>
+                                                    <td style="width: 130px">{{$item->cajero}}</td>
                                                     @if($tipo_movimiento == 1)
                                                     <td>{{$item->tipo_gasto}}</td>
                                                     @endif
@@ -443,21 +455,26 @@
                         total:'0.00',
                         desde:'{{$desde}}',
                         hasta:'{{$hasta}}',
+                        radioBtn: '{{$filtro}}'
                     },
                     created(){
                         this.obtenerTotal();
                     },
                     methods: {
+                        filtrar(){
+                            window.location.href='/caja/movimientos?tipo={{$tipo}}&mostrar='+this.radioBtn+'&desde='+this.desde+'&hasta='+this.hasta;
+                            this.obtenerTotal();
+                        },
                         setParams(obj){
                             let d1 = new Date(obj.startDate).toISOString().split('T')[0];
                             let d2 = new Date(obj.endDate).toISOString().split('T')[0];
                             this.desde=d1;
                             this.hasta=d2;
-                            window.location.href='/caja/movimientos?tipo={{$tipo}}'+'&desde='+this.desde+'&hasta='+this.hasta;
+                            this.radioBtn = 'dia';
+                            window.location.href='/caja/movimientos?tipo={{$tipo}}&mostrar='+this.radioBtn+'&desde='+this.desde+'&hasta='+this.hasta;
                         },
-
                         obtenerTotal(){
-                            axios.get('/caja/movimientos/total?tipo={{$tipo}}'+'&desde='+this.desde+'&hasta='+this.hasta)
+                            axios.get('/caja/movimientos/total?tipo={{$tipo}}&mostrar='+this.radioBtn+'&desde='+this.desde+'&hasta='+this.hasta)
                                 .then(response => {
                                     this.total = response.data.toFixed(2);
                                 })
