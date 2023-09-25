@@ -246,15 +246,15 @@
                                                   variant="danger"><i class="fas fa-times-circle"></i>
                                             Anular venta
                                         </b-button>
-                                        {{--<b-button :disabled="productosSeleccionados == 0"
-                                                  @click="imprimir('entrega')"
-                                                  variant="secondary"><i class="fas fa-print"></i>
-                                            Imprimir entrega
-                                        </b-button>--}}
                                         <b-button :disabled="productosSeleccionados == 0" @click="imprimir('pedido')"
                                                   variant="secondary"><i class="fas fa-box-open"></i>
                                             Imprimir pedido
                                         </b-button>
+                                        {{--<b-button :disabled="productosSeleccionados == 0"
+                                                  @click="imprimir('entrega')"
+                                                  variant="secondary"><i class="fas fa-print"></i>
+                                            Crédito rápido
+                                        </b-button>--}}
                                     </div>
                                     <div style="display: flex; justify-content: center;flex-wrap: nowrap;">
                                         @can('Pedido: procesar')

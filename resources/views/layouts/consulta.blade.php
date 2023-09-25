@@ -8,6 +8,7 @@
     <base href=""/>
     <link rel="shortcut icon" href="{{url('images/favicon.ico')}}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
     <!-- app.css -->
     <link rel="stylesheet" href="{{asset('css/app.css')}}">
     <!-- CSS personalizado -->

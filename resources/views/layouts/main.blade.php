@@ -19,7 +19,7 @@
         <link rel="stylesheet" href="{{asset('css/admin.css?v='.filemtime('css/admin.css'))}}">
     @endif
     <link rel="stylesheet" href="{{asset('css/OverlayScrollbars.min.css')}}">
-    <title>Facsy | @yield('titulo') </title>
+    <title>Facilito | @yield('titulo') </title>
     @laravelPWA
     <script>
         window.Laravel = {!! json_encode([

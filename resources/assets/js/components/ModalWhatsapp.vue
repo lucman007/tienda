@@ -10,12 +10,14 @@
                         <p>Ingresa el código de país (Perú = 51) + el número de celular de tu cliente, ejemplo: 51996861131</p>
                     </div>
                     <div class="col-lg-12">
-                        <div class="form-group">
+                        <b-input-group>
                             <input v-model="whatsapp" type="number" class="form-control" placeholder="Enviar a whatsapp">
-                            <b-button @click="enviarWhatsapp(whatsapp)" target="_blank"  variant="success" class="boton_adjunto" style="top:0">
-                                <i class="fab fa-whatsapp"></i> Enviar
-                            </b-button>
-                        </div>
+                            <b-input-group-append>
+                                <b-button @click="enviarWhatsapp(whatsapp)" target="_blank"  variant="success">
+                                    <i class="fab fa-whatsapp"></i> Enviar
+                                </b-button>
+                            </b-input-group-append>
+                        </b-input-group>
                     </div>
                 </div>
             </div>

@@ -428,7 +428,7 @@
                         this.obtener_ubicacion(this.idubicacion);
                     })
                     .catch(error => {
-                        this.alerta('Ha ocurrido un error.');
+                        alert('Ha ocurrido un error.');
                         console.log(error);
                     });
 
@@ -444,7 +444,7 @@
                         this.obtener_ubicacion()
                     })
                     .catch(error => {
-                        this.alerta('Ha ocurrido un error al obtener los datos');
+                        alert('Ha ocurrido un error al obtener los datos');
                         console.log(error);
                     });
             },
@@ -465,7 +465,7 @@
 
                     })
                     .catch(error => {
-                        this.alerta('Ha ocurrido un error al obtener los datos');
+                        alert('Ha ocurrido un error al obtener los datos');
                         console.log(error);
                     });
             },

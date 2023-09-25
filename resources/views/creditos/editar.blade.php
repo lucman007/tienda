@@ -4,8 +4,10 @@
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
             <div class="col-sm-12">
-                <h3 class="titulo-admin-1">{{$credito->facturacion->comprobante.' '.$credito->facturacion->serie.'-'.$credito->facturacion->correlativo}}</h3>
-                <b-button href="{{action('CreditoController@index')}}" class="mr-2"  variant="primary"><i class="fas fa-list"></i> Ver créditos</b-button>
+                <h3 class="titulo-admin-1">
+                    <a href="{{url()->previous()}}"><i class="fas fa-arrow-circle-left"></i></a>
+                    {{$credito->facturacion->comprobante.' '.$credito->facturacion->serie.'-'.$credito->facturacion->correlativo}}
+                </h3>
             </div>
         </div>
         <div class="row">
@@ -238,7 +240,7 @@
                 borrarPago(index){
                     this.detalle.splice(index,1);
                     this.disabledButtonPago = true;
-                    this.estado = 1
+                    this.estado = 1;
                     this.procesarPago()
                 },
                 agregarPago(){

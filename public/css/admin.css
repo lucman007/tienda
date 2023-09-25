@@ -1062,9 +1062,14 @@ label{
     z-index: 99999;
     background: white;
     width: 100%;
-    box-shadow: 0px 3px 13px 1px rgb(0 0 0 / 17%);
+    box-shadow: 0 3px 13px 1px rgb(0 0 0 / 17%);
     overflow-y: auto;
     max-height: 340px;
+}
+
+.autocomplete-wrapper-cliente{
+    width: 95%;
+    margin-left: 5%;
 }
 
 .header-platos{
@@ -1471,6 +1476,12 @@ table tr td, table tr th{
 
 .radiosBtn .custom-control-label:after, .radiosBtn .custom-control-label:before {
     margin-top: -2px;
+}
+
+.autocomplete-wrapper .list-group-item{
+    border: none;
+    font-size: 12px;
+    padding: 0.4rem 1.25rem;
 }
 
 /*RESPONSIVE*/

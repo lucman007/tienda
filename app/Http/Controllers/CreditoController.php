@@ -4,10 +4,12 @@ namespace sysfact\Http\Controllers;
 
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Maatwebsite\Excel\Facades\Excel;
 use Matrix\Exception;
+use sysfact\Cliente;
+use sysfact\Exports\CreditosExport;
 use sysfact\Http\Controllers\Helpers\DataTipoPago;
 use sysfact\Mail\MailCreditos;
 use sysfact\Pago;
@@ -66,81 +68,160 @@ class CreditoController extends Controller
     }
 
     public function index(Request $request){
-        if ($request) {
-            try{
-                $consulta = trim($request->get('textoBuscado'));
-                $orderby=$request->get('orderby','idventa');
-                $order=$request->get('order', 'desc');
+        try{
 
-                $ventas = Venta::join('persona', 'persona.idpersona', '=', 'ventas.idcliente')
-                    ->select('ventas.*','persona.nombre as cliente')
-                    ->where('eliminado', 0)
-                    ->where('tipo_pago', 2)
-                    ->whereHas('facturacion', function($query) {
-                        $query
-                            ->where(function ($query) {
-                                $query->where('codigo_tipo_documento',01)
-                                    ->orWhere('codigo_tipo_documento',03)
-                                    ->orWhere('codigo_tipo_documento',30);
-                            })
-                            ->where('estado','ACEPTADO')
-                            ->orWhere('estado','-');
-                    })
-                    ->orderby($orderby,$order)
-                    ->paginate(30);
+            $filtro = $request->get('filtro', 'fecha');
+            $buscar = $request->buscar;
+            $desde = $request->get('desde', date('Y-m-d',strtotime(date('Y-m-d').' - 30 days')));
+            $hasta = $request->get('hasta', date('Y-m-d'));
+            $esExportable = $request->get('export',false);
 
-                foreach ($ventas as $venta){
-                    $cuotas=$venta->pago;
-                    $minimo_dias = 5;
-                    $suma_cuotas = 0;
+            $filtros = [
+                'desde' => $desde,
+                'hasta' => $hasta,
+                'filtro'=>$filtro,
+                'buscar'=>$buscar,
+            ];
 
-                    foreach ($cuotas as $pago){
-                        $fecha_hoy = Carbon::now();
-                        $dias_restantes=$fecha_hoy->diffInDays(Carbon::parse($pago->fecha),false);
+            $orderby=$request->get('orderby','idventa');
+            $order=$request->get('order', 'desc');
 
-                        if($pago->estado == 2){
-                            $suma_cuotas +=  $pago->monto;
-                        }
+            $ventas = Venta::join('persona', 'persona.idpersona', '=', 'ventas.idcliente')
+                ->select('ventas.*','persona.nombre as cliente')
+                ->when($filtro == 'fecha', function ($query) use ($desde, $hasta) {
+                    return $query->whereBetween('fecha', [$desde.' 00:00:00', $hasta.' 23:59:59']);
+                }, function ($query) use ($buscar) {
+                    return $query->where('idcliente',$buscar);
+                })
+                ->where('eliminado', 0)
+                ->where('tipo_pago', 2)
+                ->whereHas('facturacion', function($query) {
+                    $query->whereIn('codigo_tipo_documento', [01, 03, 30])
+                        ->where(function ($query){
+                            $query->where('estado','ACEPTADO')
+                                ->orWhere('estado','PENDIENTE')
+                                ->orWhere('estado','-');
+                        });
+                })
+                ->orderby($orderby,$order)
+                ->when($esExportable, function ($query) {
+                    return $query->get();
+                }, function ($query) {
+                    return $query->paginate(30);
+                });
 
-                        if($dias_restantes <= 0 && $pago->estado == 1){
-                            $venta->estado = 'CUOTA VENCIDA '.$dias_restantes.' DÍA(S)';
-                            $venta->estado_badge_class = 'badge-danger';
-                            break;
-                        }
-                        if($dias_restantes <= $minimo_dias && $pago->estado == 1){
-                            $venta->estado = 'CUOTA POR VENCER EN '.$dias_restantes.' DÍA(S)';
-                            $venta->estado_badge_class = 'badge-warning';
-                            break;
-                        }
-                        if($suma_cuotas == $venta->total_venta){
-                            $venta->estado = 'PAGADO';
-                            $venta->estado_badge_class = 'badge-success';
-                        } else{
-                            $venta->estado = 'PAGO PENDIENTE';
-                            $venta->estado_badge_class = 'badge-info';
-                        }
+            if(!$esExportable){
+                $ventas->appends($_GET)->links();
+            }
 
+            foreach ($ventas as $venta){
+                $cuotas=$venta->pago;
+                $minimo_dias = 5;
+
+                foreach ($cuotas as $pago){
+                    $fecha_hoy = Carbon::now();
+                    $dias_restantes=$fecha_hoy->diffInDays(Carbon::parse($pago->fecha),false);
+                    $venta->estado = 'PAGO PENDIENTE';
+                    $venta->estado_badge_class = 'badge-info';
+
+                    if($dias_restantes <= 0 && $pago->estado == 1){
+                        $venta->estado = 'CUOTA VENCIDA '.$dias_restantes.' DÍA(S)';
+                        $venta->estado_badge_class = 'badge-danger';
+                        break;
                     }
+                    if($dias_restantes <= $minimo_dias && $pago->estado == 1){
+                        $venta->estado = 'CUOTA POR VENCER EN '.$dias_restantes.' DÍA(S)';
+                        $venta->estado_badge_class = 'badge-warning';
+                        break;
+                    }
+
+                    if($pago->estado == 2){
+                        $venta->estado = 'PAGADO';
+                        $venta->estado_badge_class = 'badge-success';
+                    } else {
+                        $venta->estado = 'PAGO PENDIENTE';
+                        $venta->estado_badge_class = 'badge-info';
+                        break;
+                    }
+
                 }
 
+            }
 
+            if($filtro == 'cliente'){
+                $cliente = Cliente::find($buscar);
+                $cliente->persona;
+            } else {
+                $cliente = null;
+            }
+
+            if($esExportable){
+                return Excel::download(new CreditosExport($ventas), 'resumen_creditos.xlsx');
+            } else {
                 return view('creditos.index', [
                     'creditos' => $ventas,
                     'usuario' => auth()->user()->persona,
-                    'textoBuscado' => $consulta,
+                    'filtros'=>$filtros,
+                    'cliente'=>$cliente,
                     'order'=>$order=='desc'?'asc':'desc',
                     'orderby'=>$orderby,
                     'order_icon'=>$order=='desc'?'<i class="fas fa-caret-square-up"></i>':'<i class="fas fa-caret-square-down"></i>'
                 ]);
-            } catch (\Exception $e){
-                if($e->getCode()=='42S22'){
-                    return redirect('/creditos');
-                }
-                return $e->getMessage();
             }
 
+
+
+        } catch (\Exception $e){
+            if($e->getCode()=='42S22'){
+                return redirect('/creditos');
+            }
+            return $e->getMessage();
         }
 
+    }
+
+    public function getBadget($idcliente){
+        try{
+
+            $ventas = Venta::where('idcliente',$idcliente)
+                ->where('eliminado',0)
+                ->where('tipo_pago',2)
+                ->whereHas('facturacion', function($query) {
+                    $query->whereIn('codigo_tipo_documento', [01, 03, 30])
+                        ->where(function ($query){
+                            $query->where('estado','ACEPTADO')
+                                ->orWhere('estado','PENDIENTE')
+                                ->orWhere('estado','-');
+                        });
+                })
+                ->get();
+
+            $totales = [
+                'total_credito'=>0,
+                'adeuda'=>0,
+                'pagado'=>0,
+            ];
+
+            foreach ($ventas as $item) {
+
+                $cuotas = $item->pago;
+                foreach ($cuotas as $pago){
+                    $totales['total_credito'] +=  $pago->monto;
+                    if($pago->estado == 1){
+                        $totales['adeuda'] +=  $pago->monto;
+                    }
+                    if($pago->estado == 2){
+                        $totales['pagado'] +=  $pago->monto;
+                    }
+                }
+            }
+
+            return $totales;
+
+        } catch (\Exception $e){
+            Log::info($e);
+            return $e->getMessage();
+        }
     }
 
     public function creditos_notificacion(){
@@ -216,7 +297,7 @@ class CreditoController extends Controller
         $venta->persona;
 
         foreach ($venta->pago as $pago){
-            $pago->fecha = date('d-m-Y', strtotime($pago->fecha));
+            $pago->fecha = date('d/m/Y', strtotime($pago->fecha));
             $suma = 0;
             if($pago->detalle){
                 $detalle = json_decode($pago->detalle, true);
@@ -329,4 +410,34 @@ class CreditoController extends Controller
             return $e->getMessage();
         }
     }
+
+    public function generarUrl($idcliente){
+        try{
+
+            $cliente = Cliente::find($idcliente);
+
+            if($cliente->tocken){
+                $uuid = $cliente->tocken;
+            } else {
+                $uuid = $this->generar_token(60);
+                $cliente->tocken = $uuid;
+                $cliente->save();
+            }
+
+            return 'https://'.app()->domain().'/consulta/creditos/'.$uuid;
+
+        } catch (Exception $e){
+            Log::error($e);
+            return $e->getMessage();
+        }
+    }
+
+    function generar_token($longitud)
+    {
+        if ($longitud < 4) {
+            $longitud = 4;
+        }
+        return bin2hex(openssl_random_pseudo_bytes(($longitud - ($longitud % 2)) / 2));
+    }
+
 }

@@ -2,8 +2,11 @@
 
 namespace sysfact\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use sysfact\Cliente;
 use sysfact\Emisor;
 use sysfact\Http\Controllers\Helpers\MainHelper;
 use sysfact\Http\Controllers\Helpers\PdfHelper;
@@ -127,6 +130,129 @@ class ConsultaController extends Controller
         }
 
 
+    }
+
+    public function verCredito(Request $request, $tocken){
+
+        $cliente = Cliente::where('tocken',$tocken)->first();
+
+        if(!$cliente){
+            return 'La ruta no existe';
+        }
+
+        try{
+
+            $orderby=$request->get('orderby','ventas.idventa');
+            $order=$request->get('order', 'desc');
+            $mostrar = $request->get('mostrar', 'ventas');
+
+            if($mostrar == 'productos'){
+                $ventas = DB::table('ventas_detalle')
+                    ->join('ventas', 'ventas.idventa', '=', 'ventas_detalle.idventa')
+                    ->join('cliente', 'cliente.idcliente', '=', 'ventas.idcliente')
+                    ->join('facturacion', 'facturacion.idventa', '=', 'ventas.idventa')
+                    ->join('productos', 'productos.idproducto', '=', 'ventas_detalle.idproducto')
+                    ->join('pagos', 'pagos.idventa', '=', 'ventas.idventa')
+                    ->select('ventas.idventa','ventas.fecha','ventas_detalle.monto','cantidad','serie','correlativo','codigo_moneda','productos.nombre as producto','descripcion')
+                    ->where('cliente.tocken','2fb5a9ca99650767261e')
+                    ->where(function($query) {
+                        $query->whereIn('codigo_tipo_documento', [01, 03, 30])
+                            ->where(function ($query){
+                                $query->where('facturacion.estado','ACEPTADO')
+                                    ->orWhere('facturacion.estado','PENDIENTE')
+                                    ->orWhere('facturacion.estado','-');
+                            });
+                    })
+                    ->where('ventas.eliminado',0)
+                    ->where('tipo_pago',2)
+                    ->where('pagos.estado',1)
+                    ->orderby($orderby,$order)
+                    ->paginate(30);
+            } else {
+                $ventas = Venta::join('cliente', 'cliente.idcliente', '=', 'ventas.idcliente')
+                    ->select('ventas.*','cliente.tocken')
+                    ->where('ventas.eliminado',0)
+                    ->where('tipo_pago',2)
+                    ->where('cliente.tocken',$tocken)
+                    ->whereHas('facturacion', function($query) {
+                        $query->whereIn('codigo_tipo_documento', [01, 03, 30])
+                            ->where(function ($query){
+                                $query->where('estado','ACEPTADO')
+                                    ->orWhere('estado','PENDIENTE')
+                                    ->orWhere('estado','-');
+                            });
+                    })
+                    ->whereHas('pago', function($query) {
+                        $query->where('estado', 1);
+                    })
+                    ->orderby($orderby,$order)
+                    ->paginate(30);
+            }
+
+            $ventas->appends($_GET)->links();
+
+            $cliente = $cliente->persona->nombre.' '.$cliente->persona->apellidos;
+
+            return view('creditos.clientes', [
+                'creditos' => $ventas,
+                'cliente'=>$cliente,
+                'mostrar'=>$mostrar,
+                'order'=>$order=='desc'?'asc':'desc',
+                'orderby'=>$orderby,
+                'order_icon'=>$order=='desc'?'<i class="fas fa-caret-square-up"></i>':'<i class="fas fa-caret-square-down"></i>'
+            ]);
+
+        } catch (\Exception $e){
+            return $e->getMessage();
+        }
+    }
+
+    public function getBadget($tocken){
+
+        $cliente = Cliente::where('tocken',$tocken)->first();
+
+        if(!$cliente){
+            return 'La ruta no existe';
+        }
+
+        try{
+
+            $ventas = Venta::join('cliente', 'cliente.idcliente', '=', 'ventas.idcliente')
+                ->where('cliente.tocken',$tocken)
+                ->where('ventas.eliminado',0)
+                ->where('tipo_pago',2)
+                ->whereHas('facturacion', function($query) {
+                    $query->whereIn('codigo_tipo_documento', [01, 03, 30])
+                        ->where(function ($query){
+                            $query->where('estado','ACEPTADO')
+                                ->orWhere('estado','PENDIENTE')
+                                ->orWhere('estado','-');
+                        });
+                })
+                ->get();
+
+            $totales = [
+                'total_credito'=>0,
+                'adeuda'=>0,
+                'pagado'=>0,
+            ];
+
+            foreach ($ventas as $item) {
+                $cuotas = $item->pago;
+                foreach ($cuotas as $pago){
+                    $totales['total_credito'] +=  $pago->monto;
+                    if($pago->estado == 1){
+                        $totales['adeuda'] +=  $pago->monto;
+                    }
+                }
+            }
+
+            return $totales;
+
+        } catch (\Exception $e){
+            Log::info($e);
+            return $e->getMessage();
+        }
     }
 
 }

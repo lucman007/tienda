@@ -13,6 +13,7 @@ class Cliente extends Model
 		'cod_cliente',
 		'num_documento',
 		'tipo_documento',
+        'tocken',
 		'eliminado'
 	];
 
@@ -20,4 +21,9 @@ class Cliente extends Model
 	{
 		return $this->hasOne(Persona::class,'idpersona','idcliente');
 	}
+
+    public function venta()
+    {
+        return $this->hasOne(Venta::class,'idcliente','idcliente');
+    }
 }

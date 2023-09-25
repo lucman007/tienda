@@ -108,10 +108,8 @@ Route::group(['middleware' => ['can:Pedido']], function () {
     Route::get('pedidos','PedidoController@index');
     Route::get('pedidos/mesa/{numero}','PedidoController@ver_mesa');
     Route::post('pedidos/mesa/verificar','PedidoController@verificar_mesa');
-    //Route::get('pedidos/obtener-mesas','PedidoController@obtener_mesas');
     Route::get('pedidos/obtener-pedidos','PedidoController@obtener_pedidos');
     Route::post('pedidos/productos_por_categoria', 'PedidoController@productos_por_categoria');
-    //Route::get('pedidos/productos/{search}', 'PedidoController@obtenerProductos');
     Route::post('pedidos/store', 'PedidoController@store');
     Route::post('pedidos/update', 'PedidoController@update');
     Route::get('pedidos/editar/{idpedido}','PedidoController@editar_pedido');
@@ -370,6 +368,8 @@ Route::group(['middleware' => ['can:Créditos']], function () {
     Route::get('creditos/actualizar-pagos', 'CreditoController@actualizar_pagos');
     Route::post('creditos/set-alias', 'CreditoController@set_alias');
     Route::get('creditos/get-alias/{id}', 'CreditoController@get_alias');
+    Route::get('creditos/get-badget/{id}', 'CreditoController@getBadget');
+    Route::get('creditos/generar-url/{id}', 'CreditoController@generarUrl');
 });
 
 //Ruta para consultar documentos
@@ -377,7 +377,8 @@ Route::get('consulta', 'ConsultaController@index');
 Route::post('consulta/obtenerDocumento', 'ConsultaController@obtener_documento');
 Route::get('consulta/descargar/{file}', 'ConsultaController@descargarArchivo');
 Route::get('consulta/descargar-comprobante/{tipo}/{file}', 'ConsultaController@descargar_comprobante');
-//Route::get('impresion/print-file/{file}','ConsultaController@printFile');
+Route::get('consulta/creditos/{tocken}', 'ConsultaController@verCredito');
+Route::get('consulta/get-badget/{tocken}', 'ConsultaController@getBadget');
 
 
 Route::group(['middleware' => ['can:Pedido']], function () {

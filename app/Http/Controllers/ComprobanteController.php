@@ -210,6 +210,50 @@ class ComprobanteController extends Controller
                         break;
                 }
 
+                $item->guia_relacionada=$item->guia->first();
+
+                //inicio código para version antigua del sistema tabla guia
+                if(!$item->guia_relacionada){
+                    $item->guia_relacionada = Guia::where('correlativo',$item->facturacion->guia_relacionada)->first();
+                    if(!$item->guia_relacionada){
+                        $correlativo = $item->facturacion->guia_relacionada;
+                        if($correlativo){
+                            $item->guia_relacionada = ['correlativo'=>$correlativo,'estado'=>$item->facturacion->estado_guia];
+                        } else{
+                            $item->guia_relacionada=false;
+                        }
+                    }
+                }
+                //fin código para version antigua del sistema tabla guia
+
+                switch ($item->guia_relacionada['estado']){
+                    case 'PENDIENTE':
+                        $item->badge_class_guia='badge-warning';
+                        break;
+                    case 'ACEPTADO':
+                        $item->badge_class_guia='badge-success';
+                        break;
+                    case 'ANULADO':
+                        $item->badge_class_guia='badge-dark';
+                        break;
+                    case 'RECHAZADO':
+                        $item->badge_class_guia='badge-danger';
+                }
+
+                //pago credito
+                $suma_cuotas = 0;
+                $cuotas = $item->pago;
+                foreach ($cuotas as $pago){
+                    if($pago->estado == 2){
+                        $suma_cuotas +=  $pago->monto;
+                    }
+                    if($suma_cuotas >= $item->total_venta){
+                        if($item->facturacion->codigo_tipo_documento != '07' || $item->facturacion->codigo_tipo_documento != '08'){
+                            $item->estado_credito = 'PAGADO';
+                        }
+                    }
+                }
+
 
             }
 
