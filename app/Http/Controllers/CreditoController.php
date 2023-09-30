@@ -117,8 +117,19 @@ class CreditoController extends Controller
             foreach ($ventas as $venta){
                 $cuotas=$venta->pago;
                 $minimo_dias = 5;
+                $suma = 0;
+                $proximo_pago = null;
 
                 foreach ($cuotas as $pago){
+                    if($pago->detalle){
+                        $detalle = json_decode($pago->detalle, true);
+                        foreach ($detalle as $d){
+                            $suma += $d['monto'];
+                        }
+                    }
+
+                    $proximo_pago = date('d/m/Y', strtotime($pago->fecha));
+
                     $fecha_hoy = Carbon::now();
                     $dias_restantes=$fecha_hoy->diffInDays(Carbon::parse($pago->fecha),false);
                     $venta->estado = 'PAGO PENDIENTE';
@@ -145,6 +156,10 @@ class CreditoController extends Controller
                     }
 
                 }
+
+                $venta->pagado = $suma;
+                $venta->saldo = $venta->total_venta - $suma;
+                $venta->proximo_pago = $proximo_pago;
 
             }
 
@@ -202,19 +217,23 @@ class CreditoController extends Controller
                 'pagado'=>0,
             ];
 
-            foreach ($ventas as $item) {
+            $suma = 0;
 
+            foreach ($ventas as $item) {
                 $cuotas = $item->pago;
                 foreach ($cuotas as $pago){
                     $totales['total_credito'] +=  $pago->monto;
-                    if($pago->estado == 1){
-                        $totales['adeuda'] +=  $pago->monto;
-                    }
-                    if($pago->estado == 2){
-                        $totales['pagado'] +=  $pago->monto;
+                    if($pago->detalle){
+                        $detalle = json_decode($pago->detalle, true);
+                        foreach ($detalle as $d){
+                            $suma += $d['monto'];
+                        }
                     }
                 }
             }
+
+            $totales['pagado'] =  $suma;
+            $totales['adeuda'] =  $totales['total_credito'] - $suma;
 
             return $totales;
 
@@ -296,6 +315,8 @@ class CreditoController extends Controller
         $venta->pago;
         $venta->persona;
 
+        $total_pagado = 0;
+
         foreach ($venta->pago as $pago){
             $pago->fecha = date('d/m/Y', strtotime($pago->fecha));
             $suma = 0;
@@ -307,8 +328,13 @@ class CreditoController extends Controller
             }
             $pago->total_pagado = $suma;
             $pago->total_adeuda = $pago->monto - $suma;
-            $pago->total_adeuda == 0 ? $pago->estado = 'pagado':$pago->estado = 'adeuda';
+
+            $total_pagado += $suma;
         }
+
+        $venta->pagado = $total_pagado;
+        $venta->saldo = $venta->total_venta - $total_pagado;
+
 
         switch ($venta->facturacion->codigo_tipo_documento) {
             case '03':
@@ -316,12 +342,6 @@ class CreditoController extends Controller
                 break;
             case '01':
                 $venta->facturacion->comprobante = 'Factura';
-                break;
-            case '07':
-                $venta->facturacion->comprobante = 'Nota de crédito';
-                break;
-            case '08':
-                $venta->facturacion->comprobante = 'Nota de débito';
                 break;
             default:
                 $venta->facturacion->comprobante = 'Venta';
@@ -343,7 +363,7 @@ class CreditoController extends Controller
             $pagos=Pago::where('idventa',$request->idventa)->get();
 
             foreach ($pagos as $pago){
-                $pago->fecha = date('d-m-Y', strtotime($pago->fecha));
+                $pago->fecha = date('d/m/Y', strtotime($pago->fecha));
                 $suma = 0;
                 if($pago->detalle){
                     $detalle = json_decode($pago->detalle, true);
@@ -380,7 +400,7 @@ class CreditoController extends Controller
                 $dataTipoPago = DataTipoPago::getTipoPago();
                 $find = array_search($d['metodo_pago'], array_column($dataTipoPago,'num_val'));
                 $d['metodo_pago'] = mb_strtoupper($dataTipoPago[$find]['label']);
-                $d['fecha']=date('d-m-Y',strtotime($d['fecha']));
+                $d['fecha']=date('d/m/Y',strtotime($d['fecha']));
                 $suma += $d['monto'];
                 $data[] = $d;
             }

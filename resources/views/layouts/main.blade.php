@@ -176,6 +176,16 @@
                     </div>
                 </div>
             </div>
+            <div :class="mostrarAlerta?'d-flex':'d-none'" class="alert alert-warning py-0 fade show align-items-center justify-content-between">
+                <div>
+                    @{{ aviso }}
+                </div>
+                <div>
+                    <button @click="cerrarAlerta" style="color: #695017" class="btn py-0">
+                        <i class="fas fa-times"></i> Cerrar
+                    </button>
+                </div>
+            </div>
         </header>
     @else
     <header class="fixed-top">
@@ -380,6 +390,16 @@
                 </div>
             </div>
         </div>
+        <div :class="mostrarAlerta?'d-flex':'d-none'" class="alert alert-warning py-0 fade show align-items-center justify-content-between">
+            <div>
+                @{{ aviso }}
+            </div>
+            <div>
+                <button @click="cerrarAlerta" style="color: #695017" class="btn py-0">
+                    <i class="fas fa-times"></i> Cerrar
+                </button>
+            </div>
+        </div>
     </header>
 
     @endif
@@ -399,16 +419,55 @@
     </div>
 </footer>
 {{--<script src="{{asset('js/app.js?v='.filemtime('js/app.js'))}}"></script>--}}
-<script src="{{asset('js/app-v2.js?v='.filemtime('js/app.js'))}}"></script>
+<script src="{{asset('js/app-v3.js?v='.filemtime('js/app.js'))}}"></script>
 @yield('script')
 <script>
     let app_menu = new Vue({
         el: '.app_menu',
+        data:{
+            mostrarAlerta:false,
+            aviso:''
+        },
+        mounted(){
+            this.mostrarAlerta = localStorage.getItem('mostrarAlerta');
+            this.aviso = localStorage.getItem('aviso');
+            @php
+                $emitir_solo_ticket = json_decode(cache('config')['interfaz'], true)['emitir_solo_ticket']??false;
+            @endphp
+            this.$options.sockets.onmessage = (message) => {
+                let obj = JSON.parse(message.data);
+                if(obj.clave === 'alerta_error_sunat' || obj.clave === 'otro'){
+                    if(obj.dominio === 'todos') {
+                        if(obj.clave === 'alerta_error_sunat'){
+                            @if(!$emitir_solo_ticket)
+                                this.mostrarAlerta = true;
+                                this.aviso = obj.valor;
+                            @endif
+                        } else {
+                            this.mostrarAlerta = true;
+                            this.aviso = obj.valor;
+                        }
+                    } else {
+                        let baseUrl = window.location.protocol + '//' + window.location.host + '/';
+                        if(obj.dominio === baseUrl){
+                            this.mostrarAlerta = true;
+                            this.aviso = obj.valor;
+                        }
+                    }
+                    localStorage.setItem('mostrarAlerta', true);
+                    localStorage.setItem('aviso', obj.valor);
+                }
+            };
+        },
         methods:{
             disabled_ventas(){
                 if (typeof app.disabled_ventas === 'function'){
                     app.disabled_ventas();
                 }
+            },
+            cerrarAlerta(){
+                this.mostrarAlerta=false;
+                localStorage.removeItem('mostrarAlerta', false);
             }
         }
     })

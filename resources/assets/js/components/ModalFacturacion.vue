@@ -30,28 +30,30 @@
                                             <i class="fas fa-dollar-sign"></i>
                                         </b-input-group-text>
                                     </b-input-group-prepend>
-                                <select v-model="tipoPagoContado" class="custom-select">
+                                <select v-model="metodoPago" class="custom-select">
                                     <option v-for="pago in tipo_pago" v-bind:value="pago['num_val']">{{pago['label']}}</option>
                                 </select>
                                 </b-input-group>
                             </div>
-                            <div class="col-lg-4 mt-2 mt-lg-0">
-                                <b-button v-show="tipoPagoContado==4" v-b-modal.modal-pagofraccionado variant="primary"><i
-                                        class="fas fa-plus"></i> Editar pago
+                            <div class="col-lg-8 d-flex align-items-start mt-2 mt-lg-0 mb-lg-0">
+                                <b-button class="w-100 w-lg-50 mb-2 mb-lg-0" v-show="metodoPago==4" v-b-modal.modal-pagofraccionado variant="primary"><i
+                                        class="fas fa-edit"></i> Editar pago
                                 </b-button>
-                                <b-button v-show="tipoPagoContado==2"
-                                        @click="abrirCuotas" variant="primary"><i
+                                <b-button class="w-100 w-lg-50 mb-2 mb-lg-0" v-show="metodoPago==2" @click="abrirCuotas" variant="primary"><i
                                         class="fas fa-plus"></i> Cuotas ({{cuotas.length}})
                                 </b-button>
-                            </div>
-                            <div class="col-lg-4">
-                                <b-form-checkbox v-model="imprimir" switch size="lg" class="float-right">
-                                    <p style="font-size: 1rem;">Imprimir</p>
-                                </b-form-checkbox>
+                                <b-input-group v-show="!(metodoPago==1 || metodoPago==4 || metodoPago==2)" class="mb-2 mb-lg-0 w-lg-50">
+                                    <b-input-group-prepend>
+                                        <b-input-group-text>
+                                            <i class="fas fa-check"></i>
+                                        </b-input-group-text>
+                                    </b-input-group-prepend>
+                                    <input v-model="num_operacion" type="text" class="form-control" placeholder="N° operación">
+                                </b-input-group>
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-8 order-2 order-md-1">
+                    <div class="col-lg-8 mt-2 mt-lg-2 order-2 order-lg-1">
                         <span v-show="clienteSeleccionado.esNuevo" class="badge badge-success n-cliente"> NUEVO CLIENTE</span>
                         <b-input-group>
                             <b-input-group-prepend>
@@ -63,7 +65,7 @@
                                    type="text" class="form-control">
                         </b-input-group>
                     </div>
-                    <div class="col-lg-4 mb-2 mb-lg-0 order-1 order-md-2">
+                    <div class="col-lg-4 mt-0 mt-lg-2 order-1 order-lg-2">
                         <b-input-group>
                             <b-input-group-prepend>
                                 <b-input-group-text>
@@ -166,8 +168,11 @@
                 </div>
             </div>
             <template #modal-footer="{ ok, cancel}">
+                <b-form-checkbox v-model="imprimir" switch size="lg" class="float-right">
+                    <p style="font-size: 1rem;">Imprimir</p>
+                </b-form-checkbox>
                 <b-button variant="secondary" @click="cancel()">
-                    Cancel
+                    Cancelar
                 </b-button>
                 <b-button :disabled="mostrarSpinner" variant="primary" @click="procesar">
                     <span v-show="mostrarSpinner"><b-spinner small label="Loading..."></b-spinner> Procesando...</span>
@@ -222,17 +227,17 @@
                 <div class="row">
                     <div v-for="(cuota,index) in cuotasAux" class="col-lg-12 mb-3" :key="index">
                         <div class="row">
-                            <div class="col-lg-5">
+                            <div class="col-lg-4">
                                 <label>Cuota {{ index + 1 }} S/</label>
-                                <input v-model="cuota.monto" type="text" class="form-control">
+                                <input v-model="cuota.monto" type="text" class="form-control" onfocus="this.select()">
                             </div>
                             <div class="col-lg-6">
                                 <label>Fecha de pago:</label>
                                 <input :min="fecha" type="date" v-model="cuota.fecha" name="fechaCuota"
                                        class="form-control">
                             </div>
-                            <div class="col-lg-1">
-                                <i @click="borrarCuota(index)" class="fas fa-times-circle btnBorrarCuota"></i>
+                            <div class="col-lg-2" v-show="index > 0">
+                                <b-button variant="danger" style="margin-top: 20px" @click="borrarCuota(index)"><i class="fas fa-trash"></i></b-button>
                             </div>
                         </div>
                     </div>
@@ -271,7 +276,7 @@
                 comprobante : '',
                 tituloModal:'',
                 query:'',
-                tipoPagoContado: 1,
+                metodoPago: 1,
                 imprimir:true,
                 pago_fraccionado:[
                     {
@@ -430,7 +435,7 @@
                     return;
                 }
 
-                if (this.tipoPagoContado == 2 && this.cuotas.length == 0) {
+                if (this.metodoPago == 2 && this.cuotas.length == 0) {
                     alert('Debes ingresar al menos una cuota con su fecha de vencimiento');
                     return;
                 }
@@ -445,7 +450,7 @@
                     'idpedido': this.idpedido,
                     'items':JSON.stringify(this.items),
                     'comprobante':this.comprobante,
-                    'tipo_pago_contado':this.tipoPagoContado,
+                    'tipo_pago_contado':this.metodoPago,
                     'cliente':JSON.stringify(this.clienteSeleccionado),
                     'num_operacion':this.num_operacion,
                     'pago_fraccionado': JSON.stringify(this.pago_fraccionado),
@@ -531,7 +536,7 @@
                 this.errorVenta = 0;
                 this.errorDatosVenta = [];
                 //Validar pagos fraccionados
-                if (this.tipoPagoContado == 4) {
+                if (this.metodoPago == 4) {
                     let suma_pago_fra = 0;
                     for (let pago of this.pago_fraccionado) {
                         suma_pago_fra += Number(pago.monto);
@@ -571,13 +576,14 @@
                 this.errorDatosVenta=[];
                 this.mostrarProgreso=false;
                 this.mostrarSpinner=false;
-                this.tipoPagoContado = 1;
+                this.metodoPago = 1;
                 this.idorden = -1;
                 this.idorden_origen = -1;
                 this.dividir = 0;
                 this.propina = '';
                 this.vuelto = 0;
                 this.imprimir = true;
+                this.num_operacion='';
                 this.pago_fraccionado = [
                     {
                         monto: '0.00',
@@ -633,5 +639,8 @@
     .tabla_vuelto td{
         font-size: 17px;
         padding: 0;
+    }
+    @media (min-width: 992px) {
+        .w-lg-50 { width: 50%!important; }
     }
 </style>

@@ -10,7 +10,7 @@ require('./bootstrap');
 window.Vue = require('vue');
 import BootstrapVue from 'bootstrap-vue';
 import VueSweetalert2 from 'vue-sweetalert2';
-
+import VueNativeSock from 'vue-native-websocket';
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
@@ -20,6 +20,11 @@ import VueSweetalert2 from 'vue-sweetalert2';
 
 Vue.use(BootstrapVue);
 Vue.use(VueSweetalert2);
+Vue.use(VueNativeSock, 'wss://facsy.onrender.com', {
+    reconnection: true, // Habilita la reconexión automática
+    reconnectionAttempts: 5, // Número de intentos de reconexión
+    reconnectionDelay: 10000, // Retraso entre intentos de reconexión (en milisegundos)
+});
 Vue.component('agregar-cliente', require('./components/AgregarCliente.vue'));
 Vue.component('agregar-producto', require('./components/AgregarProducto.vue'));
 Vue.component('agregar-proveedor', require('./components/AgregarProveedor.vue'));
@@ -45,3 +50,4 @@ Vue.component('modal-ubigeo',require('./components/ModalUbigeo.vue'));
 Vue.component('modal-producto-descuento',require('./components/ProductoDescuento.vue'));
 Vue.component('modal-devolucion',require('./components/ModalDevolucion.vue'));
 Vue.component('table-draggable',require('./components/TableDraggable.vue'));
+Vue.component('credito-rapido',require('./components/CreditoRapido.vue'));

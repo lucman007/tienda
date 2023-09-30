@@ -25,7 +25,7 @@
                     @can('Configuración: logos')
                     <b-tab @click="tabChanged('logos')" title="Logos" :active="tabActive=='logos'">
                         <b-card-text>
-                            <div class="container">
+                            <div class="container-fluid">
                                 <div class="row">
                                     @include('configuracion.logo')
                                 </div>
@@ -36,7 +36,7 @@
                     @can('Configuración: email')
                     <b-tab @click="tabChanged('email')" title="Email" :active="tabActive=='email'">
                         <b-card-text>
-                            <div class="container">
+                            <div class="container-fluid">
                                 <div class="row">
                                     @include('configuracion.email')
                                 </div>
@@ -47,7 +47,7 @@
                     @can('Configuración: guía')
                     <b-tab @click="tabChanged('guia')" title="Guía" :active="tabActive=='guia'">
                         <b-card-text>
-                            <div class="container">
+                            <div class="container-fluid">
                                 <div class="row">
                                     @include('configuracion.guia')
                                 </div>
@@ -58,7 +58,7 @@
                     @can('Configuración: cotización')
                     <b-tab @click="tabChanged('cotizacion')" title="Cotización" :active="tabActive=='cotizacion'">
                         <b-card-text>
-                            <div class="container">
+                            <div class="container-fluid">
                                 <div class="row">
                                     @include('configuracion.cotizacion')
                                 </div>
@@ -80,7 +80,7 @@
                     @can('Configuración: interfaz')
                         <b-tab @click="tabChanged('interfaz')" title="Interfaz" :active="tabActive=='interfaz'">
                             <b-card-text>
-                                <div class="container">
+                                <div class="container-fluid">
                                     <div class="row">
                                         @include('configuracion.interfaz')
                                     </div>
@@ -91,7 +91,7 @@
                     @can('Configuración: empresa')
                     <b-tab @click="tabChanged('empresa')" title="Empresa" :active="tabActive=='empresa'">
                         <b-card-text>
-                            <div class="container">
+                            <div class="container-fluid">
                                 <div class="row">
                                     @include('configuracion.empresa')
                                 </div>
@@ -101,7 +101,7 @@
                     @endcan
                     @can('Configuración: roles')
                         <b-tab @click="tabChanged('roles')" title="Roles" :active="tabActive=='roles'">
-                            <div class="container">
+                            <div class="container-fluid">
                                 <div class="row">
                                     @include('configuracion.roles')
                                 </div>
@@ -110,7 +110,7 @@
                     @endcan
                     @can('Configuración: sistema')
                     <b-tab @click="tabChanged('sistema')" title="Sistema" :active="tabActive=='sistema'">
-                        <div class="container">
+                        <div class="container-fluid">
                             <div class="row">
                                 @include('configuracion.sistema')
                             </div>
@@ -120,7 +120,7 @@
                     @can('Configuración: tenants')
                         @if($tenantPermision)
                         <b-tab @click="tabChanged('tenants')" title="Tenants" :active="tabActive=='tenants'">
-                            <div class="container">
+                            <div class="container-fluid">
                                 <div class="row">
                                     @include('configuracion.tenants')
                                 </div>
@@ -213,6 +213,10 @@
                 series: <?php echo $configuracion->series ?>,
                 plan: <?php echo $configuracion->plan ?>,
                 guia:<?php echo $configuracion->guia ?>,
+                aviso:'{{\Illuminate\Support\Facades\Cache::get('mensaje_tenant')}}',
+                destino_socket:'1',
+                clave_socket:'alerta_error_sunat',
+                tenant_socket:'',
             },
             computed:{
                 tabActive(){
@@ -220,6 +224,27 @@
                 },
             },
             methods: {
+                enviar(){
+                    this.$socket.addEventListener('open', (event) => {
+                    });
+                    let dominio = this.destino_socket=='1'?'todos':this.tenant_socket;
+                    let data = {dominio:dominio,clave:this.clave_socket,valor:this.aviso};
+                    if (this.$socket.readyState === WebSocket.OPEN) {
+                        this.$socket.send(JSON.stringify(data));
+                    } else {
+                        console.error('El WebSocket no está en estado abierto (OPEN)');
+                    }
+                    axios.post('{{action('ConfiguracionController@guardar_mensaje_tenant')}}', {
+                        'mensaje': this.aviso
+                    })
+                        .then(() => {
+
+                        })
+                        .catch(error => {
+                            alert('Ha ocurrido un error al guardar.');
+                            console.log(error);
+                        });
+                },
                 guardar_rol(){
                     if(this.nombre_rol==''){
                         alert('Ingresa un nombre de rol')

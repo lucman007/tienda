@@ -506,7 +506,6 @@ class VentaController extends Controller
             //Guardar tipo de pago
             if($request->comprobante != '08') {
                 if ($request->tipo_pago == 2) {
-
                     $cuotas = json_decode($request->cuotas, TRUE);
                     foreach ($cuotas as $cuota) {
                         $pago = new Pago();
@@ -1262,17 +1261,33 @@ class VentaController extends Controller
                 }
             } else if ($request->tipo_pago_contado == 2) {
                 $cuotas = json_decode($request->cuotas, TRUE);
-                foreach ($cuotas as $cuota) {
+
+                if(!$cuotas){
                     $pago = new Pago();
-                    $pago->monto = $cuota['monto'];
+                    $pago->monto = $pedido->total;
                     $pago->tipo = 2;
-                    $pago->fecha = $cuota['fecha'];
+                    $pago->fecha = date('Y-m-d H:i:s',strtotime(date('Y-m-d').' + 30 days'));
                     $venta->pago()->save($pago);
+                } else {
+                    foreach ($cuotas as $cuota) {
+                        $pago = new Pago();
+                        $pago->monto = $cuota['monto'];
+                        $pago->tipo = 2;
+                        if($cuota['estado']??false){
+                            $pago->estado = $cuota['estado'];
+                        }
+                        if($cuota['detalle']??false){
+                            $pago->detalle = $cuota['detalle'];
+                        }
+                        $pago->fecha = $cuota['fecha'];
+                        $venta->pago()->save($pago);
+                    }
                 }
             }
             else{
                 $pago = new Pago();
                 $pago->monto=$pedido->total;
+                $pago->referencia=$request->num_operacion;
                 $pago->tipo=$request->tipo_pago_contado;
                 $pago->fecha=date('Y-m-d H:i:s');
                 $venta->pago()->save($pago);

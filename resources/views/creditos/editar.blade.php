@@ -13,9 +13,6 @@
         <div class="row">
             <div class="col-lg-12 mt-4 mb-3">
                 <div class="card">
-                    <div class="card-header">
-                        Detalle
-                    </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-lg-6">
@@ -28,7 +25,19 @@
                                     DÓLARES <hr>
                                 @endif
                                 <strong>Cliente:</strong> {{$credito->cliente['num_documento']}} - {{$credito->persona['nombre']}} {{$credito->alias?'('.$credito->alias.')':''}}<a href="javascript:void(0)" @click="abrir_modal()" class="ml-3"><i class="fas fa-user"></i> Alias de cliente</a>
-                            </div>{{--
+                            </div>
+                            <div class="col-lg-6">
+                                <p class="mb-0 float-right ml-5"><span class="badge badge-warning">Total por pagar</span><br>
+                                    <span style="font-size: 30px;"><strong>S/{{number_format($credito->saldo,2)}}</strong></span>
+                                </p>
+                                <p class="mb-0 float-right ml-5"><span class="badge badge-success">Total Pagado</span><br>
+                                    <span style="font-size: 30px;"><strong>S/{{number_format($credito->pagado,2)}}</strong></span>
+                                </p>
+                                <p class="mb-0 float-right"><span class="badge badge-primary">Total crédito</span><br>
+                                    <span style="font-size: 30px;"><strong>S/{{$credito->total_venta}}</strong></span>
+                                </p>
+                            </div>
+                            {{--
                             <div class="col-lg-3 offset-lg-3">
                                 <button class="btn btn-primary float-right" title="Pagar"><i class="fas fa-dollar-sign"></i> Pago total
                                 </button>
@@ -39,11 +48,10 @@
                                 <thead class="bg-custom-green">
                                 <tr>
                                     <th scope="col"></th>
-                                    <th scope="col">N° de cuota</th>
-                                    <th scope="col">Monto</th>
+                                    <th scope="col">Cuota</th>
                                     <th scope="col">Vencimiento</th>
-                                    <th scope="col">Total pagado</th>
-                                    <th scope="col">Saldo por pagar</th>
+                                    <th scope="col">Monto</th>
+                                    <th scope="col">Estado</th>
                                     <th scope="col">Opciones</th>
                                 </tr>
                                 </thead>
@@ -51,12 +59,14 @@
                                 <tr v-for="(cuota,index) in cuotas" :key="index" :class="{'tr-pagado':'pagado'==cuota.estado}">
                                     <td></td>
                                     <td>00@{{index + 1}}</td>
-                                    <td>@{{ cuota.monto}}</td>
                                     <td>@{{ cuota.fecha }}</td>
-                                    <td>@{{ (Number(cuota.total_pagado)).toFixed(2) }}</td>
-                                    <td>@{{ (Number(cuota.total_adeuda)).toFixed(2) }}</td>
+                                    <td>@{{ cuota.monto}}</td>
                                     <td>
-                                        <button @click="abrir_modal(cuota.idpago)" class="btn btn-success" title="Agregar pago"><i class="fas fa-money-bill-wave"></i> Pagar
+                                        <span v-show="cuota.total_pagado != 0" class="badge badge-success">PAGADO @{{ (Number(cuota.total_pagado)).toFixed(2) }}</span>
+                                        <span v-show="cuota.total_adeuda != 0" class="badge badge-danger">SALDO @{{ (Number(cuota.total_adeuda)).toFixed(2) }}</span>
+                                    </td>
+                                    <td>
+                                        <button @click="abrir_modal(cuota.idpago)" class="btn btn-warning" title="Agregar pago"><i class="fas fa-money-bill-wave"></i> Pagar
                                         </button>
                                     </td>
                                 </tr>
@@ -96,7 +106,7 @@
                     @endphp
                     <select v-model="metodo_pago" class="custom-select">
                         @foreach($tipo_pago as $pago)
-                            @if($pago['num_val'] != 4)
+                            @if(!($pago['num_val'] == 4 || $pago['num_val'] == 2))
                             <option value="{{$pago['num_val']}}">{{$pago['label']}}</option>
                             @endif
                         @endforeach
@@ -112,7 +122,7 @@
             <div class="col-lg-2">
                 <div class="form-group">
                     <label for="importe">Monto:</label>
-                    <input autocomplete="off" type="text" v-model="monto" class="form-control">
+                    <input autocomplete="off" type="text" v-model="monto" class="form-control" onfocus="this.select()">
                 </div>
             </div>
             <div class="col-lg-2">
@@ -280,6 +290,7 @@
                         .then(response => {
                             this.detalle = response.data.detalle;
                             this.suma_cuotas=response.data.pagado;
+                            this.monto = (response.data.adeuda).toFixed(2);
                             this.saldo=response.data.adeuda;
                         })
                         .catch(error => {

@@ -250,11 +250,11 @@
                                                   variant="secondary"><i class="fas fa-box-open"></i>
                                             Imprimir pedido
                                         </b-button>
-                                        {{--<b-button :disabled="productosSeleccionados == 0"
-                                                  @click="imprimir('entrega')"
-                                                  variant="secondary"><i class="fas fa-print"></i>
+                                        <b-button :disabled="productosSeleccionados == 0"
+                                                  v-b-modal.credito-rapido
+                                                  variant="secondary"><i class="fas fa-money-bill-wave"></i>
                                             Crédito rápido
-                                        </b-button>--}}
+                                        </b-button>
                                     </div>
                                     <div style="display: flex; justify-content: center;flex-wrap: nowrap;">
                                         @can('Pedido: procesar')
@@ -300,7 +300,7 @@
             v-on:obtener-mesas="obtener_pedidos"
             v-on:notificaciones="obtener_notificaciones"
             v-on:countcomprobantes="obtener_num_comprobantes"
-            v-on:limpiar="limpiar">
+            v-on:limpiar="limpiar(true)">
     </modal-facturacion>
     @if($buscador_alternativo)
     <modal-agregar-producto-alt
@@ -322,6 +322,7 @@
     @endif
     <modal-entrega
             :idpedido="idpedido"
+            v-on:send="sendWS"
             v-on:delivery="obtener_pedidos">
     </modal-entrega>
     <modal-detalle
@@ -332,6 +333,13 @@
     </modal-detalle>
     <modal-producto-descuento :item="item" v-on:agregar="agregarDescuento"></modal-producto-descuento>
     <modal-devolucion></modal-devolucion>
+    <credito-rapido
+            :idpedido="idpedido"
+            :total="totalVenta"
+            :items="productosSeleccionados"
+            v-on:obtener-mesas="obtener_pedidos"
+            v-on:limpiar="limpiar(true)">
+    </credito-rapido>
 @endsection
 @section('script')
     <script>
@@ -367,6 +375,20 @@
                 },
                 mounted(){
                     this.getHeights();
+                    this.$options.sockets.onmessage = (message) => {
+                        let obj = JSON.parse(message.data);
+                        let baseUrl = window.location.protocol + '//' + window.location.host + '/';
+                        if(obj.dominio === baseUrl){
+                            this.obtener_pedidos();
+                            if(obj.clave=='limpiar'){
+                                this.limpiar(false);
+                            } else {
+                                if(this.idpedido && this.idpedido != -1){
+                                    this.obtener_data_pedido(this.idpedido, true);
+                                }
+                            }
+                        }
+                    };
                 },
                 methods:{
                     getHeights(){
@@ -434,7 +456,7 @@
                                 console.log(error);
                             });
                     },
-                    obtener_data_pedido(id){
+                    obtener_data_pedido(id,socket=false){
                         this.mostrarSpinner = true;
                         let inputs = document.getElementsByClassName('td-dis');
                         for(input of inputs){
@@ -453,10 +475,12 @@
                                 } else {
                                     this.disabledTicket=false;
                                 }
-                                window.scrollTo({
-                                    top: document.body.scrollHeight + 500,
-                                    behavior: 'smooth',
-                                });
+                                if(!socket){
+                                    window.scrollTo({
+                                        top: document.body.scrollHeight + 500,
+                                        behavior: 'smooth',
+                                    });
+                                }
                             })
                             .catch(error => {
                                 alert('Ha ocurrido un error.');
@@ -545,6 +569,7 @@
                                     top: document.body.scrollHeight + 500,
                                     behavior: 'smooth',
                                 });
+                                this.sendWS();
                             })
                             .catch(error => {
                                 alert('Ha ocurrido un error.');
@@ -574,6 +599,7 @@
                                     this.productosSeleccionados = response.data;
                                     this.obtener_pedidos();
                                     this.mostrarSpinner = false;
+                                    this.sendWS();
                                 })
                                 .catch(error => {
                                     alert('Ha ocurrido un error.');
@@ -589,7 +615,7 @@
                         if(confirm('Se anulará la venta. Confirme la acción.')){
                             axios.delete('{{url('/pedidos/destroy')}}' + '/' + this.idpedido)
                                 .then(() =>{
-                                    this.limpiar();
+                                    this.limpiar(true);
                                 })
                                 .catch(error => {
                                     console.log(error);
@@ -621,6 +647,7 @@
                                     } else {
                                         producto['warning'] = true;
                                     }
+                                    this.sendWS();
                                 })
                                 .catch(error => {
                                     alert('Ha ocurrido un error.');
@@ -675,7 +702,7 @@
                             iframe.src = src;
                         @endif
                     },
-                    limpiar(){
+                    limpiar(sendToSocket){
                         this.totalVenta = '0.00';
                         this.productosSeleccionados=[];
                         this.idpedido = -1;
@@ -683,6 +710,9 @@
                         this.idvendedor="{{$idvendedor}}";
                         this.obtener_pedidos();
                         this.disabledTicket = true;
+                        if(sendToSocket){
+                            this.sendWS('limpiar')
+                        }
                     },
                     obtenerEmpleados(){
                         axios.get('/pedidos/obtener-empleados')
@@ -695,7 +725,7 @@
                                 console.log(error);
                             });
                     },
-                    cambiarEmpleado(e){
+                    cambiarEmpleado(){
                         if(this.idpedido != -1){
                             this.mostrarSpinner = true;
                             axios.post('/pedidos/cambiar-vendedor',{
@@ -707,6 +737,7 @@
                                         alert('Ha ocurrido un error al actualizar el vendedor');
                                     } else {
                                         this.obtener_pedidos();
+                                        this.sendWS();
                                     }
                                     this.mostrarSpinner = false;
                                 })
@@ -737,7 +768,17 @@
                         this.timer = setTimeout(() => {
                             this.actualizarDetalle(null)
                         }, 500);
-
+                    },
+                    sendWS(accion='') {
+                        this.$socket.addEventListener('open', (event) => {
+                        });
+                        let baseUrl = window.location.protocol + '//' + window.location.host + '/';
+                        let data = {dominio:baseUrl,clave:accion,valor:''};
+                        if (this.$socket.readyState === WebSocket.OPEN) {
+                            this.$socket.send(JSON.stringify(data));
+                        } else {
+                            console.error('El WebSocket no está en estado abierto (OPEN)');
+                        }
                     },
                 }
             }

@@ -82,6 +82,7 @@
                              alert('No se ha podido guardar los datos de entrega. Intenta nuevamente');
                          }
                          this.$emit('delivery');
+                         this.$emit('send');
                          this.$refs['modal-entrega'].hide();
                     })
                     .catch(error => {

@@ -5,6 +5,7 @@ namespace sysfact\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Intervention\Image\Facades\Image;
 use Spatie\Permission\Models\Permission;
@@ -469,4 +470,7 @@ class ConfiguracionController extends Controller
         return redirect('/configuracion?tab=sistema');
     }
 
+    public function guardar_mensaje_tenant(Request $request){
+        Cache::forever('mensaje_tenant',$request->mensaje);
+    }
 }

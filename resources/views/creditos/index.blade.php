@@ -96,7 +96,9 @@
                                                     <th scope="col">Vend.</th>
                                                     <th scope="col" style="width:25%"><a href="?orderby=cliente&order={{$order}}">Cliente <span class="icon-hover @if($orderby=='cliente') icon-hover-active @endif">{!!$order_icon!!}</span></a></th>
                                                     <th scope="col">Importe</th>
-                                                    <th scope="col">Moneda</th>
+                                                    <th scope="col">Pagado</th>
+                                                    <th scope="col">Saldo</th>
+                                                    <th scope="col">Próximo pago</th>
                                                     <th scope="col" style="width: 12%">Comprobante</th>
                                                     <th scope="col">Estado</th>
                                                     <th scope="col">Opciones</th>
@@ -111,8 +113,10 @@
                                                             <td style="width: 120px">{{date("d/m/Y",strtotime($venta->fecha))}}</td>
                                                             <td>{{mb_strtoupper($venta->empleado->nombre)}}</td>
                                                             <td>{{$venta->cliente}} {{$venta->alias?'('.$venta->alias.')':''}}</td>
-                                                            <td>{{$venta->total_venta}}</td>
-                                                            <td>{{$venta->facturacion->codigo_moneda}}</td>
+                                                            <td>{{$venta->facturacion->codigo_moneda=='PEN'?'S/':'USD'}}{{$venta->total_venta}}</td>
+                                                            <td>{{$venta->facturacion->codigo_moneda=='PEN'?'S/':'USD'}}{{number_format($venta->pagado,2)}}</td>
+                                                            <td>{{$venta->facturacion->codigo_moneda=='PEN'?'S/':'USD'}}{{number_format($venta->saldo,2)}}</td>
+                                                            <td>{{$venta->proximo_pago}}</td>
                                                             <td><a href="/facturacion/documento/{{$venta->idventa}}" target="_blank">{{$venta->facturacion->serie}}-{{$venta->facturacion->correlativo}}</a><br>
                                                             </td>
                                                             <td><span class="badge {{$venta->estado_badge_class}}">{{$venta->estado}}</span></td>
