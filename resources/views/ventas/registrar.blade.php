@@ -321,6 +321,7 @@
                                     <option value="13">Ajustes – montos y/o fechas de pago</option>
                                     {{--<option value="03">Corrección por error en la descripción</option>
                                     <option v-show="comprobante != '07.01'" value="04">Descuento global</option>--}}
+                                    <option v-show="comprobante != '07.01'" value="04">Descuento global</option>
                                     <option v-show="comprobante != '07.01'" value="05">Descuento por ítem</option>
                                     {{--<option value="06">Devolución total</option>--}}
                                     <option value="07">Devolución por ítem</option>
@@ -568,6 +569,11 @@
                         <div class="row">
                             <div class="col-lg-6">
                                 <strong>Cliente: </strong> @{{ this.clienteSeleccionado['num_documento'] }} - @{{this.clienteSeleccionado['nombre']}} <hr>
+                            </div>
+                            <div class="col-lg-6" v-show="codigo_tipo_factura != '0200'">
+                                <b-form-checkbox v-model="esConIgv" switch size="sm" class="float-right">
+                                    Incluir IGV
+                                </b-form-checkbox>
                             </div>
                         </div>
                         <div class="table-responsive tabla-gestionar">
@@ -1153,15 +1159,13 @@
                         fecha: '{{date('Y-m-d', strtotime(date('Y-m-d').' + 1 days'))}}',
                     });
                 },
-                agregarDescuento(){
+                agregarDescuentoNC(){
                     //TIPO DE NOTA ELECTRONICA DESCUENTO
-                    axios.post('{{action('VentaController@obtenerProductos')}}', {
-                        'textoBuscado': 'descuento',
+                    axios.post('{{action('VentaController@obtenerDecuentoNc')}}', {
                         'idproducto':-2
                     })
                         .then(response => {
-                            this.listaProductos = response.data;
-                            this.agregarProducto(0);
+                            this.agregarProducto(response.data);
                         })
                         .catch(function (error) {
                             alert('Ha ocurrido un error.');
@@ -1325,12 +1329,12 @@
                             this.productosSeleccionados = datos.productos;
                             this.porcentaje_descuento_global = datos.facturacion.porcentaje_descuento_global * 100;
                             this.tipo_descuento_global = datos.facturacion.tipo_descuento_global;
+                            this.base_descuento_global = datos.facturacion.base_descuento_global;
+                            this.monto_descuento_global = datos.facturacion.descuento_global;
                             this.gravadas = datos.facturacion.total_gravadas;
                             this.exoneradas = datos.facturacion.total_exoneradas;
                             this.inafectas = datos.facturacion.total_inafectas;
                             this.gratuitas = datos.facturacion.total_gratuitas;
-                            this.base_descuento_global = datos.facturacion.base_descuento_global;
-                            this.monto_descuento_global = datos.facturacion.descuento_global;
                             this.descuentos = datos.facturacion.total_descuentos;
                             this.igv = datos.facturacion.igv;
                             this.totalVenta = datos.total_venta;
@@ -1364,8 +1368,11 @@
                                     this.calcularTotalVenta();
                                 }
                                 if(this.tipo_nota_electronica=='04'){
+                                    this.monto_descuento_global = 0;
+                                    this.base_descuento_global = 0;
+                                    this.porcentaje_descuento_global = 0;
                                     this.productosSeleccionados = [];
-                                    this.agregarDescuento();
+                                    this.agregarDescuentoNC();
                                 }
                                 this.inhabilitarComprobante = true;
                             }
@@ -1377,9 +1384,11 @@
                             this.$refs['modal-documento'].hide();
                             this.$nextTick(() => {
                                 const textareas = this.$refs.textareas;
-                                textareas.forEach(textarea => {
-                                    this.expandirTextarea({ target: textarea });
-                                });
+                                if(textareas){
+                                    textareas.forEach(textarea => {
+                                        this.expandirTextarea({ target: textarea });
+                                    });
+                                }
                             });
                         })
                         .catch(error => {

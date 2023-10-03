@@ -105,6 +105,12 @@ class VentaController extends Controller
         return json_encode($productos);
     }
 
+    public function obtenerDecuentoNc(){
+        $productos = Producto::where('idproducto',-2)
+            ->first();
+        return $productos;
+    }
+
     public function obtenerDocumentos(Request $request)
     {
         $consulta=trim($request->get('textoBuscado'));
