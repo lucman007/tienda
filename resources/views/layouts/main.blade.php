@@ -6,7 +6,7 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <base href=""/>
-    <link rel="shortcut icon" href="{{url('images/favicon.ico')}}">
+    <link rel="icon" type="image/jpg" href="{{url('images/icons/icon-72x72.png')}}"/>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
     <!-- app.css -->

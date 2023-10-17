@@ -179,6 +179,70 @@
     </template>
     </b-modal>
     <!--FIN MODAL IMAGEN -->
+    <!--INICIO MODAL BANCOS-->
+    <b-modal id="modal-cuentas" ref="modal-cuentas" size="xl" @@show="obtenerCuentas">
+    <template slot="modal-title">
+        Agregar cuentas
+    </template>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="row">
+                    <div class="col-lg-12" v-for="(item,index) in cuentas" :key="index">
+                        <div class="row">
+                            <div class="col-lg-3 form-group">
+                                <label>Banco:</label>
+                                @php
+                                    $bancos = \sysfact\Http\Controllers\Helpers\DataGeneral::getBancos();
+                                @endphp
+                                <select :disabled="index===0" v-model="item.banco" class="custom-select">
+                                    @foreach($bancos as $item)
+                                        <option value="{{$item['num_val']}}">{{$item['label']}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-lg-1 form-group">
+                                <label>Moneda:</label>
+                                <select :disabled="index===0" v-model="item.moneda" class="custom-select">
+                                    <option value="S/">S/</option>
+                                    <option value="USD">USD</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-2 form-group">
+                                <label>N° de cuenta:</label>
+                                <input class="form-control" v-model="item.cuenta" type="text"
+                                       placeholder="Cuenta">
+                            </div>
+                            <div class="col-lg-2 form-group">
+                                <label>CCI:</label>
+                                <input class="form-control" v-model="item.cci" type="text"
+                                       placeholder="CCI">
+                            </div>
+                            <div class="col-lg-3 form-group">
+                                <label>Descripción:</label>
+                                <input :disabled="index===0" class="form-control" v-model="item.descripcion" type="text"
+                                       placeholder="Descripción">
+                            </div>
+                            <div class="col-lg-1">
+                                <button v-show="index!==0" @click="borrarCuenta(index)" style="margin-top: 20px"
+                                        class="btn btn-danger"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 mb-3">
+                <button @click="agregarCuenta" class="btn btn-primary"><i class="fas fa-plus"></i> Agregar
+                </button>
+            </div>
+        </div>
+    </div>
+        <template #modal-footer="{ ok, cancel}">
+            <b-button variant="secondary" @click="cancel()">Cancelar</b-button>
+            <b-button variant="primary" @click="guardarCuentas()">Guardar</b-button>
+        </template>
+    </b-modal>
+    <!--FIN MODAL BANCOS -->
 
 @endsection
 @section('script')
@@ -217,6 +281,15 @@
                 destino_socket:'1',
                 clave_socket:'alerta_error_sunat',
                 tenant_socket:'',
+                cuentas:[
+                    {
+                        banco: '7',
+                        moneda: 'S/',
+                        cuenta: '',
+                        cci: '',
+                        descripcion: 'Cuenta de detracción',
+                    }
+                ],
             },
             computed:{
                 tabActive(){
@@ -224,6 +297,57 @@
                 },
             },
             methods: {
+                obtenerCuentas(){
+                    axios.get('{{action('ConfiguracionController@obtener_cuentas')}}')
+                        .then((response) => {
+                            this.cuentas = response.data;
+                        })
+                        .catch(error => {
+                            alert('Ha ocurrido un error al obtener la información.');
+                            console.log(error);
+                        });
+                },
+                guardarCuentas(){
+
+                    let cuentaVacia = true;
+                    let cciVacia = true;
+
+                    for(let item of this.cuentas){
+                        if(item.cuenta !== ''){
+                            cuentaVacia = false;
+                        }
+                        if(item.cci !== ''){
+                            cciVacia = false;
+                        }
+                    }
+
+                    if (cuentaVacia && cciVacia) {
+                        alert('Por favor, ingresa al menos un número de cuenta o CCI');
+                        return;
+                    }
+
+                    axios.post('{{action('ConfiguracionController@guardar_cuentas')}}', {
+                        'cuentas': JSON.stringify(this.cuentas)
+                    })
+                        .then(() => {
+                            location.href="/configuracion?tab=empresa";
+                        })
+                        .catch(error => {
+                            alert('Ha ocurrido un error al guardar.');
+                            console.log(error);
+                        });
+                },
+                agregarCuenta(){
+                    this.cuentas.push({
+                        banco: '1',
+                        moneda: 'S/',
+                        cuenta: '',
+                        cci: '',
+                    });
+                },
+                borrarCuenta(index){
+                    this.cuentas.splice(index,1);
+                },
                 enviar(){
                     this.$socket.addEventListener('open', (event) => {
                     });

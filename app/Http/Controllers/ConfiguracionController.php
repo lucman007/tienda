@@ -473,4 +473,21 @@ class ConfiguracionController extends Controller
     public function guardar_mensaje_tenant(Request $request){
         Cache::forever('mensaje_tenant',$request->mensaje);
     }
+
+    public function guardar_cuentas(Request $request){
+        $config = AppConfig::find('cuentas');
+        if(!$config){
+            $config = new AppConfig();
+            $config->clave = 'cuentas';
+        }
+        $config->valor = $request->cuentas;
+        $config->save();
+    }
+
+    public function obtener_cuentas(Request $request){
+        $config = AppConfig::find('cuentas');
+        MainHelper::updateconfiguracion();
+        return $config->valor;
+
+    }
 }

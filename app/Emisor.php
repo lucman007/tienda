@@ -47,6 +47,8 @@ class Emisor
     public $cuenta_1;
     public $cuenta_2;
 
+    public $cuentas;
+
 
     public function __construct()
     {
@@ -55,6 +57,7 @@ class Emisor
 
     public function emisor_model(){
         $config = MainHelper::configuracion('emisor');
+        $cuentas = json_decode(MainHelper::configuracion('cuentas'), true);
         $logo = MainHelper::configuracion('logo_comprobantes');
 
         if($config){
@@ -76,6 +79,7 @@ class Emisor
             $this->nombre_publicitario = $emisor['nombre_publicitario'];
             $this->texto_publicitario = $emisor['texto_publicitario'];
             $this->logo = $logo==''?false:$logo;
+            $this->cuentas = $cuentas;
             $this->cuenta_detracciones = $emisor['cuenta_detracciones'];
             $this->cuenta_1 = $emisor['cuenta_1'];
             $this->cuenta_2 = $emisor['cuenta_2'];

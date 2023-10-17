@@ -112,3 +112,9 @@
 <div class="col-lg-12">
     <b-button @click="guardarConfiguracion('emisor')" class="mr-2 mb-5 float-right" variant="success"><i class="fas fa-save"></i> Guardar</b-button>
 </div>
+<div class="col-lg-12">
+    <h4>Información de bancos y cuentas</h4>
+</div>
+<div class="col-lg-12">
+    <b-button v-b-modal.modal-cuentas class="mr-2 mb-5" variant="primary"><i class="fas fa-edit"></i> Editar cuentas</b-button>
+</div>

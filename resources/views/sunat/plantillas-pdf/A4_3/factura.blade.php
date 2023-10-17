@@ -213,9 +213,15 @@
         @endif
         <div class="cuentas">
             <p>
-                <strong>Cta. detracciones:</strong> {{$emisor->cuenta_detracciones}} <br>
-                <strong>Cta. Soles:</strong> {{$emisor->cuenta_1}} <br>
-                <strong>Cta. Dólares:</strong> {{$emisor->cuenta_2}} <br>
+                @php
+                    $bancos = \sysfact\Http\Controllers\Helpers\DataGeneral::getBancos();
+                @endphp
+                @foreach($emisor->cuentas as $cuenta)
+                    @php
+                        $index = array_search($emisor->cuentas, array_column($bancos,'num_val'));
+                    @endphp
+                <strong>Cta. {{$bancos[$index]['label']}}:</strong> {{$cuenta['cuenta']}} {{$cuenta['cci']?'/ '.$cuenta['cci']:''}} <br>
+                @endforeach
             </p>
         </div>
     </div>

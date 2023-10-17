@@ -688,21 +688,25 @@ class VentaController extends Controller
                 $venta->badge_class='badge-danger';
         }
 
-        switch ($venta->guia_relacionada['estado']){
-            case 'PENDIENTE':
-                $venta->badge_class_guia='badge-warning';
-                break;
-            case 'ACEPTADO':
-                $venta->badge_class_guia='badge-success';
-                break;
-            case 'ANULADO':
-                $venta->badge_class_guia='badge-dark';
-                break;
-            case 'RECHAZADO':
-                $venta->badge_class_guia='badge-danger';
+        if($venta->guia_relacionada){
+            switch ($venta->guia_relacionada['estado']){
+                case 'PENDIENTE':
+                    $venta->badge_class_guia='badge-warning';
+                    break;
+                case 'ACEPTADO':
+                    $venta->badge_class_guia='badge-success';
+                    break;
+                case 'ANULADO':
+                    $venta->badge_class_guia='badge-dark';
+                    break;
+                case 'RECHAZADO':
+                    $venta->badge_class_guia='badge-danger';
+            }
+
+            $venta->nombre_guia=$emisor->ruc.'-09-'.$venta->guia_relacionada['correlativo'];
+
         }
 
-        $venta->nombre_guia=$emisor->ruc.'-09-'.$venta->guia_relacionada['correlativo'];
         return view('ventas.visualizar', [
             'venta' => $venta,
             'usuario' => auth()->user()->persona

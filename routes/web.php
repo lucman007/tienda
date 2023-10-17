@@ -312,6 +312,8 @@ Route::group(['middleware' => ['can:Configuración']], function () {
     Route::get('configuracion/reiniciar-vistas', 'ConfiguracionController@reiniciar_vistas');
     Route::get('configuracion/verificar-totales', 'ConfiguracionController@verificar_totales');
     Route::post('configuracion/guardar-mensaje-tenant', 'ConfiguracionController@guardar_mensaje_tenant');
+    Route::post('configuracion/guardar-cuentas', 'ConfiguracionController@guardar_cuentas');
+    Route::get('configuracion/obtener-cuentas', 'ConfiguracionController@obtener_cuentas');
 });
 
 Route::group(['middleware' => ['can:Facturación: guía']], function () {
