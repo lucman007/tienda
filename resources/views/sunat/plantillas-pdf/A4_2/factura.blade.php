@@ -186,7 +186,7 @@
                             <tr>
                                 <td>
                                     <p>OPERACIÓN SUJETA A DETRACCIÓN <br>
-                                        <strong>N° de cta. Banco de la Nación:</strong> <br> {{$emisor->cuenta_detracciones}}
+                                        <strong>N° de cta. Banco de la Nación:</strong> <br> {{$emisor->cuentas[0]['cuenta']}}
                                     </p>
                                 </td>
                             </tr>

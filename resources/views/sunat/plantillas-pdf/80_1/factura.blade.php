@@ -183,7 +183,7 @@
         @endif
         @if($documento->facturacion->codigo_tipo_factura == '1001')
             <p><strong>OPERACIÓN SUJETA A DETRACCIÓN {{$documento->codigo_moneda}} {{$documento->detraccion}} ({{$documento->porcentaje_detraccion}}%)</strong></p>
-            <p>N° de cuenta detracción: {{$emisor->cuenta_detracciones}}</p>
+            <p>N° de cuenta detracción: {{$emisor->cuentas[0]['cuenta']}}</p>
         @endif
         <table style="text-align: center">
             <tr>

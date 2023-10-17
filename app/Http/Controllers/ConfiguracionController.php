@@ -482,11 +482,16 @@ class ConfiguracionController extends Controller
         }
         $config->valor = $request->cuentas;
         $config->save();
+        if($config->save()){
+            MainHelper::updateconfiguracion();
+            return "Datos guardados con éxito";
+        }else{
+            return "Ocurrió un error al guardar los datos";
+        }
     }
 
     public function obtener_cuentas(Request $request){
         $config = AppConfig::find('cuentas');
-        MainHelper::updateconfiguracion();
         return $config->valor;
 
     }

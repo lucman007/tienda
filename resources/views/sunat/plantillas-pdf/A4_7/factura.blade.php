@@ -109,8 +109,7 @@
                     <p>SON: {{$documento->leyenda}}</p>
                     @if($documento->facturacion->codigo_tipo_factura == '1001')
                         <p>OPERACIÓN SUJETA A DETRACCIÓN {{$documento->detraccion}} ({{$documento->porcentaje_detraccion}})</p>
-                        <p>N° de cuenta banco de la nación detracción: {{$emisor->cuenta_detracciones}}</p>
-                    @endif
+                        <p>N° de cuenta Banco de la Nación detracción: {{$emisor->cuentas[0]['cuenta']}}</p>                    @endif
                     @if($documento->tipo_pago == 2)
                         @php
                             $i=1
@@ -142,8 +141,17 @@
                         <tr>
                             <td>
                                 <br><br>
-                                <strong>Cta. Soles:</strong> <br>{{$emisor->cuenta_1}} <br>
-                                <strong>Cta. Dólares:</strong> <br> {{$emisor->cuenta_2}} <br>
+                                @php
+                                    $bancos = \sysfact\Http\Controllers\Helpers\DataGeneral::getBancos();
+                                @endphp
+                                @foreach($emisor->cuentas as $key=>$cuenta)
+                                    @php
+                                        $index = array_search($cuenta['banco'], array_column($bancos,'num_val'));
+                                    @endphp
+                                    @if($key !== 0)
+                                        <strong>N° de Cta. {{$bancos[$index]['label']}} ({{$cuenta['moneda']=='USD'?'Dólares':'Soles'}}):</strong> {{$cuenta['cuenta']}} {{$cuenta['cci']?'- CCI: '.$cuenta['cci']:''}} {{isset($cuenta['descripcion'])&&$cuenta['descripcion']!=''?'('.$cuenta['descripcion'].')':''}} <br>
+                                    @endif
+                                @endforeach
                             </td>
                         </tr>
                     </table>

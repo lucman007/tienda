@@ -123,6 +123,10 @@
                     <p>Representación Impresa de la {{$documento->titulo_doc}} Electrónica <br>
                         Código Hash: {{$documento->hash}} <br>
                         Para consultar el comprobante ingresar a : {{url('consulta')}}</p>
+                    @if($documento->facturacion->codigo_tipo_factura == '1001')
+                        <p><strong>OPERACIÓN SUJETA A DETRACCIÓN {{$documento->codigo_moneda}} {{$documento->detraccion}} ({{$documento->porcentaje_detraccion}}%)</strong></p>
+                        <p>N° de cuenta Banco de la Nación detracción: {{$emisor->cuentas[0]['cuenta']}}</p>
+                    @endif
                 </td>
                 <td style="width: 1%"></td>
                 <td class="footer-r">
@@ -216,11 +220,13 @@
                 @php
                     $bancos = \sysfact\Http\Controllers\Helpers\DataGeneral::getBancos();
                 @endphp
-                @foreach($emisor->cuentas as $cuenta)
+                @foreach($emisor->cuentas as $key=>$cuenta)
                     @php
-                        $index = array_search($emisor->cuentas, array_column($bancos,'num_val'));
+                        $index = array_search($cuenta['banco'], array_column($bancos,'num_val'));
                     @endphp
-                <strong>Cta. {{$bancos[$index]['label']}}:</strong> {{$cuenta['cuenta']}} {{$cuenta['cci']?'/ '.$cuenta['cci']:''}} <br>
+                    @if($key !== 0)
+                    <strong>N° de Cta. {{$bancos[$index]['label']}} ({{$cuenta['moneda']=='USD'?'Dólares':'Soles'}}):</strong> {{$cuenta['cuenta']}} {{$cuenta['cci']?'- CCI: '.$cuenta['cci']:''}} {{isset($cuenta['descripcion'])&&$cuenta['descripcion']!=''?'('.$cuenta['descripcion'].')':''}} <br>
+                    @endif
                 @endforeach
             </p>
         </div>

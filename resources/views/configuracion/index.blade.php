@@ -343,6 +343,7 @@
                         moneda: 'S/',
                         cuenta: '',
                         cci: '',
+                        descripcion: '',
                     });
                 },
                 borrarCuenta(index){

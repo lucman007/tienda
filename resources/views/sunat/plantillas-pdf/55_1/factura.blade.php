@@ -112,6 +112,10 @@
                 <td style="text-align: right; width: 20mm">{{$documento->codigo_moneda}} {{$documento->total_venta}}</td>
             </tr>
         </table>
+        @if($documento->facturacion->codigo_tipo_factura == '1001')
+            <p><strong>OPERACIÓN SUJETA A DETRACCIÓN {{$documento->codigo_moneda}} {{$documento->detraccion}} ({{$documento->porcentaje_detraccion}}%)</strong></p>
+            <p>N° de cuenta detracción: {{$emisor->cuentas[0]['cuenta']}}</p>
+        @endif
         <table style="text-align: center">
             <tr>
                 <td style="width: 32mm"><img class="qr" src="images/qr/{{$documento->qr}}"></td>
