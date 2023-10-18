@@ -214,14 +214,14 @@
                                        placeholder="Cuenta">
                             </div>
                             <div class="col-lg-2 form-group">
-                                <label>CCI:</label>
-                                <input class="form-control" v-model="item.cci" type="text"
-                                       placeholder="CCI">
+                                <label v-show="item.banco !== '8'">CCI:</label>
+                                <label v-show="item.banco === '8'">Código swift:</label>
+                                <input class="form-control" v-model="item.cci" type="text">
                             </div>
                             <div class="col-lg-3 form-group">
-                                <label>Descripción:</label>
-                                <input :disabled="index===0" class="form-control" v-model="item.descripcion" type="text"
-                                       placeholder="Descripción">
+                                <label v-show="item.banco !== '8'">Descripción:</label>
+                                <label v-show="item.banco === '8'">Entidad bancaria:</label>
+                                <input :disabled="index===0" class="form-control" v-model="item.descripcion" type="text">
                             </div>
                             <div class="col-lg-1">
                                 <button v-show="index!==0" @click="borrarCuenta(index)" style="margin-top: 20px"

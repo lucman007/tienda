@@ -153,13 +153,28 @@
                         <strong>Incoterm:</strong> {{$presupuesto->incoterm}}<br>
                     @endif
                     @if($presupuesto->exportacion)
-                        <strong>Cta. BBVA CONTINENTAL:</strong> {{$emisor->cuenta_1}} <br>
-                        <strong>Cta. BCP:</strong> {{$emisor->cuenta_2}}  <br>
-                        <strong>Cta. detracciones:</strong> {{$emisor->cuenta_detracciones}}
+                        @foreach($emisor->cuentas as $cuenta)
+                            @if($cuenta['banco'] == 8)
+                                <strong>Beneficiario : </strong> {{$emisor->razon_social}}<br>
+                                <strong>Código SWIFT:</strong> {{$cuenta['cci']}} <br>
+                                <strong>Cuenta N°:</strong> {{$cuenta['cuenta']}}<br>
+                                <strong>Banco:</strong> {{$cuenta['descripcion']}} <br><br>
+                            @endif
+                        @endforeach
                     @else
-                        <strong>Cta. BBVA CONTINENTAL:</strong> {{$emisor->cuenta_1}} <br>
-                        <strong>Cta. BCP:</strong> {{$emisor->cuenta_2}}  <br>
-                        <strong>Cta. detracciones:</strong> {{$emisor->cuenta_detracciones}}
+                        <?php $bancos = \sysfact\Http\Controllers\Helpers\DataGeneral::getBancos(); ?>
+                        @foreach($emisor->cuentas as $key=>$cuenta)
+                            <?php $index = array_search($cuenta['banco'], array_column($bancos,'num_val')); ?>
+                            @if($key === 0)
+                                @if($cuenta['cuenta'] != '')
+                                    <strong>N° de Cta. detracciones:</strong> {{$cuenta['cuenta']}} {{$cuenta['cci']?'- CCI: '.$cuenta['cci']:''}} <br>
+                                @endif
+                            @else
+                                @if($cuenta['banco'] != 8)
+                                    <strong>N° de Cta. {{$bancos[$index]['label']}} ({{$cuenta['moneda']=='USD'?'Dólares':'Soles'}}):</strong> {{$cuenta['cuenta']}} {{$cuenta['cci']?'- CCI: '.$cuenta['cci']:''}} {{isset($cuenta['descripcion'])&&$cuenta['descripcion']!=''?'('.$cuenta['descripcion'].')':''}} <br>
+                                @endif
+                            @endif
+                        @endforeach
                     @endif
                 </p>
             </td>

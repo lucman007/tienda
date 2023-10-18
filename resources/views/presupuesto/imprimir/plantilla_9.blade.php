@@ -24,7 +24,7 @@
         @endif
     </div>
 </div>
-<div style="width: 190mm; margin-bottom: 5mm">
+<div style="width: 180mm; margin-bottom: 5mm">
     <table cellpadding="0">
         <tr>
             <td>
@@ -66,7 +66,7 @@
                         <td>{{$usuario->correo}} / {{$usuario->telefono}}</td>
                     </tr>
                     <tr>
-                        <td style="width: 85mm" colspan="3">{{ $usuario->persona->direccion }}</td>
+                        <td style="width: 70mm" colspan="3">{{ $usuario->persona->direccion }}</td>
                     </tr>
                 </table>
                 @endif
@@ -96,7 +96,7 @@
                         <td>Forma de pago: <strong>{{strtoupper($presupuesto->condicion_pago)}}</strong></td>
                     </tr>
                     <tr>
-                        <td>Tiempo de entrega: <strong>{{strtoupper($presupuesto->tiempo_entrega)}}</strong></td>
+                        <td style="width: 80mm">Tiempo de entrega: <strong>{{strtoupper($presupuesto->tiempo_entrega)}}</strong></td>
                     </tr>
                     <tr>
                         <td>Punto de entrega: <strong>{{mb_strtoupper($presupuesto->lugar_entrega)}}</strong></td>
@@ -159,7 +159,7 @@
                     <td><br></td>
                 </tr>
                 <tr>
-                    <td colspan="7" style="margin-top: 5mm">
+                    <td colspan="7" style="margin-top: 5mm; width: 150mm">
                         Observación: {{$presupuesto->observaciones}}
                     </td>
                 </tr>
@@ -185,17 +185,34 @@
                 @endif
                 <br>
                 @if($presupuesto->exportacion)
-                    <strong>Beneficiario : </strong> <br>
-                    <strong>Código SWIFT:</strong>  <br>
-                    <strong>Cuenta N°:</strong> <br>
-                    <strong>Banco:</strong><br>
-                @else
+                    @foreach($emisor->cuentas as $cuenta)
+                        @if($cuenta['banco'] == 8)
+                            <strong>Beneficiario : </strong> {{$emisor->razon_social}}<br>
+                            <strong>Código SWIFT:</strong> {{$cuenta['cci']}} <br>
+                            <strong>Cuenta N°:</strong> {{$cuenta['cuenta']}}<br>
+                            <strong>Banco:</strong> {{$cuenta['descripcion']}} <br><br>
+                        @endif
+                    @endforeach
                 @endif
             </p>
             <table>
                 <tr>
                     <td><span class="bcp-logo"><img src="{{public_path('images/nyabby/bcp-logo.png')}}" alt=""></span></td>
-                    <td colspan="3"><strong>Cta. Soles:</strong> {{$emisor->cuenta_1}}<br><strong>Cta. Dólares:</strong> {{$emisor->cuenta_2}}</td>
+                    <td colspan="3">
+                        <?php $bancos = \sysfact\Http\Controllers\Helpers\DataGeneral::getBancos(); ?>
+                        @foreach($emisor->cuentas as $key=>$cuenta)
+                            <?php $index = array_search($cuenta['banco'], array_column($bancos,'num_val')); ?>
+                            @if($key === 0)
+                                @if($cuenta['cuenta'] != '')
+                                <strong>Cta. detracciones:</strong> {{$cuenta['cuenta']}} {{$cuenta['cci']?'- CCI: '.$cuenta['cci']:''}} <br>
+                                @endif
+                            @else
+                                @if($cuenta['banco'] != 8)
+                                <strong>Cta. {{$bancos[$index]['label']}} ({{$cuenta['moneda']=='USD'?'Dólares':'Soles'}}):</strong> {{$cuenta['cuenta']}} {{$cuenta['cci']?'- CCI: '.$cuenta['cci']:''}} {{isset($cuenta['descripcion'])&&$cuenta['descripcion']!=''?'('.$cuenta['descripcion'].')':''}} <br>
+                                @endif
+                            @endif
+                        @endforeach
+                    </td>
                 </tr>
                 <tr>
                     <td style="padding-top:10px">

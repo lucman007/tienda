@@ -20,6 +20,7 @@ class DataGeneral
             ['num_val'=>'5','text_val'=>'','label'=>'PICHINCHA'],
             ['num_val'=>'6','text_val'=>'','label'=>'BANBIF'],
             ['num_val'=>'7','text_val'=>'','label'=>'BANCO DE LA NACIÓN'],
+            ['num_val'=>'8','text_val'=>'','label'=>'CUENTA DE EXPORTACIÓN'],
         ];
     }
 }

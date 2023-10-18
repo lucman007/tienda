@@ -61,7 +61,7 @@
             </tr>
         </table>
     </div>
-    @php($i=1)
+    @php $i=1 @endphp
         <table class="items" cellpadding="0">
             <thead>
                 <tr class="table-header">
@@ -123,14 +123,28 @@
                     <strong>Impuesto:</strong> {{mb_strtoupper($presupuesto->impuesto)}} <br>
                     <strong>Punto de entrega:</strong> {{mb_strtoupper($presupuesto->lugar_entrega)}} <br>
                     @if($presupuesto->exportacion)
-                        <strong>Beneficiario : </strong> LINE TECH EIRL<br>
-                        <strong>Código SWIFT:</strong> BCPLPEPL <br>
-                        <strong>Cuenta N°:</strong> 192-2669185-1-73 <br>
-                        <strong>Banco:</strong> BANCO DE CREDITO DEL PERU <br>
+                        @foreach($emisor->cuentas as $cuenta)
+                            @if($cuenta['banco'] == 8)
+                                <strong>Beneficiario : </strong> {{$emisor->razon_social}}<br>
+                                <strong>Código SWIFT:</strong> {{$cuenta['cci']}} <br>
+                                <strong>Cuenta N°:</strong> {{$cuenta['cuenta']}}<br>
+                                <strong>Banco:</strong> {{$cuenta['descripcion']}} <br><br>
+                            @endif
+                        @endforeach
                     @else
-                        <strong>Cta. detracciones:</strong> {{$emisor->cuenta_detracciones}} <br>
-                        <strong>Cta. Soles:</strong> {{$emisor->cuenta_1}} <br>
-                        <strong>Cta. Dólares:</strong> {{$emisor->cuenta_2}} <br>
+                        <?php $bancos = \sysfact\Http\Controllers\Helpers\DataGeneral::getBancos(); ?>
+                        @foreach($emisor->cuentas as $key=>$cuenta)
+                            <?php $index = array_search($cuenta['banco'], array_column($bancos,'num_val')); ?>
+                                @if($key === 0)
+                                    @if($cuenta['cuenta'] != '')
+                                        <strong>N° de Cta. detracciones:</strong> {{$cuenta['cuenta']}} {{$cuenta['cci']?'- CCI: '.$cuenta['cci']:''}} <br>
+                                    @endif
+                                @else
+                                    @if($cuenta['banco'] != 8)
+                                    <strong>N° de Cta. {{$bancos[$index]['label']}} ({{$cuenta['moneda']=='USD'?'Dólares':'Soles'}}):</strong> {{$cuenta['cuenta']}} {{$cuenta['cci']?'- CCI: '.$cuenta['cci']:''}} {{isset($cuenta['descripcion'])&&$cuenta['descripcion']!=''?'('.$cuenta['descripcion'].')':''}} <br>
+                                    @endif
+                                @endif
+                        @endforeach
                     @endif
                 </p>
             </td>
