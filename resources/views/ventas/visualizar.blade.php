@@ -322,20 +322,10 @@
                         <div class="col-lg-12 mt-5">
                             <div class="row">
                                 <div class="col-lg-6">
-                                    <b-input-group>
-                                        <b-input-group-prepend>
-                                            <b-input-group-text>
-                                                <i class="fab fa-whatsapp"></i>
-                                            </b-input-group-text>
-                                        </b-input-group-prepend>
-                                        <input v-model="whatsapp" type="number" class="form-control" placeholder="Ejemplo: 51996861131" >
-                                        <b-input-group-append>
-                                            <b-button target="_blank" :disabled="whatsapp.length==0" variant="primary" :href="'{{$agent->isDesktop()?'https://web.whatsapp.com':'https://api.whatsapp.com'}}'+'/send/?phone='+whatsapp+'&text='+'{{$venta->text_whatsapp}}'+'&app_absent=1'">
-                                                <i class="fas fa-paper-plane"></i>
-                                            </b-button>
-                                        </b-input-group-append>
-                                    </b-input-group>
-                                    <p style="color:gray; margin-top:5px">*Ingresa el N° whatsapp incluyendo código de país</p>
+                                    @php
+                                        $codigos_pais = \sysfact\Http\Controllers\Helpers\DataGeneral::getCodigoPais();
+                                    @endphp
+                                    <input-whatsapp :text="'{{$venta->text_whatsapp}}'" :codigos="{{json_encode($codigos_pais)}}" :link="'{{$agent->isDesktop()?'https://web.whatsapp.com':'https://api.whatsapp.com'}}'"></input-whatsapp>
                                 </div>
                                 <div class="col-lg-6">
                                     <b-input-group>

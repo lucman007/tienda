@@ -1,23 +1,13 @@
 <template>
     <div>
-        <b-modal id="modal-whatsapp" ref="modal-whatsapp" @hidden="whatsapp = ''">
+        <b-modal id="modal-whatsapp" ref="modal-whatsapp">
             <template slot="modal-title">
                 Enviar por Whatsapp
             </template>
             <div class="container">
                 <div class="row">
                     <div class="col-lg-12">
-                        <p>Ingresa el código de país (Perú = 51) + el número de celular de tu cliente, ejemplo: 51996861131</p>
-                    </div>
-                    <div class="col-lg-12">
-                        <b-input-group>
-                            <input v-model="whatsapp" type="number" class="form-control" placeholder="Enviar a whatsapp">
-                            <b-input-group-append>
-                                <b-button @click="enviarWhatsapp(whatsapp)" target="_blank"  variant="success">
-                                    <i class="fab fa-whatsapp"></i> Enviar
-                                </b-button>
-                            </b-input-group-append>
-                        </b-input-group>
+                        <input-whatsapp :codigos="codigos" :link="link" :text="text"></input-whatsapp>
                     </div>
                 </div>
             </div>
@@ -31,23 +21,13 @@
 <script>
     export default {
         name: 'modal-whatsapp',
-        props: ['text','link'],
+        props: ['text','link','codigos'],
         data() {
             return {
                 whatsapp:''
             }
         },
         methods: {
-            enviarWhatsapp(numero){
-                if(numero==""){
-                    alert('Ingresa un número válido')
-                } else {
-                    if(numero.includes('+')){
-                        numero.replace('+', '')
-                    }
-                    window.open(this.link+'/send/?phone='+numero+'&text='+this.text+'&app_absent=1', '_blank');
-                }
-            }
         }
     }
 </script>

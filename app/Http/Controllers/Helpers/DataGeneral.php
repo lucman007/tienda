@@ -23,4 +23,18 @@ class DataGeneral
             ['num_val'=>'8','text_val'=>'','label'=>'CUENTA DE EXPORTACIÓN'],
         ];
     }
+
+    public static function getCodigoPais(){
+        return [
+            ['num_val'=>'+54','text_val'=>'','label'=>'Argentina +54'],
+            ['num_val'=>'+591','text_val'=>'','label'=>'Bolivia +591'],
+            ['num_val'=>'+593','text_val'=>'','label'=>'Ecuador +593'],
+            ['num_val'=>'+1','text_val'=>'','label'=>'EEUU +1'],
+            ['num_val'=>'+34','text_val'=>'','label'=>'España +34'],
+            ['num_val'=>'+56','text_val'=>'','label'=>'Chile +56'],
+            ['num_val'=>'+57','text_val'=>'','label'=>'Colombia +57'],
+            ['num_val'=>'+52','text_val'=>'','label'=>'México +52'],
+            ['num_val'=>'+51','text_val'=>'','label'=>'Perú +51'],
+        ];
+    }
 }

@@ -154,7 +154,7 @@ class ConsultaController extends Controller
                     ->join('productos', 'productos.idproducto', '=', 'ventas_detalle.idproducto')
                     ->join('pagos', 'pagos.idventa', '=', 'ventas.idventa')
                     ->select('ventas.idventa','ventas.fecha','ventas_detalle.monto','cantidad','serie','correlativo','codigo_moneda','productos.nombre as producto','descripcion')
-                    ->where('cliente.tocken','2fb5a9ca99650767261e')
+                    ->where('cliente.tocken',$tocken)
                     ->where(function($query) {
                         $query->whereIn('codigo_tipo_documento', [01, 03, 30])
                             ->where(function ($query){

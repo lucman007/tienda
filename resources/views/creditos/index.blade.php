@@ -147,7 +147,7 @@
             </div>
         </div>
     </div>
-    <b-modal id="modal-compartir" ref="modal-compartir" @hidden="whatsapp = ''">
+    <b-modal id="modal-compartir" ref="modal-compartir">
         <template slot="modal-title">
             Compartir
         </template>
@@ -157,20 +157,13 @@
                     <b-button class="mb-2" @click="copiar" target="_blank"  variant="primary">
                         <i class="fas fa-copy"></i> Copiar link
                     </b-button>
-                    <p><strong>@{{ sharedLink }}</strong></p>
+                    <p style="word-wrap: break-word;"><strong>@{{ sharedLink }}</strong></p>
                 </div>
                 <div class="col-lg-12">
-                    <p style="word-wrap: break-word;">Para enviarlo por whatsapp: ingresa el código de país (Perú = 51) + el número de celular de tu cliente, ejemplo: 51996861131</p>
-                </div>
-                <div class="col-lg-12">
-                    <b-input-group>
-                        <input v-model="whatsapp" type="number" class="form-control" placeholder="Enviar a whatsapp">
-                        <b-input-group-append>
-                            <b-button @click="enviarWhatsapp(whatsapp)" target="_blank"  variant="success">
-                                <i class="fab fa-whatsapp"></i> Enviar
-                            </b-button>
-                        </b-input-group-append>
-                    </b-input-group>
+                    @php
+                        $codigos_pais = \sysfact\Http\Controllers\Helpers\DataGeneral::getCodigoPais();
+                    @endphp
+                    <input-whatsapp :text="sharedLink" :codigos="{{json_encode($codigos_pais)}}" :link="'{{$agent->isDesktop()?'https://web.whatsapp.com':'https://api.whatsapp.com'}}'"></input-whatsapp>
                 </div>
             </div>
         </div>
@@ -192,8 +185,6 @@
                 totales:null,
                 disabledSearch:false,
                 sharedLink:'',
-                whatsapp:'',
-                link:'{{$agent->isDesktop()?'https://web.whatsapp.com':'https://api.whatsapp.com'}}',
             },
             created(){
                 if(this.filtro === 'cliente'){
@@ -259,16 +250,6 @@
                 abrirCredito(idventa){
                     location.href = '/creditos/editar'+'/'+idventa;
                 },
-                enviarWhatsapp(numero){
-                    if(numero==""){
-                        alert('Ingresa un número válido')
-                    } else {
-                        if(numero.includes('+')){
-                            numero.replace('+', '')
-                        }
-                        window.open(this.link+'/send/?phone='+numero+'&text='+this.sharedLink+'&app_absent=1', '_blank');
-                    }
-                },
                 copiar(){
                     navigator.clipboard.writeText(this.sharedLink)
                         .then(() => {
@@ -293,7 +274,6 @@
                         })
                 }
             }
-
         });
     </script>
 @endsection

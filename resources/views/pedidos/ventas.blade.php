@@ -1,6 +1,9 @@
 @extends('layouts.main')
 @section('titulo', 'Resumen de ventas')
 @section('contenido')
+    @php
+        $codigos_pais = \sysfact\Http\Controllers\Helpers\DataGeneral::getCodigoPais();
+    @endphp
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
             <div class="col-lg-8">
@@ -243,7 +246,7 @@
             v-on:countcomprobantes="obtener_num_comprobantes"
             v-on:after-save="after_save">
     </modal-facturacion>
-    <modal-whatsapp :text="text_whatsapp" :link="'{{$agent->isDesktop()?'https://web.whatsapp.com':'https://api.whatsapp.com'}}'"></modal-whatsapp>
+    <modal-whatsapp :text="text_whatsapp" :link="'{{$agent->isDesktop()?'https://web.whatsapp.com':'https://api.whatsapp.com'}}'" :codigos="{{json_encode($codigos_pais)}}"></modal-whatsapp>
 @endsection
 @section('script')
     <script>

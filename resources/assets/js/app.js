@@ -51,3 +51,4 @@ Vue.component('modal-producto-descuento',require('./components/ProductoDescuento
 Vue.component('modal-devolucion',require('./components/ModalDevolucion.vue'));
 Vue.component('table-draggable',require('./components/TableDraggable.vue'));
 Vue.component('credito-rapido',require('./components/CreditoRapido.vue'));
+Vue.component('input-whatsapp',require('./components/InputWhatsapp.vue'));

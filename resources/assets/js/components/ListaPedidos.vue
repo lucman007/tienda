@@ -99,10 +99,11 @@ export default{
 
 <style>
     .active_item {
-    background-color: #007bff;
-    color: white;
-}
-    .list-group-item:hover{
-    background-color: #CCC;
-}
+        background-color: #007bff;
+        color: white;
+    }
+
+    .list-group-item:hover {
+        background-color: #CCC;
+    }
 </style>

@@ -45,8 +45,8 @@
                                                                 <span style="font-size: 30px;"><strong>S/@{{totales.adeuda.toFixed(2)}}</strong></span>
                                                             </p>
                                                         </div>
-                                                        <div class="ml-4">
-                                                            <b-form-checkbox value="productos" unchecked-value="ventas" @change="filtrar" v-model="mostrar" switch size="lg" class="float-right">
+                                                        <div class="ml-md-4">
+                                                            <b-form-checkbox value="productos" unchecked-value="ventas" @change="filtrar" v-model="mostrar" switch size="lg" class="mt-3 mt-md-0float-md-right">
                                                                 <p style="font-size: 1rem;">Ver lista de productos</p>
                                                             </b-form-checkbox>
                                                         </div>
