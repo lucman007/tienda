@@ -39,7 +39,7 @@ class PedidoController extends Controller
     }
 
     public function index(Request $request){
-        $categorias=Categoria::orderby('nombre','asc')->get();
+        $categorias=Categoria::where('eliminado',0)->orderby('nombre','asc')->get();
         $idvendedor= $this->obtener_vendedor();
         $agent = new Agent();
         $data = ['categorias'=>$categorias,'idvendedor'=>$idvendedor,'usuario'=>auth()->user()->persona,'agent'=>$agent];
@@ -374,7 +374,7 @@ class PedidoController extends Controller
 
     public function obtenerCategorias()
     {
-        return ['categorias'=>Categoria::all()];
+        return ['categorias'=>Categoria::where('eliminado',0)->get()];
 
     }
 

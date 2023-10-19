@@ -4,112 +4,100 @@ namespace sysfact\Http\Controllers;
 
 use Illuminate\Http\Request;
 use sysfact\Categoria;
+use sysfact\Producto;
 
 class CategoriaController extends Controller
 {
 
-	public function __construct()
-	{
-		$this->middleware('auth');
-	}
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index(Request $request)
+    public function __construct()
     {
-	    if ($request){
-		    $consulta=trim($request->get('textoBuscado'));
-
-		    $categorias=Categoria::where('nombre','LIKE','%'.$consulta.'%')
-		                       ->paginate(30);
-
-		    return view('categorias.index',['categorias'=>$categorias,'textoBuscado'=>$consulta,'usuario'=>auth()->user()->persona]);
-
-	    }
+        $this->middleware('auth');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    public function index(Request $request)
+    {
+        if ($request) {
+            $consulta = trim($request->get('textoBuscado'));
+
+            $categorias = Categoria::where('nombre', 'LIKE', '%' . $consulta . '%')
+                ->where('eliminado', 0)
+                ->where('idcategoria', '!=', -1)
+                ->paginate(30);
+
+            $categorias->each(function ($categoria) {
+                $cantidadProductos = $categoria->producto()
+                    ->where('eliminado', 0)
+                    ->count();
+
+                $categoria->cantidad_productos = $cantidadProductos;
+            });
+
+            return view('categorias.index', ['categorias' => $categorias, 'textoBuscado' => $consulta, 'usuario' => auth()->user()->persona]);
+
+        }
+    }
+
     public function create()
     {
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request) {
+    public function store(Request $request)
+    {
 
-	    $categoria                  = new Categoria();
-	    $categoria->nombre          = mb_strtoupper($request->nombre);
-	    $categoria->descripcion = mb_strtoupper($request->descripcion);
-	    $categoria->color = $request->color;
-	    $categoria->save();
+        $categoria = new Categoria();
+        $categoria->nombre = mb_strtoupper($request->nombre);
+        $categoria->descripcion = mb_strtoupper($request->descripcion);
+        $categoria->color = $request->color;
+        $categoria->save();
 
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function show()
     {
-	    return ['categorias'=>Categoria::all()];
+        return ['categorias' => Categoria::where('eliminado',0)->get()];
 
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Request $request,$id)
+    public function edit(Request $request, $id)
     {
-	    if ( ! $request->ajax() ) {
-		    return redirect( '/' );
-	    }
+        if (!$request->ajax()) {
+            return redirect('/');
+        }
 
-	    $categoria=Categoria::find($id);
+        $categoria = Categoria::find($id);
 
-	    return $categoria;
+        return $categoria;
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request)
     {
-	    $categoria                  = Categoria::find($request->idcategoria);
-	    $categoria->nombre          = mb_strtoupper($request->nombre);
-	    $categoria->descripcion = mb_strtoupper($request->descripcion);
+        $categoria = Categoria::find($request->idcategoria);
+        $categoria->nombre = mb_strtoupper($request->nombre);
+        $categoria->descripcion = mb_strtoupper($request->descripcion);
         $categoria->color = $request->color;
-	    $categoria->save();
+        $categoria->save();
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+    public function check_productos($id){
+        $productos = Producto::where('eliminado',0)
+            ->where('idcategoria',$id)
+            ->exists();
+
+        if($productos){
+            return 1;
+        }
+
+        return 0;
+
+    }
+
     public function destroy($id)
     {
-	    $categoria=Categoria::find($id);
-	    $categoria->delete();
+        $categoria = Categoria::find($id);
+        $categoria->update([
+            'eliminado'=>1
+        ]);
+
     }
 }

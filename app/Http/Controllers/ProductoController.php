@@ -44,7 +44,7 @@ class ProductoController extends Controller
                     switch ($filtro){
                         case 'categoria':
                             $productos=Producto::join('categorias', 'categorias.idcategoria', '=', 'productos.idcategoria')
-                                ->where('eliminado',0)
+                                ->where('productos.eliminado',0)
                                 ->where('cod_producto','!=','00NR')
                                 ->select('productos.*','categorias.nombre as categoria')
                                 ->where('categorias.nombre','LIKE','%'.$consulta.'%')
@@ -54,7 +54,7 @@ class ProductoController extends Controller
                             break;
                         case 'ubicacion':
                             $productos=Producto::join('categorias', 'categorias.idcategoria', '=', 'productos.idcategoria')
-                                ->where('eliminado',0)
+                                ->where('productos.eliminado',0)
 	                            ->where('cod_producto','!=','00NR')
                                 ->select('productos.*','categorias.nombre as categoria')
                                 ->where('categorias.nombre','LIKE','%'.$consulta.'%')
@@ -64,7 +64,7 @@ class ProductoController extends Controller
                             break;
                         default:
                             $productos=Producto::join('categorias', 'categorias.idcategoria', '=', 'productos.idcategoria')
-                                ->where('eliminado',0)
+                                ->where('productos.eliminado',0)
 	                            ->where('cod_producto','!=','00NR')
                                 ->select('productos.*','categorias.nombre as categoria')
                                 ->where($filtro,'LIKE','%'.$consulta.'%')
@@ -74,7 +74,7 @@ class ProductoController extends Controller
 
                 } else {
                     $productos=Producto::join('categorias', 'categorias.idcategoria', '=', 'productos.idcategoria')
-                        ->where('eliminado',0)
+                        ->where('productos.eliminado',0)
 	                    ->where('cod_producto','!=','00NR')
                         ->select('productos.*','categorias.nombre as categoria')
                         ->where(function ($query) use ($consulta) {
@@ -473,7 +473,7 @@ class ProductoController extends Controller
 
     public function mostrar_categorias()
     {
-        return ['categorias'=>Categoria::all()];
+        return ['categorias'=>Categoria::where('eliminado',0)->getl()];
 
     }
 

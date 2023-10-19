@@ -67,6 +67,7 @@ Route::group(['middleware' => ['can:Mantenimiento: categorías']], function () {
     Route::resource('categorias', 'CategoriaController');
     Route::post('/categorias/store', 'CategoriaController@store')->name('guardarCategoria');
     Route::delete('/categorias/destroy/{id}', 'CategoriaController@destroy')->name('eliminarCategoria');
+    Route::get('/categorias/check-productos/{id}', 'CategoriaController@check_productos');
     Route::get('/categorias/show', 'CategoriaController@show');
     Route::get('/categorias/edit/{id}', 'CategoriaController@edit')->name('editarCategorias');
     Route::put('/categorias/update', 'CategoriaController@update')->name('actualizarCategoria');

@@ -26,6 +26,7 @@
                                     <th scope="col"></th>
                                     <th scope="col">Nombre</th>
                                     <th scope="col">Descripción</th>
+                                    <th scope="col">Productos</th>
                                     <th scope="col">Color</th>
                                     <th scope="col"></th>
                                 </tr>
@@ -35,14 +36,14 @@
                                 @foreach($categorias as $categoria)
                                     <tr @if(!$agent->isDesktop()) @click="editarCategoria({{$categoria->idcategoria}})" @endif>
                                         <td></td>
-                                        <td style="display:none">{{$categoria->idcategoria}}</td>
                                         <td>{{$categoria->nombre}}</td>
                                         <td>{{$categoria->descripcion}}</td>
+                                        <td>{{$categoria->cantidad_productos}} PRODUCTOS</td>
                                         <td><span style="background: {{$categoria->color}};" class="cat-circle-color"></span></td>
                                         <td @click.stop class="botones-accion" style="text-align: right">
                                             <b-button @click="editarCategoria({{$categoria->idcategoria}})" class="btn btn-success" title="Editar categoria"><i
                                                         class="fas fa-edit"></i></b-button>
-                                            <button @click="borrarCategoria({{$categoria->idcategoria}})" class="btn btn-danger" title="Eliminar"><i class="fas fa-trash-alt"></i>
+                                            <button @click="checkProductos({{$categoria->idcategoria}})" class="btn btn-danger" title="Eliminar"><i class="fas fa-trash-alt"></i>
                                             </button>
                                         </td>
                                     </tr>
@@ -127,13 +128,17 @@
                         e.preventDefault();
                         return;
                     }
+
+                    let data = {
+                        'idcategoria': this.idcategoria,
+                        'nombre': this.nombre,
+                        'descripcion': this.descripcion,
+                        'color': this.color
+                    };
+
                     if(this.accion=='insertar'){
-                        axios.post('{{action('CategoriaController@store')}}', {
-                            'nombre': this.nombre,
-                            'descripcion': this.descripcion,
-                            'color': this.color
-                        })
-                            .then(response => {
+                        axios.post('{{action('CategoriaController@store')}}', data)
+                            .then(() => {
                                 window.location.reload(true)
                             })
                             .catch(error => {
@@ -141,13 +146,8 @@
                                 console.log(error);
                             });
                     } else{
-                        axios.put('{{action('CategoriaController@update')}}', {
-                            'idcategoria': this.idcategoria,
-                            'nombre': this.nombre,
-                            'descripcion': this.descripcion,
-                            'color': this.color
-                        })
-                            .then(response => {
+                        axios.put('{{action('CategoriaController@update')}}',data)
+                            .then(() => {
                                 window.location.reload(true)
                             })
                             .catch(error => {
@@ -175,18 +175,29 @@
                         });
 
                 },
+                checkProductos(id){
+                    axios.get('{{url('/categorias/check-productos')}}' + '/' + id)
+                        .then((response) => {
+                            if (response.data === 1) {
+                                if(confirm('Existen productos asociados a esta categoría. Si la borra, deberá actualizar la categoría de los productos asociados. ¿Desea continuar?')){
+                                    this.borrarCategoria(id)
+                                }
+                            } else {
+                                this.borrarCategoria(id)
+                            }
+                        })
+                        .catch((error) => {
+                            console.log(error);
+                        });
+                },
                 borrarCategoria(id){
-                    if(confirm('Realmente desea eliminar la categoria')){
-
-                        axios.delete('{{url('/categorias/destroy')}}' + '/' + id)
-                            .then(response => {
-                                window.location.reload(true)
-                            })
-                            .catch(error => {
-                                this.alerta('No puedes eliminar la categoría porque algunos productos pertenecen a ella.');
-                                console.log(error);
-                            });
-                    }
+                    axios.delete('{{url('/categorias/destroy')}}' + '/' + id)
+                        .then(() => {
+                            window.location.reload(true)
+                        })
+                        .catch((error) => {
+                            console.log(error);
+                        });
                 },
                 validarCategoria(){
                     this.errorCategoria = 0;

@@ -671,7 +671,7 @@ class VentaController extends Controller
             $venta->motivo_rechazo = $Description[0]??false;
         }
 
-
+/*
         switch ($venta->facturacion->estado){
             case 'PENDIENTE':
                 $venta->badge_class='badge-warning';
@@ -687,9 +687,9 @@ class VentaController extends Controller
             case 'RECHAZADO':
                 $venta->badge_class='badge-danger';
         }
-
+*/
         if($venta->guia_relacionada){
-            switch ($venta->guia_relacionada['estado']){
+            /*switch ($venta->guia_relacionada['estado']){
                 case 'PENDIENTE':
                     $venta->badge_class_guia='badge-warning';
                     break;
@@ -701,7 +701,7 @@ class VentaController extends Controller
                     break;
                 case 'RECHAZADO':
                     $venta->badge_class_guia='badge-danger';
-            }
+            }*/
 
             $venta->nombre_guia=$emisor->ruc.'-09-'.$venta->guia_relacionada['correlativo'];
 
@@ -1068,7 +1068,7 @@ class VentaController extends Controller
 
     public function categorias()
     {
-        return ['categorias'=>Categoria::all()];
+        return ['categorias'=>Categoria::where('eliminado',0)->get()];
     }
 
     public function guardarProducto(Request $request){

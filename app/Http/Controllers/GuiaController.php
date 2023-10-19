@@ -563,7 +563,7 @@ class GuiaController extends Controller
 
     public function categorias()
     {
-        return ['categorias'=>Categoria::all()];
+        return ['categorias'=>Categoria::where('eliminado',0)->get()];
 
     }
 

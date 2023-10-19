@@ -413,7 +413,7 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-12 mt-4">
-                <p class="copy text-center">Sistema <a target="_blank" href="https://facebook.com/facsyperu">Facsy.</a> Un producto de <a href="https://coditec.pe" target="_blank"> coditec.pe</a> | © {{date('Y')}}</p>
+                <p class="copy text-center">Sistema <a target="_blank" href="https://facebook.com/facsyperu">Facilito.</a> Un producto de <a href="https://coditec.pe" target="_blank"> coditec.pe</a> | © {{date('Y')}}</p>
             </div>
         </div>
     </div>

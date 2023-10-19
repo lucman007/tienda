@@ -564,7 +564,7 @@ class PresupuestoController extends Controller
 
     public function obtenerCategorias()
     {
-        return ['categorias'=>Categoria::all()];
+        return ['categorias'=>Categoria::where('eliminado',0)->get()];
 
     }
 
