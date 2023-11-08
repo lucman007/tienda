@@ -17,7 +17,7 @@ import VueNativeSock from 'vue-native-websocket';
  * the page. Then, you may begin adding components to this application
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
-
+Vue.prototype.$eventBus = new Vue();
 Vue.use(BootstrapVue);
 Vue.use(VueSweetalert2);
 Vue.use(VueNativeSock, 'wss://facsy.onrender.com', {

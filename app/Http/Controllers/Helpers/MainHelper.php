@@ -608,8 +608,8 @@ class MainHelper extends Controller
         if ($plan === 'plan_ilimitado') {
             return [8000, false];
         }
-
-        $emitidos = Venta::whereBetween('fecha', [date('Y-m-') . '01 00:00:00', date('Y-m-') . '31 23:59:59'])
+        $ultimoDiaMes = date('Y-m-t');
+        $emitidos = Venta::whereBetween('fecha', [date('Y-m-01 00:00:00'), $ultimoDiaMes . ' 23:59:59'])
             ->whereHas('facturacion', function($query) {
                 $query
                     ->where(function ($query) {
@@ -632,6 +632,10 @@ class MainHelper extends Controller
         }
 
         return [$restan,$restan <= 0];
+    }
+
+    public function notificar_estado_stock($idventa){
+        ProductoController::notificar_stock_productos($idventa);
     }
 
 }

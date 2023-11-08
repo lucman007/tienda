@@ -537,11 +537,6 @@
                                 </tbody>
                             </table>
                         @endif
-                        <div>
-                            <b-alert :variant="mensajeStock.style" show v-show="mensajeStock.string.length>0">
-                                @{{ mensajeStock.string }}
-                            </b-alert>
-                        </div>
                         <div class="dropdown-divider"></div>
                         <div class="row  mt-3">
                             <div class="col-lg-2 mb-2">
@@ -555,6 +550,11 @@
                                            v-model="doc_observacion" type="text" placeholder="Observación">
                                 </div>
                             </div>
+                        </div>
+                        <div>
+                            <b-alert v-for="mensaje in mensajesStock" show fade dismissible :key="mensaje.id" :variant="mensaje.estilo" v-on:dismissed="cerrarMensajeStock(mensaje.id)">
+                                @{{ mensaje.mensaje }}
+                            </b-alert>
                         </div>
                     </div>
                 </div>
@@ -1007,10 +1007,6 @@
                     tipo_transporte:<?php echo json_encode(json_decode(cache('config')['guia'], true)['tipo_transporte']) ?>,
                 },
                 numero_guia_fisica: '',
-                mensajeStock: {
-                    string: '',
-                    style: ''
-                },
                 doc_relacionado_nc:'',
                 guiasRelacionadas: [],
                 guiasRelacionadasAux: [],
@@ -1025,7 +1021,8 @@
                 dataDescuento:{},
                 spinnerRuc:false,
                 domicilioFiscalCliente:true,
-                doc_observacion:""
+                doc_observacion:"",
+                mensajesStock: []
             },
             mounted() {
                 if (localStorage.getItem('productos')) {
@@ -1439,8 +1436,6 @@
                 },
                 agregarProducto(obj){
                     let productos = this.productosSeleccionados.push(Object.assign({}, obj));
-                    //crear propiedades precio y cantidad en objeto productosSeleccionados:{} para usarlos
-                    //más tarde al procesar la venta.
                     let i = productos - 1;
 
                     let subtotal = (this.productosSeleccionados[i]['precio'] * 1).toFixed(2);
@@ -1852,17 +1847,37 @@
 
                     return errorVenta;
                 },
-                validar_stock(producto){
+                validar_stock(producto) {
+
                     if (producto['tipo_producto'] === 1) {
-                        this.mensajeStock.string = '';
+                        const mensajeExistente = this.mensajesStock.find(mensaje => mensaje.idproducto === producto.idproducto);
+                        let mensaje = '';
+                        let estilo = '';
+                        let unidad = (producto.unidad_medida).split('/')[1];
                         if (producto['cantidad'] > producto['stock']) {
-                            this.mensajeStock.string = 'La cantidad ingresada supera el stock del producto ' + producto['nombre'] + ' (' + producto['stock'] + ' ' + (producto.unidad_medida).split('/')[1] + ')' + '. Revise sus existencias.';
-                            this.mensajeStock.style = 'danger';
+                            mensaje = 'El stock del producto ' + producto['nombre'] + ' es de ' + producto['stock'] + ' ' + unidad + '. ¡Revisa tu stock antes de vender!';
+                            estilo = 'danger';
                         } else if (producto['cantidad'] >= (producto['stock'] - producto['stock_bajo'])) {
-                            this.mensajeStock.string = 'El stock del producto ' + producto['nombre'] + ' (' + producto['stock'] + ' ' + (producto.unidad_medida).split('/')[1] + ')' + ' es bajo, es necesario adquirir más unidades.';
-                            this.mensajeStock.style = 'warning';
+                            mensaje = 'El stock del producto ' + producto['nombre'] + ' es de ' + producto['stock'] + ' ' + unidad + '. ¡Está por agotarse!';
+                            estilo = 'warning';
+                        }
+
+                        if (mensajeExistente) {
+                            mensajeExistente.mensaje = mensaje;
+                            mensajeExistente.estilo = estilo;
+                        } else {
+                            const mensajeStock = {
+                                idproducto: producto.idproducto,
+                                id: Date.now(),
+                                mensaje: mensaje,
+                                estilo: estilo
+                            };
+                            this.mensajesStock.push(mensajeStock);
                         }
                     }
+                },
+                cerrarMensajeStock(id) {
+                    this.mensajesStock = this.mensajesStock.filter(mensaje => mensaje.id !== id);
                 },
                 cambiarSerie(){
 
@@ -1942,10 +1957,6 @@
                         doc_relacionado: '-1',
                         num_doc_relacionado: '',
                         tipo_transporte: '01'
-                    };
-                    this.mensajeStock = {
-                        string: '',
-                        style: ''
                     };
                     this.numero_guia_fisica = '';
                     this.tipo_busqueda = '';

@@ -217,6 +217,7 @@
         @endif
         <div class="cuentas">
             <p>
+                <strong>Cuentas bancarias:</strong> <br><br>
                 @php
                     $bancos = \sysfact\Http\Controllers\Helpers\DataGeneral::getBancos();
                 @endphp
@@ -357,7 +358,11 @@
             border: 1px solid black;
         }
         .cuentas{
+            width:180mm;
             margin: 4mm 0 0 5mm;
+            border: 2px solid #CCC;
+            border-radius:5px;
+            padding: 0 10px 10px;
         }
     </style>
 

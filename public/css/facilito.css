@@ -1496,6 +1496,21 @@ table tr td, table tr th{
     padding: 0.4rem 1.25rem;
 }
 
+.total-movil{
+    position: absolute;
+    bottom: 25px;
+    width: 90%;
+    z-index: 99;
+}
+.total-movil p{
+    font-size: 55px;
+    font-weight: 600;
+    text-align: center;
+    opacity: 0.2;
+    mix-blend-mode: multiply;
+}
+
+
 /*RESPONSIVE*/
 
 @media (min-width: 576px) {

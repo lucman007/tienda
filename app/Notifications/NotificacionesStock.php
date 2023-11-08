@@ -7,19 +7,19 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class NotificacionesSistema extends Notification
+class NotificacionesStock extends Notification
 {
     use Queueable;
-    protected $comprobante;
+    protected $mensaje;
 
     /**
      * Create a new notification instance.
      *
      * @return void
      */
-    public function __construct($comprobante)
+    public function __construct($mensaje)
     {
-        $this->comprobante = $comprobante;
+        $this->mensaje = $mensaje;
     }
 
     /**
@@ -42,9 +42,9 @@ class NotificacionesSistema extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-            ->line('The introduction to the notification.')
-            ->action('Notification Action', url('/'))
-            ->line('Thank you for using our application!');
+                    ->line('The introduction to the notification.')
+                    ->action('Notification Action', url('/'))
+                    ->line('Thank you for using our application!');
     }
 
     /**
@@ -56,11 +56,8 @@ class NotificacionesSistema extends Notification
     public function toArray($notifiable)
     {
         return [
-            'tipo_notificacion' => 1,
-            'idventa' => $this->comprobante->idventa,
-            'comprobante' => $this->comprobante->facturacion->serie.'-'.$this->comprobante->facturacion->correlativo,
-            'estado' => $this->comprobante->estado,
-            'mensaje'=>$this->comprobante->mensaje
+            'tipo_notificacion' => 2,
+            'mensaje'=>$this->mensaje
         ];
     }
 }

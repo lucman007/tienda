@@ -851,4 +851,9 @@ class PedidoController extends Controller
         return view('pedidos.interfaz_2.editar',['ultimo_id'=>json_encode($ultimo_id_registrado),'orden'=>$orden,'idvendedor'=>$idvendedor,'productos'=>json_encode($productos),'usuario'=>auth()->user()->persona]);
     }
 
+    public function check_stock(Request $request){
+        $producto = new ProductoController();
+        return $producto->check_stock_productos($request);
+    }
+
 }

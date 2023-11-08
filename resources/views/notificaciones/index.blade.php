@@ -13,17 +13,22 @@
                     <div class="card-body">
                         @forelse($notifications as $notification)
                             <div class="alert {{$notification->read_at==null?'alert-primary':'alert-secondary'}}" role="alert">
+                                @if($notification->data['tipo_notificacion'] == 1)
                                 El comprobante <strong>{{ $notification->data['comprobante'] }}</strong> está en estado <strong>{{ $notification->data['estado'] }}</strong> <br>
                                 Mensaje: {{ $notification->data['mensaje'] }}
+                                @endif
+                                @if($notification->data['tipo_notificacion'] == 2)
+                                    <strong>Control de stock</strong> <br>
+                                    {{ $notification->data['mensaje'] }}
+                                @endif
                                 <br>
-                                <span>{{ date('m/d/Y', strtotime($notification->created_at)) }}</span>
+                                <span>{{ date('d/m/Y', strtotime($notification->created_at)) }}</span>
                                 @if($notification->read_at==null)
                                 <a href="{{url('/notificaciones/marcar-como-leido/'.$notification->id)}}" class="float-right mark-as-read">
                                     Marcar como leído
                                 </a>
                                 @endif
                             </div>
-
                             @if($loop->last)
                                 <a href="{{url('/notificaciones/marcar-todo-como-leido')}}" id="mark-all">
                                     Marcar todo como leído

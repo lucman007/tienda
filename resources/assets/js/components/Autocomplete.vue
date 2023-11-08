@@ -173,11 +173,11 @@ export default{
         color: white;
     }
 
-    .list-group-item:hover {
+    #autocomplete-component-id .list-group-item:hover {
         background-color: #2b2b2b;
         color: white
     }
-    .list-group-item{
+    #autocomplete-component-id .list-group-item{
         border: none;
         font-size: 12px;
         padding: 0.4rem 1.25rem;

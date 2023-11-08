@@ -137,6 +137,7 @@ Route::group(['middleware' => ['can:Pedido']], function () {
     Route::post('pedidos/guardar-datos-entrega','PedidoController@guardar_datos_entrega');
     Route::get('pedidos/nuevo', 'PedidoController@nueva_orden');
     Route::get('pedidos/imprimir-lista', 'PedidoController@imprimir_lista');
+    Route::post('pedidos/check-stock','PedidoController@check_stock');
 
 });
 
@@ -432,6 +433,7 @@ Route::get('helper/buscar-clientes/{search}', 'Helpers\MainHelper@buscar_cliente
 Route::get('helper/categorias', 'Helpers\MainHelper@categorias');
 Route::get('helper/obtener-descuentos/{id}', 'Helpers\MainHelper@obtenerDescuentos');
 Route::post('helper/guardar-producto', 'Helpers\MainHelper@guardarProducto');
+Route::get('helper/notificar-estado-stock/{id}', 'Helpers\MainHelper@notificar_estado_stock');
 
 
 Auth::routes(['register' => false]);

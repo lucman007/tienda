@@ -88,6 +88,12 @@
                     this.openPanel = false;
                 }
             });
+            this.$eventBus.$on('count-notificaciones', () => {
+                this.countNotifications();
+            });
+            this.$eventBus.$on('count-comprobantes', () => {
+                this.countComprobantes();
+            });
         },
         methods:{
             obtenerNotificaciones(){

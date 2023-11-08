@@ -86,6 +86,11 @@
                                 </div>
                             </div>
                             <div class="card-body" style="height: 360px; overflow-y: auto; padding-top:10px;padding-bottom:10px;" id="box-items">
+                                @if(!$agent->isDesktop())
+                                <div class="total-movil">
+                                    <p>S/@{{ Number(totalVenta).toFixed(2) }}</p>
+                                </div>
+                                @endif
                                 <div class="loader" v-show="mostrarSpinner">
                                     <b-spinner label="Cargando..." ></b-spinner>
                                 </div>
@@ -110,7 +115,11 @@
                                                 <tr v-for="(producto,index) in productosSeleccionados" :key="index">
                                                     <td></td>
                                                     <td>
-                                                        @{{producto.nombre}} <br>
+                                                        @{{producto.nombre}}
+                                                        <br>
+                                                        <span v-show="producto.alert_stock" >
+                                                            <span class="badge" :class="producto.alert_color">@{{ producto.alert_stock }} </span>
+                                                        </span>
                                                         <span style="font-size: 11px; color: #0b870b;" v-for="item in producto.items_kit">+ (@{{ item.cantidad }}) @{{item['nombre']}}<br></span>
                                                     </td>
                                                     <td @click="habilitar(producto.num_item,'d')"><input
@@ -189,7 +198,11 @@
                                                     <tbody>
                                                     <tr v-for="(producto,index) in productosSeleccionados" :key="index" v-b-modal.modal-detalle @click="editarItem(producto)">
                                                         <td>
-                                                            @{{producto.nombre}} x @{{producto.cantidad}} <br>
+                                                            @{{producto.nombre}} x @{{producto.cantidad}}
+                                                            <br>
+                                                            <span v-show="producto.alert_stock">
+                                                                <span class="badge" :class="producto.alert_color">@{{ producto.alert_stock }} </span>
+                                                            </span>
                                                             <span style="font-size: 11px; color: #0b870b;" v-for="item in producto.items_kit">+@{{item['nombre']}} (x@{{ item.cantidad }})<br></span>
                                                         </td>
                                                         <td>@{{producto.total}}</td>
@@ -298,8 +311,6 @@
             :items="productosSeleccionados"
             v-on:imprimir="imprimir"
             v-on:obtener-mesas="obtener_pedidos"
-            v-on:notificaciones="obtener_notificaciones"
-            v-on:countcomprobantes="obtener_num_comprobantes"
             v-on:limpiar="limpiar(true)">
     </modal-facturacion>
     @if($buscador_alternativo)
@@ -391,6 +402,26 @@
                     };
                 },
                 methods:{
+                    checkStock(producto){
+                        @if(!$agent->isDesktop())
+                            let toaster = 'b-toaster-bottom-center';
+                            @else
+                            let toaster = 'b-toaster-top-center';
+                        @endif
+                        if(producto.tipo_producto == 1){
+                            axios.post('/pedidos/check-stock',{
+                                'idproducto':producto.idproducto,
+                                'cantidad':producto.cantidad
+                            })
+                                .then(response => {
+                                    producto.alert_stock = response.data.mensaje;
+                                    producto.alert_color = response.data.color;
+                                })
+                                .catch(error => {
+                                    console.log(error);
+                                });
+                        }
+                    },
                     getHeights(){
                         let width = window.innerWidth
                             || document.documentElement.clientWidth
@@ -520,6 +551,7 @@
                             this.$set(this.productosSeleccionados[i], 'descuento', '0.00');
                             this.$set(this.productosSeleccionados[i], 'total', this.productosSeleccionados[i]['precio']);
                             this.disabledTicket = false;
+                            this.checkStock(this.productosSeleccionados[i]);
                             this.calcularTotales();
                         }
 
@@ -635,6 +667,7 @@
                                 'item':JSON.stringify(producto)
                             })
                                 .then(response => {
+                                    this.checkStock(producto);
                                     this.current_val = producto['cantidad'];
                                     producto['loading'] = false;
                                     producto['precio'] = (Number(producto['precio'])).toFixed(2);
@@ -747,12 +780,6 @@
                                     console.log(error);
                                 });
                         }
-                    },
-                    obtener_notificaciones(){
-                        app_menu.$refs['panelNotificacion'].countNotifications();
-                    },
-                    obtener_num_comprobantes(){
-                        app_menu.$refs['panelNotificacion'].countComprobantes();
                     },
                     cambiarCantidad(index, tipo){
                         let producto = this.productosSeleccionados[index];

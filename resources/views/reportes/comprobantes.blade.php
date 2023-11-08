@@ -70,13 +70,18 @@
             @endif
             <div class="col-sm-12 mt-4">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header d-flex justify-content-between">
                         <span class="titulo-tabla-reporte">Lista de comprobantes</span>
-                        <div class="form-group float-right mb-0">
+                        <div class="form-group d-flex mb-0">
                             @if(count($comprobantes)!=0)
-                                <a href="{{str_contains(url()->full(),'?')?url()->full().'&export=true':url()->current().'?export=true'}}" class="btn btn-primary d-block"><i class="fas fa-file-export"></i> Exportar excel</a>
+                                <a href="{{str_contains(url()->full(),'?')?url()->full().'&export=true&type=excel':url()->current().'?export=true&type=excel'}}" class="btn btn-primary d-block"><i class="fas fa-file-export"></i> Exportar excel</a>
                             @else
                                 <button disabled class="btn btn-primary d-block"><i class="fas fa-file-export"></i> Exportar excel</button>
+                            @endif
+                            @if(count($comprobantes)!=0)
+                                <a href="{{str_contains(url()->full(),'?')?url()->full().'&export=true&type=txt':url()->current().'?export=true&type=txt'}}" class="btn btn-primary d-block ml-2"><i class="fas fa-file-export"></i> TXT SIRE</a>
+                            @else
+                                <button disabled class="btn btn-primary d-block ml-2"><i class="fas fa-file-export"></i> txt SIRE</button>
                             @endif
                         </div>
                     </div>

@@ -5,6 +5,7 @@ namespace sysfact\Http\Controllers;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use ZipArchive;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -1245,7 +1246,119 @@ class ReporteController extends Controller
         $comprobantes=$this->reporte_comprobantes_data($desde, $hasta, $filtro, $buscar, $esExportable);
 
         if($esExportable){
-            return Excel::download(new ReporteComprobantes($comprobantes['comprobantes']), 'reporte_comprobantes.xlsx');
+            $type = $request->get('type','excel');
+            if($type == 'excel'){
+                return Excel::download(new ReporteComprobantes($comprobantes['comprobantes']), 'reporte_comprobantes.xlsx');
+            } else {
+
+                //verificar_comprobantes_mismo_periodo();
+
+                $emisor = new Emisor();
+                $txtContent = "";
+                $periodo = date('Ym',strtotime($desde));
+
+                foreach ($comprobantes['comprobantes'] as $venta) {
+
+                    if($venta->facturacion->estado != 'RECHAZADO') {
+
+                        $doc_modificado = [
+                            'fecha' => '',
+                            'tipo' => '',
+                            'serie' => '',
+                            'correlativo' => '',
+                        ];
+
+                        switch ($venta->facturacion->estado) {
+                            case 'ANULADO (BAJA)':
+                                $estado = 2;
+                                break;
+                            case 'ANULADO':
+                                $estado = 4;
+                                break;
+                            default:
+                                $estado = 1;
+                        }
+
+                        if ($venta->facturacion->codigo_tipo_documento == '07' || $venta->facturacion->codigo_tipo_documento == '08') {
+                            $doc_modificado = Venta::whereHas('facturacion', function ($query) use ($venta) {
+                                $query->where('serie', $venta->facturacion->serie)
+                                    ->where('correlativo', $venta->facturacion->correlativo);
+                            })
+                                ->first();
+
+                            if (!$doc_modificado) {
+                                $doc_modificado = [
+                                    'fecha' => '',
+                                    'tipo' => '',
+                                    'serie' => '',
+                                    'correlativo' => '',
+                                ];
+                            }
+
+                        }
+
+                        $txtContent .=
+                            $emisor->ruc//1 Ruc
+                            . "|" . $emisor->razon_social//2 Razon social
+                            . "|" . $periodo//3 Periodo
+                            . "|"//4 CAR
+                            . "|" . date('d/m/Y', strtotime($venta->fecha))//5
+                            . "|" . date('d/m/Y', strtotime($venta->fecha_vencimiento))//6
+                            . "|" . $venta->facturacion->codigo_tipo_documento//7
+                            . "|" . $venta->facturacion->serie//8
+                            . "|" . $venta->facturacion->correlativo//9 Nro CP o Doc. Nro Inicial (Rango)
+                            . "|"//Nro Final (Rango)
+                            . "|" . $venta->cliente->tipo_documento//11
+                            . "|" . $venta->cliente->num_documento//12
+                            . "|" . $venta->cliente->persona->nombre//13
+                            . "|0"//14 Valor Facturado Exportación
+                            . "|" . $venta->facturacion->total_gravadas//15 BASE IMPONIBLE
+                            . "|0"//16 Descuento base imponible
+                            . "|" . $venta->facturacion->igv//17
+                            . "|0"//18 Descuento igv
+                            . "|" . $venta->facturacion->total_exoneradas//19
+                            . "|" . $venta->facturacion->total_inafectas//20
+                            . "|0"//21 ISC
+                            . "|0"//22 BI Grav IVAP
+                            . "|0"//23 IVAP
+                            . "|0"//24 ICBPER
+                            . "|0"//25 Otros Tributos
+                            . "|" . $venta->total_venta//26 Total CP
+                            . "|" . $venta->facturacion->codigo_moneda//27 Moneda
+                            . "|".($venta->facturacion->codigo_moneda=='USD'?$venta->tipo_cambio:'')//28 Tipo Cambio
+                            //
+                            . "|" . $doc_modificado['fecha']//29 Fecha Emisión Doc Modificado
+                            . "|" . $doc_modificado['tipo']//30 Tipo CP Modificado
+                            . "|" . $doc_modificado['serie']//31 Serie CP Modificado
+                            . "|" . $doc_modificado['correlativo']//32 Nro CP Modificado
+
+                            . "|"//33 ID Proyecto Operadores Atribución
+                            . "|" . $venta->facturacion->tipo_nota_electronica//34 Tipo de Nota
+                            . "|" . $estado//35 Est. Comp
+                            . "|0"//36 Valor FOB Embarcado
+                            . "|" . $venta->facturacion->total_gratuitas//37 Valor OP Gratuitas
+                            . "|" . $venta->facturacion->codigo_tipo_factura//38 Tipo Operación
+                            . "|"//39 CLU
+                            . "|"//40 ID Proyecto Operadores Atribución
+                            . "|" . $emisor->ruc . $venta->facturacion->codigo_tipo_documento . $venta->facturacion->serie . $venta->facturacion->correlativo //41 CAR
+                            . "\n";
+                    }
+                }
+
+                $tempFileName = 'LE'.$emisor->ruc.$periodo.'00140400021112.txt';
+                file_put_contents(storage_path('app/' . $tempFileName), $txtContent);
+
+                $zipFileName = 'LE'.$emisor->ruc.$periodo.'00140400021112.zip';
+                $zip = new ZipArchive;
+                $zip->open(storage_path('app/' . $zipFileName), ZipArchive::CREATE);
+                $zip->addFile(storage_path('app/' . $tempFileName), $tempFileName);
+                $zip->close();
+
+                unlink(storage_path('app/' . $tempFileName));
+
+                return response()->download(storage_path('app/' . $zipFileName))->deleteFileAfterSend(true);
+
+            }
         } else {
             return view('reportes.comprobantes',$comprobantes);
         }

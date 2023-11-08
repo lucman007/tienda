@@ -5,6 +5,8 @@ namespace sysfact\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Maatwebsite\Excel\Facades\Excel;
@@ -16,10 +18,13 @@ use sysfact\Descuento;
 use sysfact\Exports\ProductosExport;
 use sysfact\Imports\ProductosImport;
 use sysfact\Inventario;
+use sysfact\Mail\EstadoStock;
+use sysfact\Notifications\NotificacionesStock;
 use sysfact\Opciones;
 use sysfact\Producto;
 use Intervention\Image\ImageManagerStatic as Image;
 use sysfact\Ubicacion;
+use sysfact\User;
 
 class ProductoController extends Controller
 {
@@ -700,6 +705,77 @@ class ProductoController extends Controller
             Log::error($e);
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
+
+    public function check_stock_productos(Request $request){
+        $producto = Producto::find($request->idproducto);
+        $stock = $producto->inventario()->first()->saldo??0;
+        $unidad = explode('/',$producto->unidad_medida);
+        $unidad_medida = $unidad[1];
+       /* if($request->cantidad > $stock){
+            return ['mensaje'=>'El stock del producto '.$producto->nombre.' es de '.$stock.' '.$unidad_medida.'. ¡Revisa tu stock antes de vender!','color'=>'danger'];
+        } else if($request->cantidad >= ($stock - $producto->stock_bajo)){
+            return ['mensaje'=>'El stock del producto '.$producto->nombre.' es de '.$stock.' '.$unidad_medida.'. ¡Está por agotarse!','color'=>'warning'];
+        }*/
+        if($request->cantidad > $stock){
+            return ['mensaje'=>'¡Cantidad supera el stock!','color'=>'badge-danger'];
+        } else if($request->cantidad >= ($stock - $producto->stock_bajo)){
+            return ['mensaje'=>'¡Por agotarse!','color'=>'badge-warning'];
+        } else {
+            return null;
+        }
+
+    }
+
+    public static function notificar_stock_productos($idventa){
+
+        $productos = DB::table('ventas_detalle')
+            ->where('idventa',$idventa)
+            ->select('idproducto')
+            ->get();
+
+        $mensaje = [];
+        $flag = false;
+
+        foreach ($productos as $item){
+            $producto = Producto::find($item->idproducto);
+            if($producto->tipo_producto == 1){
+                $stock = $producto->inventario()->first()->saldo??0;
+                $unidad = explode('/',$producto->unidad_medida);
+                $unidad_medida = $unidad[1];
+                if($stock >= -20){
+                    if($stock <= 0){
+                        $flag = true;
+                        $mensaje[] = ['mensaje'=>'El stock del producto '.$producto->nombre.' está agotado ('.$stock.' '.$unidad_medida.')','bg_color'=>'#ffbfbf'];
+                    } else if($stock <= $producto->stock_bajo){
+                        $flag = true;
+                        $mensaje[] = ['mensaje'=>'El stock del producto '.$producto->nombre.' está por agotarse ('.$stock.' '.$unidad_medida.')','bg_color'=>'#ffe047'];
+                    }
+                }
+            }
+        }
+
+        if($flag){
+
+            $mensaje_strings = implode('<br>', array_column($mensaje, 'mensaje'));
+
+            $user = User::whereHas('roles', function ($query) {
+                $query->where('id', 5);
+            })->get();
+
+            Notification::send($user, new NotificacionesStock($mensaje_strings));
+
+            $email = json_decode(cache('config')['mail_contact'], true)['notificacion_caja'];
+            if ($email) {
+                $email_copia = json_decode(cache('config')['mail_contact'], true)['notificacion_caja_copia']??false;
+                if ($email_copia) {
+                    //Mail::to($email)->cc([$email_copia])->send(new EstadoStock($mensaje));
+                } else {
+                    //Mail::to($email)->send(new EstadoStock($mensaje));
+                }
+            }
+        }
+
     }
 
 }

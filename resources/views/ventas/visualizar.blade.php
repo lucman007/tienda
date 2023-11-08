@@ -476,8 +476,21 @@
                     this.enviar_guia("<?php echo $venta->guia_relacionada['ticket'] ?>",<?php echo $venta->guia_relacionada['idguia'] ?>);
                 }
 
+                this.control_stock();
             },
             methods: {
+                control_stock(){
+                    if(('<?php echo basename(url()->previous()) ?>').includes('facturacion')){
+                        axios.get('/helper/notificar-estado-stock' + '/' + '{{$venta->idventa}}')
+                            .then(() => {
+                                this.$eventBus.$emit('actualizar-notificaciones');
+                            })
+                            .catch(error => {
+                                alert('Ha ocurrido un error al obtener el stock');
+                                console.log(error);
+                            });
+                    }
+                },
                 agregarCC(){
                     this.cc.push({
                         email: '',
@@ -520,16 +533,17 @@
                                 titulo = 'Comprobante enviado con éxito';
                                 color = 'primary';
                                 tiempo = 5000;
+                                this.$eventBus.$emit('count-comprobantes');
                             } else if((mensaje.toLowerCase()).includes('rechazado')) {
                                 titulo = 'El comprobante ha sido rechazado y no es válido';
                                 color = 'danger';
                                 tiempo = 10000;
-                                this.$emit('notificaciones');
+                                this.$eventBus.$emit('actualizar-notificaciones');
                             } else {
                                 titulo = 'Comprobante pendiente de envío';
                                 color = 'warning';
                                 tiempo = 10000;
-                                this.$emit('notificaciones');
+                                this.$eventBus.$emit('actualizar-notificaciones');
                             }
 
                             this.$bvToast.toast(mensaje, {

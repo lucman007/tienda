@@ -400,7 +400,7 @@
                             .then(response => {
                                 this.clienteSeleccionado = response.data;
                                 if(response.data.success === false){
-                                    alert('No se ha encontrado el cliente, ingrese los datos manualmente');
+                                    this.alerta('No se ha encontrado el cliente, ingrese los datos manualmente','info');
                                     this.disabledCliente = false;
                                     this.disabledClienteDireccion = false;
                                     this.disabledClienteRuc = false;
@@ -408,7 +408,7 @@
                                 this.mostrarProgreso = false;
                             });
                     } else {
-                        alert('Asegúrate de colocar la cantidad de dígitos correcta, para DNI 8 dígitos, para RUC 11 dígitos.');
+                        this.alerta('Asegúrate de colocar la cantidad de dígitos correcta, para DNI 8 dígitos, para RUC 11 dígitos','info');
                         this.mostrarProgreso = false;
                     }
                 }
@@ -463,7 +463,7 @@
                             this.$emit('obtener-mesas');
                         }
                         if (isNaN(data.idventa)) {
-                            alert('Ha ocurrido un error al procesar la venta');
+                            this.alerta('Ha ocurrido un error al procesar la venta','error');
                         } else {
                             if(data.idventa == -1){
                                 this.errorVenta = 1;
@@ -473,7 +473,6 @@
                                 if(isNaN(data.file)){
                                     this.enviar_documentos(data.idventa,data.file,'0');
                                 }
-
                                 if(this.origen == 'pedidos'){
                                     this.$emit('limpiar');
                                 } else{
@@ -483,6 +482,7 @@
                                     this.$emit('imprimir',data.idventa);
                                 }
                                 this.$refs['modal-facturar'].hide();
+                                this.control_stock(data.idventa);
                             }
                             this.cuotas = [];
                             this.cuotasAux = [];
@@ -490,7 +490,7 @@
                     })
                     .catch(error => {
                         this.mostrarSpinner = false;
-                        alert('Ha ocurrido un error.');
+                        this.alerta('Ha ocurrido un error.','error');
                         console.log(error);
                     });
             },
@@ -505,17 +505,17 @@
                             titulo = 'Comprobante enviado con éxito';
                             color = 'primary';
                             tiempo = 5000;
-                            this.$emit('countcomprobantes');
+                            this.$eventBus.$emit('count-comprobantes');
                         } else if((mensaje.toLowerCase()).includes('rechazado')) {
                             titulo = 'El comprobante ha sido rechazado y no es válido';
                             color = 'danger';
                             tiempo = 10000;
-                            this.$emit('notificaciones');
+                            this.$eventBus.$emit('count-notificaciones');
                         } else {
                             titulo = 'Comprobante pendiente de envío';
                             color = 'warning';
                             tiempo = 10000;
-                            this.$emit('notificaciones');
+                            this.$eventBus.$emit('count-notificaciones');
                         }
 
                         this.$bvToast.toast(mensaje, {
@@ -527,7 +527,17 @@
 
                     })
                     .catch(error => {
-                        alert('error');
+                        this.alerta('Error','error');
+                        console.log(error);
+                    });
+            },
+            control_stock(idventa){
+                axios.get('/helper/notificar-estado-stock' + '/' + idventa)
+                    .then(() => {
+                        this.$eventBus.$emit('count-notificaciones');
+                    })
+                    .catch(error => {
+                        alert('Ha ocurrido un error al obtener el stock');
                         console.log(error);
                     });
             },
@@ -594,6 +604,16 @@
                         tipo: '3'
                     },
                 ];
+            },
+            alerta(texto, icon){
+                this.$swal({
+                    position: 'top',
+                    icon: icon || 'warning',
+                    title: texto,
+                    timer: 5000,
+                    toast:true,
+                    confirmButtonColor: '#007bff',
+                });
             }
         }
     }

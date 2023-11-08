@@ -124,6 +124,9 @@
                     @endif
                     <strong>Impuesto:</strong> {{mb_strtoupper($presupuesto->impuesto)}} <br>
                     <strong>Punto de entrega:</strong> {{mb_strtoupper($presupuesto->lugar_entrega)}} <br>
+                </p>
+                <div class="border">
+                    <p><strong>Cuentas bancarias:</strong></p>
                     @if($presupuesto->exportacion)
                         @foreach($emisor->cuentas as $cuenta)
                             @if($cuenta['banco'] == 8)
@@ -148,7 +151,7 @@
                             @endif
                         @endforeach
                     @endif
-                </p>
+                </div>
             </td>
             <td style="width: 1%"></td>
             <td class="footer-r">
@@ -337,6 +340,12 @@
     }
     .atentamente td{
         width: 200mm;
+    }
+    .border{
+        margin-top:5mm;
+        border: 2px solid #CCC;
+        border-radius:5px;
+        padding: 0 10px 10px;
     }
 
 </style>
