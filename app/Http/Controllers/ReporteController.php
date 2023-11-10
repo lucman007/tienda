@@ -5,6 +5,8 @@ namespace sysfact\Http\Controllers;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Storage;
+use sysfact\Exports\ComparacionSire;
 use ZipArchive;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -1709,6 +1711,89 @@ class ReporteController extends Controller
 
         return $productosDetalleFinal;
 
+    }
+
+    public function comparar_txt(Request $request)
+    {
+        $comprobantes=$this->reporte_comprobantes_data($request->desde, $request->hasta, 'fecha', null, true);
+        $archivoZip = $request->file('archivo');
+
+        // Extraer el único archivo del ZIP en el almacenamiento temporal
+        $extractPath = storage_path('app/temp_extracted');
+        $zip = new ZipArchive;
+        $zip->open($archivoZip->path());
+        $zip->extractTo($extractPath);
+        $zip->close();
+
+        // Obtener el único archivo descomprimido en el almacenamiento temporal
+        $archivos = scandir($extractPath);
+        $archivo = $archivos[2]; // El tercer elemento, excluyendo "." y ".."
+
+        // Leer el contenido del archivo, ignorando la primera línea
+        $lineas = file($extractPath . '/' . $archivo, FILE_SKIP_EMPTY_LINES | FILE_IGNORE_NEW_LINES);
+        array_shift($lineas); // Eliminar la primera línea (encabezado)
+
+        $resultados = [];
+
+        foreach ($comprobantes['comprobantes'] as $venta) {
+            // Analizar la venta (implementa la lógica según tu estructura de datos)
+            $serie = $venta->facturacion->serie;
+            $correlativo = ltrim($venta->facturacion->correlativo, '0');
+            $totalVentaDB = $venta->total_venta;
+
+            // Verificar si la venta existe en el archivo
+            $ventaEncontrada = false;
+            foreach ($lineas as $linea) {
+                // Analizar la línea (implementa la lógica según el formato de tu archivo)
+                $datosArchivo = explode('|', $linea);
+                $serieArchivo = $datosArchivo[3];
+                $correlativoArchivo = $datosArchivo[4];
+                $totalVentaArchivo = floatval($datosArchivo[21]);
+                //Log::info($serieArchivo.'-'.$correlativoArchivo);
+                //Log::info($serie.'-'.$correlativo);//
+                // Comparar la venta con la línea del archivo
+                if ($serie == $serieArchivo && $correlativo == $correlativoArchivo) {
+                    // Comparar el total de la venta con el archivo
+                    $diferencia = $totalVentaDB - $totalVentaArchivo;
+
+                    // Agregar resultados al array de resultados
+                    $resultados[] = [
+                        'serie' => $serie,
+                        'correlativo' => $correlativo,
+                        'totalDB' => $totalVentaDB,
+                        'totalArchivo' => $totalVentaArchivo,
+                        'estado' => 'Encontrado',
+                        'diferencia' => $diferencia,
+                    ];
+
+                    // Indicar que la venta fue encontrada en el archivo
+                    $ventaEncontrada = true;
+                    break;
+                }
+            }
+
+            // Si la venta no fue encontrada en el archivo
+            if (!$ventaEncontrada) {
+                $resultados[] = [
+                    'serie' => $serie,
+                    'correlativo' => $correlativo,
+                    'totalDB' => $totalVentaDB,
+                    'estado' => 'No encontrado',
+                    'diferencia' => null,
+                ];
+            }
+        }
+
+        // Eliminar el archivo descomprimido y el directorio temporal
+        unlink($extractPath . '/' . $archivo);
+        rmdir($extractPath);
+
+        // Generar el archivo Excel y guardarlo temporalmente
+        Excel::store(new ComparacionSire($resultados), 'comparacion_sire.xlsx');
+        $currentLocation = storage_path('app/comparacion_sire.xlsx');
+        $newLocation = public_path('files/comparacion_sire.xlsx');
+        rename($currentLocation, $newLocation);
+        return '/files/comparacion_sire.xlsx';
     }
 
 }

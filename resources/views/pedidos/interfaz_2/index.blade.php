@@ -403,11 +403,6 @@
                 },
                 methods:{
                     checkStock(producto){
-                        @if(!$agent->isDesktop())
-                            let toaster = 'b-toaster-bottom-center';
-                            @else
-                            let toaster = 'b-toaster-top-center';
-                        @endif
                         if(producto.tipo_producto == 1){
                             axios.post('/pedidos/check-stock',{
                                 'idproducto':producto.idproducto,

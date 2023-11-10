@@ -276,6 +276,7 @@ Route::group(['middleware' => ['can:Reportes']], function () {
     Route::get('reportes/utilidad','ReporteController@reporte_utilidad');
     Route::get('reportes/obtener-vendedores','ReporteController@obtener_vendedores');
     Route::get('reportes/obtener-cajeros','ReporteController@obtener_cajeros');
+    Route::post('reportes/comparar-txt','ReporteController@comparar_txt');
 });
 
 Route::group(['middleware' => ['can:Inventario: requerimientos']], function () {

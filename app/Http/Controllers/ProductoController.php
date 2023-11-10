@@ -712,11 +712,6 @@ class ProductoController extends Controller
         $stock = $producto->inventario()->first()->saldo??0;
         $unidad = explode('/',$producto->unidad_medida);
         $unidad_medida = $unidad[1];
-       /* if($request->cantidad > $stock){
-            return ['mensaje'=>'El stock del producto '.$producto->nombre.' es de '.$stock.' '.$unidad_medida.'. ¡Revisa tu stock antes de vender!','color'=>'danger'];
-        } else if($request->cantidad >= ($stock - $producto->stock_bajo)){
-            return ['mensaje'=>'El stock del producto '.$producto->nombre.' es de '.$stock.' '.$unidad_medida.'. ¡Está por agotarse!','color'=>'warning'];
-        }*/
         if($request->cantidad > $stock){
             return ['mensaje'=>'¡Cantidad supera el stock!','color'=>'badge-danger'];
         } else if($request->cantidad >= ($stock - $producto->stock_bajo)){
@@ -724,7 +719,6 @@ class ProductoController extends Controller
         } else {
             return null;
         }
-
     }
 
     public static function notificar_stock_productos($idventa){
