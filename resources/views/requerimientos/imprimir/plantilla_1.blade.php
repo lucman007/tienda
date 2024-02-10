@@ -33,7 +33,7 @@
         <table cellpadding="0">
             <tr>
                 <td style="width: 20mm"><strong>Fecha:</strong></td>
-                <td style="width: 50mm">{{ date("d/m/Y",strtotime($requerimiento->fecha)) }}</td>
+                <td style="width: 50mm">{{ date("d/m/Y",strtotime($requerimiento->fecha_requerimiento)) }}</td>
             </tr>
             <tr>
                 <td><strong>Proveedor:</strong></td>

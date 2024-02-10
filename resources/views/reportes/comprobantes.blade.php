@@ -154,7 +154,7 @@
         </div>
         <div class="row" v-show="mostrar">
             <div class="col-lg-12 mt-4">
-                <p>Exporta el TXT desde la plataforma SIRE de Sunat y cárgalo aquí para hacer la comparación (Archivo .zip).</p>
+                <p>Exporta el TXT desde propuesta del RVIE de la plataforma SIRE y cárgalo aquí para hacer la comparación (Archivo .zip).</p>
                 <b-form-file v-model="archivo" class="mb-2" plain accept=".zip"></b-form-file>
                 <b-button :disabled="!archivo" variant="success" @click="compararVentas">Comparar</b-button>
             </div>

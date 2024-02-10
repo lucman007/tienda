@@ -731,14 +731,14 @@
                         @endif
                     },
                     limpiar(sendToSocket){
-                        this.totalVenta = '0.00';
-                        this.productosSeleccionados=[];
-                        this.idpedido = -1;
-                        this.ticket = '';
-                        this.idvendedor="{{$idvendedor}}";
-                        this.obtener_pedidos();
-                        this.disabledTicket = true;
                         if(sendToSocket){
+                            this.totalVenta = '0.00';
+                            this.ticket = '';
+                            this.idvendedor="{{$idvendedor}}";
+                            this.obtener_pedidos();
+                            this.disabledTicket = true;
+                            this.productosSeleccionados=[];
+                            this.idpedido = -1;
                             this.sendWS('limpiar')
                         }
                     },

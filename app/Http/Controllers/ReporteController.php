@@ -437,7 +437,9 @@ class ReporteController extends Controller
 
     public function reporte_ventas_diario_data($mes, $moneda, $tipo_cambio)
     {
-        $ventas = Venta::whereBetween('fecha', ["$mes-01 " . $this->hora_inicio, "$mes-31 " . $this->hora_fin])
+        $primerDia = $mes . "-01";
+        $ultimoDia = date("Y-m-t", strtotime($primerDia));
+        $ventas = Venta::whereBetween('fecha', [$primerDia .' '. $this->hora_inicio, $ultimoDia. ' ' . $this->hora_fin])
             ->where('eliminado', 0)
             ->with(['facturacion'])
             ->whereHas('facturacion', function ($query) use ($moneda) {
@@ -723,7 +725,20 @@ class ReporteController extends Controller
 
             }
 
-            $ventas = $totales_del_mes;
+            $totales_badge = [
+                'bruto'=>0,
+                'impuesto'=>0,
+                'neto'=>0,
+            ];
+
+            foreach ($totales_del_mes as $total) {
+                $totales_badge['bruto'] += $total['ventas_brutas'];
+                $totales_badge['impuesto'] += $total['impuestos'];
+                $totales_badge['neto'] += $total['ventas_netas'];
+            }
+
+
+            $ventas = [$totales_del_mes,$totales_badge];
             $manual = 1;
 
         } else {
@@ -755,6 +770,7 @@ class ReporteController extends Controller
         $valor_mes = $ex[1];
 
         $ventas=$this->reporte_ventas_diario_data($mes, $moneda, $tipo_cambio);
+        $ventas = $ventas[0];
 
         if(count($ventas) > 0){
 
@@ -1640,7 +1656,6 @@ class ReporteController extends Controller
         $suma = 0;
 
         foreach ($productos as $producto){
-            Log::info(json_encode($producto));
             $suma += $producto->vendidos;
         }
 
@@ -1746,12 +1761,15 @@ class ReporteController extends Controller
             foreach ($lineas as $linea) {
                 // Analizar la línea (implementa la lógica según el formato de tu archivo)
                 $datosArchivo = explode('|', $linea);
+                $tipoComprobante = $datosArchivo[2];
                 $serieArchivo = $datosArchivo[3];
                 $correlativoArchivo = $datosArchivo[4];
                 $totalVentaArchivo = floatval($datosArchivo[21]);
-                //Log::info($serieArchivo.'-'.$correlativoArchivo);
-                //Log::info($serie.'-'.$correlativo);//
-                // Comparar la venta con la línea del archivo
+
+                if($tipoComprobante == '07'){
+                    $totalVentaArchivo = $totalVentaArchivo * -1;
+                }
+
                 if ($serie == $serieArchivo && $correlativo == $correlativoArchivo) {
                     // Comparar el total de la venta con el archivo
                     $diferencia = $totalVentaDB - $totalVentaArchivo;
@@ -1762,8 +1780,8 @@ class ReporteController extends Controller
                         'correlativo' => $correlativo,
                         'totalDB' => $totalVentaDB,
                         'totalArchivo' => $totalVentaArchivo,
-                        'estado' => 'Encontrado',
                         'diferencia' => $diferencia,
+                        'estado' => 'Encontrado',
                     ];
 
                     // Indicar que la venta fue encontrada en el archivo
@@ -1778,8 +1796,9 @@ class ReporteController extends Controller
                     'serie' => $serie,
                     'correlativo' => $correlativo,
                     'totalDB' => $totalVentaDB,
-                    'estado' => 'No encontrado',
+                    'totalArchivo' => '',
                     'diferencia' => null,
+                    'estado' => 'No encontrado',
                 ];
             }
         }

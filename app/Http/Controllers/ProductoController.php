@@ -84,7 +84,7 @@ class ProductoController extends Controller
                         ->select('productos.*','categorias.nombre as categoria')
                         ->where(function ($query) use ($consulta) {
                             $query->where('productos.nombre','LIKE','%'.$consulta.'%')
-                                ->orWhere('cod_producto','like','%'.$consulta.'%')
+                                ->orWhere('cod_producto','like','%'.ltrim($consulta,'0').'%')
                                 ->orWhere('presentacion','like','%'.$consulta.'%');
                         })
                         ->orderby($orderby,$order)

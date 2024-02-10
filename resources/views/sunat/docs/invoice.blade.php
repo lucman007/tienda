@@ -116,7 +116,7 @@
             <cbc:ID>Detraccion</cbc:ID>
             <cbc:PaymentMeansCode>001</cbc:PaymentMeansCode>
             <cac:PayeeFinancialAccount>
-                <cbc:ID>{{$emisor->cuenta_detracciones}}</cbc:ID>
+                <cbc:ID>{{$emisor->cuentas[0]['cuenta']}}</cbc:ID>
             </cac:PayeeFinancialAccount>
         </cac:PaymentMeans>
         <cac:PaymentTerms>

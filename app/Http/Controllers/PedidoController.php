@@ -674,9 +674,11 @@ class PedidoController extends Controller
     public function obtenerEmpleados(){
 
         if (Role::where('name', 'Vendedor')->exists()) {
-            $empleados = User::role('Vendedor')
-                ->orWhere('cargo', 1)
-                ->where('acceso', '!=', '1')
+            $empleados = User::where(function ($query) {
+                $query->role('Vendedor')
+                    ->orWhere('cargo', 1);
+            })
+                ->where('acceso', '!=', 1)
                 ->where('eliminado', 0)
                 ->get();
         } else {

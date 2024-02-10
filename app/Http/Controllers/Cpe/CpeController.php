@@ -417,7 +417,7 @@ class CpeController extends Controller
         curl_setopt_array($curl, array(
             CURLOPT_URL => $url,
             CURLOPT_HTTPHEADER => [
-                'Authorization: Bearer '.$tocken['access_token'],
+                'Authorization: Bearer '.($tocken['access_token']??''),
                 'Content-Type: application/json'
             ],
             CURLOPT_RETURNTRANSFER => true,
@@ -468,7 +468,7 @@ class CpeController extends Controller
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'GET',
             CURLOPT_HTTPHEADER => [
-                'Authorization: Bearer '.$tocken['access_token']
+                'Authorization: Bearer '.($tocken['access_token']??'')
             ],
         ));
 

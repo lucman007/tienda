@@ -202,6 +202,12 @@
                 set_data_chart(){
                     labels=[];
                     datos=[];
+                    @php
+                        $manual = json_decode(cache('config')['interfaz'], true)['reporte_ventas_manual']??false;
+                    @endphp
+                    @if($manual)
+                        this.ventas.reverse();
+                    @endif
                     if(this.ventas) {
                         for (let venta of this.ventas) {
                             let fecha = (venta.fecha).split('-');

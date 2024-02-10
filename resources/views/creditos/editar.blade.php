@@ -331,7 +331,8 @@
                     if (this.monto.length == 0) errorDatos.push('*El campo monto no puede estar vacío');
                     if (this.monto == 0) errorDatos.push('*El monto debe ser mayor a 0.00');
                     if (isNaN(this.monto)) errorDatos.push('*El monto debe ser un número');
-                    if(this.monto>this.saldo) errorDatos.push('*El monto excede el saldo o total de la cuota');
+                    let saldo = (this.saldo).toFixed(2);
+                    if(this.monto>Number(saldo)) errorDatos.push('*El monto excede el saldo o total de la cuota');
                     if (errorDatos.length) {
                         error = 1;
                         for (let error of errorDatos) {

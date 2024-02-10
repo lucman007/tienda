@@ -428,11 +428,12 @@
                 },
                 buscar(event){
                     if(event.code == 'Enter' || event.code == 'NumpadEnter'){
+                        const textoCodificado = encodeURIComponent(this.search);
                         event.preventDefault();
                         if('Filtro' == '<?php echo $filtro ?>'){
-                            window.location.href = '/productos?textoBuscado='+this.search;
+                            window.location.href = '/productos?textoBuscado='+textoCodificado;
                         } else {
-                            window.location.href = '/productos?textoBuscado='+this.search+'&filtro=<?php echo $filtro ?>'
+                            window.location.href = '/productos?textoBuscado='+textoCodificado+'&filtro=<?php echo $filtro ?>'
                         }
                     }
                 },

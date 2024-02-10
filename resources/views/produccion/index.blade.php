@@ -36,6 +36,7 @@
                                     <th scope="col">Fecha</th>
                                     <th scope="col">Cliente</th>
                                     <th scope="col">Prioridad</th>
+                                    <th scope="col">Oc</th>
                                     <th scope="col">Estado</th>
                                     <th scope="col">Opciones</th>
                                 </tr>
@@ -54,6 +55,7 @@
                                                     <span class="badge badge-danger">ALTA</span>
                                                 @endif
                                             </td>
+                                            <td>{{$item->num_oc}}</td>
                                             <td>@if($item->estado=='PENDIENTE')
                                                     <span class="badge badge-warning">PENDIENTE</span>
                                                 @else
