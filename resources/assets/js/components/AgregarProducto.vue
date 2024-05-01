@@ -12,7 +12,7 @@
                             <div class="container">
                                 <div class="row">
                                     <div v-show="tipo_producto == 3" class="col-lg-12">
-                                        <p style="color: green">Ahora puedes armar un conjunto de productos y establecerle un precio. Cada producto se descontará del inventario individualmente. Agrega los productos al kit desde la pestaña <strong>AGREGAR PRODUCTOS</strong>.</p>
+                                        <p style="color: green">Arma un conjunto de productos y establece un precio. Cada producto se descontará del inventario individualmente. Agrega los productos al kit desde la pestaña <strong>AGREGAR PRODUCTOS</strong>.</p>
                                     </div>
                                     <div class="col-lg-3">
                                         <div class="form-group">
@@ -84,11 +84,11 @@
                                             </template>
                                         </b-input-group>
                                     </div>
-                                    <div v-if="(!can_gestionar && accion=='insertar') || can_gestionar" class="col-lg-5" v-show="accion=='editar' && tipo_producto=='1'">
+                                    <div v-if="(!can_gestionar && accion=='insertar') || can_gestionar" class="col-lg-8" v-show="accion=='editar' && tipo_producto=='1'">
                                         <label>Código de barras:</label>
                                         <div class="form-group">
                                             <a :href="'data:image/png;base64,'+barcode" download>
-                                                <img :src="'data:image/png;base64,'+barcode" alt="barcode">
+                                                <img style="max-width: 90%; height: 30px;" :src="'data:image/png;base64,'+barcode" alt="barcode">
                                             </a>
                                             <b-button variant="success" :href="'data:image/png;base64,'+barcode" download><i class="fas fa-download"></i></b-button>
                                         </div>

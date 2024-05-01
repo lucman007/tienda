@@ -938,6 +938,7 @@ class VentaController extends Controller
             return json_encode($guia);
 
         }catch (\Exception $e){
+            Log::error($e);
             return $e;
         }
 
@@ -946,9 +947,9 @@ class VentaController extends Controller
     public function imprimir_venta(Request $request, $idventa)
     {
         try{
-            return PdfHelper::generarPdf($idventa, $request->rawbt);
+            return PdfHelper::generarPdf($idventa, $request->rawbt, false, $request->formato);
         } catch (\Exception $e){
-            Log::info($e);
+            Log::error($e);
             return response(['idventa'=>-1,'respuesta'=>$e->getMessage()],500);
         }
 

@@ -379,7 +379,7 @@ class CreditoController extends Controller
                     }
                 }
                 $pago->total_pagado = $suma;
-                $pago->total_adeuda = $pago->monto - $suma;
+                $pago->total_adeuda = round($pago->monto - $suma,2);
                 $pago->total_adeuda == 0 ? $pago->estado = 'pagado':$pago->estado = 'adeuda';
             }
 
@@ -406,7 +406,7 @@ class CreditoController extends Controller
             }
         }
         $total_pagado = $suma;
-        $total_adeuda = $pago->monto - $suma;
+        $total_adeuda = round($pago->monto - $suma,2);
         return json_encode(['detalle'=>$data,'pagado'=>$total_pagado,'adeuda'=>$total_adeuda]);
     }
 

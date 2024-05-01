@@ -35,9 +35,15 @@ class PdfHelper
         self::$ruta_formato = $formato['ruta'];
     }
 
-    public static function generarPdf($idventa, $rawbt, $dest = false){
+    public static function generarPdf($idventa, $rawbt, $dest = false, $formato = false){
 
         self::setFormatoImpresion();
+
+        if($formato && $formato == '80_1'){
+            self::$ruta_formato = $formato;
+            self::$formato = [72,250];
+        }
+
         $venta=Venta::find($idventa);
         $venta->color = json_decode(cache('config')['impresion'], true)['color']??false;
 

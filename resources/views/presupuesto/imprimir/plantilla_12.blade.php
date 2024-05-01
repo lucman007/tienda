@@ -101,6 +101,9 @@
                         <td>Forma de pago: <strong>{{strtoupper($presupuesto->condicion_pago)}}</strong></td>
                     </tr>
                     <tr>
+                        <td>Impuesto: <strong>{{mb_strtoupper($presupuesto->impuesto)}}</strong></td>
+                    </tr>
+                    <tr>
                         <td>Tiempo de entrega: <strong>{{strtoupper($presupuesto->tiempo_entrega)}}</strong></td>
                     </tr>
                     <tr>

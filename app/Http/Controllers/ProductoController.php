@@ -298,7 +298,7 @@ class ProductoController extends Controller
         }
 
         $barcode = new DNS1D();
-        $producto->barcode=$barcode->getBarcodePNG($id, "C39+");
+        $producto->barcode=$barcode->getBarcodePNG($producto->cod_producto, "C39+");
 
 		$producto->cantidad=$suma;
         $producto->descuentos=$descuentos;
@@ -630,7 +630,7 @@ class ProductoController extends Controller
         $barcode = new DNS1D();
 
         foreach ($productos as $producto) {
-            $barcodeData = $barcode->getBarcodePNG($producto->idproducto, "C39+");
+            $barcodeData = $barcode->getBarcodePNG($producto->cod_producto, "C39+");
             $decodedBarcodeData = base64_decode($barcodeData);
             $barcodePath = $tempPath . '/' . $this->cleanFileName($producto->cod_producto).'-'. $this->cleanFileName($producto->nombre).'_' . uniqid() . '.png';
             file_put_contents($barcodePath, $decodedBarcodeData);

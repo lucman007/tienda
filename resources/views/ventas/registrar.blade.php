@@ -657,11 +657,16 @@
                                                 $tipo_pago = \sysfact\Http\Controllers\Helpers\DataTipoPago::getTipoPago();
                                             @endphp
                                             @foreach($tipo_pago as $pago)
-                                                @if(!($pago['num_val'] == 4 || $pago['num_val'] == 2))
+                                                @if($pago['num_val'] != 2)
                                                 <option value="{{$pago['num_val']}}">{{$pago['label']}}</option>
                                                 @endif
                                             @endforeach
                                         </select>
+                                    </div>
+                                    <div v-show="tipoPago==1 && tipoPagoContado == 4" class="col-lg-6 form-group">
+                                        <b-button v-b-modal.modal-pagofraccionado variant="primary"><i
+                                                    class="fas fa-edit"></i> Editar pago
+                                        </b-button>
                                     </div>
                                     <div v-show="tipoPago==2" class="col-lg-6 form-group">
                                         <b-button
@@ -729,6 +734,48 @@
             </div>
         </div>
     </div>
+    <!--INICIO MODAL PAGO FRACCIONADO -->
+    <b-modal size="md" id="modal-pagofraccionado" ref="modal-pagofraccionado" @ok="">
+    <template slot="modal-title">
+        Pago fraccionado
+    </template>
+    <div class="container">
+        <div class="row">
+            <div v-for="pago,index in pago_fraccionado" class="col-lg-12 mb-3">
+                <div class="row">
+                    <div class="col-lg-4">
+                        <label>Monto</label>
+                        <input v-model="pago.monto" type="number" class="form-control" onfocus="this.select()">
+                    </div>
+                    <div class="col-lg-6">
+                        <label>Tipo de pago</label>
+                        <select v-model="pago.tipo" class="custom-select">
+                            @foreach($tipo_pago as $pago)
+                                @if($pago['num_val'] != 2)
+                                    <option v-show="!({{$pago['num_val']}} == 4 || {{$pago['num_val']}} == 2)" value="{{$pago['num_val']}}">{{$pago['label']}}</option>
+                                @endif
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-lg-2" v-show="index > 1">
+                        <button @click="borrarFraccionado(index)" style="margin-top: 20px" class="btn btn-danger"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-12">
+                <b-button variant="primary" @click="agregarFraccionado"><i
+                            class="fas fa-plus"></i>
+                </b-button>
+            </div>
+        </div>
+    </div>
+    <template #modal-footer="{ ok, cancel}">
+        <b-button variant="secondary" @click="cancel()">
+            Listo
+        </b-button>
+    </template>
+    </b-modal>
+    <!--FIN MODAL PAGO FRACCIONADO -->
     <!--INICIO MODAL DOCUMENTO -->
     <b-modal size="lg" id="modal-documento" ref="modal-documento" ok-only @hidden="resetModal">
         <template slot="modal-title">
@@ -1022,7 +1069,17 @@
                 spinnerRuc:false,
                 domicilioFiscalCliente:true,
                 doc_observacion:"",
-                mensajesStock: []
+                mensajesStock: [],
+                pago_fraccionado:[
+                    {
+                        monto: '0.00',
+                        tipo: '1'
+                    },
+                    {
+                        monto: '0.00',
+                        tipo: '3'
+                    },
+                ],
             },
             mounted() {
                 if (localStorage.getItem('productos')) {
@@ -1056,6 +1113,12 @@
                 }
             },
             methods: {
+                agregarFraccionado(){
+                    this.pago_fraccionado.push({monto: '0.00', tipo: '1'});
+                },
+                borrarFraccionado(index){
+                    this.pago_fraccionado.splice(index,1);
+                },
                 redondearSinCeros(numero) {
                     let numeroRedondeado = parseFloat(numero.toFixed(3));
                     return numeroRedondeado.toString().replace(/(\.0*|(?<=(\..*))0*)$/, '');
@@ -1690,6 +1753,7 @@
                                 'doc_relacionado_nc':this.doc_relacionado_nc,
                                 'idventa_modifica':this.idventa_modifica,
                                 'doc_observacion':this.doc_observacion,
+                                'pago_fraccionado': JSON.stringify(this.pago_fraccionado),
                             })
                                 .then(response => {
                                     localStorage.removeItem('productos');
@@ -1756,6 +1820,16 @@
 
                         if (suma_cuotas > this.totalVenta) errorDatosVenta.push('*La suma de las cuotas supera el monto total de la venta');
                         if (suma_cuotas < this.totalVenta) errorDatosVenta.push('*La suma de las cuotas es inferior al monto total de la venta');
+                    }
+
+                    if (this.tipoPago == 1 && this.tipoPagoContado == 4) {
+                        let suma_pago_fra = 0;
+                        for (let pago of this.pago_fraccionado) {
+                            suma_pago_fra += Number(pago.monto);
+                        }
+
+                        if (suma_pago_fra > this.totalVenta) errorDatosVenta.push('*La suma de los pagos fraccionados supera el monto total de la venta');
+                        if (suma_pago_fra < this.totalVenta) errorDatosVenta.push('*La suma de los pagos fraccionados es inferior al monto total de la venta');
                     }
 
                     if (this.comprobante == '01' || this.comprobante == '07.02' || this.comprobante == '08.02') {

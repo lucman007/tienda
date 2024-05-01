@@ -265,7 +265,7 @@ class CpeController extends Controller
             if ($request->guia) {
                 PdfHelper::generarPdfGuia($file_or_id, false, 'D');
             } else {
-                PdfHelper::generarPdf($file_or_id, false, 'D');
+                PdfHelper::generarPdf($file_or_id, false, 'D', $request->formato);
             }
 
         } else {
