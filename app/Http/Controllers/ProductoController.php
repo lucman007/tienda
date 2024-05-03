@@ -232,6 +232,8 @@ class ProductoController extends Controller
             } else{
                 $producto->discounts = 0;
             }
+
+            $producto->series = $request->series;
             $producto->items_kit = $request->items_kit;
             $producto->save();
 
@@ -368,6 +370,7 @@ class ProductoController extends Controller
             } else {
                 $producto->discounts = 0;
             }
+            $producto->series = $request->series;
             $producto->items_kit = $request->items_kit;
             $producto->save();
 

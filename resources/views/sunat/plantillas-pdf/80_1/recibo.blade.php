@@ -70,7 +70,7 @@
             <tbody>
             @foreach($items as $item)
                 <tr>
-                    <td style="width: 35mm">{{$item->detalle->cantidad}} {{$item->nombre}} {{$item->detalle->descripcion}}</td>
+                    <td style="width: 35mm">{{$item->detalle->cantidad}} {{$item->nombre}} {!!$item->detalle->descripcion!!}</td>
                     <td style="width: 10mm">{{$item->detalle->monto}}</td>
                     <td style="width: 10mm">{{$item->detalle->total}}</td>
                 </tr>

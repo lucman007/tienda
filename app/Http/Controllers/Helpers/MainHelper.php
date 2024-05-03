@@ -291,36 +291,56 @@ class MainHelper extends Controller
                     ->limit(20)
                     ->get();
 
+                /*$productosPorSerie = Producto::where('eliminado', 0)
+                    ->where(function ($query) use ($search) {
+                        $query->whereJsonContains('series', ['serie' => $search]);
+                    })
+                    ->orderby($orderby, $sort)
+                    ->limit(20)
+                    ->get();*/
+
                 $productos = $productosPorNombre
                     ->concat($productosPorPresentacion)
                     ->concat($productosPorCodigo)
+                    //->concat($productosPorSerie)
                     ->unique()
                     ->take(20);
             }
         }
 
         foreach ($productos as $producto) {
-            $producto->stock = $producto->inventario()->first()->saldo;
-            $producto->moneda = $producto->moneda=='PEN'?'S/':'USD';
-            $producto->unidad = explode('/',$producto->unidad_medida)[1];
-            $descuento=$producto->descuento()->orderby('monto_desc','asc')->first();
-            $producto->precioPorMayor = $descuento['monto_desc'];
-            $producto->cantidadPorMayor = $descuento['cantidad_min'];
-            $producto->etiqueta = $descuento['etiqueta'];
-            $producto->items_kit = json_decode($producto->items_kit, true);
-            $producto->badge_stock = 'badge-success';
-            if($producto->stock <= 0){
-                $producto->badge_stock = 'badge-danger';
-            } else if($producto->stock <= $producto->stock_bajo){
-                $producto->badge_stock = 'badge-warning';
-            }
+            $this->getDataAdicional($producto);
         }
 
         return response()->json($productos);
     }
 
+    public function getDataAdicional($producto){
+        $producto->stock = $producto->inventario()->first()->saldo;
+        $producto->moneda = $producto->moneda=='PEN'?'S/':'USD';
+        $producto->unidad = explode('/',$producto->unidad_medida)[1];
+        $descuento=$producto->descuento()->orderby('monto_desc','asc')->first();
+        $producto->precioPorMayor = $descuento['monto_desc'];
+        $producto->cantidadPorMayor = $descuento['cantidad_min'];
+        $producto->etiqueta = $descuento['etiqueta'];
+        $producto->items_kit = json_decode($producto->items_kit, true);
+        $producto->badge_stock = 'badge-success';
+        if($producto->stock <= 0){
+            $producto->badge_stock = 'badge-danger';
+        } else if($producto->stock <= $producto->stock_bajo){
+            $producto->badge_stock = 'badge-warning';
+        }
+    }
+
     public function agregar_producto($search){
-        $producto = Producto::where('cod_producto',$search)->first();
+        $producto = Producto::where('cod_producto', $search)
+            ->orwhere(function ($query) use ($search) {
+                $query->whereJsonContains('series', ['serie' => $search]);
+            })
+            ->first();
+        if($producto){
+            $this->getDataAdicional($producto);
+        }
         return response()->json($producto);
     }
 

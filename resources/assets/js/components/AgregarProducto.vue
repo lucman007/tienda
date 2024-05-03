@@ -24,17 +24,17 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div v-if="accion=='editar'" class="col-lg-3">
+                                    <div class="col-lg-3">
                                         <div class="form-group">
-                                            <label>Código Producto:</label>
+                                            <label>Código:</label>
                                             <input autocomplete="off" type="text" v-model="cod_producto" name="cod_producto" class="form-control">
                                         </div>
                                     </div>
-                                    <div :class="[accion=='insertar'?'col-lg-9':'col-lg-6']">
+                                    <div class="col-lg-6">
                                         <div class="form-group">
                                             <label v-show="tipo_producto != 3">Nombre del producto o servicio:</label>
                                             <label v-show="tipo_producto == 3">Nombre del kit de productos:</label>
-                                            <input type="text" v-model="nombre" name="nombre"  class="form-control" autocomplete="off">
+                                            <input type="text" v-model="nombre" name="nombre"  class="form-control" autocomplete="off" id="nombre_producto">
                                         </div>
                                     </div>
                                     <div class="col-lg-12">
@@ -178,7 +178,7 @@
                                                     <div class="col-lg-4">
                                                         <label for="precio">Cantidad:</label>
                                                         <b-input-group>
-                                                            <input onfocus="this.select()" class="form-control" v-model="descuento.cantidad" type="number" placeholder="cantidad">
+                                                            <input onfocus="this.select()" class="form-control" v-model="descuento.cantidad" type="number" placeholder="cantidad" :id="'desc_'+index">
                                                             <b-input-group-append>
                                                                 <b-input-group-text>
                                                                     {{(medida.split('/'))[1]}}
@@ -268,7 +268,7 @@
                                     <div class="col-lg-3 form-group">
                                         <label>Precio mínimo</label>
                                         <b-input-group>
-                                            <b-form-input type="number" v-model="param_4"></b-form-input>
+                                            <b-form-input onfocus="this.select()" type="number" v-model="param_4"></b-form-input>
                                             <template #append>
                                                 <b-dropdown :text="param_5==null ? 'PEN':param_5" variant="secondary">
                                                     <b-dropdown-item @click="param_5 = 'PEN'">PEN</b-dropdown-item>
@@ -276,6 +276,25 @@
                                                 </b-dropdown>
                                             </template>
                                         </b-input-group>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-12 my-3">
+                                        <label>Series:</label>
+                                    </div>
+                                    <div class="col-lg-4 mb-3">
+                                        <button @click="agregarSerie" class="btn btn-primary"><i class="fas fa-plus"></i> Agregar serie
+                                        </button>
+                                    </div>
+                                    <div class="col-lg-12 mb-2" v-for="(item,index) in series" :key="index">
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <input onfocus="this.select()" class="form-control" v-model="item.serie" type="text" placeholder="Serie" :id="'serie_'+index">
+                                            </div>
+                                            <div class="col-lg-1">
+                                                <button @click="borrarSerie(index)" class="btn btn-danger"><i class="fas fa-trash"></i></button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -340,6 +359,7 @@
                 nombreUbicacion:'',
                 items_kit:[],
                 unidad_de_medida:[],
+                series:[]
             }
         },
         mounted(){
@@ -353,6 +373,7 @@
                     this.tipo_producto = this.tipo_de_producto;
                 }
                 this.unidad_de_medida = this.unidad_medida;
+                document.getElementById('nombre_producto').focus();
             },
             obtener_categorias(){
                 axios.get('/helper/categorias')
@@ -397,7 +418,6 @@
                 axios.get('/productos/edit' + '/' + id)
                     .then(response => {
                         let datos = response.data;
-                        console.log(datos.tipo_producto)
                         this.cod_producto = datos.cod_producto;
                         this.nombre = datos.nombre;
                         this.costo = datos.costo;
@@ -424,6 +444,7 @@
                         this.idalmacen = datos.almacen.idalmacen || null;
                         this.idubicacion = datos.almacen.idubicacion || null;
                         this.items_kit = datos.items_kit == null ? [] : JSON.parse(datos.items_kit);
+                        this.series = datos.series == null ? [] : JSON.parse(datos.series);
                         this.$refs['modal-nuevo-producto'].show();
                         this.obtener_ubicacion(this.idubicacion);
                     })
@@ -475,9 +496,25 @@
                     precio: '0.00',
                     etiqueta: ''
                 });
+                let index = this.descuentos.length - 1;
+                setTimeout(() => {
+                    document.getElementById('desc_'+index).focus();
+                }, 50);
             },
             borrarDescuento(index){
                 this.descuentos.splice(index,1);
+            },
+            agregarSerie(){
+                this.series.push({
+                    serie: ''
+                });
+                let index = this.series.length - 1;
+                setTimeout(() => {
+                    document.getElementById('serie_'+index).focus();
+                }, 50);
+            },
+            borrarSerie(index){
+                this.series.splice(index,1);
             },
             agregarAlKit(obj){
                 let plato = {idproducto:obj['idproducto'],cantidad:1,precio:obj['precio'],nombre:obj['nombre']};
@@ -517,6 +554,7 @@
                     'tipo_producto':this.tipo_producto,
                     'moneda': this.moneda,
                     'descuentos': JSON.stringify(this.descuentos),
+                    'series': JSON.stringify(this.series),
                     'observacion': this.observacion,
                     'moneda_compra' : this.moneda_compra,
                     'tipo_cambio_compra' : this.tipo_cambio_compra,
@@ -612,6 +650,7 @@
                 this.tipo_producto = 1;
                 this.moneda = 'PEN';
                 this.descuentos = [];
+                this.series = [];
                 this.observacion = '';
                 this.moneda_compra = 'PEN';
                 this.tipo_cambio_compra = this.tipo_cambio;

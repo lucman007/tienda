@@ -161,20 +161,24 @@
                     case 'NumpadEnter':
                         if (this.productos.length > 0) {
                             this.agregarProducto(this.productos[this.currentItem]);
+                            this.mostrarSpinner = false;
                         } else{
                             axios.get('/helper/agregar-producto' + '/' + this.query)
                                 .then(response => {
-                                    this.productos = response.data;
-                                    if((Object.keys(this.productos).length === 0)){
+                                    this.productos = [response.data];
+                                    this.mostrarSpinner = false;
+                                    if((Object.keys(response.data).length === 0)){
                                         alert('No se ha encontrado el producto con el código marcado');
+                                        this.productos = [];
                                     } else{
-                                        this.agregarProducto(this.productos[this.currentItem]);
+                                        this.agregarProducto(this.productos[0], true);
                                     }
                                 });
                         }
                         break;
                     default:
                         this.currentItem = 0;
+                        this.productos = [];
                         this.buscarProducto();
 
                 }
@@ -252,7 +256,7 @@
                 this.$refs['modal-agregar-producto-alt'].hide();
                 this.idcategoria = -1;
             },
-            agregarProducto(producto){
+            agregarProducto(producto, barcode = false){
                 let spinner = document.getElementById("spinner_"+producto.idproducto);
                 let spinnerAll = document.querySelectorAll(".spinner_add");
                 spinnerAll.forEach((spinner) => {
@@ -268,6 +272,10 @@
 
                 if(this.countClicks > 1){
                     this.onOpenModalNewItem = false;
+                }
+
+                if(barcode){
+                    this.onOpenModalNewItem = true;
                 }
 
                 this.$emit('agregar',{'producto':producto,'newItem':this.onOpenModalNewItem});

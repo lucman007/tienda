@@ -11,7 +11,7 @@
             <div class="texto">
                 <p>
                     <strong>{{$emisor->nombre_comercial?$emisor->nombre_comercial:$emisor->nombre_publicitario}}</strong><br>
-                    {{json_decode(cache('config')['impresion'], true)['ocultar_razon_social']?'':$emisor->razon_social}}<br>R.U.C. {{$emisor->ruc}}<br><br>{{$emisor->direccion}}, {{$emisor->urbanizacion==''?'':$emisor->urbanizacion.','}} {{$emisor->provincia}},
+                    {{(json_decode(cache('config')['impresion'], true)['ocultar_razon_social']??false)?'':$emisor->razon_social}}<br>R.U.C. {{$emisor->ruc}}<br><br>{{$emisor->direccion}}, {{$emisor->urbanizacion==''?'':$emisor->urbanizacion.','}} {{$emisor->provincia}},
                     {{$emisor->departamento}}, {{$emisor->distrito}} <br> {{$emisor->telefono_1}} / {{$emisor->telefono_2==''?'':$emisor->telefono_2.' / '}}{{$emisor->email}} <br>
                     {{$emisor->texto_publicitario}} <br><br>
                     <strong>{{mb_strtoupper($documento->titulo_doc)}} ELECTRÓNICA {{$documento->facturacion->serie}}-{{$documento->facturacion->correlativo}}</strong>
@@ -79,7 +79,7 @@
             @foreach($items as $item)
                 <tr>
                     <td style="width: 38mm">
-                        {{$item->detalle->cantidad}} {{$item->nombre}} {{$item->detalle->descripcion}}
+                        {{$item->detalle->cantidad}} {{$item->nombre}} {!!$item->detalle->descripcion!!}
                         @if($item->detalle->descuento > 0)
                             <br>
                             Dscto: {{$item->detalle->tipo_descuento?floatval($item->detalle->porcentaje_descuento).'%':$item->detalle->descuento}}

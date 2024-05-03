@@ -464,7 +464,7 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <tr v-for="(producto,index) in productosSeleccionados" :key="producto.num_item">
+                                <tr v-for="(producto,index) in productosSeleccionados" :key="index">
                                     <td></td>
                                     <td>@{{producto.cod_producto}} - @{{producto.nombre}} <br>
                                         <span style="font-size: 11px; color: #0b870b;" v-for="item in producto.items_kit">+ (@{{ item.cantidad }}) @{{item['nombre']}}<br></span>

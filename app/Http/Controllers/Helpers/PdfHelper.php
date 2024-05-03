@@ -39,9 +39,16 @@ class PdfHelper
 
         self::setFormatoImpresion();
 
-        if($formato && $formato == '80_1'){
-            self::$ruta_formato = $formato;
-            self::$formato = [72,250];
+        if($formato){
+            if($formato == '80_1'){
+                self::$ruta_formato = $formato;
+                self::$formato = [72,250];
+            } else {
+                if(!str_contains(self::$ruta_formato,'A4')){
+                    self::$ruta_formato = 'A4_1';
+                    self::$formato = 'A4';
+                }
+            }
         }
 
         $venta=Venta::find($idventa);

@@ -131,7 +131,7 @@
             <tbody>
                 @foreach($items as $item)
                     <tr>
-                        <td style="width: 38mm">{{$item->descripcion}}</td>
+                        <td style="width: 38mm">{!!$item->descripcion!!}</td>
                         <td>{{$item->cantidad}} {{explode('/',$item->unidad_medida)[1]}}</td>
                     </tr>
                 @endforeach

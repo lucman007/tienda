@@ -107,11 +107,12 @@ export default{
                     } else{
                         axios.get('/helper/agregar-producto' + '/' + this.query)
                             .then(response => {
-                                this.results = response.data;
-                                if((Object.keys(this.results).length === 0)){
+                                this.results = [response.data];
+                                if((Object.keys(response.data).length === 0)){
                                     alert('No se ha encontrado el producto con el código marcado');
+                                    this.results = [];
                                 } else{
-                                    this.$emit('agregar_producto', this.results);
+                                    this.$emit('agregar_producto', this.results[0]);
                                 }
                             });
                     }
