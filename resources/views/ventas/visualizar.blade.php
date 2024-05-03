@@ -127,7 +127,7 @@
                                 <tr v-for="(producto,index) in productosSeleccionados" :key="producto.index">
                                     <td></td>
                                     <td>
-                                        @{{ producto.nombre }} <br>
+                                        @{{ producto.nombre }} @{{ producto.detalle.num_serie?'/ SERIE PRODUCTO: '+producto.detalle.num_serie:'' }}<br>
                                         <span style="font-size: 11px; color: #0b870b;" v-for="item in producto.items_kit">+ (@{{ item.cantidad }}) @{{item['nombre']}}<br></span>
                                     </td>
                                     <td style="white-space: break-spaces; width: 250px">@{{ producto.detalle.descripcion}}</td>

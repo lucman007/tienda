@@ -252,11 +252,18 @@ class ConfiguracionController extends Controller
                     $image=$request->file('imagen');
                     $filename   = $emisor->ruc.'-'.time() . '-logo.' . $image->getClientOriginalExtension();
 
-                    $img = Image::make($image->getRealPath());
-                    $img->resize(500, 500, function ($constraint) {
-                        $constraint->aspectRatio();
-                    });
-                    $img->save(public_path('images/' .$filename));
+                    // Verificar las dimensiones de la imagen
+                    list($width, $height) = getimagesize($image);
+                    if ($width > 500 || $height > 500) {
+                        $img = Image::make($image->getRealPath());
+                        $img->resize(500, 500, function ($constraint) {
+                            $constraint->aspectRatio();
+                        });
+                        $img->save(public_path('images/' . $filename));
+                    } else {
+                        // Si la imagen es lo suficientemente pequeña, guardarla sin cambios
+                        $image->move(public_path('images/'), $filename);
+                    }
 
                     $config = AppConfig::find($request->tipo_logo);
                     $config->valor=$filename;

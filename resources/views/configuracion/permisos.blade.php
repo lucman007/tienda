@@ -28,6 +28,7 @@
                                     <b-form-checkbox
                                             v-for="option in seleccionados" v-if="option.parent == permiso.name" :key="option.id"
                                             v-model="option.isSelected"
+                                            v-show="option.name != 'Configuración: crear permisos'"
                                             :value="option.name">@{{ option.child_name }}
                                     </b-form-checkbox>
                                 </b-form-group>

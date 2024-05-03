@@ -79,7 +79,7 @@
             @foreach($items as $item)
                 <tr>
                     <td style="width: 38mm">
-                        {{$item->detalle->cantidad}} {{$item->nombre}} {!!$item->detalle->descripcion!!}
+                        {{$item->detalle->cantidad}} {{$item->nombre}} {{$item->detalle->num_serie?'- SERIE PRODUCTO: '.$item->detalle->num_serie:''}} {!!$item->detalle->descripcion!!}
                         @if($item->detalle->descuento > 0)
                             <br>
                             Dscto: {{$item->detalle->tipo_descuento?floatval($item->detalle->porcentaje_descuento).'%':$item->detalle->descuento}}

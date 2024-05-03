@@ -116,8 +116,9 @@
                                                     <td></td>
                                                     <td>
                                                         @{{producto.nombre}}
+                                                        <span v-show="producto.serie" style="font-size: 11px; color: #0f53ff;"><br>@{{'SERIE: '+producto.serie}}</span>
                                                         <br>
-                                                        <span v-show="producto.alert_stock" >
+                                                        <span v-show="producto.alert_stock">
                                                             <span class="badge" :class="producto.alert_color">@{{ producto.alert_stock }} </span>
                                                         </span>
                                                         <span style="font-size: 11px; color: #0b870b;" v-for="item in producto.items_kit">+ (@{{ item.cantidad }}) @{{item['nombre']}}<br></span>

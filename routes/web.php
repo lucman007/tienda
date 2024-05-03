@@ -113,7 +113,6 @@ Route::group(['middleware' => ['can:Pedido']], function () {
     Route::post('pedidos/productos_por_categoria', 'PedidoController@productos_por_categoria');
     Route::post('pedidos/store', 'PedidoController@store');
     Route::post('pedidos/update', 'PedidoController@update');
-    Route::get('pedidos/editar/{idpedido}','PedidoController@editar_pedido');
     Route::get('pedidos/cambiar-mesa','PedidoController@cambiar_mesa');
     Route::post('pedidos/guardar-cambio-mesa','PedidoController@guardar_cambio_mesa');
     Route::post('pedidos/marcar-como-reservado','PedidoController@marcar_como_reservado');
@@ -135,8 +134,6 @@ Route::group(['middleware' => ['can:Pedido']], function () {
     Route::post('pedidos/cambiar-vendedor','PedidoController@cambiar_vendedor');
     Route::get('pedidos/obtener-datos-entrega/{id}','PedidoController@obtener_datos_entrega');
     Route::post('pedidos/guardar-datos-entrega','PedidoController@guardar_datos_entrega');
-    Route::get('pedidos/nuevo', 'PedidoController@nueva_orden');
-    Route::get('pedidos/imprimir-lista', 'PedidoController@imprimir_lista');
     Route::post('pedidos/check-stock','PedidoController@check_stock');
 
 });

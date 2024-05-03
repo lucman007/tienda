@@ -268,9 +268,14 @@ class MainHelper extends Controller
         } else {
             if(is_numeric($search)){
                 $productos=Producto::where('eliminado',0)
-                    ->where('cod_producto',$consulta)
+                    ->where(function ($query) use ($consulta) {
+                        $query->where('cod_producto',$consulta)
+                            ->orwhere(function ($query) use ($consulta) {
+                                $query->whereJsonContains('series', ['serie' => $consulta]);
+                            });
+                    })
                     ->orderby($orderby,$sort)
-                    ->take(10)
+                    ->take(5)
                     ->get();
             } else {
                 $productosPorNombre = Producto::where('eliminado', 0)
@@ -288,21 +293,20 @@ class MainHelper extends Controller
                 $productosPorCodigo = Producto::where('eliminado', 0)
                     ->where('cod_producto', $consulta)
                     ->orderby($orderby, $sort)
-                    ->limit(20)
+                    ->limit(5)
                     ->get();
 
-                /*$productosPorSerie = Producto::where('eliminado', 0)
+                $productosPorSerie = Producto::where('eliminado', 0)
                     ->where(function ($query) use ($search) {
                         $query->whereJsonContains('series', ['serie' => $search]);
                     })
-                    ->orderby($orderby, $sort)
-                    ->limit(20)
-                    ->get();*/
+                    ->limit(1)
+                    ->get();
 
                 $productos = $productosPorNombre
                     ->concat($productosPorPresentacion)
                     ->concat($productosPorCodigo)
-                    //->concat($productosPorSerie)
+                    ->concat($productosPorSerie)
                     ->unique()
                     ->take(20);
             }
@@ -340,6 +344,12 @@ class MainHelper extends Controller
             ->first();
         if($producto){
             $this->getDataAdicional($producto);
+            $seriesArray = json_decode($producto->series, true);
+            if ($seriesArray && in_array(['serie' => $search], $seriesArray)) {
+                $producto->serie = $search;
+            } else {
+                $producto->serie = null;
+            }
         }
         return response()->json($producto);
     }
@@ -582,6 +592,7 @@ class MainHelper extends Controller
                     $inventario->idproducto = $kit->idproducto;
                     $inventario->idempleado = auth()->user()->idempleado??-1;
                     $inventario->idventa = $idventa;
+                    //$inventario->serie = $item['serie'];
                     if($tipo_operacion == 'ingreso'){
                         $inventario->cantidad = $kit->cantidad * $cantidad;
                         $inventario->saldo = $inv_kit->saldo + ($kit->cantidad * $cantidad);
@@ -602,6 +613,7 @@ class MainHelper extends Controller
                 $inventario->costo = $item['costo'];
                 $inventario->moneda = $item['moneda_compra'];
                 $inventario->tipo_cambio = $item['tipo_cambio'];
+                $inventario->serie = $item['detalle']['serie'];
                 if($tipo_operacion == 'ingreso'){
                     $inventario->cantidad = $cantidad;
                     $inventario->saldo = $inv->saldo + $cantidad;

@@ -648,20 +648,6 @@ class VentaController extends Controller
             $venta->guia_relacionada['ticket'] = $ticket_json[count($ticket_json) - 1]['numTicket']??0;
         }
 
-        //inicio código para version antigua del sistema tabla guia
-        /*if(!$venta->guia_relacionada){
-            $venta->guia_relacionada = Guia::where('correlativo',$venta->facturacion->guia_relacionada)->first();
-            if(!$venta->guia_relacionada){
-                $correlativo = $venta->facturacion->guia_relacionada;
-                if($correlativo){
-                    $venta->guia_relacionada = ['correlativo'=>$correlativo,'estado'=>$venta->facturacion->estado_guia];
-                } else{
-                    $venta->guia_relacionada=false;
-                }
-            }
-        }*/
-        //fin código para version antigua del sistema tabla guia
-
 
         /*LEER EL CDR*/
         $file_xml=storage_path().'/app/sunat/cdr/R-'.$venta->nombre_fichero.'.xml';
@@ -671,37 +657,7 @@ class VentaController extends Controller
             $venta->motivo_rechazo = $Description[0]??false;
         }
 
-/*
-        switch ($venta->facturacion->estado){
-            case 'PENDIENTE':
-                $venta->badge_class='badge-warning';
-                break;
-            case 'ACEPTADO':
-                $venta->badge_class='badge-success';
-                break;
-            case 'ANULADO':
-            case 'ANULADO (BAJA)':
-            case 'MODIFICADO':
-                $venta->badge_class='badge-dark';
-                break;
-            case 'RECHAZADO':
-                $venta->badge_class='badge-danger';
-        }
-*/
         if($venta->guia_relacionada){
-            /*switch ($venta->guia_relacionada['estado']){
-                case 'PENDIENTE':
-                    $venta->badge_class_guia='badge-warning';
-                    break;
-                case 'ACEPTADO':
-                    $venta->badge_class_guia='badge-success';
-                    break;
-                case 'ANULADO':
-                    $venta->badge_class_guia='badge-dark';
-                    break;
-                case 'RECHAZADO':
-                    $venta->badge_class_guia='badge-danger';
-            }*/
 
             $venta->nombre_guia=$emisor->ruc.'-09-'.$venta->guia_relacionada['correlativo'];
 
@@ -1242,6 +1198,8 @@ class VentaController extends Controller
                     $detalle['subtotal'] = $subtotal_item;
                     $detalle['igv'] = $igv_item;
                     $detalle['total'] = $total_item;
+                    $detalle['num_serie'] = $item->detalle->serie;
+                    Log::info($item->detalle);
                     $venta->productos()->attach($item->idproducto, $detalle);
 
                     MainHelper::actualizar_inventario($idventa, $item, $item_inv, 'venta');
@@ -1584,6 +1542,9 @@ Imprime y entrega la NOTA DE CRÉDITO junto al comprobante anulado.',
                     $detalle['descuento'] = 0;
                     $detalle['descripcion'] = mb_strtoupper($item['presentacion']);
                     $detalle['items_kit'] = json_encode($item['items_kit']);
+                    $detalle['serie']=$item['serie']??null;
+                    $detalle['fecha']=date('Y-m-d H:i:s');
+                    $detalle['usuario']=auth()->user()->persona->idpersona;
                     $detalle['idproducto'] = $item['idproducto'];
                     $detalle['idorden'] = $idpedido;
                     DB::table('orden_detalle')->insert($detalle);

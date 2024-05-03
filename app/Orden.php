@@ -26,7 +26,7 @@ class Orden extends Model
 	public function productos(){
 		return $this->belongsToMany(Producto::class,'orden_detalle','idorden','idproducto')
 		            ->as('detalle')
-		            ->withPivot('num_item', 'cantidad', 'monto', 'descripcion','descuento','items_kit');
+		            ->withPivot('num_item', 'cantidad', 'monto', 'descripcion','descuento','items_kit','serie');
 	}
 
     public function trabajador()
