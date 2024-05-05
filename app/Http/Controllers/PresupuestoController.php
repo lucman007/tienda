@@ -216,14 +216,7 @@ class PresupuestoController extends Controller
 
         }
 
-        $ultimo_id_registrado=DB::table('productos')
-            ->select('idproducto')
-            ->where('eliminado','=',0)
-            ->orderby('idproducto','desc')
-            ->first();
-        if($ultimo_id_registrado==null)$ultimo_id_registrado=['idproducto'=>1];
-
-        return view('presupuesto.editar',['presupuesto'=>$presupuesto,'productos'=>json_encode($productos),'usuario'=>auth()->user()->persona,'ultimo_id'=>json_encode($ultimo_id_registrado)]);
+        return view('presupuesto.editar',['presupuesto'=>$presupuesto,'productos'=>json_encode($productos),'usuario'=>auth()->user()->persona]);
     }
 
 
@@ -383,20 +376,13 @@ class PresupuestoController extends Controller
     }
 
     public function nuevo_presupuesto(){
-        $ultimo_id_registrado=DB::table('productos')
-            ->select('idproducto')
-            ->where('eliminado','=',0)
-            ->orderby('idproducto','desc')
-            ->first();
-        if($ultimo_id_registrado==null)$ultimo_id_registrado=['idproducto'=>1];
-
         $config = json_decode(cache('config')['cotizacion'], true);
         $configuracion = Collect($config);
 
 
         return view('presupuesto.nuevo',
             [
-                'usuario'=>auth()->user()->persona,'ultimo_id'=>json_encode($ultimo_id_registrado),
+                'usuario'=>auth()->user()->persona,
                 'config'=>$configuracion
             ]);
     }

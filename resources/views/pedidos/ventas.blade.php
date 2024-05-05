@@ -7,7 +7,10 @@
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
             <div class="col-lg-8">
-                <h3 class="titulo-admin-1">Resumen de ventas</h3>
+                <h3 class="titulo-admin-1">
+                    <a href="{{url()->previous()}}"><i class="fas fa-arrow-circle-left"></i></a>
+                    Resumen de ventas
+                </h3>
                 <b-button @click="imprimir(null)" class="mr-2" variant="primary"><i class="fas fa-print"></i>
                     Imprimir
                 </b-button>

@@ -8,22 +8,30 @@
                             <div v-if="isdesktop" class="col-lg-12 mb-2">
                                 <div class="card">
                                     <div class="card-body" style="overflow: auto;">
-                                        <input type="text" v-model="query" class="form-control"
-                                               placeholder="Buscar producto..." id="buscador" autocomplete="off" v-on:keyup="navigate">
+
+                                        <b-input-group>
+                                            <input type="text" v-model="query" class="form-control"
+                                                   placeholder="Buscar producto..." id="buscador" autocomplete="off" v-on:keyup="navigate">
+                                            <b-input-group-append>
+                                                <b-button v-b-modal.modal-nuevo-producto variant="primary">
+                                                    <i class="fas fa-plus"></i>
+                                                </b-button>
+                                            </b-input-group-append>
+                                        </b-input-group>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-lg-12">
                                 <div class="card">
                                     <div v-if="isdesktop" class="container" style="background: #474747; color: white;">
-                                        <div class="row py-2">
+                                        <div class="row py-2" style="padding: 3px !important;">
                                             <div class="col-lg-6"><strong>Producto</strong></div>
                                             <div class="col-lg-2"><strong>Precio</strong></div>
                                             <div class="col-lg-2"><strong>Otro precio</strong></div>
                                             <div class="col-lg-2"><strong>Stock</strong></div>
                                         </div>
                                     </div>
-                                    <div class="card-body" id="section_productos" style="height: 500px" @scroll="getProductos">
+                                    <div class="card-body" id="section_productos" style="height: 480px" @scroll="getProductos">
                                         <div class="row mb-5">
                                             <div class="col-lg-12">
                                                 <b-list-group v-show="!mostrarSpinner">
@@ -90,13 +98,21 @@
                 <b-button style="width: 190px" variant="danger" @click="cancel()">Salir</b-button>
             </template>
         </b-modal>
+        <agregar-producto
+                :tipo_cambio="tipo_cambio"
+                :unidad_medida="unidad_medida"
+                :can_gestionar="false"
+                :tipo_de_producto="1"
+                :origen="'pedidos'"
+                v-on:agregar="agregarProductoNuevo">
+        </agregar-producto>
     </div>
 </template>
 <script>
 
     export default {
         name: 'modal-agregar-producto-alt',
-        props: ['categorias','isdesktop'],
+        props: ['categorias','isdesktop','unidad_medida','tipo_cambio'],
         data() {
             return {
                 productos:[],
@@ -127,6 +143,10 @@
             window.removeEventListener('keydown', this.handler);
         },
         methods: {
+            agregarProductoNuevo(nombre){
+                this.query = nombre;
+                this.buscarProducto()
+            },
             init(){
                 this.focusBuscador();
                 let width = window.innerWidth
@@ -337,9 +357,10 @@
         overflow-y: scroll;
     }
 
-    #modal-agregar-producto-alt .categorias-container{
-        height: 500px;
+    #modal-agregar-producto-alt .modal-footer{
+        padding: 0 1rem 1rem 1rem;
     }
+
     .badge {
         font-size: 85%;
         font-weight: normal;
@@ -359,5 +380,8 @@
     }
     .codigo_producto{
         color:#8b8b8b;
+    }
+    #section_productos{
+        padding: 5px 18px;
     }
 </style>

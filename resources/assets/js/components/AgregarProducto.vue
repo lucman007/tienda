@@ -532,9 +532,6 @@
                 let tipo_accion = '/productos/update';
 
                 if (this.accion == 'insertar') {
-                    if (this.cod_producto.length == 0) {
-                        this.generarCodigo();
-                    }
                     tipo_accion = '/helper/guardar-producto';
                 }
 
@@ -597,14 +594,6 @@
                             toast:true
                         });
                     });
-            },
-            generarCodigo(){
-                let obj= this.ultimo_id;
-                let codigoNumero = obj['idproducto'];
-                if (codigoNumero < 100) {
-                    codigoNumero = '0' + codigoNumero;
-                }
-                this.cod_producto = codigoNumero;
             },
             validarProducto(){
                 this.errorProducto = 0;

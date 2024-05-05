@@ -13,8 +13,10 @@
     @endcan    <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
             <div class="col-sm-12">
-                <h3 class="titulo-admin-1">Orden de compra N° {{$requerimiento->correlativo}}</h3>
-                <b-button href="{{action('RequerimientoController@index')}}" class="mr-2"  variant="primary"><i class="fas fa-list"></i> Ver órdenes</b-button>
+                <h3 class="titulo-admin-1">
+                    <a href="{{url()->previous()}}"><i class="fas fa-arrow-circle-left"></i></a>
+                    OC N° {{$requerimiento->correlativo}}
+                </h3>
                 <b-button href="{{action('RequerimientoController@nuevo_requerimiento')}}" class="mr-2"  variant="primary"><i class="fas fa-plus"></i> Nueva orden</b-button>
             </div>
         </div>
@@ -253,7 +255,6 @@
             v-on:agregar="agregarProveedorNuevo">
     </agregar-proveedor>
     <agregar-producto
-            :ultimo_id="{{$ultimo_id}}"
             :tipo_cambio="{{$tipo_cambio_compra}}"
             :unidad_medida="{{json_encode($unidad_medida)}}"
             :can_gestionar="{{json_encode($can_gestionar)}}"

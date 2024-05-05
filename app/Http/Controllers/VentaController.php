@@ -41,18 +41,11 @@ class VentaController extends Controller
 
     public function registrar()
     {
-        $ultimo_id_registrado=DB::table('productos')
-            ->select('idproducto')
-            ->where('eliminado','=',0)
-            ->orderby('idproducto','desc')
-            ->first();
-        if($ultimo_id_registrado==null)$ultimo_id_registrado=['idproducto'=>1];
         $serie_comprobates = $this->serie_comprobante->getSeries();
         $emisor=new Emisor();
 
         return view('ventas/registrar', [
             'ruc_emisor'=>json_encode($emisor->ruc),
-            'ultimo_id'=>json_encode($ultimo_id_registrado),
             'usuario' => auth()->user()->persona,
             'disabledVentas'=>MainHelper::disabledVentas()[1],
             'serie_comprobantes'=>$serie_comprobates

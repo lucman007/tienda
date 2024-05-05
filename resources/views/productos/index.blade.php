@@ -300,10 +300,8 @@
             </b-button>
         </template>
     </b-modal>
-
     <agregar-producto
             ref="modal-producto"
-            :ultimo_id="{{$ultimo_id}}"
             :tipo_cambio="{{$tipo_cambio_compra}}"
             :unidad_medida="{{json_encode($unidad_medida)}}"
             :can_gestionar="{{json_encode($can_gestionar)}}"

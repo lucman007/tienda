@@ -6,6 +6,8 @@
         $colapsar = json_decode(cache('config')['interfaz'], true)['colapsar_categorias']??false;
         $emitir_solo_ticket = json_decode(cache('config')['interfaz'], true)['emitir_solo_ticket']??false;
         $aumentar_cantidad_producto = json_decode(cache('config')['interfaz'], true)['aumentar_cantidad_producto']??false;
+        $tipo_cambio_compra = cache('opciones')['tipo_cambio_compra'];
+        $unidad_medida = \sysfact\Http\Controllers\Helpers\DataUnidadMedida::getUnidadMedida();
     @endphp
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}} interfaz_3">
         <div class="row no-gutters">
@@ -116,8 +118,9 @@
                                                     <td></td>
                                                     <td>
                                                         @{{producto.nombre}}
+                                                        <span v-show="producto.serie" style="font-size: 11px; color: #0f53ff;"><br>@{{'SERIE: '+producto.serie}}</span>
                                                         <br>
-                                                        <span v-show="producto.alert_stock" >
+                                                        <span v-show="producto.alert_stock">
                                                             <span class="badge" :class="producto.alert_color">@{{ producto.alert_stock }} </span>
                                                         </span>
                                                         <span style="font-size: 11px; color: #0b870b;" v-for="item in producto.items_kit">+ (@{{ item.cantidad }}) @{{item['nombre']}}<br></span>
@@ -317,6 +320,8 @@
     <modal-agregar-producto-alt
             ref="agregarPlato"
             :categorias="{{$categorias}}"
+            :tipo_cambio="{{$tipo_cambio_compra}}"
+            :unidad_medida="{{json_encode($unidad_medida)}}"
             :isdesktop="{{json_encode($agent->isDesktop())}}"
             v-on:agregar="agregarProducto"
             v-on:guardar="guardarPedido">

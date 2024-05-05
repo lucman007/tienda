@@ -120,13 +120,6 @@ class ProductoController extends Controller
 
                 }
 
-                $ultimo_id_registrado=DB::table('productos')
-                    ->select('idproducto')
-                    ->where('eliminado','=',0)
-                    ->orderby('idproducto','desc')
-                    ->first();
-                if($ultimo_id_registrado==null)$ultimo_id_registrado=['idproducto'=>1];
-
                 $productos->appends($_GET)->links();
 
                 $opcion = Opciones::where('nombre_opcion','col_productos')->first();
@@ -153,7 +146,6 @@ class ProductoController extends Controller
 
                 return view('productos.index',[
                     'productos'=>$productos,
-                    'ultimo_id'=>json_encode($ultimo_id_registrado),
                     'usuario'=>auth()->user()->persona,
                     'textoBuscado'=>$consulta,
                     'order'=>$order=='desc'?'asc':'desc',
@@ -201,7 +193,8 @@ class ProductoController extends Controller
 	{
         try{
             $producto=new Producto();
-            $producto->cod_producto=strtoupper($request->cod_producto);
+            $codigo=$this->generar_codigo_producto();
+            $producto->cod_producto=$codigo;
             $producto->nombre=strtoupper($request->nombre);
             $presentacion=preg_replace("/[\r\n|\n|\r]+/", " ", $request->presentacion);
             $producto->presentacion=mb_strtoupper($presentacion);
@@ -277,7 +270,6 @@ class ProductoController extends Controller
         }
 
 	}
-
 
     public function edit(Request $request,$id)
     {
@@ -504,9 +496,9 @@ class ProductoController extends Controller
             ->orderby('idproducto','desc')
             ->first();
         if($ultimo_id_registrado){
-            return substr(date('Y'),2,2).$ultimo_id_registrado->idproducto;
+            return $ultimo_id_registrado->idproducto+1;
         } else {
-            return substr(date('Y'),2,2).'1';
+            return '1';
         }
 
     }

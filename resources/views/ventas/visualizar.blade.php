@@ -5,7 +5,10 @@
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
             <div class="col-sm-12">
-                <h3 class="titulo-admin-1">{{$venta->facturacion['comprobante'].' '.$venta->facturacion['serie'].'-'.$venta->facturacion['correlativo']}}</h3>
+                <h3 class="titulo-admin-1">
+                    <a href="{{url()->previous()}}"><i class="fas fa-arrow-circle-left"></i></a>
+                    {{$venta->facturacion['comprobante'].' '.$venta->facturacion['serie'].'-'.$venta->facturacion['correlativo']}}
+                </h3>
                 <b-button href="{{action('VentaController@registrar')}}" class="mr-2"  variant="primary"><i class="fas fa-plus"></i> Nuevo comprobante</b-button>
                 @if($venta->eliminado == 1)
                     <h3 class="float-right" style="background: #f94b4b;color: white;padding: 5px 20px; margin: 0">VENTA ANULADA</h3>

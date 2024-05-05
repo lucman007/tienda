@@ -38,7 +38,7 @@
                                         <td></td>
                                         <td>{{$categoria->nombre}}</td>
                                         <td>{{$categoria->descripcion}}</td>
-                                        <td>{{$categoria->cantidad_productos}} PRODUCTOS</td>
+                                        <td><a href="/productos?textoBuscado={{$categoria->nombre}}&filtro=categoria">{{$categoria->cantidad_productos}} PRODUCTOS</a></td>
                                         <td><span style="background: {{$categoria->color}};" class="cat-circle-color"></span></td>
                                         <td @click.stop class="botones-accion" style="text-align: right">
                                             <b-button @click="editarCategoria({{$categoria->idcategoria}})" class="btn btn-success" title="Editar categoria"><i

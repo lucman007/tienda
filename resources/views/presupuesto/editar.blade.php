@@ -10,8 +10,10 @@
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
             <div class="col-sm-12">
-                <h3 class="titulo-admin-1">Cotización N° {{$presupuesto['correlativo']}}</h3>
-                <b-button href="{{action('PresupuestoController@index')}}" class="mr-2"  variant="primary"><i class="fas fa-list"></i> Ver cotizaciones</b-button>
+                <h3 class="titulo-admin-1">
+                    <a href="{{url()->previous()}}"><i class="fas fa-arrow-circle-left"></i></a>
+                    Cotización N° {{$presupuesto['correlativo']}}
+                </h3>
                 <b-button href="{{action('PresupuestoController@nuevo_presupuesto')}}" class="mr-2"  variant="primary"><i class="fas fa-plus"></i> Nueva cotización</b-button>
             </div>
         </div>
@@ -492,7 +494,6 @@
             v-on:agregar="agregarClienteNuevo">
     </agregar-cliente>
     <agregar-producto
-            :ultimo_id="{{$ultimo_id}}"
             :tipo_cambio="{{$tipo_cambio_compra}}"
             :unidad_medida="{{json_encode($unidad_medida)}}"
             :can_gestionar="{{json_encode($can_gestionar)}}"

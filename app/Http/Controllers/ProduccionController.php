@@ -52,13 +52,7 @@ class ProduccionController extends Controller
     }
 
     public function nueva_produccion(){
-        $ultimo_id_registrado=DB::table('productos')
-            ->select('idproducto')
-            ->where('eliminado','=',0)
-            ->orderby('idproducto','desc')
-            ->first();
-        if($ultimo_id_registrado==null)$ultimo_id_registrado=['idproducto'=>1];
-        return view('produccion.nuevo',['usuario'=>auth()->user()->persona,'ultimo_id'=>json_encode($ultimo_id_registrado)]);
+        return view('produccion.nuevo',['usuario'=>auth()->user()->persona]);
     }
 
     public function nuevo_desde_cotizacion($idcotizacion){
@@ -238,14 +232,7 @@ class ProduccionController extends Controller
 
         }
 
-        $ultimo_id_registrado=DB::table('productos')
-            ->select('idproducto')
-            ->where('eliminado','=',0)
-            ->orderby('idproducto','desc')
-            ->first();
-        if($ultimo_id_registrado==null)$ultimo_id_registrado=['idproducto'=>1];
-
-        return view('produccion.editar',['produccion'=>$produccion,'productos'=>json_encode($productos),'usuario'=>auth()->user()->persona,'ultimo_id'=>json_encode($ultimo_id_registrado)]);
+        return view('produccion.editar',['produccion'=>$produccion,'productos'=>json_encode($productos),'usuario'=>auth()->user()->persona]);
     }
 
     public function update(Request $request)
