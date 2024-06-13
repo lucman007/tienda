@@ -717,7 +717,7 @@
 
                     @if(!$agent->isDesktop())
                         @if(isset(json_decode(cache('config')['interfaz'], true)['rawbt']) && json_decode(cache('config')['interfaz'], true)['rawbt'])
-                            axios.get(src+'?rawbt=true')
+                            axios.get(src+'&rawbt=true')
                             .then(response => {
                                 window.location.href = response.data;
                             })

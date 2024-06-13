@@ -1192,7 +1192,6 @@ class VentaController extends Controller
                     $detalle['igv'] = $igv_item;
                     $detalle['total'] = $total_item;
                     $detalle['num_serie'] = $item->detalle->serie;
-                    Log::info($item->detalle);
                     $venta->productos()->attach($item->idproducto, $detalle);
 
                     MainHelper::actualizar_inventario($idventa, $item, $item_inv, 'venta');

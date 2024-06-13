@@ -49,6 +49,7 @@
                                 <option value="0">NIF</option>
                                 <option value="4">Carnet de extrajería</option>
                                 <option value="7">Pasaporte</option>
+                                <option value="D">Identification Number</option>
                             </select>
                         </div>
                     </div>

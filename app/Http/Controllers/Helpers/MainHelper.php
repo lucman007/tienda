@@ -320,7 +320,7 @@ class MainHelper extends Controller
     }
 
     public function getDataAdicional($producto){
-        $producto->stock = $producto->inventario()->first()->saldo;
+        $producto->stock = $producto->inventario()->first()->saldo??null;
         $producto->moneda = $producto->moneda=='PEN'?'S/':'USD';
         $producto->unidad = explode('/',$producto->unidad_medida)[1];
         $descuento=$producto->descuento()->orderby('monto_desc','asc')->first();
@@ -613,7 +613,7 @@ class MainHelper extends Controller
                 $inventario->costo = $item['costo'];
                 $inventario->moneda = $item['moneda_compra'];
                 $inventario->tipo_cambio = $item['tipo_cambio'];
-                $inventario->serie = $item['detalle']['serie'];
+                $inventario->serie = $item['detalle']['serie']??'';
                 if($tipo_operacion == 'ingreso'){
                     $inventario->cantidad = $cantidad;
                     $inventario->saldo = $inv->saldo + $cantidad;

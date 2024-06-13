@@ -126,16 +126,16 @@
                                                         <span style="font-size: 11px; color: #0b870b;" v-for="item in producto.items_kit">+ (@{{ item.cantidad }}) @{{item['nombre']}}<br></span>
                                                     </td>
                                                     <td @click="habilitar(producto.num_item,'d')"><input
-                                                                onblur="app.noFocus(this)"
-                                                                @keyup="actualizarDetalle"
+                                                                @blur="noFocus($event)"
+                                                                @keyup="noFocus($event)"
                                                                 :id="producto.num_item+'-d'"
                                                                 class="form-control td-dis" type="text"
                                                                 readonly
                                                                 v-model="producto.presentacion"></td>
                                                     <td @click="habilitar(producto.num_item,'p')"><input
-                                                                onblur="app.noFocus(this)"
+                                                                @blur="noFocus($event)"
+                                                                @keyup="noFocus($event)"
                                                                 onfocus="this.select()"
-                                                                @keyup="actualizarDetalle"
                                                                 :id="producto.num_item+'-p'"
                                                                 class="form-control td-dis" type="number"
                                                                 readonly
@@ -147,10 +147,9 @@
                                                                           variant="primary">-
                                                                 </b-button>
                                                             </b-input-group-prepend>
-                                                            <input
-                                                                    onblur="app.noFocus(this)"
+                                                            <input  @blur="noFocus($event)"
+                                                                    @keyup="noFocus($event)"
                                                                     onfocus="this.select()"
-                                                                    @keyup="actualizarDetalle"
                                                                     :id="producto.num_item+'-c'"
                                                                     class="form-control td-dis" type="number"
                                                                     readonly
@@ -174,7 +173,7 @@
                                                             </b-tooltip>
                                                         </span>
                                                     </td>
-                                                    <td class="" style="width: 120px;">
+                                                    <td class="d-block">
                                                         <button @click="borrarItemVenta(index)"
                                                                 :disabled="mostrarSpinner" class="btn btn-danger"
                                                                 title="Borrar item"><i class="fas fa-trash"></i>
@@ -345,7 +344,7 @@
             :item="item"
             :show-precio="true"
             :can-edit-precio="@can('Pedido: editar precio') true @else false @endcan"
-            v-on:actualizar="actualizarDetalle(null)">
+            v-on:actualizar="actualizarDetalle()">
     </modal-detalle>
     <modal-producto-descuento :item="item" v-on:agregar="agregarDescuento"></modal-producto-descuento>
     <modal-devolucion></modal-devolucion>
@@ -456,18 +455,34 @@
                         let producto = this.productosSeleccionados[this.index];
                         producto['precio'] = obj.precio;
                         producto['cantidad'] = obj.cantidad;
-                        this.actualizarDetalle(null);
+                        this.actualizarDetalle();
                     },
                     editarItem(item, index = null){
                         this.item=item;
                         this.index = index;
                         this.num_item = item.num_item;
                     },
-                    noFocus(input){
-                        if(input.value != this.current_val){
-                            this.actualizarDetalle(null);
+                    noFocus(event){
+                        if (typeof event.code === 'undefined' || event.key == 'Enter') {
+                            let input = event.target;
+                            let value = input.value;
+
+                            if (/^\d+$/.test(input.value)) {
+                                value = Number(input.value).toFixed(2);
+                            }
+
+                            if (/^\d+$/.test(this.current_val)) {
+                                this.current_val = Number(this.current_val).toFixed(2);
+                            }
+
+                            if (value !== this.current_val) {
+                                this.actualizarDetalle();
+                                this.current_val = value;
+                            }
+
+                            input.setAttribute('readonly', "");
+                            this.expandir_desc(input, false)
                         }
-                        input.setAttribute('readonly',"");
                     },
                     habilitar(num_item, el){
                         this.num_item = num_item;
@@ -476,6 +491,26 @@
                         input.removeAttribute('readonly');
                         input.focus();
                         this.current_val=input.value;
+                        if(el==='d'){
+                            this.expandir_desc(input, true)
+                        }
+                    },
+                    expandir_desc(input, expandir){
+                        const tdConInput = input.parentNode;
+                        const tdHermanos = Array.from(tdConInput.parentNode.children);
+                        const indiceTdConInput = tdHermanos.indexOf(tdConInput);
+                        const tresUltimosTd = tdHermanos.slice(indiceTdConInput + 1).slice(-5);
+                        if(expandir){
+                            tdConInput.colSpan = 5;
+                            tresUltimosTd.forEach(td => {
+                                td.classList.add('d-none');
+                            });
+                        } else {
+                            tdConInput.colSpan = 1;
+                            tresUltimosTd.forEach(td => {
+                                td.classList.remove('d-none');
+                            });
+                        }
                     },
                     obtener_pedidos(){
                         axios.get('/pedidos/obtener-pedidos/')
@@ -539,7 +574,7 @@
                                 this.timer = null;
                             }
                             this.timer = setTimeout(() => {
-                                this.actualizarDetalle(null)
+                                this.actualizarDetalle()
                             }, 600);
                         } else {
                             let productos = this.productosSeleccionados.push({...item});
@@ -654,41 +689,34 @@
                                 });
                         }
                     },
-                    actualizarDetalle(event){
-                        if(event ==null || event.code == 'Enter' || event.code == 'NumpadEnter'){
-                            let index = this.num_item - 1;
-                            let producto = this.productosSeleccionados[index];
-                            producto['loading'] = true;
-                            producto['warning'] = false;
-                            this.calcularTotales();
-                            axios.post('{{action('PedidoController@actualizarDetalle')}}',{
-                                'idorden':this.idpedido,
-                                'total':this.totalVenta,
-                                'item':JSON.stringify(producto)
-                            })
-                                .then(response => {
-                                    this.checkStock(producto);
-                                    this.current_val = producto['cantidad'];
-                                    producto['loading'] = false;
-                                    producto['precio'] = (Number(producto['precio'])).toFixed(2);
-                                    if(response.data == 1){
-                                        this.obtener_pedidos();
-                                        let input = document.getElementById(+this.num_item+"-"+this.element);
-                                        if(input){
-                                            input.setAttribute('readonly',"");
-                                        }
-                                    } else {
-                                        producto['warning'] = true;
-                                    }
-                                    this.sendWS();
-                                })
-                                .catch(error => {
-                                    alert('Ha ocurrido un error.');
-                                    producto['loading'] = false;
+                    actualizarDetalle(){
+                        let index = this.num_item - 1;
+                        let producto = this.productosSeleccionados[index];
+                        producto['loading'] = true;
+                        producto['warning'] = false;
+                        this.calcularTotales();
+                        axios.post('{{action('PedidoController@actualizarDetalle')}}',{
+                            'idorden':this.idpedido,
+                            'total':this.totalVenta,
+                            'item':JSON.stringify(producto)
+                        })
+                            .then(response => {
+                                this.checkStock(producto);
+                                producto['loading'] = false;
+                                producto['precio'] = (Number(producto['precio'])).toFixed(2);
+                                producto['cantidad'] = Number(producto['cantidad']);
+                                if(response.data != 1){
                                     producto['warning'] = true;
-                                    console.log(error);
-                                });
-                        }
+                                }
+                                this.obtener_pedidos();
+                                this.sendWS();
+                            })
+                            .catch(error => {
+                                alert('Ha ocurrido un error.');
+                                producto['loading'] = false;
+                                producto['warning'] = true;
+                                console.log(error);
+                            });
                     },
                     imprimir(file_or_id){
 
@@ -793,7 +821,7 @@
                             this.timer = null;
                         }
                         this.timer = setTimeout(() => {
-                            this.actualizarDetalle(null)
+                            this.actualizarDetalle()
                         }, 500);
                     },
                     sendWS(accion='') {

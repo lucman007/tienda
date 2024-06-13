@@ -58,7 +58,7 @@
                 <td colspan="3" style="width:150mm">{{ $usuario->persona->direccion }}</td>
             </tr>
             <tr>
-                <td><strong>RUC:</strong></td>
+                <td><strong>N° doc:</strong></td>
                 <td>{{ $usuario->num_documento }}</td>
             </tr>
         </table>

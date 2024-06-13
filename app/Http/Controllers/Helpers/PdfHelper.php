@@ -188,9 +188,21 @@ class PdfHelper
 
     }
 
-    public static function generarPdfGuia($idguia, $rawbt, $dest = false){
+    public static function generarPdfGuia($idguia, $rawbt, $dest = false, $formato = false){
 
         self::setFormatoImpresion();
+
+        if($formato){
+            if($formato == '80_1'){
+                self::$ruta_formato = $formato;
+                self::$formato = [72,250];
+            } else {
+                if(!str_contains(self::$ruta_formato,'A4')){
+                    self::$ruta_formato = 'A4_1';
+                    self::$formato = 'A4';
+                }
+            }
+        }
 
         $guia=Guia::find($idguia);
         $guia->productos;

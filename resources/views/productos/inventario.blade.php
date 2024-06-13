@@ -34,7 +34,7 @@
                                         <tr>
                                             <td></td>
                                             <td>{{date("d/m/Y H:i",strtotime($item->fecha))}}</td>
-                                            <td>{{$item->operacion}} {{$item->serie?'/ SERIE PRODUCTO: '.$item->serie:''}}</td>
+                                            <td>@if($item->idventa) <a href="/facturacion/documento/{{$item->idventa}}">{{$item->operacion}}</a>  @else {{$item->operacion}} @endif  {{$item->serie?'/ SERIE PRODUCTO: '.$item->serie:''}}</td>
                                             <td v-show="'{{$item->cantidad}}'>0"
                                                 style="background: #84d091; text-align: center">{{$item->cantidad}}</td>
                                             <td v-show="'{{$item->cantidad}}'<=0"

@@ -1852,7 +1852,7 @@
                                 errorDatosVenta.push('*Para boletas mayores a S/.700.00 debe ingresar un DNI válido');
                             }
                         }
-                        if (this.clienteSeleccionado['num_documento'] && (this.clienteSeleccionado['num_documento'].length < 8 || this.clienteSeleccionado['num_documento'].length > 11)) errorDatosVenta.push('*Ingrese un DNI o RUC válido');
+                        //if (this.clienteSeleccionado['num_documento'] && (this.clienteSeleccionado['num_documento'].length < 8 || this.clienteSeleccionado['num_documento'].length > 11)) errorDatosVenta.push('*Ingrese un DNI o RUC válido');
                     }
                     if (this.comprobante == '07.02' || this.comprobante == '08.02' || this.comprobante == '07.01' || this.comprobante == '08.01') {
                         if (this.motivo.length == 0) errorDatosVenta.push('*El campo motivo no puede quedar en blanco');

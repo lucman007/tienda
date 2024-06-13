@@ -193,7 +193,7 @@ class ProductoController extends Controller
 	{
         try{
             $producto=new Producto();
-            $codigo=$this->generar_codigo_producto();
+            $codigo=$request->cod_producto?$request->cod_producto:$this->generar_codigo_producto();
             $producto->cod_producto=$codigo;
             $producto->nombre=strtoupper($request->nombre);
             $presentacion=preg_replace("/[\r\n|\n|\r]+/", " ", $request->presentacion);
