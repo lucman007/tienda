@@ -39,14 +39,17 @@
                                    'badge-danger' :estado=='RECHAZADO'}">@{{estado}}</span>
                                 <a href="/guia/correccion/{{$guia->idguia}}" v-show="estado=='PENDIENTE'"><span class="badge badge-primary"><i class="fas fa-edit"></i> CORREGIR</span></a><hr>
 
-                            @if($guia->num_doc_relacionado)
+                                @if($guia->num_doc_relacionado)
                                     <strong>Documento relacionado:</strong> {{$guia->num_doc_relacionado}}<hr>
                                 @endif
                                 @if($guia->estado=='PENDIENTE')
                                 <strong>Mensaje:</strong> @{{mensaje}}  <hr>
                                 @endif
                                 @if($guia->estado=='ACEPTADO' && $guia->nota)
-                                    <strong>Observación:</strong> {{$guia->nota}}  <hr>
+                                    <strong>Mensaje:</strong> {{$guia->nota}}  <hr>
+                                @endif
+                                @if($guia->observacion)
+                                <strong>Observación:</strong> {{$guia->observacion}}  <hr>
                                 @endif
                             </div>
                             <div class="col-lg-8">

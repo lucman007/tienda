@@ -149,6 +149,7 @@ class GuiaController extends Controller
             $guia->idcliente = $request->idcliente;
             $guia->fecha_emision = $request->fecha . ' ' . date('H:i:s');
             $guia->correlativo = json_decode($correlativo);
+            $guia->observacion = $request->observacion??'';
 
             $datos_partida = json_decode($request->direccion_partida, true);
 

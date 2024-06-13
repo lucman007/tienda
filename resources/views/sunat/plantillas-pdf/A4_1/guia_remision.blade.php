@@ -142,6 +142,11 @@
             </tbody>
         </table>
         <table class="footer">
+            @if($documento->observacion)
+                <tr>
+                    <td colspan="8">Nota / observación: {{$documento->observacion}}</td>
+                </tr>
+            @endif
             <tr>
                 <td class="footer-l">
                     @if($documento->qr)

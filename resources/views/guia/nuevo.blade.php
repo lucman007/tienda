@@ -326,6 +326,15 @@
                                 </table>
                             @endif
                         </div>
+                        <div class="dropdown-divider"></div>
+                        <div class="row  mt-3">
+                            <div class="col-lg-12">
+                                <div class="form-group">
+                                    <input class="form-control"
+                                           v-model="observacion" type="text" placeholder="Observación">
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -488,7 +497,8 @@
                 domicilioFiscalCliente:true,
                 disabledNr:false,
                 esUbigeo:true,
-                direccion_partida : null
+                direccion_partida : null,
+                observacion:''
             },
             created(){
                 this.obtenerCorrelativo();
@@ -724,6 +734,7 @@
                                 'direccion_partida':JSON.stringify(this.direccion_partida),
                                 'num_guia': this.numeroGuia,
                                 'fecha': this.fecha,
+                                'observacion': this.observacion,
                                 'guia_datos_adicionales': JSON.stringify(this.guia_datos_adicionales),
                                 'items': JSON.stringify(this.productosSeleccionados)
                             })
