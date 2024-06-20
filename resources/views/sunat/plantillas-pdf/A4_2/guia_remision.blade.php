@@ -84,6 +84,12 @@
                     <td style="width:150mm">{{$documento->num_doc_relacionado}}</td>
                     </tr>
                 @endif
+                @if($documento->num_oc)
+                    <tr>
+                        <td><strong>Orden de compra:</strong></td>
+                        <td style="width:150mm">{{$documento->num_oc}}</td>
+                    </tr>
+                @endif
             </table>
         </div>
         <div class="borde info-usuario" style="margin-top: 5mm">

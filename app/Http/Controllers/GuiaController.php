@@ -73,6 +73,15 @@ class GuiaController extends Controller
             foreach ($guias as $item) {
                 $item->cliente->persona;
                 $emisor = new Emisor();
+
+                $datos_adicionales = json_decode($item->guia_datos_adicionales, TRUE);
+                $item->num_doc_relacionado=$datos_adicionales['num_doc_relacionado'];
+                $item->num_oc=$datos_adicionales['oc']??'';
+
+                if($item->num_doc_relacionado == $item->num_oc){
+                    $item->num_oc = null;
+                }
+
                 $item->nombre_fichero = $emisor->ruc . '-09-' . $item->correlativo;
                 $ticket_json = json_decode($item->ticket, true)??[];
                 $item->ticket = $ticket_json[count($ticket_json) - 1]['numTicket']??0;
@@ -173,7 +182,7 @@ class GuiaController extends Controller
             $datos_guia['dni_conductor'] = trim($datos_guia['dni_conductor']);
             $datos_guia['licencia_conductor'] = trim($datos_guia['licencia_conductor']);
             $datos_guia['fecha_traslado'] = $datos_guia['fecha_traslado'] . ' ' . date('H:i:s');
-            $datos_guia['oc'] = $request->num_oc;
+            $datos_guia['oc'] = $datos_guia['oc']??$request->num_oc;
 
             $motivo_traslado = DataGuia::getMotivoTraslado();
             foreach ($motivo_traslado as $motivo){
@@ -224,6 +233,7 @@ class GuiaController extends Controller
         } catch (\Exception $e) {
 
             DB::rollback();
+            Log::error($e);
             //En caso de error borramos guia relacionada de tabla venta
             if($venta){
                 $ultima_venta=Facturacion::find($venta->idventa);
@@ -246,6 +256,7 @@ class GuiaController extends Controller
             $guia = Guia::find($idguia);
             $guia->idcliente = $request->idcliente;
             $guia->fecha_emision = $request->fecha . ' ' . date('H:i:s');
+            $guia->observacion = $request->observacion??'';
             if ($request->fecha > date('Y-m-d')) {
                 $guia->fecha_emision = date('Y-m-d H:i:s');
             }
@@ -363,7 +374,11 @@ class GuiaController extends Controller
                     $producto->total = $producto->detalle->total;
                 }
 
-                $doc->comprobante_referencia = $doc->facturacion->serie . '-' . $doc->facturacion->correlativo;
+                $doc->tipo_comprobante = $doc->facturacion->codigo_tipo_documento;
+                if($doc->tipo_comprobante != 30){
+                    $doc->comprobante_relacionado = $doc->facturacion->serie . '-' . $doc->facturacion->correlativo;
+                }
+
                 $doc->cliente->nombre = $doc->cliente->persona->nombre;
                 $doc->cliente->direccion = $doc->cliente->persona->direccion;
             } else if($request->idguia){
@@ -460,6 +475,12 @@ class GuiaController extends Controller
         $guia->ubigeo_direccion_llegada=$datos_adicionales['ubigeo'];
         $guia->motivo_traslado=$datos_adicionales['motivo_traslado'];
         $guia->num_doc_relacionado=$datos_adicionales['num_doc_relacionado'];
+        $guia->num_oc=$datos_adicionales['oc']??'';
+
+        if($guia->num_doc_relacionado == $guia->num_oc){
+            $guia->num_oc = null;
+        }
+
         $guia->fecha_traslado=date('Y-m-d', strtotime($datos_adicionales['fecha_traslado']));
         $ticket_json = json_decode($guia->ticket, true)??[];
         $guia->ticket = $ticket_json[count($ticket_json) - 1]['numTicket']??0;
@@ -539,6 +560,7 @@ class GuiaController extends Controller
         $guia->motivo_traslado=$datos_adicionales['motivo_traslado'];
         $guia->doc_relacionado=$datos_adicionales['doc_relacionado'];
         $guia->num_doc_relacionado=$datos_adicionales['num_doc_relacionado'];
+        $guia->oc=$datos_adicionales['oc']??'';
         $guia->fecha_traslado=date('Y-m-d', strtotime($datos_adicionales['fecha_traslado']));
 
         $motivo_traslado = DataGuia::getMotivoTraslado();

@@ -26,8 +26,8 @@
                                 <label>Serie y correlativo</label>
                                 <input disabled type="text" v-model="numeroGuia" class="form-control">
                             </div>
-                            <div class="col-lg-3 form-group">
-                                <label>Documento relacionado</label>
+                            <div class="col-lg-2 form-group">
+                                <label>Doc. relacionado</label>
                                 <select v-model="guia_datos_adicionales.doc_relacionado" class="custom-select">
                                     @php
                                         $doc_relacionado = \sysfact\Http\Controllers\Helpers\DataGuia::getDocumentoRelacionado();
@@ -39,9 +39,13 @@
                                 </select>
                             </div>
                             <div v-show="guia_datos_adicionales.doc_relacionado!='-1'" class="col-lg-3 form-group">
-                                <label>N° documento relacionado</label>
+                                <label>N° doc. relacionado</label>
                                 <input type="text" v-model="guia_datos_adicionales.num_doc_relacionado" placeholder="Número documento relacionado"
                                        class="form-control">
+                            </div>
+                            <div class="col-lg-2 form-group">
+                                <label>N° OC</label>
+                                <input type="text" v-model="guia_datos_adicionales.oc" class="form-control">
                             </div>
                             <div class="col-lg-6 form-group">
                                 <label>Dirección de llegada</label>
@@ -216,6 +220,15 @@
                                 </div>
                             @endif
                         </div>
+                        <div class="dropdown-divider"></div>
+                        <div class="row  mt-3">
+                            <div class="col-lg-12">
+                                <div class="form-group">
+                                    <input class="form-control"
+                                           v-model="observacion" type="text" placeholder="Observación">
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -278,12 +291,14 @@
                     fecha_traslado: "{{date("Y-m-d",strtotime($guia->fecha_traslado))}}",
                     doc_relacionado:"{{$guia->doc_relacionado}}",
                     num_doc_relacionado:"{{$guia->num_doc_relacionado}}",
-                    tipo_transporte:"{{$guia->tipo_transporte}}"
+                    tipo_transporte:"{{$guia->tipo_transporte}}",
+                    oc:"{{$guia->oc}}"
                 },
                 clienteSeleccionado: <?php echo $guia['cliente'] ?>,
                 nombreCliente: "{{$guia->cliente->num_documento.' - '.$guia->cliente->persona->nombre}}",
                 mostrarSpinnerCliente: false,
-                spinnerRuc:false
+                spinnerRuc:false,
+                observacion:''
             },
             mounted(){
                 let obj = <?php echo json_encode($guia->cliente)?>;
@@ -378,6 +393,7 @@
                         'idcliente': this.clienteSeleccionado['idcliente'],
                         'fecha': this.fecha,
                         'idguia':this.idguia,
+                        'observacion': this.observacion,
                         'guia_datos_adicionales': JSON.stringify(this.guia_datos_adicionales)
                     })
                         .then(response => {

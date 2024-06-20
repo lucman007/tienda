@@ -282,7 +282,7 @@ class VentaController extends Controller
                 $producto->descuento = $producto->detalle->descuento;
                 $producto->descuento_por_und = $producto->detalle->descuento_por_und;
                 $producto->tipo_descuento = $producto->detalle->tipo_descuento;
-                $producto->stock = $producto->inventario()->first()->saldo;
+                $producto->stock = $producto->inventario()->first()->saldo??0;
                 $producto->precio = $producto->detalle->monto;
                 $producto->cantidad = $producto->detalle->cantidad;
                 $producto->presentacion = strip_tags($producto->detalle->descripcion);
@@ -300,6 +300,7 @@ class VentaController extends Controller
             return json_encode($venta);
 
         }catch (\Exception $e){
+            Log::error($e);
             return $e;
         }
     }
@@ -327,7 +328,7 @@ class VentaController extends Controller
                 $producto->subtotal = $subtotal;
                 $producto->igv = round($total - $subtotal,2);
                 $producto->total=$total;
-                $producto->stock = $producto->inventario()->first()->saldo;
+                $producto->stock = $producto->inventario()->first()->saldo??0;
                 $producto->items_kit = null;
                 $suma_total+=$total;
             }
@@ -354,6 +355,7 @@ class VentaController extends Controller
             return json_encode($presupuesto);
 
         }catch (\Exception $e){
+            Log::error($e);
             return $e;
         }
 
@@ -382,7 +384,7 @@ class VentaController extends Controller
             $venta->idcajero = auth()->user()->idempleado;
             $venta->idcaja = MainHelper::obtener_idcaja();
             $venta->fecha = $request->fecha . ' ' . date('H:i:s');
-            $venta->tipo_cambio = cache('opciones')['tipo_cambio_compra'];
+            $venta->tipo_cambio = $request->tipo_cambio??cache('opciones')['tipo_cambio_compra'];
             if($request->fecha>date('Y-m-d')){
                 $venta->fecha = date('Y-m-d H:i:s');
             }
@@ -686,7 +688,7 @@ class VentaController extends Controller
                 $producto->subtotal = $subtotal;
                 $producto->igv = round($total - $subtotal,2);
                 $producto->total=$total;
-                $producto->stock = $producto->inventario()->first()->saldo;
+                $producto->stock = $producto->inventario()->first()->saldo??0;
                 $producto->items_kit = json_decode($producto->items_kit, true);
                 $suma_total+=$total;
             }
@@ -715,6 +717,7 @@ class VentaController extends Controller
             return json_encode($presupuesto);
 
         }catch (\Exception $e){
+            Log::error($e);
             return $e;
         }
 
@@ -773,6 +776,7 @@ class VentaController extends Controller
             return json_encode($guia);
 
         }catch (\Exception $e){
+            Log::error($e);
             return $e;
         }
 
@@ -806,7 +810,7 @@ class VentaController extends Controller
                 $producto->subtotal = $subtotal;
                 $producto->igv = round($total - $subtotal,2);
                 $producto->total=$total;
-                $producto->stock = $producto->inventario()->first()->saldo;
+                $producto->stock = $producto->inventario()->first()->saldo??0;
                 $producto->items_kit = null;
                 $suma_total+=$total;
             }
@@ -833,6 +837,7 @@ class VentaController extends Controller
             return json_encode($orden);
 
         }catch (\Exception $e){
+            Log::error($e);
             return $e;
         }
 

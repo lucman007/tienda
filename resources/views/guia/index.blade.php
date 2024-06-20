@@ -78,6 +78,7 @@
                                     <th scope="col">Cliente</th>
                                     <th scope="col" style="width: 12%">Comprobante</th>
                                     <th scope="col" style="width: 12%">Doc. relacionado</th>
+                                    <th scope="col" style="width: 12%">Num. OC</th>
                                     <th scope="col">Estado</th>
                                     <th scope="col">Opciones</th>
                                 </tr>
@@ -91,7 +92,8 @@
                                             <td style="width: 15%">{{$guia->fecha_emision}}</td>
                                             <td>{{$guia->cliente->persona->nombre}}</td>
                                             <td>{{$guia->correlativo}}</td>
-                                            <td>{{json_decode($guia->guia_datos_adicionales,true)['oc']??json_decode($guia->guia_datos_adicionales,true)['num_doc_relacionado']}}</td>
+                                            <td>{{$guia->num_doc_relacionado}}</td>
+                                            <td>{{$guia->num_oc}}</td>
                                             <td><span class="badge {{$guia->badge_class}}">{{$guia->estado}}</span></td>
                                             <td class="botones-accion" style="width: 10%" @click.stop>
                                                 <a href="{{url('guia/emision/').'/'.$guia->idguia}}">

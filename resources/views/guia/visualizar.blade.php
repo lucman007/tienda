@@ -25,11 +25,15 @@
                                 <strong>Fecha emisión:</strong> {{date("d/m/Y",strtotime($guia->fecha_emision))}} <hr>
                                 <strong>Fecha de traslado:</strong> {{date("d/m/Y",strtotime($guia->fecha_traslado))}} <hr>
                                 <strong>Motivo de traslado:</strong> {{$guia->motivo_traslado}}  <hr>
+                                <strong>Cliente:</strong> {{$guia->cliente['num_documento']}} - {{$guia->persona['nombre']}} <hr>
                             </div>
                             <div class="col-lg-4">
                                 <strong>Transporte: </strong>{{$guia->tipo_transporte}}  <hr>
                                 <strong>Vehículo de categoría M1 o L:</strong> {{$categoria_vehiculo == 'M1_L'?'SÍ':'NO'}}  <hr>
                                 <strong>Peso y bultos: </strong>{{$guia->peso_bruto.' KG / '.$guia->cantidad_bultos.' UND'}}<hr>
+                                @if($guia->num_oc)
+                                <strong>Num oc: </strong>{{$guia->num_oc}}<hr>
+                                @endif
                             </div>
                             <div class="col-lg-4">
                                 <strong>Estado de guía:</strong>
@@ -53,7 +57,6 @@
                                 @endif
                             </div>
                             <div class="col-lg-8">
-                                <strong>Cliente:</strong> {{$guia->cliente['num_documento']}} - {{$guia->persona['nombre']}} <hr>
                                 <strong>Dirección de llegada:</strong> {{$guia->direccion_llegada}}<hr>
                             </div>
                         </div>

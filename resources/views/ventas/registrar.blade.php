@@ -1752,6 +1752,7 @@
                                 'doc_relacionado_nc':this.doc_relacionado_nc,
                                 'idventa_modifica':this.idventa_modifica,
                                 'doc_observacion':this.doc_observacion,
+                                'tipo_cambio':this.tipoCambio,
                                 'pago_fraccionado': JSON.stringify(this.pago_fraccionado),
                             })
                                 .then(response => {

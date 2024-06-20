@@ -35,8 +35,8 @@
                                 <label>Serie y correlativo</label>
                                 <input disabled type="text" v-model="numeroGuia" class="form-control">
                             </div>
-                            <div class="col-lg-3 form-group">
-                                <label>Documento relacionado</label>
+                            <div class="col-lg-2 form-group">
+                                <label>Doc. relacionado</label>
                                 <select v-model="guia_datos_adicionales.doc_relacionado" class="custom-select">
                                     @php
                                         $doc_relacionado = \sysfact\Http\Controllers\Helpers\DataGuia::getDocumentoRelacionado();
@@ -48,9 +48,13 @@
                                 </select>
                             </div>
                             <div v-show="guia_datos_adicionales.doc_relacionado!='-1'" class="col-lg-3 form-group">
-                                <label>N° documento relacionado</label>
+                                <label>N° doc. relacionado</label>
                                 <input type="text" v-model="guia_datos_adicionales.num_doc_relacionado" placeholder="Número documento relacionado"
                                        class="form-control">
+                            </div>
+                            <div class="col-lg-2 form-group">
+                                <label>N° OC</label>
+                                <input type="text" v-model="guia_datos_adicionales.oc" class="form-control">
                             </div>
                             <div class="col-lg-6 form-group">
                                 <label>Dirección de llegada</label>
@@ -488,6 +492,7 @@
                     fecha_traslado: "{{date("Y-m-d")}}",
                     doc_relacionado:"-1",
                     num_doc_relacionado:"",
+                    oc:"",
                     tipo_transporte:<?php echo json_encode(json_decode(cache('config')['guia'], true)['tipo_transporte']) ?>,
                 },
                 tipo_busqueda:"",
@@ -666,6 +671,10 @@
                                     tipo_transporte:'01'
                                 }
 
+                            }
+                            if(datos.comprobante_relacionado){
+                                this.guia_datos_adicionales.num_doc_relacionado = datos.comprobante_relacionado;
+                                this.guia_datos_adicionales.doc_relacionado = datos.tipo_comprobante;
                             }
                             this.$refs['modal-documento'].hide();
                         })
@@ -852,7 +861,8 @@
                         fecha_traslado: '{{date('Y-m-d')}}',
                         doc_relacionado:'-1',
                         num_doc_relacionado:'',
-                        tipo_transporte:'01'
+                        tipo_transporte:'01',
+                        oc:'',
                     };
                     this.domicilioFiscalCliente = true;
                     this.tipo_busqueda='';

@@ -386,6 +386,7 @@ class CreditoController extends Controller
             return json_encode($pagos);
 
         } catch (\Exception $e){
+            Log::error($e);
             return $e;
         }
     }

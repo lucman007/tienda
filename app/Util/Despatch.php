@@ -61,6 +61,7 @@ class Despatch {
         $documento->codigo_traslado=$datos_adicionales['codigo_traslado'];
         $documento->num_doc_relacionado=$datos_adicionales['num_doc_relacionado'];
         $documento->doc_relacionado=$datos_adicionales['doc_relacionado'];
+        $documento->num_oc=$datos_adicionales['oc']??'';
         $documento->fecha_traslado=date('Y-m-d', strtotime($datos_adicionales['fecha_traslado']));
         $documento->categoria_vehiculo = $datos_adicionales['categoria_vehiculo']??'otros';
         $documento->direccion_partida = $documento->direccion_partida?$documento->direccion_partida:$emisor->direccion_resumida;
