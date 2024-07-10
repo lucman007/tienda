@@ -44,7 +44,10 @@
                                         @endif
                                         <td>@{{item.idorden}}</td>
                                         <td>@{{item.empleado}}</td>
-                                        <td>@{{item.datos_entrega['contacto']}}</td>
+                                        <td>
+                                            <b-button @click.stop v-b-modal.modal-entrega variant="success" v-show="item.idorden == idpedido" class="mr-2"><i class="fas fa-edit"></i></b-button>
+                                            @{{item.datos_entrega['contacto']}}
+                                        </td>
                                         <td>S/ @{{item.total}}</td>
                                     </tr>
                                     <tr v-show="ordenes.length == 0" class="text-center">
@@ -173,7 +176,7 @@
                                                             </b-tooltip>
                                                         </span>
                                                     </td>
-                                                    <td class="d-block">
+                                                    <td class="d-flex">
                                                         <button @click="borrarItemVenta(index)"
                                                                 :disabled="mostrarSpinner" class="btn btn-danger"
                                                                 title="Borrar item"><i class="fas fa-trash"></i>
@@ -619,7 +622,7 @@
 
                         if(tipo == 'nuevo'){
                             this.disabledNuevo = true;
-                            data['datos_entrega'] = JSON.stringify({direccion:'',referencia:'',contacto:'-',telefono:'', costo:'0'});
+                            data['datos_entrega'] = JSON.stringify({direccion:'',referencia:'',contacto:'',telefono:'', costo:'0'});
                         }
 
                         axios.post(accion, data)

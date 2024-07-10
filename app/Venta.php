@@ -46,6 +46,10 @@ class Venta extends Model
 		return $this->hasOne(Cliente::class,'idcliente','idcliente');
 	}
 
+    public function clienteAlias(){
+        return $this->hasOne(Cliente::class,'idcliente','alias');
+    }
+
     public function guia(){
         return $this->hasMany(Guia::class,'idventa');
     }

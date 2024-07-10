@@ -178,6 +178,7 @@ class PedidoController extends Controller
                 $datos_entrega = json_decode($request->datos_entrega, TRUE);
                 $datos_entrega['direccion'] = mb_strtoupper(trim($datos_entrega['direccion']));
                 $datos_entrega['referencia'] = mb_strtoupper(trim($datos_entrega['referencia']));
+                $datos_entrega['idcontacto'] = null;
                 $datos_entrega['contacto'] = mb_strtoupper(trim($datos_entrega['contacto']));
                 $datos_entrega['telefono'] = mb_strtoupper(trim($datos_entrega['telefono']));
                 $datos_entrega['costo'] = trim($datos_entrega['costo']);
@@ -716,6 +717,7 @@ class PedidoController extends Controller
 
     public function guardar_datos_entrega(Request $request){
         try{
+            Log::info($request->datos_entrega);
             $pedido = Orden::find($request->idpedido);
             $datos_entrega = json_decode($request->datos_entrega, TRUE);
             $datos_entrega['direccion'] = mb_strtoupper(trim($datos_entrega['direccion']));
@@ -727,7 +729,8 @@ class PedidoController extends Controller
             $success=$pedido->save();
             return $success?1:0;
         } catch (\Exception $e){
-           return $e->getMessage();
+            Log::error($e);
+            return $e->getMessage();
         }
     }
 

@@ -355,7 +355,7 @@
                                                     <td style="width: 15%">{{date('d/m/Y H:i', strtotime($venta->fecha))}}</td>
                                                     <td>{{$venta->caja->idpersona == -1?'-':strtoupper($venta->caja->nombre)}}</td>
                                                     <td>{{$venta->empleado->idpersona == -1?'-':strtoupper($venta->empleado->nombre)}}</td>
-                                                    <td>{{$venta->cliente->persona->nombre}}</td>
+                                                    <td>{{$venta->cliente->persona->nombre}} {{$venta->clienteAlias?'('.$venta->clienteAlias->persona->nombre.')':''}}</td>
                                                     <td>{{$venta->total_venta}}</td>
                                                     <td>{{$venta->facturacion->codigo_moneda}}</td>
                                                     <td>

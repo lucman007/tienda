@@ -465,6 +465,7 @@ class GuiaController extends Controller
         $guia->unidad_medida_peso_bruto='KGM';
         $guia->cantidad_bultos=$datos_adicionales['bultos'];
         $guia->indicador_transbordo_programado='false';
+        $guia->categoria_vehiculo=$datos_adicionales['categoria_vehiculo'];
         $guia->tipo_transporte=$datos_adicionales['tipo_transporte']=='01'?'PÚBLICO':'PRIVADO'; //01 Publico y 02 privado catalogo 18 sunat
         $guia->tipo_doc_transportista=$datos_adicionales['tipo_doc_transportista'];
         $guia->num_doc_transportista=$datos_adicionales['num_doc_transportista'];

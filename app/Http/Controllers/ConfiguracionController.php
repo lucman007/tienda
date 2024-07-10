@@ -283,7 +283,9 @@ class ConfiguracionController extends Controller
 
     public function borrarImagen(Request $request){
         $config = AppConfig::find($request->tipo_logo);
-        unlink('images/'.$config->valor);
+        if(file_exists('images/'.$config->valor)){
+            unlink('images/'.$config->valor);
+        }
         $config->valor='';
         if($config->save()){
             MainHelper::updateconfiguracion();

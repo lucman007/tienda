@@ -22,7 +22,6 @@ class CreditoController extends Controller
     {
         $this->middleware('auth');
     }
-
     public function actualizar_pagos(){
        try{
            $ventas = Venta::where('tipo_pago',2)->get();
@@ -184,8 +183,6 @@ class CreditoController extends Controller
                 ]);
             }
 
-
-
         } catch (\Exception $e){
             if($e->getCode()=='42S22'){
                 return redirect('/creditos');
@@ -335,7 +332,6 @@ class CreditoController extends Controller
         $venta->pagado = $total_pagado;
         $venta->saldo = $venta->total_venta - $total_pagado;
 
-
         switch ($venta->facturacion->codigo_tipo_documento) {
             case '03':
                 $venta->facturacion->comprobante = 'Boleta';
@@ -399,9 +395,15 @@ class CreditoController extends Controller
             $detalle = json_decode($pago->detalle, true);
             foreach ($detalle as $d){
                 $dataTipoPago = DataTipoPago::getTipoPago();
-                $find = array_search($d['metodo_pago'], array_column($dataTipoPago,'num_val'));
-                $d['metodo_pago'] = mb_strtoupper($dataTipoPago[$find]['label']);
-                $d['fecha']=date('d/m/Y',strtotime($d['fecha']));
+
+                if(is_numeric($d['metodo_pago'])){
+                    $find = array_search($d['metodo_pago'], array_column($dataTipoPago,'num_val'));
+                    $d['label'] = mb_strtoupper($dataTipoPago[$find]['label']);
+                } else {
+                    $d['label'] = $d['metodo_pago'];
+                }
+
+                $d['fecha']=date('Y-m-d',strtotime($d['fecha']));
                 $suma += $d['monto'];
                 $data[] = $d;
             }

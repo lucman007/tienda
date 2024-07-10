@@ -16,8 +16,8 @@
                         Detalle
                     </div>
                     @php
-                        $datos_adicionales = json_decode($guia->guia_datos_adicionales,TRUE);
-                        $categoria_vehiculo = $datos_adicionales['categoria_vehiculo']??'otros';
+                        //$datos_adicionales = json_decode($guia->guia_datos_adicionales,TRUE);
+                        $categoria_vehiculo = $guia['categoria_vehiculo'];
                     @endphp
                     <div class="card-body">
                         <div class="row">

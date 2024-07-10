@@ -98,6 +98,10 @@
                     <td>TRANSPORTE:</td>
                 </tr>
                 @if($documento->categoria_vehiculo != 'M1_L')
+                    <tr>
+                        <td><strong>Indicador de traslado en vehículos de categoría M1 o L:</strong></td>
+                        <td style="width:150mm">NO</td>
+                    </tr>
                     @if($documento->codigo_transporte == '01')
                     <tr>
                         <td style="width: 170px"><strong>Razón social:</strong></td>
@@ -116,16 +120,55 @@
                         <td><strong>DNI Conductor:</strong></td>
                         <td style="width:150mm">{{$documento->dni_conductor}}</td>
                     </tr>
+                        @if($documento->licencia_conductor)
+                            <tr>
+                                <td><strong>Licencia de conducir:</strong></td>
+                                <td style="width:150mm">{{$documento->licencia_conductor}}</td>
+                            </tr>
+                        @endif
+                        @if($documento->nombre_conductor)
+                        <tr>
+                            <td><strong>Nombre conductor:</strong></td>
+                            <td style="width:150mm">{{$documento->nombre_conductor}} {{$documento->apellido_conductor}}</td>
+                        </tr>
+                        @endif
                     @endif
                 @else
                     <tr>
                         <td><strong>Indicador de traslado en vehículos de categoría M1 o L:</strong></td>
                         <td style="width:150mm">SÍ</td>
                     </tr>
-                    <tr>
-                        <td><strong>Placa de vehículo:</strong> {{$documento->placa_vehiculo}}</td>
-                        <td style="width:150mm"></td>
-                    </tr>
+                    @if($documento->codigo_transporte == '01')
+                        <tr>
+                            <td style="width: 170px"><strong>Razón social:</strong></td>
+                            <td style="width: 170px">{{$documento->razon_social_transportista}}</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 170px"><strong>Ruc:</strong></td>
+                            <td style="width: 170px">{{ $documento->num_doc_transportista }}</td>
+                        </tr>
+                    @elseif($documento->codigo_transporte == '02')
+                        <tr>
+                            <td><strong>Placa de vehículo:</strong></td>
+                            <td style="width:150mm">{{$documento->placa_vehiculo}}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>DNI Conductor:</strong></td>
+                            <td style="width:150mm">{{$documento->dni_conductor}}</td>
+                        </tr>
+                        @if($documento->licencia_conductor)
+                            <tr>
+                                <td><strong>Licencia de conducir:</strong></td>
+                                <td style="width:150mm">{{$documento->licencia_conductor}}</td>
+                            </tr>
+                        @endif
+                        @if($documento->nombre_conductor)
+                            <tr>
+                                <td><strong>Nombre conductor:</strong></td>
+                                <td style="width:150mm">{{$documento->nombre_conductor}} {{$documento->apellido_conductor}}</td>
+                            </tr>
+                        @endif
+                    @endif
                 @endif
             </table>
         </div>

@@ -3,6 +3,7 @@
 namespace sysfact\Http\Controllers;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use sysfact\Cliente;
 use Illuminate\Http\Request;
@@ -61,40 +62,45 @@ class ClienteController extends Controller
 
     public function store(Request $request)
     {
-        try{
-            if(Cliente::where('num_documento', $request->num_documento)
-                ->where('eliminado',0)
+        try {
+            if (Cliente::where('num_documento', $request->num_documento)
+                ->where('eliminado', 0)
                 ->exists()
-            ){
+            ) {
                 return 1;
             }
 
-	    $persona=new Persona();
-	    $persona->nombre=mb_strtoupper($request->nombre);
-	    $persona->direccion=mb_strtoupper($request->direccion);
-	    $persona->telefono=$request->telefono;
-	    $persona->correo=$request->email;
-	    $persona->save();
-	    $id=$persona->idpersona;
+            if ($request->num_documento == -1) {
+                $request->num_documento = null;
+            }
 
-	    $cliente=new Cliente();
-	    $codigo=$this->generar_codigo_cliente();
-	    $cliente->cod_cliente=$codigo;
-	    $cliente->num_documento=$request->num_documento??$codigo;
-	    $cliente->tipo_documento=$request->tipo_documento;
-	    $cliente->eliminado=0;
-	    $persona->cliente()->save($cliente);
+            $persona = new Persona();
+            $persona->nombre = mb_strtoupper($request->nombre);
+            $persona->direccion = mb_strtoupper($request->direccion);
+            $persona->telefono = $request->telefono;
+            $persona->correo = $request->email;
+            $persona->save();
+            $id = $persona->idpersona;
 
-	    return response()->json([
-            "idcliente"=>$id,
-            "cod_cliente"=>$codigo,
-            "nombre"=>$request->nombre,
-            "persona"=>["nombre"=>$request->nombre],
-            "num_documento"=>$request->num_documento??$codigo
-        ],200);
+            $cliente = new Cliente();
+            $codigo = $this->generar_codigo_cliente();
+            $cliente->cod_cliente = $codigo;
+            $cliente->num_documento = $request->num_documento ?? $codigo;
+            $cliente->tipo_documento = $request->tipo_documento;
+            $cliente->eliminado = 0;
+            $persona->cliente()->save($cliente);
 
-        } catch (\Exception $e){
-            return response(['mensaje'=>'Ha ocurrido un error al guardar el cliente'], 500);
+            return response()->json([
+                "idcliente" => $id,
+                "cod_cliente" => $codigo,
+                "nombre" => $request->nombre,
+                "persona" => ["nombre" => $request->nombre],
+                "num_documento" => $request->num_documento ?? $codigo
+            ], 200);
+
+        } catch (\Exception $e) {
+            Log::error($e);
+            return response(['mensaje' => 'Ha ocurrido un error al guardar el cliente'], 500);
         }
     }
 

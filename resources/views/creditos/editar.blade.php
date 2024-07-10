@@ -94,7 +94,7 @@
             <div class="col-lg-3">
                 <div class="form-group">
                     <label>Fecha de pago:</label>
-                    <input min="{{date('Y-m-d')}}" type="date" v-model="fecha"
+                    <input type="date" v-model="fecha"
                            class="form-control">
                 </div>
             </div>
@@ -145,9 +145,9 @@
                         </thead>
                         <tbody>
                         <tr v-for="(pago,index) in detalle">
-                            <td>@{{ pago.fecha }}</td>
+                            <td>@{{ formatDate(pago.fecha) }}</td>
                             <td>@{{ (Number(pago.monto)).toFixed(2) }}</td>
-                            <td>@{{ pago.metodo_pago}}</td>
+                            <td>@{{ pago.label}}</td>
                             <td>@{{ pago.num_operacion }}</td>
                             <td>
                                 <button :disabled="disabledButtonPago" @click="borrarPago(index)" class="btn btn-danger" title="Borrar pago"><i class="fas fa-trash"></i>
@@ -223,6 +223,14 @@
                 alias:''
             },
             methods: {
+                formatDate(date) {
+                    const d = new Date(date);
+                    const correctedDate = new Date(d.getTime() + d.getTimezoneOffset() * 60000);
+                    const day = ('0' + correctedDate.getDate()).slice(-2);
+                    const month = ('0' + (correctedDate.getMonth() + 1)).slice(-2);
+                    const year = correctedDate.getFullYear();
+                    return `${day}/${month}/${year}`;
+                },
                 agregar_alias(){
                     axios.post("{{action('CreditoController@set_alias')}}",{
                         'idventa':this.idventa,
@@ -269,7 +277,6 @@
                     if(Number(this.monto) + this.suma_cuotas == this.suma_cuotas + this.saldo){
                         this.estado = 2
                     }
-
                     this.procesarPago()
 
                 },
@@ -311,6 +318,7 @@
                     axios.post(tipo_accion, dataset)
                         .then(response => {
                             this.cuotas = response.data;
+                            this.total_pagado = this.cuotas.total_pagado;
                             this.obtenerPagos();
                             this.num_operacion = '';
                             this.monto = '';
@@ -329,6 +337,7 @@
                     let errorDatos = [];
                     let errorString = '';
                     if (this.monto.length == 0) errorDatos.push('*El campo monto no puede estar vacío');
+                    if (!this.fecha) errorDatos.push('*El campo fecha no tiene el formato correcto');
                     if (this.monto == 0) errorDatos.push('*El monto debe ser mayor a 0.00');
                     if (isNaN(this.monto)) errorDatos.push('*El monto debe ser un número');
                     let saldo = (this.saldo).toFixed(2);

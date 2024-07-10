@@ -1122,6 +1122,7 @@ class VentaController extends Controller
 
         //obtener pedido
         $pedido = Orden::find($request->idpedido);
+        $alias = $this->obtener_alias($pedido);
         $subtotal = round($pedido->total / 1.18, 2);
         $igv = round($pedido->total - $subtotal, 2);
 
@@ -1139,6 +1140,7 @@ class VentaController extends Controller
             $venta->total_venta = $pedido->total;
             $venta->tipo_pago = $request->tipo_pago_contado;
             $venta->igv_incluido = true;
+            $venta->alias = $alias;
             $venta->save();
             $idventa = $venta->idventa;
 
@@ -1290,6 +1292,34 @@ class VentaController extends Controller
             Log::error($e);
             return $e->getMessage();
         }
+    }
+
+    public function obtener_alias($pedido)
+    {
+        try{
+            $datos_entrega = json_decode($pedido->datos_entrega, TRUE);
+            if(!(isset($datos_entrega['idcontacto']) && $datos_entrega['idcontacto'])){
+                $contacto = trim($datos_entrega['contacto']);
+                if($contacto != '' && $contacto != '-'){
+                    $request = new Request();
+                    $request->nombre = $datos_entrega['contacto'];
+                    $request->num_documento = -1;
+                    $request->tipo_documento = 9;
+                    $cliente = new ClienteController();
+                    $response = $cliente->store($request);
+                    $response = json_decode($response->getContent(), true);
+                    return $response['idcliente'];
+                } else {
+                    return null;
+                }
+            } else {
+                return $datos_entrega['idcontacto'];
+            }
+        } catch (\Exception $e) {
+            Log::error($e);
+            return null;
+        }
+
     }
 
     public function facturacion_desde_ticket_alt(Request $request){
