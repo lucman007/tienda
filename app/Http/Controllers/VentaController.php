@@ -293,9 +293,11 @@ class VentaController extends Controller
             }
 
             $venta->comprobante_referencia=$venta->facturacion->serie.'-'.$venta->facturacion->correlativo;
+            $venta->anulacion_factura_exportacion=$venta->facturacion->codigo_tipo_factura == '0200'?'EXP':'';
             $venta->cliente->nombre=$venta->cliente->persona->nombre;
             $venta->cliente->nombre_o_razon_social=$venta->cliente->persona->nombre;
             $venta->cliente->direccion=$venta->cliente->persona->direccion;
+
 
             return json_encode($venta);
 
@@ -424,6 +426,10 @@ class VentaController extends Controller
             $facturacion->tipo_descuento = $request->tipo_descuento;
             $facturacion->base_descuento_global = $request->base_descuento_global;
             $facturacion->estado = 'PENDIENTE';
+
+            if($request->comprobante == '07') {
+                $facturacion->motivo_baja = $request->anulacion_factura_exportacion??'';
+            }
 
             if($request->codigo_tipo_factura == 1){
                 $facturacion->retencion = 1;

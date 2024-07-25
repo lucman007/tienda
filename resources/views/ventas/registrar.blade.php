@@ -1079,6 +1079,7 @@
                         tipo: '3'
                     },
                 ],
+                anulacion_factura_exportacion:''
             },
             mounted() {
                 if (localStorage.getItem('productos')) {
@@ -1401,6 +1402,8 @@
                             this.numero_guia_fisica = datos.facturacion.guia_relacionada;
                             this.numeroOc = datos.facturacion.oc_relacionada;
                             this.moneda = datos.facturacion.codigo_moneda;
+                            this.anulacion_factura_exportacion = datos.anulacion_factura_exportacion;
+                            console.log(datos.anulacion_factura_exportacion);
                             this.cuotas = [];
                             this.idventa_modifica = idventa;
                             this.codigo_tipo_factura = datos.facturacion.codigo_tipo_factura || '0101';
@@ -1754,6 +1757,7 @@
                                 'doc_observacion':this.doc_observacion,
                                 'tipo_cambio':this.tipoCambio,
                                 'pago_fraccionado': JSON.stringify(this.pago_fraccionado),
+                                'anulacion_factura_exportacion':this.anulacion_factura_exportacion
                             })
                                 .then(response => {
                                     localStorage.removeItem('productos');

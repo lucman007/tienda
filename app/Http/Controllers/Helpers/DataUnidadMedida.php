@@ -19,6 +19,7 @@ class DataUnidadMedida
             ['num_val'=>'4','text_val'=>'RO/ROL','label'=>'Rollo'],
             ['num_val'=>'5','text_val'=>'KGM/KG','label'=>'Kilogramo'],
             ['num_val'=>'6','text_val'=>'GRM/G','label'=>'Gramo'],
+            ['num_val'=>'6','text_val'=>'NIU/SET','label'=>'Set'],
             ['num_val'=>'7','text_val'=>'LTR/L','label'=>'Litro'],
             ['num_val'=>'8','text_val'=>'GLL/GL','label'=>'Galón'],
             ['num_val'=>'9','text_val'=>'NIU/PZA','label'=>'Pieza'],

@@ -68,6 +68,10 @@ class CreditNote {
             $item->tipo_precio_venta_unitario_por_item='02';//Catálogo N° 16: Tipo de precio de venta unitario (02 si es venta gratuita)
             $item->igv=$item->detalle->igv;
 
+            if($documento->facturacion->motivo_baja == 'EXP'){
+                $item->detalle->afectacion = '40';
+            }
+
             switch ($item->detalle->afectacion){
                 case '10':
                     $item->tax_id='S';
@@ -126,6 +130,16 @@ class CreditNote {
                     $item->tax_name_code='FRE';
                     $item->tipo_precio_venta_unitario_por_item='02';
                     $item->igv=$item->detalle->igv;
+                    break;
+                case '40':
+                    $item->tax_id='S';
+                    $item->tax_code='9995';
+                    $item->tax_siglas='EXP';
+                    $item->tax_name_code='FRE';
+                    $item->tipo_precio_venta_unitario_por_item='01';
+                    $item->igv=0;
+                    $item->porcentaje_igv = 0;
+                    $item->tipo_afectacion_igv = 40;
                     break;
 
             }

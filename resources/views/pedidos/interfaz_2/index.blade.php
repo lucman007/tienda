@@ -619,7 +619,7 @@
 
                         if(tipo == 'nuevo'){
                             this.disabledNuevo = true;
-                            data['datos_entrega'] = JSON.stringify({direccion:'',referencia:'',contacto:'-',telefono:'', costo:'0'});
+                            data['datos_entrega'] = JSON.stringify({direccion:'',referencia:'',contacto:'',telefono:'', costo:'0'});
                         }
 
                         axios.post(accion, data)

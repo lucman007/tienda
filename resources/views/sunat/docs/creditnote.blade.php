@@ -122,7 +122,7 @@
     @endif
     <cac:TaxTotal>
         <cbc:TaxAmount currencyID="{{$documento->codigo_moneda}}">{{$documento->total_impuestos}}</cbc:TaxAmount>
-        @if($documento->facturacion->igv>'0.00')
+        @if($documento->facturacion->motivo_baja == 'EXP')
             <cac:TaxSubtotal>
                 <cbc:TaxableAmount
                         currencyID="{{$documento->codigo_moneda}}">{{$documento->facturacion->total_gravadas}}</cbc:TaxableAmount>
@@ -131,12 +131,29 @@
                     <cbc:ID>S
                     </cbc:ID>
                     <cac:TaxScheme>
-                        <cbc:ID>1000</cbc:ID>
-                        <cbc:Name>IGV</cbc:Name>
-                        <cbc:TaxTypeCode>VAT</cbc:TaxTypeCode>
+                        <cbc:ID>9995</cbc:ID>
+                        <cbc:Name>EXP</cbc:Name>
+                        <cbc:TaxTypeCode>FRE</cbc:TaxTypeCode>
                     </cac:TaxScheme>
                 </cac:TaxCategory>
             </cac:TaxSubtotal>
+        @else
+            @if($documento->facturacion->igv>'0.00')
+                <cac:TaxSubtotal>
+                    <cbc:TaxableAmount
+                            currencyID="{{$documento->codigo_moneda}}">{{$documento->facturacion->total_gravadas}}</cbc:TaxableAmount>
+                    <cbc:TaxAmount currencyID="{{$documento->codigo_moneda}}">{{$documento->facturacion->igv}}</cbc:TaxAmount>
+                    <cac:TaxCategory>
+                        <cbc:ID>S
+                        </cbc:ID>
+                        <cac:TaxScheme>
+                            <cbc:ID>1000</cbc:ID>
+                            <cbc:Name>IGV</cbc:Name>
+                            <cbc:TaxTypeCode>VAT</cbc:TaxTypeCode>
+                        </cac:TaxScheme>
+                    </cac:TaxCategory>
+                </cac:TaxSubtotal>
+            @endif
         @endif
         @if($documento->facturacion->isc>'0.00')
             <cac:TaxSubtotal>

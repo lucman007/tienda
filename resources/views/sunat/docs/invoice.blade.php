@@ -401,7 +401,7 @@
                 </cac:TaxTotal>
             @endif
             <cac:Item>
-                <cbc:Description><![CDATA[{{preg_replace("/[\r\n|\n|\r]+/", " ",strip_tags($item->descripcion))}}]]></cbc:Description>
+                <cbc:Description><![CDATA[{{preg_replace('/\s+/', ' ', preg_replace("/[\r\n|\n|\r]+/", " ", strip_tags($item->descripcion)))}}]]></cbc:Description>
                 <cac:SellersItemIdentification>
                     <cbc:ID>{{$item->codigo}}</cbc:ID>
                 </cac:SellersItemIdentification>

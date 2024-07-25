@@ -10,6 +10,7 @@ namespace sysfact\Http\Controllers\Cpe;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redirect;
 use sysfact\Emisor;
 use sysfact\Guia;
 use sysfact\Http\Controllers\Controller;
@@ -253,7 +254,7 @@ class CpeController extends Controller
             }
             $zip=$util->generarZip($xml);
 
-            return 'Se regeneraron los archivos';
+            return Redirect::back();
         } catch (\Exception $e){
             return $e;
         }

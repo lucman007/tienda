@@ -13,6 +13,9 @@
                 @if($venta->eliminado == 1)
                     <h3 class="float-right" style="background: #f94b4b;color: white;padding: 5px 20px; margin: 0">VENTA ANULADA</h3>
                 @endif
+                @if(auth()->user()->acceso == 1)
+                    <b-button href="/ventas/regenerar/invoice/{{$venta->idventa}}" class="btn btn-primary"> Regenerar</b-button>
+                @endif
             </div>
         </div>
         <div class="row">
