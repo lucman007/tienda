@@ -22,7 +22,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'dni', 'usuario', 'password'
+        'dni', 'usuario', 'password','session_id'
     ];
 
     /**
@@ -31,7 +31,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token',
+        'password', 'remember_token','session_id'
     ];
 
     public function persona()	{

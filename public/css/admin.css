@@ -1496,7 +1496,11 @@ table tr td, table tr th{
     opacity: 0.2;
     mix-blend-mode: multiply;
 }
-
+.textCountChar{
+    margin-bottom: 0;
+    float: right;
+    color: #595959;
+}
 
 /*RESPONSIVE*/
 

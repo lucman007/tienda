@@ -5,6 +5,7 @@ namespace sysfact\Http\Controllers;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use Spatie\Permission\Models\Role;
@@ -70,14 +71,13 @@ class TrabajadorController extends Controller
     public function store(Request $request)
     {
 	    $persona=new Persona();
-	    $persona->nombre=$request->nombre;
-	    $persona->apellidos=$request->apellidos;
+	    $persona->nombre=mb_strtoupper($request->nombre);
+	    $persona->apellidos=mb_strtoupper($request->apellidos);
 	    $persona->direccion=$request->direccion;
 	    $persona->ciudad=$request->ciudad;
 	    $persona->telefono=$request->telefono;
 	    $persona->correo=$request->email;
 	    $persona->save();
-	    $idpersona=$persona->idpersona;
 
 	    $trabajador=new Trabajador();
 	    $trabajador->fecha_ingreso=$request->fecha_ingreso;
@@ -108,8 +108,8 @@ class TrabajadorController extends Controller
     public function update(Request $request)
     {
 	    $persona=Persona::find($request->idtrabajador);
-	    $persona->nombre=$request->nombre;
-	    $persona->apellidos=$request->apellidos;
+        $persona->nombre=mb_strtoupper($request->nombre);
+        $persona->apellidos=mb_strtoupper($request->apellidos);
 	    $persona->direccion=$request->direccion;
 	    $persona->ciudad=$request->ciudad;
 	    $persona->telefono=$request->telefono;
@@ -129,9 +129,29 @@ class TrabajadorController extends Controller
 
     public function destroy($id)
     {
-	    $trabajador=Trabajador::findOrFail($id);
-	    $trabajador->eliminado=1;
-	    $trabajador->update();
+        try{
+            $trabajador=Trabajador::findOrFail($id);
+            $sessionId = $trabajador->session_id;
+            $trabajador->eliminado=1;
+            $trabajador->remember_token = null;
+            $trabajador->session_id = null;
+            $trabajador->update();
+
+            if ($sessionId) {
+                // Ruta al directorio de sesiones
+                $sessionPath = config('session.files') . '/' . $sessionId;
+
+                // Elimina el archivo de sesión si existe
+                if (File::exists($sessionPath)) {
+                    File::delete($sessionPath);
+                }
+            }
+
+        } catch (\Exception $e){
+            Log::error($e);
+            return response(['mensaje'=>$e->getMessage()],500);
+        }
+
     }
 
     public function verificarUsuario(Request $request){

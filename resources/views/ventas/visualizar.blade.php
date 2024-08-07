@@ -14,7 +14,7 @@
                     <h3 class="float-right" style="background: #f94b4b;color: white;padding: 5px 20px; margin: 0">VENTA ANULADA</h3>
                 @endif
                 @if(auth()->user()->acceso == 1)
-                    <b-button href="/ventas/regenerar/invoice/{{$venta->idventa}}" class="btn btn-primary"> Regenerar</b-button>
+                    <b-button href="/ventas/regenerar/invoice/{{$venta->idventa}}" class="btn btn-primary"><i class="fas fa-sync-alt"></i> Regenerar</b-button>
                 @endif
             </div>
         </div>
@@ -75,6 +75,9 @@
                                    'badge-dark' : (estado=='ANULADO' || estado=='ANULADO (BAJA)'),
                                    'badge-danger' :estado=='RECHAZADO'}">@{{estado}}</span>
                                 <hr>
+                                @endif
+                                @if($venta->facturacion->codigo_tipo_factura == '0200')
+                                        <strong>Tipo de factura:</strong> Exportación
                                 @endif
                                 @if($venta->motivo_rechazo)
                                         <span v-show="estado=='RECHAZADO'"><strong>Motivo de rechazo:</strong> {{$venta->motivo_rechazo}}

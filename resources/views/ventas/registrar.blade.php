@@ -469,8 +469,8 @@
                                     <td>@{{producto.cod_producto}} - @{{producto.nombre}} <br>
                                         <span style="font-size: 11px; color: #0b870b;" v-for="item in producto.items_kit">+ (@{{ item.cantidad }}) @{{item['nombre']}}<br></span>
                                     </td>
-                                    <td><textarea rows="1" @keyup="agregarCaracteristicasSession()" class="form-control texto-desc" ref="textareas" @input="expandirTextarea"
-                                                  v-model="producto.presentacion"></textarea></td>
+                                    <td><textarea rows="1" @keyup="agregarCaracteristicasSession()" class="form-control texto-desc" ref="textareas" @input="expandirYContarTextarea(index,$event)"
+                                                  v-model="producto.presentacion"></textarea><p v-show="charCounts[index] > 100"  :class="{ 'text-danger': charCounts[index] > 250 }" class="textCountChar">@{{ charCounts[index] }} caracteres</p></td>
                                     <td><input onfocus="this.select()" @keyup="calcular(index)" class="form-control" type="text"
                                                v-model="producto.precio"></td>
                                     <td>
@@ -597,7 +597,7 @@
                                     <td></td>
                                     <td>@{{ producto.nombre }}</td>
                                     <td v-show="tipo_nota_electronica != 03" style="white-space: break-spaces">@{{ producto.presentacion}}</td>
-                                    <td v-show="tipo_nota_electronica == 03"><textarea rows="1" @keyup="agregarCaracteristicasSession()" class="form-control texto-desc" ref="textareas" @input="expandirTextarea"
+                                    <td v-show="tipo_nota_electronica == 03"><textarea rows="1" @keyup="agregarCaracteristicasSession()" class="form-control texto-desc" ref="textareas" @input="expandirYContarTextarea(index, $event)"
                                                   v-model="producto.presentacion"></textarea></td>
                                     <td v-show="!(tipo_nota_electronica == 04 || tipo_nota_electronica == 05)">@{{ producto.precio }}</td>
                                     <td v-show="tipo_nota_electronica == 04 || tipo_nota_electronica == 05">
@@ -1079,7 +1079,8 @@
                         tipo: '3'
                     },
                 ],
-                anulacion_factura_exportacion:''
+                anulacion_factura_exportacion:'',
+                charCounts: []
             },
             mounted() {
                 if (localStorage.getItem('productos')) {
@@ -1097,6 +1098,7 @@
                 if (localStorage.getItem('esConIgv')) {
                     this.esConIgv = localStorage.getItem('esConIgv') == 'true' ? true : false;
                 }
+                this.countTextareas();
 
             },
             created(){
@@ -1403,7 +1405,6 @@
                             this.numeroOc = datos.facturacion.oc_relacionada;
                             this.moneda = datos.facturacion.codigo_moneda;
                             this.anulacion_factura_exportacion = datos.anulacion_factura_exportacion;
-                            console.log(datos.anulacion_factura_exportacion);
                             this.cuotas = [];
                             this.idventa_modifica = idventa;
                             this.codigo_tipo_factura = datos.facturacion.codigo_tipo_factura || '0101';
@@ -1444,14 +1445,7 @@
                             }
 
                             this.$refs['modal-documento'].hide();
-                            this.$nextTick(() => {
-                                const textareas = this.$refs.textareas;
-                                if(textareas){
-                                    textareas.forEach(textarea => {
-                                        this.expandirTextarea({ target: textarea });
-                                    });
-                                }
-                            });
+                            this.countTextareas();
                         })
                         .catch(error => {
                             this.alerta('No se ha podido copiar la venta');
@@ -1534,6 +1528,7 @@
                     this.calcularTotalVenta();
                     this.validar_stock(this.productosSeleccionados[i]);
                     this.agregarProductosSession();
+                    this.countTextareas();
                 },
                 calcular(index){
                     let producto = this.productosSeleccionados[index];
@@ -2105,11 +2100,25 @@
                         }
                     });
                 },
-                expandirTextarea(event){
-                    let textarea = event.target;
+                expandirYContarTextarea(index, event) {
+                    const textarea = event.target;
                     textarea.style.height = 'auto';
-                    textarea.style.height = textarea.scrollHeight + 'px';
+                    textarea.style.height = `${textarea.scrollHeight}px`;
+                    if(this.productosSeleccionados[index]){
+                        this.$set(this.charCounts, index, 0);
+                        this.charCounts[index] = this.productosSeleccionados[index].presentacion.length;
+                    }
                 },
+                countTextareas(){
+                    this.$nextTick(() => {
+                        const textareas = this.$refs.textareas;
+                        if (textareas) {
+                            textareas.forEach((textarea, index) => {
+                                this.expandirYContarTextarea(index, {target: textarea});
+                            });
+                        }
+                    });
+                }
             },
             watch: {
                 comprobante(){

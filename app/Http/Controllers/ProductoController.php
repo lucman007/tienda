@@ -195,8 +195,8 @@ class ProductoController extends Controller
             $codigo=$request->cod_producto?$request->cod_producto:$this->generar_codigo_producto();
             $producto->cod_producto=$codigo;
             $producto->nombre=strtoupper($request->nombre);
-            $presentacion=preg_replace("/[\r\n|\n|\r]+/", " ", $request->presentacion);
-            $producto->presentacion=mb_strtoupper($presentacion);
+            //$presentacion=preg_replace("/[\r\n|\n|\r]+/", " ", $request->presentacion);
+            $producto->presentacion=mb_strtoupper($request->presentacion);
             $producto->precio=$request->precio;
             $producto->costo=$request->costo;
             $producto->moneda_compra = $request->moneda_compra;
@@ -334,8 +334,8 @@ class ProductoController extends Controller
             $producto=Producto::find($request->idproducto);
             $producto->cod_producto=mb_strtoupper($request->cod_producto);
             $producto->nombre=mb_strtoupper($request->nombre);
-            $presentacion=preg_replace("/[\r\n|\n|\r]+/", " ", $request->presentacion);
-            $producto->presentacion=mb_strtoupper($presentacion);
+            //$presentacion=preg_replace("/[\r\n|\n|\r]+/", " ", $request->presentacion);
+            $producto->presentacion=mb_strtoupper($request->presentacion);
             $producto->precio=$request->precio;
             $producto->costo=$request->costo;
             $producto->moneda_compra = $request->moneda_compra;

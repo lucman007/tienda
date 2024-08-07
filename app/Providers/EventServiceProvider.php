@@ -1,9 +1,9 @@
 <?php
 
 namespace sysfact\Providers;
-
-use Illuminate\Support\Facades\Event;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+use Illuminate\Auth\Events\Login;
+use sysfact\Listeners\UpdateUserSessionId;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -15,6 +15,9 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         'sysfact\Events\Event' => [
             'sysfact\Listeners\EventListener',
+        ],
+        Login::class => [
+            UpdateUserSessionId::class,
         ],
     ];
 

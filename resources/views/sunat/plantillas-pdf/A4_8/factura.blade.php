@@ -46,6 +46,9 @@
                 @if($documento->facturacion->guia_fisica)
                     <td><strong>Guía:</strong> {{$documento->facturacion->guia_fisica}}</td>
                 @endif
+                @if($documento->facturacion->codigo_tipo_factura == '0200')
+                    <td><strong>Tipo de factura:</strong> Exportación</td>
+                @endif
             </tr>
             <tr>
                 <td><strong>Cliente:</strong></td>

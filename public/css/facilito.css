@@ -1509,6 +1509,11 @@ table tr td, table tr th{
     mix-blend-mode: multiply;
 }
 
+.textCountChar{
+    margin-bottom: 0;
+    float: right;
+    color: #595959;
+}
 
 /*RESPONSIVE*/
 
