@@ -112,7 +112,7 @@
                                                             <td>{{$venta->idventa}}</td>
                                                             <td style="width: 120px">{{date("d/m/Y",strtotime($venta->fecha))}}</td>
                                                             <td>{{mb_strtoupper($venta->empleado->nombre)}}</td>
-                                                            <td>{{$venta->cliente}} {{$venta->alias?'('.$venta->alias.')':''}}</td>
+                                                            <td>{{$venta->cliente}} {{$venta->personaAlias?'('.$venta->personaAlias->nombre.')':''}}</td>
                                                             <td>{{$venta->facturacion->codigo_moneda=='PEN'?'S/':'USD'}}{{$venta->total_venta}}</td>
                                                             <td>{{$venta->facturacion->codigo_moneda=='PEN'?'S/':'USD'}}{{number_format($venta->pagado,2)}}</td>
                                                             <td>{{$venta->facturacion->codigo_moneda=='PEN'?'S/':'USD'}}{{number_format($venta->saldo,2)}}</td>

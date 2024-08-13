@@ -6,6 +6,7 @@
         $colapsar = json_decode(cache('config')['interfaz'], true)['colapsar_categorias']??false;
         $emitir_solo_ticket = json_decode(cache('config')['interfaz'], true)['emitir_solo_ticket']??false;
         $aumentar_cantidad_producto = json_decode(cache('config')['interfaz'], true)['aumentar_cantidad_producto']??false;
+        $emitir_como_contado = json_decode(cache('config')['interfaz'], true)['emitir_como_contado']??false;
         $tipo_cambio_compra = cache('opciones')['tipo_cambio_compra'];
         $unidad_medida = \sysfact\Http\Controllers\Helpers\DataUnidadMedida::getUnidadMedida();
     @endphp
@@ -311,6 +312,7 @@
             :idpedido="idpedido"
             :total="totalVenta"
             :origen="'pedidos'"
+            :mostrar_emitir_contado="{{json_encode($emitir_como_contado)}}"
             :fecha="'{{date('Y-m-d', strtotime(date('Y-m-d').' + 1 days'))}}'"
             :tipo_de_pago="{{json_encode(\sysfact\Http\Controllers\Helpers\DataTipoPago::getTipoPago())}}"
             :items="productosSeleccionados"

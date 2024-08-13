@@ -86,7 +86,32 @@
                 </td>
             </tr>
             <tr>
-                <td colspan="2">PAGO: {{$documento->tipo_pago}}</td>
+                @if($documento->tipo_pago == 2)
+                    <td colspan="3">FORMA DE PAGO:
+                        <br>
+                        CRÉDITO {{$documento->codigo_moneda}} {{$documento->total_venta}}
+                    </td>
+                @else
+                    @if($documento->facturacion->emitir_como_contado === 1)
+                        <td colspan="3">FORMA DE PAGO:
+                            <br>
+                            CONTADO {{$documento->codigo_moneda}} {{$documento->total_venta}}
+                        </td>
+                    @else
+                        <td colspan="3">PAGOS:
+                            @php
+                                $tipo_pago = \sysfact\Http\Controllers\Helpers\DataTipoPago::getTipoPago();
+                            @endphp
+                            @foreach($documento->pago as $pago)
+                                @php
+                                    $index = array_search($pago->tipo, array_column($tipo_pago,'num_val'));
+                                @endphp
+                                <br>
+                                {{mb_strtoupper($tipo_pago[$index]['label'])}} {{$documento->codigo_moneda}} {{$pago->monto}}
+                            @endforeach
+                        </td>
+                    @endif
+                @endif
             </tr>
             <tr>
                 <td colspan="3">
@@ -94,7 +119,7 @@
                 </td>
             </tr>
             <tr>
-                <td colspan="3">SON: {{$documento->leyenda}}</td>
+                <td colspan="3">SON: {{$documento->tipo_pago}}</td>
             </tr>
             </tbody>
         </table>

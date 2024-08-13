@@ -717,7 +717,6 @@ class PedidoController extends Controller
 
     public function guardar_datos_entrega(Request $request){
         try{
-            Log::info($request->datos_entrega);
             $pedido = Orden::find($request->idpedido);
             $datos_entrega = json_decode($request->datos_entrega, TRUE);
             $datos_entrega['direccion'] = mb_strtoupper(trim($datos_entrega['direccion']));

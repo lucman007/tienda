@@ -66,14 +66,14 @@ class PdfHelper
                 $moneda_letras='DÓLARES';
             }
 
+            if($venta->facturacion->emitir_como_contado === 1){
+                $venta->tipo_pago = 1;
+            }
+
             $venta->leyenda=NumeroALetras::convert($venta->total_venta, $moneda_letras,true);
             $usuario=$venta->cliente;
             $emisor=new Emisor();
             $nombre_fichero = $venta->facturacion->serie.'-'.$venta->facturacion->correlativo;
-
-            $pago = DataTipoPago::getTipoPago();
-            $find = array_search($venta->tipo_pago, array_column($pago,'num_val'));
-            $venta->tipo_pago = mb_strtoupper($pago[$find]['label']);
 
             $view = view('sunat/plantillas-pdf/'.self::$ruta_formato.'/recibo',['documento'=>$venta, 'emisor'=>$emisor,'usuario'=>$usuario,'items'=>$items]);
             $html=$view->render();

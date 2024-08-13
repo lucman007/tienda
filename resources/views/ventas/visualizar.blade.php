@@ -42,6 +42,9 @@
                                     <br>
                                 @endforeach
                                 <hr>
+                                @if($venta->facturacion->emitir_como_contado)
+                                    <strong>Tipo de pago comprobante:</strong> CONTADO<hr>
+                                @endif
                                 <strong>Moneda:</strong>
                                 @if($venta->codigo_moneda=='S/')
                                     SOLES <hr>
@@ -112,7 +115,7 @@
                                         @endif
                             </div>
                             <div class="col-lg-8">
-                                <strong>Cliente:</strong> {{$venta->cliente['num_documento']}} - {{$venta->persona['nombre']}}
+                                <strong>Cliente:</strong> {{$venta->cliente['num_documento']}} - {{$venta->persona['nombre']}} {{$venta->personaAlias?'('.$venta->personaAlias->nombre.')':''}}
                                 <hr>
                             </div>
                         </div>

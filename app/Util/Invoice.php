@@ -192,6 +192,10 @@ class Invoice {
         $usuario->razon_social=$usuario->persona['nombre'];
         $this->nombre_fichero=$emisor->ruc.'-'.$documento->codigo_tipo_documento.'-'.$documento->serie.'-'.$documento->correlativo;
 
+        if($documento->facturacion->emitir_como_contado === 1){
+            $documento->tipo_pago = 1;
+        }
+
         if($render){
             $view = view('sunat/docs/invoice',['documento'=>$documento,'usuario'=>$usuario,'items'=>$detalle,'emisor'=>$emisor]);
             return $view->render();

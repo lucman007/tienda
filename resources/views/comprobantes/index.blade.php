@@ -166,7 +166,7 @@
                                             @else
                                                 <td style="width: 15%">{{date("d-m-Y H:i:s",strtotime($venta->fecha))}}</td>
                                             @endif
-                                            <td>{{$venta->cliente->persona->nombre}}</td>
+                                            <td>{{$venta->cliente->persona->nombre}} {{$venta->personaAlias?'('.$venta->personaAlias->nombre.')':''}}</td>
                                             @if(!$agent->isDesktop())
                                                 <td>{{$venta->facturacion->codigo_moneda=='PEN'?'S/':'USD'}} {{$venta->total_venta}}</td>
                                             @else

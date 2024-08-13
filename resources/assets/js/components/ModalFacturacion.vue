@@ -50,6 +50,9 @@
                                     </b-input-group-prepend>
                                     <input v-model="num_operacion" type="text" class="form-control" placeholder="N° operación">
                                 </b-input-group>
+                                <b-form-checkbox v-model="emitir_como_contado" switch size="lg" class="float-right ml-3" v-show="metodoPago==2 && mostrar_emitir_contado">
+                                  <span style="font-size: 1rem;">Emitir como contado</span>
+                                </b-form-checkbox>
                             </div>
                         </div>
                     </div>
@@ -169,7 +172,7 @@
             </div>
             <template #modal-footer="{ ok, cancel}">
                 <b-form-checkbox v-model="imprimir" switch size="lg" class="float-right">
-                    <p style="font-size: 1rem;">Imprimir</p>
+                    <span style="font-size: 1rem;">Imprimir</span>
                 </b-form-checkbox>
                 <b-button variant="secondary" @click="cancel()">
                     Cancelar
@@ -262,7 +265,7 @@
 <script>
     export default {
         name: 'modal-facturacion',
-        props: ['idventa','idpedido','origen','tipo_doc','items','total','tipo_de_pago','fecha'],
+        props: ['idventa','idpedido','origen','tipo_doc','items','total','tipo_de_pago','fecha','mostrar_emitir_contado'],
         data() {
             return {
                 clienteSeleccionado:{},
@@ -278,6 +281,7 @@
                 query:'',
                 metodoPago: 1,
                 imprimir:true,
+                emitir_como_contado: false,
                 pago_fraccionado:[
                     {
                         monto: '0.00',
@@ -455,6 +459,7 @@
                     'num_operacion':this.num_operacion,
                     'pago_fraccionado': JSON.stringify(this.pago_fraccionado),
                     'cuotas': JSON.stringify(this.cuotas),
+                    'emitir_como_contado': this.emitir_como_contado,
                 })
                     .then(response => {
                         let data = response.data;
@@ -593,6 +598,7 @@
                 this.propina = '';
                 this.vuelto = 0;
                 this.imprimir = true;
+                this.emitir_como_contado = false;
                 this.num_operacion='';
                 this.pago_fraccionado = [
                     {

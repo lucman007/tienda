@@ -75,6 +75,11 @@
     </b-form-checkbox>
 </div>
 <div class="col-lg-3 mt-3">
+    <b-form-checkbox v-model="interfaz.emitir_como_contado" switch size="lg">
+        <p style="font-size: 14px;">Opción de emitir como contado</p>
+    </b-form-checkbox>
+</div>
+<div class="col-lg-3 mt-3">
     <div class="form-group">
         <label>Impresión:</label>
         <select v-model="interfaz.tipo_impresion" class="custom-select">

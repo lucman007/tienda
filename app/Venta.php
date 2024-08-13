@@ -72,4 +72,8 @@ class Venta extends Model
         return $this->hasMany(Inventario::class, 'idventa', 'idventa');
     }
 
+    public function personaAlias(){
+        return $this->hasOne(Persona::class,'idpersona','alias');
+    }
+
 }

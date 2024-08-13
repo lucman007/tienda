@@ -416,8 +416,22 @@ class CreditoController extends Controller
     public function set_alias(Request $request){
        try{
            $venta = Venta::find($request->idventa);
-           $venta->alias = mb_strtoupper($request->alias);
+           $json = json_decode($request->alias, true);
+           $venta->alias = $json['idcliente'];
+
+           if(!$json['idcliente']){
+               $request = new Request();
+               $request->nombre = $json['nombre'];
+               $request->num_documento = -1;
+               $request->tipo_documento = 9;
+               $cliente = new ClienteController();
+               $response = $cliente->store($request);
+               $response = json_decode($response->getContent(), true);
+               $venta->alias = $response['idcliente'];
+           }
+
            $venta->save();
+
        } catch (Exception $e){
            Log::error($e);
            return $e->getMessage();
@@ -427,7 +441,22 @@ class CreditoController extends Controller
     public function get_alias($idventa){
         try{
             $venta = Venta::find($idventa);
-            return $venta->alias;
+            $alias = $venta->personaAlias;
+
+            $dataAlias = [
+                'idcliente' => null,
+                'nombre' => null
+            ];
+
+            if($alias){
+                $dataAlias = [
+                    'idcliente' => $alias->idpersona,
+                    'nombre' => $alias->nombre
+                ];
+            }
+
+            return $dataAlias;
+
         } catch (Exception $e){
             Log::error($e);
             return $e->getMessage();

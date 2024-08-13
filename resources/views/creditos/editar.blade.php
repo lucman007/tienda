@@ -24,7 +24,7 @@
                                 @else
                                     DÓLARES <hr>
                                 @endif
-                                <strong>Cliente:</strong> {{$credito->cliente['num_documento']}} - {{$credito->persona['nombre']}} {{$credito->alias?'('.$credito->alias.')':''}}<a href="javascript:void(0)" @click="abrir_modal()" class="ml-3"><i class="fas fa-user"></i> Alias de cliente</a>
+                                <strong>Cliente:</strong> {{$credito->cliente['num_documento']}} - {{$credito->persona['nombre']}} {{$credito->personaAlias?'('.$credito->personaAlias->nombre.')':''}}<a href="javascript:void(0)" @click="abrir_modal()" class="ml-3"><i class="fas fa-user"></i> Alias de cliente</a>
                             </div>
                             <div class="col-lg-6">
                                 <p class="mb-0 float-right ml-5"><span class="badge badge-warning">Total por pagar</span><br>
@@ -179,26 +179,28 @@
     </b-modal>
     <!--FIN MODAL AGREGAR PAGO -->
     <b-modal id="modal-alias" ref="modal-alias" @hidden="alias = ''">
-    <template slot="modal-title">
-        Cliente: <br>{{$credito->cliente['num_documento']}} - {{$credito->persona['nombre']}}
-    </template>
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <p>Escribe un alias de cliente para control interno</p>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 mb-3">
+                    <h5>{{$credito->cliente['num_documento']}} - {{$credito->persona['nombre']}}</h5>
+                </div>
             </div>
-            <div class="col-lg-12">
-                <div class="form-group">
-                    <input v-model="alias" type="text" class="form-control" placeholder="Alias de cliente">
+            <div class="row">
+                <div class="col-lg-12">
+                    <p>Escribe un alias de cliente para control interno</p>
+                </div>
+                <div class="col-lg-12">
+                    <autocomplete-cliente-pedido v-on:agregar_cliente="agregarCliente"
+                                                 v-on:borrar_cliente="borrarCliente"
+                                                 ref="suggestCliente"></autocomplete-cliente-pedido>
                 </div>
             </div>
         </div>
-    </div>
-    <template #modal-footer="{ ok, cancel}">
-        <b-button variant="secondary" @click="cancel()">Cancelar</b-button>
-        <b-button variant="primary" @click="agregar_alias">Ok
-        </b-button>
-    </template>
+        <template #modal-footer="{ ok, cancel}">
+            <b-button variant="secondary" @click="cancel()">Cancelar</b-button>
+            <b-button variant="primary" @click="agregar_alias">Ok
+            </b-button>
+        </template>
     </b-modal>
 @endsection
 @section('script')
@@ -220,9 +222,25 @@
                 detalle:[],
                 disabledButtonPago:false,
                 estado: 1,
-                alias:''
+                alias: {
+                    idcliente:null,
+                    nombre:null
+                }
             },
             methods: {
+                agregarCliente(obj) {
+                    console.log(obj);
+                    this.alias = {
+                        idcliente: obj['idcliente'],
+                        nombre: obj['nombre']
+                    }
+                },
+                borrarCliente() {
+                    this.alias = {
+                        idcliente: null,
+                        nombre: null
+                    }
+                },
                 formatDate(date) {
                     const d = new Date(date);
                     const correctedDate = new Date(d.getTime() + d.getTimezoneOffset() * 60000);
@@ -231,12 +249,16 @@
                     const year = correctedDate.getFullYear();
                     return `${day}/${month}/${year}`;
                 },
-                agregar_alias(){
-                    axios.post("{{action('CreditoController@set_alias')}}",{
-                        'idventa':this.idventa,
-                        'alias':this.alias
+                agregar_alias() {
+                    if(!this.alias.nombre){
+                        alert("Alias de cliente no puede estar vacío.")
+                        return;
+                    }
+                    axios.post("{{action('CreditoController@set_alias')}}", {
+                        'idventa': this.idventa,
+                        'alias': JSON.stringify(this.alias)
                     })
-                        .then(()=> {
+                        .then(() => {
                             location.reload(true)
                         })
                         .catch(error => {
@@ -283,7 +305,11 @@
                 obtenerAlias(){
                     axios.get('/creditos/get-alias'+'/'+this.idventa)
                         .then(response => {
-                            this.alias=response.data;
+                            this.alias = response.data;
+                            let obj = {idcliente:this.alias.idcliente,nombre:this.alias.nombre};
+                            if(obj.idcliente){
+                                this.$refs['suggestCliente'].setCliente(obj);
+                            }
                         })
                         .catch(error => {
                             alert('Ha ocurrido un error.');

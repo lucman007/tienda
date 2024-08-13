@@ -1175,6 +1175,7 @@ class VentaController extends Controller
             $facturacion->oc_relacionada='';
             $facturacion->guia_relacionada='';
             $facturacion->guia_fisica='';
+            $facturacion->emitir_como_contado=$request->emitir_como_contado??null;
             $guardado = $facturacion->save();
 
 
@@ -1208,7 +1209,6 @@ class VentaController extends Controller
                     $venta->productos()->attach($item->idproducto, $detalle);
 
                     MainHelper::actualizar_inventario($idventa, $item, $item_inv, 'venta');
-
                     $i++;
                 }
 
