@@ -556,7 +556,7 @@
                     for (let pago of this.pago_fraccionado) {
                         suma_pago_fra += Number(pago.monto);
                     }
-
+                    suma_pago_fra = suma_pago_fra.toFixed(2)
                     if (suma_pago_fra > this.porPagar) this.errorDatosVenta.push('*La suma de los pagos fraccionados supera el monto total de la venta');
                     if (suma_pago_fra < this.porPagar) this.errorDatosVenta.push('*La suma de los pagos fraccionados es inferior al monto total de la venta');
                 }

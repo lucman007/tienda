@@ -11,7 +11,7 @@
         $unidad_medida = \sysfact\Http\Controllers\Helpers\DataUnidadMedida::getUnidadMedida();
     @endphp
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}} interfaz_3">
-        <div class="row">
+        <div class="row no-gutters">
             <div class="col-lg-4">
                 <div class="card">
                     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
@@ -245,7 +245,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="row mt-2">
+                <div class="row">
                     <div class="col-lg-12">
                         <div class="card" id="bottom-btns">
                             <div class="card-body" @if($agent->isDesktop()) style="padding: 10px" @endif>
@@ -398,13 +398,17 @@
                     this.$options.sockets.onmessage = (message) => {
                         let obj = JSON.parse(message.data);
                         let baseUrl = window.location.protocol + '//' + window.location.host + '/';
-                        if(obj.dominio === baseUrl){
+                        if (obj.dominio === baseUrl) {
+
                             this.obtener_pedidos();
-                            if(obj.clave=='limpiar'){
-                                this.limpiar(false);
-                            } else {
-                                if(this.idpedido && this.idpedido != -1){
+                            if (obj.clave === 'actualizar_detalle') {
+                                console.log(this.idpedido);
+                                if (obj.valor == this.idpedido) {
                                     this.obtener_data_pedido(this.idpedido, true);
+                                }
+                            } else if (obj.clave === 'limpiar_pedido') {
+                                if (obj.valor == this.idpedido) {
+                                    this.limpiar(false);
                                 }
                             }
                         }
@@ -438,7 +442,7 @@
 
                             let bottom_btns = document.getElementById('bottom-btns').offsetHeight;
                             let top_btns = document.getElementById('top-btns').offsetHeight;
-                            let h_box_pedidos = height - 90 - 141;
+                            let h_box_pedidos = height - 90 - 145;
                             let h_box_items = height - 90 - top_btns - bottom_btns - 100;
 
                             let box_pedidos = document.getElementById('box-pedidos');
@@ -572,7 +576,7 @@
 
                         if (existeProducto && '{{$aumentar_cantidad_producto}}' === '1') {
                             existeProducto.cantidad++;
-                            existeProducto.total = existeProducto.cantidad * existeProducto.precio;
+                            existeProducto.total = (existeProducto.cantidad * existeProducto.precio).toFixed(2);
                             this.num_item = this.productosSeleccionados.length;
                             if (this.timer) {
                                 clearTimeout(this.timer);
@@ -593,6 +597,9 @@
                             this.disabledTicket = false;
                             this.checkStock(this.productosSeleccionados[i]);
                             this.calcularTotales();
+                            if ('{{$aumentar_cantidad_producto}}' === '1') {
+                                this.guardarPedido();
+                            }
                         }
 
                     },
@@ -641,7 +648,7 @@
                                     top: document.body.scrollHeight + 500,
                                     behavior: 'smooth',
                                 });
-                                this.sendWS();
+                                this.sendWS('actualizar_detalle', this.idpedido);
                             })
                             .catch(error => {
                                 alert('Ha ocurrido un error.');
@@ -671,7 +678,7 @@
                                     this.productosSeleccionados = response.data;
                                     this.obtener_pedidos();
                                     this.mostrarSpinner = false;
-                                    this.sendWS();
+                                    this.sendWS('actualizar_detalle', this.idpedido);
                                 })
                                 .catch(error => {
                                     alert('Ha ocurrido un error.');
@@ -714,7 +721,7 @@
                                     producto['warning'] = true;
                                 }
                                 this.obtener_pedidos();
-                                this.sendWS();
+                                this.sendWS('actualizar_detalle', this.idpedido);
                             })
                             .catch(error => {
                                 alert('Ha ocurrido un error.');
@@ -749,9 +756,6 @@
                                         alert('Ha ocurrido un error al imprimir con RawBT.');
                                         console.log(error);
                                     });
-                                /*let  beforeUrl = 'intent:';
-                                afterUrl = '#Intent;package=ru.a402d.rawbtprinter;scheme=rawbt;component=ru.a402d.rawbtprinter.activity.PrintDownloadActivity;end;';
-                                document.location=beforeUrl+encodeURI(src)+afterUrl;*/
                             @else
                                 window.open(src, '_blank');
                             @endif
@@ -770,15 +774,15 @@
                     },
                     limpiar(sendToSocket){
                         if(sendToSocket){
-                            this.totalVenta = '0.00';
-                            this.ticket = '';
-                            this.idvendedor="{{$idvendedor}}";
-                            this.obtener_pedidos();
-                            this.disabledTicket = true;
-                            this.productosSeleccionados=[];
-                            this.idpedido = -1;
-                            this.sendWS('limpiar')
+                            this.sendWS('limpiar_pedido', this.idpedido);
                         }
+                        this.totalVenta = '0.00';
+                        this.ticket = '';
+                        this.idvendedor="{{$idvendedor}}";
+                        this.obtener_pedidos();
+                        this.disabledTicket = true;
+                        this.productosSeleccionados=[];
+                        this.idpedido = -1;
                     },
                     obtenerEmpleados(){
                         axios.get('/pedidos/obtener-empleados')
@@ -803,7 +807,7 @@
                                         alert('Ha ocurrido un error al actualizar el vendedor');
                                     } else {
                                         this.obtener_pedidos();
-                                        this.sendWS();
+                                        this.sendWS('actualizar_detalle', this.idpedido);
                                     }
                                     this.mostrarSpinner = false;
                                 })
@@ -829,11 +833,11 @@
                             this.actualizarDetalle()
                         }, 500);
                     },
-                    sendWS(accion='') {
+                    sendWS(accion, valor) {
                         this.$socket.addEventListener('open', (event) => {
                         });
                         let baseUrl = window.location.protocol + '//' + window.location.host + '/';
-                        let data = {dominio:baseUrl,clave:accion,valor:''};
+                        let data = {dominio:baseUrl,clave:accion,valor:valor};
                         if (this.$socket.readyState === WebSocket.OPEN) {
                             this.$socket.send(JSON.stringify(data));
                         } else {

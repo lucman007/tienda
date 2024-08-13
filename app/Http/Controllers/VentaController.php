@@ -1128,7 +1128,9 @@ class VentaController extends Controller
 
         //obtener pedido
         $pedido = Orden::find($request->idpedido);
-        $alias = $this->obtener_alias($pedido);
+        $extradata = $this->obtener_extradata($pedido);
+        $alias = $extradata['idcliente'];
+        $observacion = $extradata['observacion'];
         $subtotal = round($pedido->total / 1.18, 2);
         $igv = round($pedido->total - $subtotal, 2);
 
@@ -1145,6 +1147,7 @@ class VentaController extends Controller
             $venta->fecha = date('Y-m-d H:i:s');
             $venta->total_venta = $pedido->total;
             $venta->tipo_pago = $request->tipo_pago_contado;
+            $venta->observacion = $observacion;
             $venta->igv_incluido = true;
             $venta->alias = $alias;
             $venta->save();
@@ -1187,10 +1190,11 @@ class VentaController extends Controller
                     $total_item = round($item->detalle->monto * $item->detalle->cantidad, 2);
                     $suma_detalle += $total_item;
                     if($request->comprobante != 30 && $total_item == 0){
-                        return json_encode(['idventa' => -1, 'respuesta' => 'No está permitido items con monto igual a 0.00, edite su pedido', 'file' => null]);
-
+                        return json_encode(['idventa' => -1, 'respuesta' => 'No está permitido items con monto igual o menor a 0.00, edite su pedido', 'file' => null]);
                     }
-
+                    if($item->detalle->cantidad < 0){
+                        return json_encode(['idventa' => -1, 'respuesta' => 'No está permitido items con cantidades menor a 0, edite su pedido', 'file' => null]);
+                    }
                     $item_inv = $item->inventario()->first();
                     $subtotal_item = round($total_item / 1.18, 2);
                     $igv_item = round($total_item - $subtotal_item, 2);
@@ -1300,9 +1304,10 @@ class VentaController extends Controller
         }
     }
 
-    public function obtener_alias($pedido)
+    public function obtener_extradata($pedido)
     {
         try{
+            $idcliente = null;
             $datos_entrega = json_decode($pedido->datos_entrega, TRUE);
             if(!(isset($datos_entrega['idcontacto']) && $datos_entrega['idcontacto'])){
                 $contacto = trim($datos_entrega['contacto']);
@@ -1314,13 +1319,19 @@ class VentaController extends Controller
                     $cliente = new ClienteController();
                     $response = $cliente->store($request);
                     $response = json_decode($response->getContent(), true);
-                    return $response['idcliente'];
-                } else {
-                    return null;
+
+                    $idcliente = $response['idcliente'];
+
                 }
             } else {
-                return $datos_entrega['idcontacto'];
+                $idcliente = $datos_entrega['idcontacto'];
             }
+
+            return [
+                'idcliente' => $idcliente,
+                'observacion' => $datos_entrega['direccion'],
+            ];
+
         } catch (\Exception $e) {
             Log::error($e);
             return null;

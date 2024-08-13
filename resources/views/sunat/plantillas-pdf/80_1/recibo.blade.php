@@ -119,7 +119,7 @@
                 </td>
             </tr>
             <tr>
-                <td colspan="3">SON: {{$documento->tipo_pago}}</td>
+                <td colspan="3">SON: {{$documento->leyenda}}</td>
             </tr>
             </tbody>
         </table>

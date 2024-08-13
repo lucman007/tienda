@@ -6,6 +6,7 @@
         $colapsar = json_decode(cache('config')['interfaz'], true)['colapsar_categorias']??false;
         $emitir_solo_ticket = json_decode(cache('config')['interfaz'], true)['emitir_solo_ticket']??false;
         $aumentar_cantidad_producto = json_decode(cache('config')['interfaz'], true)['aumentar_cantidad_producto']??false;
+        $emitir_como_contado = json_decode(cache('config')['interfaz'], true)['emitir_como_contado']??false;
         $tipo_cambio_compra = cache('opciones')['tipo_cambio_compra'];
         $unidad_medida = \sysfact\Http\Controllers\Helpers\DataUnidadMedida::getUnidadMedida();
     @endphp
@@ -44,7 +45,10 @@
                                         @endif
                                         <td>@{{item.idorden}}</td>
                                         <td>@{{item.empleado}}</td>
-                                        <td>@{{item.datos_entrega['contacto']}}</td>
+                                        <td>
+                                            <b-button @click.stop v-b-modal.modal-entrega variant="success" v-show="item.idorden == idpedido" class="mr-2"><i class="fas fa-edit"></i></b-button>
+                                            @{{item.datos_entrega['contacto']}}
+                                        </td>
                                         <td>S/ @{{item.total}}</td>
                                     </tr>
                                     <tr v-show="ordenes.length == 0" class="text-center">
@@ -173,7 +177,7 @@
                                                             </b-tooltip>
                                                         </span>
                                                     </td>
-                                                    <td class="d-block">
+                                                    <td class="d-flex">
                                                         <button @click="borrarItemVenta(index)"
                                                                 :disabled="mostrarSpinner" class="btn btn-danger"
                                                                 title="Borrar item"><i class="fas fa-trash"></i>
@@ -308,6 +312,7 @@
             :idpedido="idpedido"
             :total="totalVenta"
             :origen="'pedidos'"
+            :mostrar_emitir_contado="{{json_encode($emitir_como_contado)}}"
             :fecha="'{{date('Y-m-d', strtotime(date('Y-m-d').' + 1 days'))}}'"
             :tipo_de_pago="{{json_encode(\sysfact\Http\Controllers\Helpers\DataTipoPago::getTipoPago())}}"
             :items="productosSeleccionados"
@@ -393,13 +398,17 @@
                     this.$options.sockets.onmessage = (message) => {
                         let obj = JSON.parse(message.data);
                         let baseUrl = window.location.protocol + '//' + window.location.host + '/';
-                        if(obj.dominio === baseUrl){
+                        if (obj.dominio === baseUrl) {
+
                             this.obtener_pedidos();
-                            if(obj.clave=='limpiar'){
-                                this.limpiar(false);
-                            } else {
-                                if(this.idpedido && this.idpedido != -1){
+                            if (obj.clave === 'actualizar_detalle') {
+                                console.log(this.idpedido);
+                                if (obj.valor == this.idpedido) {
                                     this.obtener_data_pedido(this.idpedido, true);
+                                }
+                            } else if (obj.clave === 'limpiar_pedido') {
+                                if (obj.valor == this.idpedido) {
+                                    this.limpiar(false);
                                 }
                             }
                         }
@@ -567,7 +576,7 @@
 
                         if (existeProducto && '{{$aumentar_cantidad_producto}}' === '1') {
                             existeProducto.cantidad++;
-                            existeProducto.total = existeProducto.cantidad * existeProducto.precio;
+                            existeProducto.total = (existeProducto.cantidad * existeProducto.precio).toFixed(2);
                             this.num_item = this.productosSeleccionados.length;
                             if (this.timer) {
                                 clearTimeout(this.timer);
@@ -588,6 +597,9 @@
                             this.disabledTicket = false;
                             this.checkStock(this.productosSeleccionados[i]);
                             this.calcularTotales();
+                            if ('{{$aumentar_cantidad_producto}}' === '1') {
+                                this.guardarPedido();
+                            }
                         }
 
                     },
@@ -636,7 +648,7 @@
                                     top: document.body.scrollHeight + 500,
                                     behavior: 'smooth',
                                 });
-                                this.sendWS();
+                                this.sendWS('actualizar_detalle', this.idpedido);
                             })
                             .catch(error => {
                                 alert('Ha ocurrido un error.');
@@ -666,7 +678,7 @@
                                     this.productosSeleccionados = response.data;
                                     this.obtener_pedidos();
                                     this.mostrarSpinner = false;
-                                    this.sendWS();
+                                    this.sendWS('actualizar_detalle', this.idpedido);
                                 })
                                 .catch(error => {
                                     alert('Ha ocurrido un error.');
@@ -709,7 +721,7 @@
                                     producto['warning'] = true;
                                 }
                                 this.obtener_pedidos();
-                                this.sendWS();
+                                this.sendWS('actualizar_detalle', this.idpedido);
                             })
                             .catch(error => {
                                 alert('Ha ocurrido un error.');
@@ -744,9 +756,6 @@
                                         alert('Ha ocurrido un error al imprimir con RawBT.');
                                         console.log(error);
                                     });
-                                /*let  beforeUrl = 'intent:';
-                                afterUrl = '#Intent;package=ru.a402d.rawbtprinter;scheme=rawbt;component=ru.a402d.rawbtprinter.activity.PrintDownloadActivity;end;';
-                                document.location=beforeUrl+encodeURI(src)+afterUrl;*/
                             @else
                                 window.open(src, '_blank');
                             @endif
@@ -765,15 +774,15 @@
                     },
                     limpiar(sendToSocket){
                         if(sendToSocket){
-                            this.totalVenta = '0.00';
-                            this.ticket = '';
-                            this.idvendedor="{{$idvendedor}}";
-                            this.obtener_pedidos();
-                            this.disabledTicket = true;
-                            this.productosSeleccionados=[];
-                            this.idpedido = -1;
-                            this.sendWS('limpiar')
+                            this.sendWS('limpiar_pedido', this.idpedido);
                         }
+                        this.totalVenta = '0.00';
+                        this.ticket = '';
+                        this.idvendedor="{{$idvendedor}}";
+                        this.obtener_pedidos();
+                        this.disabledTicket = true;
+                        this.productosSeleccionados=[];
+                        this.idpedido = -1;
                     },
                     obtenerEmpleados(){
                         axios.get('/pedidos/obtener-empleados')
@@ -798,7 +807,7 @@
                                         alert('Ha ocurrido un error al actualizar el vendedor');
                                     } else {
                                         this.obtener_pedidos();
-                                        this.sendWS();
+                                        this.sendWS('actualizar_detalle', this.idpedido);
                                     }
                                     this.mostrarSpinner = false;
                                 })
@@ -824,11 +833,11 @@
                             this.actualizarDetalle()
                         }, 500);
                     },
-                    sendWS(accion='') {
+                    sendWS(accion, valor) {
                         this.$socket.addEventListener('open', (event) => {
                         });
                         let baseUrl = window.location.protocol + '//' + window.location.host + '/';
-                        let data = {dominio:baseUrl,clave:accion,valor:''};
+                        let data = {dominio:baseUrl,clave:accion,valor:valor};
                         if (this.$socket.readyState === WebSocket.OPEN) {
                             this.$socket.send(JSON.stringify(data));
                         } else {

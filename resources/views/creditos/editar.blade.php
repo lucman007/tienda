@@ -25,6 +25,10 @@
                                     DÓLARES <hr>
                                 @endif
                                 <strong>Cliente:</strong> {{$credito->cliente['num_documento']}} - {{$credito->persona['nombre']}} {{$credito->personaAlias?'('.$credito->personaAlias->nombre.')':''}}<a href="javascript:void(0)" @click="abrir_modal()" class="ml-3"><i class="fas fa-user"></i> Alias de cliente</a>
+                                <hr>
+                                @if($credito->observacion)
+                                    <strong>Nota / Observación:</strong> {{$credito->observacion}} <hr>
+                                @endif
                             </div>
                             <div class="col-lg-6">
                                 <p class="mb-0 float-right ml-5"><span class="badge badge-warning">Total por pagar</span><br>

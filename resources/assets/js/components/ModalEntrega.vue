@@ -9,8 +9,7 @@
                     <div class="col-lg-12">
                         <div class="form-group">
                             <label>Nombre o alias</label>
-<!--                            <input v-model="datosEntrega.contacto" placeholder="Nombre" type="text" class="form-control">-->
-                          <autocomplete-cliente-pedido v-on:agregar_cliente="agregarCliente"
+                            <autocomplete-cliente-pedido v-on:agregar_cliente="agregarCliente"
                                                 v-on:borrar_cliente="borrarCliente"
                                                 ref="suggestCliente"></autocomplete-cliente-pedido>
                         </div>
