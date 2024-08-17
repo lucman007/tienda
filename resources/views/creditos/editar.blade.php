@@ -27,7 +27,10 @@
                                 <strong>Cliente:</strong> {{$credito->cliente['num_documento']}} - {{$credito->persona['nombre']}} {{$credito->personaAlias?'('.$credito->personaAlias->nombre.')':''}}<a href="javascript:void(0)" @click="abrir_modal()" class="ml-3"><i class="fas fa-user"></i> Alias de cliente</a>
                                 <hr>
                                 @if($credito->observacion)
-                                    <strong>Nota / Observación:</strong> {{$credito->observacion}} <hr>
+                                    <strong>Observación:</strong> {{$credito->observacion}} <hr>
+                                @endif
+                                @if($credito->nota)
+                                    <strong>Nota:</strong> {{$credito->nota}} <hr>
                                 @endif
                             </div>
                             <div class="col-lg-6">

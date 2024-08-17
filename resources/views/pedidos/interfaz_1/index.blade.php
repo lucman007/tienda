@@ -12,14 +12,15 @@
     @endphp
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}} interfaz_3">
         <div class="row no-gutters">
-            <div class="col-lg-4">
+            <div class="col-lg-4" style="z-index: 9;">
                 <div class="card">
                     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-                        <b-button :disabled="disabledNuevo" alt="Nuevo pedido"  @click="nuevoDelivery" variant="primary"><i class="fas fa-plus"></i> Nueva venta</b-button>
+                        <b-button :disabled="disabledNuevo" alt="Nuevo pedido"  @click="nuevoDelivery" variant="primary"><i class="fas fa-plus"></i> Nuevo</b-button>
                         <div style="display: flex">
                             <b-button alt="Resumen del día"  variant="primary" class="mx-2" @cannot('Facturación: facturar') class="disabled" disabled @endcannot href="{{action('PedidoController@ventas')}}">
-                                <i class="fas fa-list-ul"></i> Resumen del día
+                                <i class="fas fa-list-ul"></i> Resumen
                             </b-button>
+                            {{--<b-button class="mr-2" href="/lista-pedidos" variant="primary" title="lista de pedidos"><i class="fas fa-stream"></i></b-button>--}}
                             <b-button @click="reloadPage" variant="warning" title="Actualizar"><i class="fas fa-sync"></i></b-button>
                         </div>
                     </div>

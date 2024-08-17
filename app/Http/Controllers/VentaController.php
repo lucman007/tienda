@@ -1131,6 +1131,7 @@ class VentaController extends Controller
         $extradata = $this->obtener_extradata($pedido);
         $alias = $extradata['idcliente'];
         $observacion = $extradata['observacion'];
+        $nota = $extradata['nota'];
         $subtotal = round($pedido->total / 1.18, 2);
         $igv = round($pedido->total - $subtotal, 2);
 
@@ -1148,6 +1149,7 @@ class VentaController extends Controller
             $venta->total_venta = $pedido->total;
             $venta->tipo_pago = $request->tipo_pago_contado;
             $venta->observacion = $observacion;
+            $venta->nota = $nota;
             $venta->igv_incluido = true;
             $venta->alias = $alias;
             $venta->save();
@@ -1329,7 +1331,8 @@ class VentaController extends Controller
 
             return [
                 'idcliente' => $idcliente,
-                'observacion' => $datos_entrega['direccion'],
+                'nota' => $datos_entrega['direccion'],
+                'observacion' => $datos_entrega['referencia'],
             ];
 
         } catch (\Exception $e) {

@@ -6,7 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -504,4 +506,185 @@ class ConfiguracionController extends Controller
         return $config->valor;
 
     }
+
+    public function obtenerUltimosCorrelativosDesdeXml()
+    {
+        // Directorio donde están los archivos XML
+        $directory = storage_path('app/sunat/xml/');
+        $files = Storage::files('sunat/xml');
+
+        // Variables para almacenar los últimos correlativos
+        $ultimoBoleta = null;
+        $ultimoFactura = null;
+        $ultimoNotaCreditoBoleta = null;
+        $ultimoNotaCreditoFactura = null;
+
+        // Recorrer cada archivo XML
+        foreach ($files as $file) {
+            $filePath = storage_path('app/' . $file);
+            $xmlContent = file_get_contents($filePath);
+            $xml = simplexml_load_string($xmlContent, 'SimpleXMLElement', LIBXML_NOCDATA);
+            $namespaces = $xml->getNamespaces(true);
+            $xml->registerXPathNamespace('cbc', $namespaces['cbc']);
+
+            // Obtener la serie y el correlativo del documento (cbc:ID)
+            $serieYCorrelativoArray = $xml->xpath('//cbc:ID');
+            if (!$serieYCorrelativoArray || !is_array($serieYCorrelativoArray) || count($serieYCorrelativoArray) === 0) {
+                continue; // Si no hay resultados, saltar al siguiente archivo
+            }
+
+            $serieYCorrelativo = (string) $serieYCorrelativoArray[0];
+            $serie = substr($serieYCorrelativo, 0, 4); // Ejemplo: B001, F001, BC01, FC01
+            $correlativo = (int) substr($serieYCorrelativo, 5); // Solo el número correlativo
+
+            // Clasificar según la serie y guardar el mayor correlativo
+            if (str_starts_with($serie, 'B00')) {
+                if (!$ultimoBoleta || $correlativo > $ultimoBoleta['correlativo']) {
+                    $ultimoBoleta = ['serie' => $serie, 'correlativo' => $correlativo];
+                }
+            } elseif (str_starts_with($serie, 'F00')) {
+                if (!$ultimoFactura || $correlativo > $ultimoFactura['correlativo']) {
+                    $ultimoFactura = ['serie' => $serie, 'correlativo' => $correlativo];
+                }
+            } elseif (str_starts_with($serie, 'BC0')) {
+                if (!$ultimoNotaCreditoBoleta || $correlativo > $ultimoNotaCreditoBoleta['correlativo']) {
+                    $ultimoNotaCreditoBoleta = ['serie' => $serie, 'correlativo' => $correlativo];
+                }
+            } elseif (str_starts_with($serie, 'FC0')) {
+                if (!$ultimoNotaCreditoFactura || $correlativo > $ultimoNotaCreditoFactura['correlativo']) {
+                    $ultimoNotaCreditoFactura = ['serie' => $serie, 'correlativo' => $correlativo];
+                }
+            }
+        }
+
+        // Iniciar una transacción para insertar los datos
+        DB::beginTransaction();
+
+        try {
+            // Insertar los datos del último correlativo de boletas en ventas y facturación
+            if ($ultimoBoleta) {
+                $idVentaBoleta = DB::table('ventas')->insertGetId([
+                    'idempleado' => -1,
+                    'idcliente' => -1,
+                    'idcajero' => -1,
+                    'idcaja' => '-1',
+                    'fecha' => DB::raw('CURRENT_TIMESTAMP'),
+                    'fecha_vencimiento' => DB::raw('CURRENT_TIMESTAMP'),
+                    'total_venta' => 0, // Valor por defecto
+                    'tipo_pago' => '',
+                    'observacion' => 'Último correlativo de boleta',
+                    'igv_incluido' => '0',
+                    'eliminado' => '0',
+                    'ticket' => null,
+                    'tipo_cambio' => '0.00',
+                ]);
+
+                DB::table('facturacion')->insert([
+                    'idventa' => $idVentaBoleta,
+                    'codigo_tipo_documento' => '03',
+                    'codigo_tipo_factura' => '03', // Boleta
+                    'serie' => $ultimoBoleta['serie'],
+                    'correlativo' => str_pad($ultimoBoleta['correlativo'], 8, '0', STR_PAD_LEFT),
+                    'codigo_moneda' => 'PEN',
+                    'estado' => 'ACEPTADO',
+                ]);
+            }
+
+            // Insertar los datos del último correlativo de facturas en ventas y facturación
+            if ($ultimoFactura) {
+                $idVentaFactura = DB::table('ventas')->insertGetId([
+                    'idempleado' => -1,
+                    'idcliente' => -1,
+                    'idcajero' => -1,
+                    'idcaja' => '-1',
+                    'fecha' => DB::raw('DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY)'),
+                    'fecha_vencimiento' => DB::raw('DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY)'),
+                    'total_venta' => 0, // Valor por defecto
+                    'tipo_pago' => '',
+                    'observacion' => 'Último correlativo de factura',
+                    'igv_incluido' => '0',
+                    'eliminado' => '0',
+                    'ticket' => null,
+                    'tipo_cambio' => '0.00',
+                ]);
+
+                DB::table('facturacion')->insert([
+                    'idventa' => $idVentaFactura,
+                    'codigo_tipo_documento' => '01',
+                    'codigo_tipo_factura' => '01', // Factura
+                    'serie' => $ultimoFactura['serie'],
+                    'correlativo' => str_pad($ultimoFactura['correlativo'], 8, '0', STR_PAD_LEFT),
+                    'codigo_moneda' => 'PEN',
+                    'estado' => 'ACEPTADO',
+                ]);
+            }
+
+            // Insertar los datos del último correlativo de notas de crédito de boleta en ventas y facturación
+            if ($ultimoNotaCreditoBoleta) {
+                $idVentaNotaCreditoBoleta = DB::table('ventas')->insertGetId([
+                    'idempleado' => -1,
+                    'idcliente' => -1,
+                    'idcajero' => -1,
+                    'idcaja' => '-1',
+                    'fecha' => DB::raw('CURRENT_TIMESTAMP'),
+                    'fecha_vencimiento' => DB::raw('CURRENT_TIMESTAMP'),
+                    'total_venta' => 0, // Valor por defecto
+                    'tipo_pago' => '',
+                    'observacion' => 'Último correlativo de nota de crédito de boleta',
+                    'igv_incluido' => '0',
+                    'eliminado' => '0',
+                    'ticket' => null,
+                    'tipo_cambio' => '0.00',
+                ]);
+
+                DB::table('facturacion')->insert([
+                    'idventa' => $idVentaNotaCreditoBoleta,
+                    'codigo_tipo_documento' => '07',
+                    'codigo_tipo_factura' => '07', // Nota de crédito de boleta
+                    'serie' => $ultimoNotaCreditoBoleta['serie'],
+                    'correlativo' => str_pad($ultimoNotaCreditoBoleta['correlativo'], 8, '0', STR_PAD_LEFT),
+                    'codigo_moneda' => 'PEN',
+                    'estado' => 'ACEPTADO',
+                ]);
+            }
+
+            // Insertar los datos del último correlativo de notas de crédito de factura en ventas y facturación
+            if ($ultimoNotaCreditoFactura) {
+                $idVentaNotaCreditoFactura = DB::table('ventas')->insertGetId([
+                    'idempleado' => -1,
+                    'idcliente' => -1,
+                    'idcajero' => -1,
+                    'idcaja' => '-1',
+                    'fecha' => DB::raw('CURRENT_TIMESTAMP'),
+                    'fecha_vencimiento' => DB::raw('CURRENT_TIMESTAMP'),
+                    'total_venta' => 0, // Valor por defecto
+                    'tipo_pago' => '',
+                    'observacion' => 'Último correlativo de nota de crédito de factura',
+                    'igv_incluido' => '0',
+                    'eliminado' => '0',
+                    'ticket' => null,
+                    'tipo_cambio' => '0.00',
+                ]);
+
+                DB::table('facturacion')->insert([
+                    'idventa' => $idVentaNotaCreditoFactura,
+                    'codigo_tipo_documento' => '07',
+                    'codigo_tipo_factura' => '07', // Nota de crédito de factura
+                    'serie' => $ultimoNotaCreditoFactura['serie'],
+                    'correlativo' => str_pad($ultimoNotaCreditoFactura['correlativo'], 8, '0', STR_PAD_LEFT),
+                    'codigo_moneda' => 'PEN',
+                    'estado' => 'ACEPTADO',
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json(['message' => 'Últimos correlativos insertados correctamente.']);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['error' => 'Error al insertar los correlativos: ' . $e->getMessage()], 500);
+        }
+    }
+
+
 }

@@ -55,7 +55,9 @@
                                     <b-nav-item href="/caja/{{$fecha}}?turno={{$i}}" @if($i == $caja->turno) active @endif>TURNO {{$i}}</b-nav-item>
                                     @endfor
                                     @if($fecha == date('Y-m-d'))
-                                    <b-nav-item href="javascript:void(0)" @if(!$caja_abierta) v-b-modal.modal-1 @else disabled onclick="alert('Debes cerrar el turno {{$caja_abierta->turno}} para abrir otro')" @endif><i class="fas fa-plus"></i> Abrir caja</b-nav-item>
+                                    <b-nav-item href="javascript:void(0)" @if(!$caja_abierta) v-b-modal.modal-1 @else disabled onclick="alert('Debes cerrar el turno {{$caja_abierta->turno}} para abrir otro')" @endif>
+                                        <i class="fas fa-plus"></i> Abrir caja
+                                    </b-nav-item>
                                     @endif
                                 </b-nav>
                             </div>
@@ -661,6 +663,7 @@
                         'apertura':apertura,
                         'observacion_a':this.observacion_a,
                         'turno':this.nuevo_turno,
+                        'fecha':this.fecha,
                         'notificacion':this.notificacion,
                     };
 
@@ -673,13 +676,17 @@
                             } else {
                                 this.mostrarProgreso=false;
                                 alert('Ha ocurrido un error al abrir caja.');
-                                console.log(response.data);
                             }
 
                         })
                         .catch((error) => {
                             this.mostrarProgreso=false;
-                            alert('Ha ocurrido un error al abrir caja.');
+                            if (error.response && error.response.status === 400) {
+                                alert(error.response.data.message);
+                                location.reload(true);
+                            } else {
+                                alert('Ha ocurrido un error inesperado.');
+                            }
                             console.log(error);
                         });
                 },

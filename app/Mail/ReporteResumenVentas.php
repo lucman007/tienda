@@ -31,7 +31,7 @@ class ReporteResumenVentas extends Mailable
      */
     public function build()
     {
-        $mail = $this->from('facsy@coditec.pe')
+        $mail = $this->from('facsy@facturacion.xyz')
             ->subject('REPORTE DE VENTAS - '.$this->config['remitente'])
             ->view('mail.reporte_resumen_ventas');
 

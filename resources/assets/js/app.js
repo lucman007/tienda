@@ -35,6 +35,7 @@ Vue.component('modal-cliente', require('./components/ModalCliente.vue'));
 Vue.component('autocomplete',require('./components/Autocomplete.vue'));
 Vue.component('autocomplete-cliente',require('./components/AutocompleteCliente.vue'));
 Vue.component('autocomplete-cliente-pedido',require('./components/AutocompleteClientePedido.vue'));
+Vue.component('autocomplete-filter',require('./components/AutocompleteFilter.vue'));
 Vue.component('pedidos',require('./components/ListaPedidos.vue'));
 Vue.component('modal-facturacion',require('./components/ModalFacturacion.vue'));
 Vue.component('modal-agregar-producto',require('./components/ModalAgregarProducto.vue'));

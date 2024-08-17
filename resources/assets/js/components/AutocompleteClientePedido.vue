@@ -115,15 +115,14 @@ export default{
             }
         },
         setCliente(data){
-          setTimeout(() => {
-            document.getElementById("buscador-cliente").focus();
-          }, 0);
           if(data){
-            if(data.nombre != '' && data.nombre != '-'){
-              let obj = {idcliente:data.idcliente,nombre: data.nombre, num_documento:null, persona: {nombre:data.nombre}};
-              this.agregarCliente(obj);
-            }
-
+              setTimeout(() => {
+                  document.getElementById("buscador-cliente").focus();
+              }, 0);
+                if(data.nombre != '' && data.nombre != '-'){
+                  let obj = {idcliente:data.idcliente,nombre: data.nombre, num_documento:null, persona: {nombre:data.nombre}};
+                  this.agregarCliente(obj);
+                }
           } else {
             if(this.query){
               let cliente = this.query.toUpperCase();

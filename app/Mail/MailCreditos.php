@@ -29,7 +29,7 @@ class MailCreditos extends Mailable
 
     public function build()
     {
-        $mail = $this->from('facsy@coditec.pe')
+        $mail = $this->from('facsy@facturacion.xyz')
             ->subject('VENTAS A CRÉDITO POR VENCER - '.$this->emisor)
             ->view('mail.creditos',['ventas'=>$this->ventas]);
 

@@ -26,16 +26,22 @@
                         <ul class="list-group">
                             @can('Créditos')
                                 <li v-for="credito in ventasCredito">
-                                    <div v-if="credito.dias > 0" class="alert alert-warning"><i class="fas fa-receipt"></i>
-                                        @{{ credito.comprobante }} a crédito @{{ credito.correlativo }} tiene pagos por vencer
-                                        <a :href="'/creditos/editar/'+credito.idventa" class="btn btn-warning float-right" style="margin-top: -8px" title="Ver">
-                                            Ver
+                                    <div v-if="credito.dias > 0" class="alert alert-warning d-flex justify-content-between align-items-center px-4 py-2">
+                                        <span>
+                                            <i class="fas fa-receipt"></i>
+                                            @{{ credito.comprobante }} a crédito @{{ credito.correlativo }} tiene pagos por vencer
+                                        </span>
+                                        <a :href="'/creditos/editar/'+credito.idventa" class="btn btn-warning btn-sm" title="Ver">
+                                            <i class="fas fa-eye"></i>
                                         </a>
                                     </div>
-                                    <div v-else class="alert alert-danger"><i class="fas fa-receipt"></i>
-                                        @{{ credito.comprobante }} a crédito @{{ credito.correlativo }} ha vencido
-                                        <a :href="'/creditos/editar/'+credito.idventa" class="btn btn-warning float-right" style="margin-top: -8px" title="Ver">
-                                            Ver
+                                    <div v-else class="alert alert-danger d-flex justify-content-between align-items-center px-4 py-1">
+                                        <span>
+                                            <i class="fas fa-receipt"></i>
+                                            @{{ credito.comprobante }} a crédito @{{ credito.correlativo }} ha vencido
+                                        </span>
+                                        <a :href="'/creditos/editar/'+credito.idventa" class="btn btn-warning btn-sm" title="Ver">
+                                            <i class="fas fa-eye"></i>
                                         </a>
                                     </div>
                                 </li>

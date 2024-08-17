@@ -138,6 +138,14 @@ Route::group(['middleware' => ['can:Pedido']], function () {
 
 });
 
+Route::group(['middleware' => ['can:Pedido']], function () {
+//Rutas para lista de pedidos
+    Route::get('lista-pedidos/edit/{id}', 'PedidoListaController@edit');
+    Route::get('lista-pedidos/{desde}/{hasta}','PedidoListaController@index');
+    Route::get('lista-pedidos','PedidoListaController@index');
+    Route::delete('lista-pedidos/destroy/{id}', 'PedidoListaController@destroy');
+    Route::put('lista-pedidos/update', 'PedidoListaController@update');
+});
 
 Route::group(['middleware' => ['can:Cotizaciones']], function () {
 //Rutas para presupuesto
@@ -314,6 +322,7 @@ Route::group(['middleware' => ['can:Configuración']], function () {
     Route::post('configuracion/guardar-mensaje-tenant', 'ConfiguracionController@guardar_mensaje_tenant');
     Route::post('configuracion/guardar-cuentas', 'ConfiguracionController@guardar_cuentas');
     Route::get('configuracion/obtener-cuentas', 'ConfiguracionController@obtener_cuentas');
+    Route::get('configuracion/obtener-ultimos-correlativos', 'ConfiguracionController@obtenerUltimosCorrelativosDesdeXml');
 });
 
 Route::group(['middleware' => ['can:Facturación: guía']], function () {

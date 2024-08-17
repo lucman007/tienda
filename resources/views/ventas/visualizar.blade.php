@@ -112,7 +112,11 @@
                                     @if($venta->observacion)
                                         <strong>Observacion:</strong> {{$venta->observacion}}
                                         <hr>
-                                        @endif
+                                    @endif
+                                    @if($venta->nota)
+                                        <strong>Nota:</strong> {{$venta->nota}}
+                                        <hr>
+                                    @endif
                             </div>
                             <div class="col-lg-8">
                                 <strong>Cliente:</strong> {{$venta->cliente['num_documento']}} - {{$venta->persona['nombre']}} {{$venta->personaAlias?'('.$venta->personaAlias->nombre.')':''}}

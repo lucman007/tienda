@@ -324,9 +324,9 @@ class MainHelper extends Controller
         $producto->moneda = $producto->moneda=='PEN'?'S/':'USD';
         $producto->unidad = explode('/',$producto->unidad_medida)[1];
         $descuento=$producto->descuento()->orderby('monto_desc','asc')->first();
-        $producto->precioPorMayor = $descuento['monto_desc'];
-        $producto->cantidadPorMayor = $descuento['cantidad_min'];
-        $producto->etiqueta = $descuento['etiqueta'];
+        $producto->precioPorMayor = $descuento['monto_desc']??0;
+        $producto->cantidadPorMayor = $descuento['cantidad_min']??0;
+        $producto->etiqueta = $descuento['etiqueta']??'';
         $producto->items_kit = json_decode($producto->items_kit, true);
         $producto->badge_stock = 'badge-success';
         if($producto->stock <= 0){
@@ -668,6 +668,17 @@ class MainHelper extends Controller
 
     public function notificar_estado_stock($idventa){
         ProductoController::notificar_stock_productos($idventa);
+    }
+
+    public function urlOrdenamiento(Request $request, $field)
+    {
+        $order = $request->input('order') === 'asc' ? 'desc' : 'asc';
+        $queryParams = $request->except(['orderby', 'order']);
+        $queryParams = array_merge($queryParams, [
+            'orderby' => $field,
+            'order' => $order,
+        ]);
+        return url()->current() . '?' . http_build_query($queryParams);
     }
 
 }

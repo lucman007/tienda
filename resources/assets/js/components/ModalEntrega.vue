@@ -16,9 +16,21 @@
                     </div>
                     <div class="col-lg-12">
                         <div class="form-group">
-                            <label>Nota</label>
+                            <label>Nota <i class="fas fa-info-circle" id="nota"></i></label>
                             <textarea  v-model="datosEntrega.direccion" class="form-control" rows="3"/>
                         </div>
+                        <b-tooltip target="nota" triggers="hover">
+                            Control interno
+                        </b-tooltip>
+                    </div>
+                    <div class="col-lg-12">
+                        <div class="form-group">
+                            <label>Observación <i class="fas fa-info-circle" id="observacion"></i></label>
+                            <textarea  v-model="datosEntrega.referencia" class="form-control" rows="2"/>
+                        </div>
+                        <b-tooltip target="observacion" triggers="hover">
+                            Se imprime en comprobante
+                        </b-tooltip>
                     </div>
                 </div>
             </div>
@@ -61,7 +73,8 @@ export default {
       this.datosEntrega.contacto = obj['nombre'];
     },
     borrarCliente() {
-
+        this.datosEntrega.idcontacto = null;
+        this.datosEntrega.contacto = null;
     },
     guardarDatos() {
       axios.post('/pedidos/guardar-datos-entrega', {

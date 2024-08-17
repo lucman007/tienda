@@ -33,7 +33,7 @@ class EstadoStock extends Mailable
      */
     public function build()
     {
-        $mail = $this->from('facsy@coditec.pe')
+        $mail = $this->from('facsy@facturacion.xyz')
             ->subject('STOCK DE PRODUCTOS '.date('d/m/Y').' - '.mb_strtoupper($this->config['remitente']))
             ->view('mail.stock',['mensajes'=>$this->mensaje]);
 

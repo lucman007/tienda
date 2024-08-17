@@ -64,31 +64,46 @@ class CajaController extends Controller
             ]);
     }
 
-    public function abrir_caja(Request $request){
-        try{
-            $caja=new Caja();
-            $caja->idempleado=auth()->user()->idempleado;
-            $caja->apertura=$request->apertura;
-            $caja->observacion_a=$request->observacion_a;
-            $caja->fecha_a=date('Y-m-d H:i:s');
-            $caja->estado=0;
-            $caja->turno=$request->turno;
+    public function abrir_caja(Request $request)
+    {
+        try {
+
+            $cajaAbierta = Caja::where('estado', 0)
+                ->whereDate('fecha_a', date('Y-m-d'))
+                ->first();
+
+            if ($cajaAbierta) {
+                return response()->json(['message' => 'Existe una caja abierta en el día actual.'], 400);
+            }
+
+            if (strtotime($request->fecha) < strtotime(date('Y-m-d'))) {
+                return response()->json(['message' => 'No se puede abrir una caja con una fecha anterior a la actual.'], 400);
+            }
+
+            $caja = new Caja();
+            $caja->idempleado = auth()->user()->idempleado;
+            $caja->apertura = $request->apertura;
+            $caja->observacion_a = $request->observacion_a;
+            $caja->fecha_a = date('Y-m-d H:i:s');
+            $caja->estado = 0;
+            $caja->turno = $request->turno;
             $success = $caja->save();
             $idcaja = $caja->idcaja;
 
-            if($success){
+            if ($success) {
                 Cache::forever('caja_abierta', $idcaja);
-                if($request->notificacion && json_decode(cache('config')['mail_contact'], true)['notificacion_caja']){
+                if ($request->notificacion && json_decode(cache('config')['mail_contact'], true)['notificacion_caja']) {
                     $email = json_decode(cache('config')['mail_contact'], true)['notificacion_caja'];
                     Mail::to($email)->send(new MovimientoCaja($caja));
                 }
                 return 1;
             }
 
-            return 0;
+            return response()->json(['message' => 'Error al abrir la caja.'], 500);
 
-        } catch (\Exception $e){
-            return $e->getMessage();
+        } catch (\Exception $e) {
+            Log::error($e);
+            return response()->json(['message' => $e->getMessage()], 500);
         }
 
     }
@@ -174,6 +189,7 @@ class CajaController extends Controller
             return 0;
 
         } catch (\Exception $e){
+            Log::error($e);
             return $e->getMessage();
         }
 
@@ -246,6 +262,7 @@ class CajaController extends Controller
             return response()->json($caja);
 
         } catch (\Exception $e){
+            Log::error($e);
             return $e->getMessage();
         }
 
@@ -270,6 +287,7 @@ class CajaController extends Controller
             return 0;
 
         } catch (\Exception $e){
+            Log::error($e);
             return $e->getMessage();
         }
 
@@ -396,6 +414,7 @@ class CajaController extends Controller
             }
 
         } catch (\Exception $e){
+            Log::error($e);
             return $e->getMessage();
         }
 

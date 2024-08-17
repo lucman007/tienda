@@ -19,6 +19,7 @@ class Venta extends Model
 		'total_venta',
 		'tipo_pago',
 		'observacion',
+		'nota',
 		'estado',
         'igv_incluido',
 		'eliminado',

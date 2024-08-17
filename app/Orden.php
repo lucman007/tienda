@@ -20,7 +20,10 @@ class Orden extends Model
         'moneda',
         'igv_incluido',
         'idventa',
-        'datos_entrega'
+        'datos_entrega',
+        'fecha_entrega',
+        'despacho',
+        'eliminado',
 	];
 
 	public function productos(){
