@@ -131,13 +131,6 @@
             window.removeEventListener('keydown', this.handler);
         },
         methods: {
-            ocultarCategorias(){
-                this.showCategorias=false;
-            },
-            mostrarCategorias(){
-                this.showCategorias=true;
-                this.query = '';
-            },
             init(){
                 this.countClicks=1;
                 this.idproducto=null;

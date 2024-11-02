@@ -16,6 +16,7 @@
             <option value="A4_7">A4 - modelo 7</option>
             <option value="A4_8">A4 - modelo 8</option>
             <option value="A4_9">A4 - modelo 9</option>
+            <option value="A4_10">A4 - modelo 10</option>
         </select>
     </div>
 </div>

@@ -520,11 +520,8 @@ class PedidoController extends Controller
             $productos=[];
             $i=0;
             foreach($orden->productos as $product){
-                $stock=0;
-                foreach ($product->inventario as $kardex){
-                    $stock+=$kardex->cantidad;
-                }
 
+                $stock=$product->inventario()->first()->saldo??0;
                 $productos[$i]['cantidad']=$product->detalle->cantidad;
                 $productos[$i]['cod_producto']=$product->cod_producto;
                 $productos[$i]['costo']=$product->costo;

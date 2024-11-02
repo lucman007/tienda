@@ -53,8 +53,6 @@ Route::group(['middleware' => ['can:Inventario: productos']], function () {
     Route::get('productos/mostrar_categorias', 'ProductoController@mostrar_categorias');
     Route::post('productos/agregar-imagen', 'ProductoController@agregar_imagen');
     Route::get('productos/update-saldo', 'ProductoController@temp_saldo_productos');
-    Route::get('productos/mostrar-almacen', 'ProductoController@mostrar_almacen');
-    Route::get('productos/mostrar-ubicacion/{id}', 'ProductoController@mostrar_ubicacion');
     Route::post('productos/ocultar-columnas', 'ProductoController@ocultar_columnas');
     Route::get('productos/temp-almacen', 'ProductoController@temp_almacen');
     Route::get('productos/descargar-barcodes', 'ProductoController@descargar_zip_barcode');
@@ -322,7 +320,7 @@ Route::group(['middleware' => ['can:Configuración']], function () {
     Route::post('configuracion/guardar-mensaje-tenant', 'ConfiguracionController@guardar_mensaje_tenant');
     Route::post('configuracion/guardar-cuentas', 'ConfiguracionController@guardar_cuentas');
     Route::get('configuracion/obtener-cuentas', 'ConfiguracionController@obtener_cuentas');
-    Route::get('configuracion/obtener-ultimos-correlativos', 'ConfiguracionController@obtenerUltimosCorrelativosDesdeXml');
+    Route::get('configuracion/procesar-xml/{serie}/{inicio}/{fin}', 'ConfiguracionController@procesarXmlPorCorrelativo');
 });
 
 Route::group(['middleware' => ['can:Facturación: guía']], function () {
@@ -441,6 +439,8 @@ Route::get('helper/categorias', 'Helpers\MainHelper@categorias');
 Route::get('helper/obtener-descuentos/{id}', 'Helpers\MainHelper@obtenerDescuentos');
 Route::post('helper/guardar-producto', 'Helpers\MainHelper@guardarProducto');
 Route::get('helper/notificar-estado-stock/{id}', 'Helpers\MainHelper@notificar_estado_stock');
+Route::get('productos/mostrar-almacen', 'ProductoController@mostrar_almacen');
+Route::get('productos/mostrar-ubicacion/{id}', 'ProductoController@mostrar_ubicacion');
 
 
 Auth::routes(['register' => false]);

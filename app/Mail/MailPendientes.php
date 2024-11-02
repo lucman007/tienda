@@ -33,7 +33,7 @@ class MailPendientes extends Mailable
      */
     public function build()
     {
-        return $this->from('soporte@coditec.pe')
+        return $this->from('facsy@facturacion.xyz')
             ->subject('COMPROBANTES PENDIENTES DE ENVÍO...')
             ->view('mail.pendientes',['emisor'=>$this->emisor,'num_comprobante'=>$this->num_comprobantes]);
     }

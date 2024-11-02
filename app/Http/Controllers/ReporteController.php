@@ -100,7 +100,8 @@ class ReporteController extends Controller
                         ->whereHas('facturacion', function($query) {
                             $this->func_filter($query);
                         })
-                        ->orderby('idventa', 'desc')
+                        ->orderby('fecha','desc')
+                        ->orderby('idventa','desc')
                         ->when($esExportable, function ($query) {
                             return $query->get();
                         }, function ($query) {
@@ -130,7 +131,8 @@ class ReporteController extends Controller
                     }
                     $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
                         ->where('eliminado', '=', 0)
-                        ->orderby('idventa', 'desc')
+                        ->orderby('fecha','desc')
+                        ->orderby('idventa','desc')
                         ->whereHas('facturacion', function ($query) use ($filtro, $buscar) {
                             $query
                                 ->where($filtro, $buscar)
@@ -158,7 +160,8 @@ class ReporteController extends Controller
                         ->whereHas('facturacion', function($query) {
                             $this->func_filter($query);
                         })
-                        ->orderby('idventa', 'desc')
+                        ->orderby('fecha','desc')
+                        ->orderby('idventa','desc')
                         ->when($esExportable, function ($query) {
                             return $query->get();
                         }, function ($query) {
@@ -169,7 +172,8 @@ class ReporteController extends Controller
                     $filtro = 'nombre';
                     $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
                         ->where('eliminado', '=', 0)
-                        ->orderby('idventa', 'desc')
+                        ->orderby('fecha','desc')
+                        ->orderby('idventa','desc')
                         ->whereHas('persona', function ($query) use ($filtro, $buscar) {
                             $query->where($filtro, 'LIKE', '%' . $buscar . '%');
                         })
@@ -189,7 +193,8 @@ class ReporteController extends Controller
                         ->whereHas('facturacion', function($query) {
                             $this->func_filter($query);
                         })
-                        ->orderby('idventa', 'desc')
+                        ->orderby('fecha','desc')
+                        ->orderby('idventa','desc')
                         ->when($esExportable, function ($query) {
                             return $query->get();
                         }, function ($query) {
@@ -203,7 +208,8 @@ class ReporteController extends Controller
                         ->whereHas('facturacion', function($query) {
                             $this->func_filter($query);
                         })
-                        ->orderby('idventa', 'desc')
+                        ->orderby('fecha','desc')
+                        ->orderby('idventa','desc')
                         ->when($esExportable, function ($query) {
                             return $query->get();
                         }, function ($query) {
@@ -1126,7 +1132,8 @@ class ReporteController extends Controller
                                 ->orWhere('codigo_tipo_documento',07)
                                 ->orWhere('codigo_tipo_documento','08');
                         })
-                        ->orderby('fecha', 'desc')
+                        ->orderby('fecha','desc')
+                        ->orderby('idventa','desc')
                         ->when($esExportable, function ($query) {
                             return $query->get();
                         }, function ($query) {
@@ -1157,7 +1164,8 @@ class ReporteController extends Controller
 
                     $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
                         ->where('eliminado', '=', 0)
-                        ->orderby('fecha', 'desc')
+                        ->orderby('fecha','desc')
+                        ->orderby('idventa','desc')
                         ->whereHas('facturacion', function ($query) use ($filtro, $buscar) {
                             $query->where($filtro, $buscar);
                         })

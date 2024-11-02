@@ -146,7 +146,7 @@
                             $tipo_pago = \sysfact\Http\Controllers\Helpers\DataTipoPago::getTipoPago();
                         @endphp
                         @foreach($tipo_pago as $pago)
-                            @if($pago['num_val'] != 4)
+                            @if($pago['num_val'] != 4 && $pago['num_val'] != 2)
                                 <option value="{{$pago['num_val']}}">{{$pago['label']}}</option>
                             @endif
                         @endforeach

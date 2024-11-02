@@ -84,6 +84,7 @@ class ComprobanteController extends Controller
                         ->whereHas('facturacion', function($query) {
                             $this->func_filter($query);
                         })
+                        ->orderby('fecha','desc')
                         ->orderby('idventa','desc')
                         ->paginate(30);
                     break;
@@ -118,6 +119,7 @@ class ComprobanteController extends Controller
 
                 $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
                         ->where('eliminado','=',0)
+                        ->orderby('fecha','desc')
                         ->orderby('idventa','desc')
                         ->whereHas('facturacion', function($query) use($filtro,$buscar){
                             $query->where($filtro, $buscar);
@@ -138,7 +140,8 @@ class ComprobanteController extends Controller
                         ->whereHas('pago', function($query) use ($buscar){
                             $query->where('tipo',$buscar);
                         })
-                        ->orderby('idventa', 'desc')
+                        ->orderby('fecha','desc')
+                        ->orderby('idventa','desc')
                         ->paginate(30);
 
                     break;
@@ -146,6 +149,7 @@ class ComprobanteController extends Controller
                     $filtro = 'nombre';
                     $ventas = Venta::whereBetween('fecha', [$desde.' '.$this->hora_inicio, $this->getHasta($hasta).' '.$this->hora_fin])
                         ->where('eliminado','=',0)
+                        ->orderby('fecha','desc')
                         ->orderby('idventa','desc')
                         ->whereHas('persona', function($query) use($filtro,$buscar){
                             $query->where($filtro,'LIKE', '%'.$buscar.'%');

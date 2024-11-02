@@ -2,6 +2,7 @@
 
 namespace sysfact\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
@@ -14,9 +15,12 @@ use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Spipu\Html2Pdf\Html2Pdf;
 use sysfact\AppConfig;
+use sysfact\Cliente;
 use sysfact\Emisor;
 use sysfact\Http\Controllers\Helpers\MainHelper;
+use sysfact\Persona;
 use sysfact\Presupuesto;
+use sysfact\Producto;
 use sysfact\Trabajador;
 use sysfact\Venta;
 
@@ -507,183 +511,252 @@ class ConfiguracionController extends Controller
 
     }
 
-    public function obtenerUltimosCorrelativosDesdeXml()
+    public function procesarXmlPorCorrelativo($serie, $correlativoInicio, $correlativoFin)
     {
-        // Directorio donde están los archivos XML
-        $directory = storage_path('app/sunat/xml/');
-        $files = Storage::files('sunat/xml');
+        $serie = strtoupper($serie);
 
-        // Variables para almacenar los últimos correlativos
-        $ultimoBoleta = null;
-        $ultimoFactura = null;
-        $ultimoNotaCreditoBoleta = null;
-        $ultimoNotaCreditoFactura = null;
+        DB::table('facturacion')
+            ->join('ventas', 'facturacion.idventa', '=', 'ventas.idventa')
+            ->where('ventas.observacion', 'like', 'Último correlativo%')
+            ->where('facturacion.serie', $serie)
+            ->delete();
 
-        // Recorrer cada archivo XML
-        foreach ($files as $file) {
-            $filePath = storage_path('app/' . $file);
+        // Crear una instancia del Emisor y obtener el RUC
+        $emisor = new Emisor();
+        $ruc = $emisor->ruc;  // Obtenemos el RUC del emisor
+
+        // Determinar el tipo de documento basado en la serie
+        if (str_starts_with($serie, 'F0')) {
+            $tipo_documento = '01';  // Factura
+        } elseif (str_starts_with($serie, 'B0')) {
+            $tipo_documento = '03';  // Boleta
+        } elseif (str_starts_with($serie, 'BC') || str_starts_with($serie, 'FC')) {
+            $tipo_documento = '07';  // Nota de crédito
+        } else {
+            return response()->json(['error' => 'Serie no reconocida.'], 400);
+        }
+
+        // Recorrer el rango de correlativos
+        $contadorMinutos = 0;
+        for ($correlativo = $correlativoInicio; $correlativo <= $correlativoFin; $correlativo++) {
+            // Asegurar que el correlativo tenga 8 dígitos, llenando con ceros a la izquierda
+            $correlativoFormateado = str_pad($correlativo, 8, '0', STR_PAD_LEFT);
+
+            // Verificar si la serie y correlativo ya existen en la tabla facturacion
+            $facturacionExistente = DB::table('facturacion')
+                ->where('serie', $serie)
+                ->where('correlativo', $correlativoFormateado)
+                ->exists();
+
+            if ($facturacionExistente) {
+                // Si ya existe la combinación de serie y correlativo, saltar este registro
+                echo "Registro con serie $serie y correlativo $correlativoFormateado ya existe. Saltando.\n";
+                continue;
+            }
+
+            // Construir el nombre del archivo dinámicamente
+            $nombreArchivo = "$ruc-$tipo_documento-$serie-$correlativoFormateado.xml";
+            $filePath = storage_path("app/sunat/xml/$nombreArchivo");
+
+            // Verificar si el archivo existe
+            if (!file_exists($filePath)) {
+                continue; // Si el archivo no existe, saltar al siguiente correlativo
+            }
+
+            // Cargar el archivo XML
             $xmlContent = file_get_contents($filePath);
             $xml = simplexml_load_string($xmlContent, 'SimpleXMLElement', LIBXML_NOCDATA);
             $namespaces = $xml->getNamespaces(true);
             $xml->registerXPathNamespace('cbc', $namespaces['cbc']);
+            $xml->registerXPathNamespace('cac', $namespaces['cac']);
 
-            // Obtener la serie y el correlativo del documento (cbc:ID)
-            $serieYCorrelativoArray = $xml->xpath('//cbc:ID');
-            if (!$serieYCorrelativoArray || !is_array($serieYCorrelativoArray) || count($serieYCorrelativoArray) === 0) {
-                continue; // Si no hay resultados, saltar al siguiente archivo
+            // Extraer la fecha del XML <cbc:IssueDate>
+            $fechaEmisionArray = $xml->xpath('//cbc:IssueDate');
+            $fechaEmision = isset($fechaEmisionArray[0]) ? (string) $fechaEmisionArray[0] : null;
+
+            if (!$fechaEmision) {
+                continue; // Si no hay fecha, saltar este archivo
             }
 
-            $serieYCorrelativo = (string) $serieYCorrelativoArray[0];
-            $serie = substr($serieYCorrelativo, 0, 4); // Ejemplo: B001, F001, BC01, FC01
-            $correlativo = (int) substr($serieYCorrelativo, 5); // Solo el número correlativo
+            // Ajustar la fecha de emisión para que sea a las 23:00:00
+            $fechaEmisionConHora = Carbon::createFromFormat('Y-m-d H:i:s', $fechaEmision . ' 20:00:00')
+                ->addMinutes($contadorMinutos); // Añadir el número de minutos basado en el contador
 
-            // Clasificar según la serie y guardar el mayor correlativo
-            if (str_starts_with($serie, 'B00')) {
-                if (!$ultimoBoleta || $correlativo > $ultimoBoleta['correlativo']) {
-                    $ultimoBoleta = ['serie' => $serie, 'correlativo' => $correlativo];
-                }
-            } elseif (str_starts_with($serie, 'F00')) {
-                if (!$ultimoFactura || $correlativo > $ultimoFactura['correlativo']) {
-                    $ultimoFactura = ['serie' => $serie, 'correlativo' => $correlativo];
-                }
-            } elseif (str_starts_with($serie, 'BC0')) {
-                if (!$ultimoNotaCreditoBoleta || $correlativo > $ultimoNotaCreditoBoleta['correlativo']) {
-                    $ultimoNotaCreditoBoleta = ['serie' => $serie, 'correlativo' => $correlativo];
-                }
-            } elseif (str_starts_with($serie, 'FC0')) {
-                if (!$ultimoNotaCreditoFactura || $correlativo > $ultimoNotaCreditoFactura['correlativo']) {
-                    $ultimoNotaCreditoFactura = ['serie' => $serie, 'correlativo' => $correlativo];
+            // Incrementar el contador de minutos para el próximo registro
+            $contadorMinutos++;
+
+            // Extraer el RUC o DNI del cliente
+            $clienteIDArray = $xml->xpath('//cac:AccountingCustomerParty/cac:Party/cac:PartyIdentification/cbc:ID');
+            $clienteNombreArray = $xml->xpath('//cac:AccountingCustomerParty/cac:Party/cac:PartyLegalEntity/cbc:RegistrationName');
+
+            if (!$clienteIDArray || !$clienteNombreArray || !isset($clienteIDArray[0]) || !isset($clienteNombreArray[0])) {
+                continue; // Si no se encuentran los datos del cliente, saltar este archivo
+            }
+
+            $rucDni = (string) $clienteIDArray[0];
+            $nombreCliente = (string) $clienteNombreArray[0];
+
+            // Determinar si es RUC (11 dígitos) o DNI (8 dígitos)
+            $tipoDocumento = strlen($rucDni) == 11 ? '6' : (strlen($rucDni) == 8 ? '1' : null);
+            if (!$tipoDocumento) {
+                continue; // Si el tipo de documento no es válido, saltar el archivo
+            }
+
+            // Verificar si el cliente ya existe en la base de datos
+            $clienteExistente = Cliente::where('num_documento', $rucDni)
+                ->where('eliminado', 0)
+                ->first();
+
+            if (!$clienteExistente) {
+                // Si el cliente no existe, crearlo
+                $persona = new Persona();
+                $persona->nombre = mb_strtoupper($nombreCliente);
+                $persona->direccion = ''; // Puedes modificarlo si tienes la dirección en el XML
+                $persona->telefono = '';  // Si tienes el teléfono en el XML
+                $persona->correo = '';    // Si tienes el correo en el XML
+                $persona->save();
+
+                $cliente = new Cliente();
+                $codigoCliente = '';  // Generar el código del cliente
+                $cliente->cod_cliente = $codigoCliente;
+                $cliente->num_documento = $rucDni;
+                $cliente->tipo_documento = $tipoDocumento;  // 6 = RUC, 1 = DNI
+                $cliente->eliminado = 0;
+                $persona->cliente()->save($cliente);
+
+                $clienteExistente = Cliente::where('num_documento', $rucDni)
+                    ->where('eliminado', 0)
+                    ->first();
+
+                // Verificar que el cliente se asignó correctamente
+                if ($clienteExistente) {
+                    Log::info($clienteExistente->idcliente); // Comprobación del ID del cliente
+                } else {
+                    Log::error("El cliente no pudo ser recuperado correctamente.");
                 }
             }
-        }
 
-        // Iniciar una transacción para insertar los datos
-        DB::beginTransaction();
+            // Extraer datos del XML para la venta
+            $payableAmountArray = $xml->xpath('//cac:LegalMonetaryTotal/cbc:PayableAmount');
+            $totalVenta = isset($payableAmountArray[0]) ? (float) $payableAmountArray[0] : 0;
 
-        try {
-            // Insertar los datos del último correlativo de boletas en ventas y facturación
-            if ($ultimoBoleta) {
-                $idVentaBoleta = DB::table('ventas')->insertGetId([
+            // Iniciar la transacción para insertar los datos en la tabla ventas y facturacion
+            DB::beginTransaction();
+
+            try {
+                // Insertar en la tabla ventas
+                $idVenta = DB::table('ventas')->insertGetId([
                     'idempleado' => -1,
-                    'idcliente' => -1,
+                    'idcliente' => $clienteExistente->idcliente, // ID del cliente creado o encontrado
                     'idcajero' => -1,
                     'idcaja' => '-1',
-                    'fecha' => DB::raw('CURRENT_TIMESTAMP'),
-                    'fecha_vencimiento' => DB::raw('CURRENT_TIMESTAMP'),
-                    'total_venta' => 0, // Valor por defecto
-                    'tipo_pago' => '',
-                    'observacion' => 'Último correlativo de boleta',
-                    'igv_incluido' => '0',
+                    'fecha' => $fechaEmisionConHora, // Fecha extraída del XML
+                    'fecha_vencimiento' => $fechaEmisionConHora, // Usamos la misma fecha de emisión como vencimiento
+                    'total_venta' => $totalVenta, // Total de venta extraído del XML
+                    'tipo_pago' => '1', // Según tu requerimiento
+                    'observacion' => '',
+                    'igv_incluido' => 1,
                     'eliminado' => '0',
-                    'ticket' => null,
                     'tipo_cambio' => '0.00',
                 ]);
 
+                // Insertar en la tabla facturacion
+                $porcentaje_igv = json_decode(cache('config')['interfaz'], true)['porcentaje_igv']??18;
+                $_igv = ($porcentaje_igv/100+1);
+                $subtotalVenta = $totalVenta/$_igv;
                 DB::table('facturacion')->insert([
-                    'idventa' => $idVentaBoleta,
-                    'codigo_tipo_documento' => '03',
-                    'codigo_tipo_factura' => '03', // Boleta
-                    'serie' => $ultimoBoleta['serie'],
-                    'correlativo' => str_pad($ultimoBoleta['correlativo'], 8, '0', STR_PAD_LEFT),
-                    'codigo_moneda' => 'PEN',
-                    'estado' => 'ACEPTADO',
-                ]);
-            }
-
-            // Insertar los datos del último correlativo de facturas en ventas y facturación
-            if ($ultimoFactura) {
-                $idVentaFactura = DB::table('ventas')->insertGetId([
-                    'idempleado' => -1,
-                    'idcliente' => -1,
-                    'idcajero' => -1,
-                    'idcaja' => '-1',
-                    'fecha' => DB::raw('DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY)'),
-                    'fecha_vencimiento' => DB::raw('DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY)'),
-                    'total_venta' => 0, // Valor por defecto
-                    'tipo_pago' => '',
-                    'observacion' => 'Último correlativo de factura',
-                    'igv_incluido' => '0',
-                    'eliminado' => '0',
-                    'ticket' => null,
-                    'tipo_cambio' => '0.00',
+                    'idventa' => $idVenta,
+                    'codigo_tipo_documento' => $tipo_documento,
+                    'codigo_tipo_factura' => '0101', // Determinado a partir de la serie
+                    'serie' => $serie, // Serie pasada como parámetro
+                    'correlativo' => $correlativoFormateado, // Correlativo formateado a 8 dígitos
+                    'codigo_moneda' => 'PEN', // Asumimos PEN, ajusta si es necesario
+                    'estado' => 'ACEPTADO',  // Estado
+                    'total_gravadas' => round($subtotalVenta, 2),
+                    'igv' => round($totalVenta - $subtotalVenta, 2)
                 ]);
 
-                DB::table('facturacion')->insert([
-                    'idventa' => $idVentaFactura,
-                    'codigo_tipo_documento' => '01',
-                    'codigo_tipo_factura' => '01', // Factura
-                    'serie' => $ultimoFactura['serie'],
-                    'correlativo' => str_pad($ultimoFactura['correlativo'], 8, '0', STR_PAD_LEFT),
-                    'codigo_moneda' => 'PEN',
-                    'estado' => 'ACEPTADO',
-                ]);
-            }
-
-            // Insertar los datos del último correlativo de notas de crédito de boleta en ventas y facturación
-            if ($ultimoNotaCreditoBoleta) {
-                $idVentaNotaCreditoBoleta = DB::table('ventas')->insertGetId([
-                    'idempleado' => -1,
-                    'idcliente' => -1,
-                    'idcajero' => -1,
-                    'idcaja' => '-1',
-                    'fecha' => DB::raw('CURRENT_TIMESTAMP'),
-                    'fecha_vencimiento' => DB::raw('CURRENT_TIMESTAMP'),
-                    'total_venta' => 0, // Valor por defecto
-                    'tipo_pago' => '',
-                    'observacion' => 'Último correlativo de nota de crédito de boleta',
-                    'igv_incluido' => '0',
-                    'eliminado' => '0',
-                    'ticket' => null,
-                    'tipo_cambio' => '0.00',
+                DB::table('pagos')->insert([
+                    'idventa' => $idVenta,
+                    'tipo' => 1,
+                    'monto' => $totalVenta,
+                    'fecha' => $fechaEmisionConHora,
+                    'estado' => 1
                 ]);
 
-                DB::table('facturacion')->insert([
-                    'idventa' => $idVentaNotaCreditoBoleta,
-                    'codigo_tipo_documento' => '07',
-                    'codigo_tipo_factura' => '07', // Nota de crédito de boleta
-                    'serie' => $ultimoNotaCreditoBoleta['serie'],
-                    'correlativo' => str_pad($ultimoNotaCreditoBoleta['correlativo'], 8, '0', STR_PAD_LEFT),
-                    'codigo_moneda' => 'PEN',
-                    'estado' => 'ACEPTADO',
-                ]);
-            }
+            // Insertar los detalles de la venta
+            $items = ($tipo_documento === '07') ? $xml->xpath('//cac:CreditNoteLine') : $xml->xpath('//cac:InvoiceLine');
+            $i = 1;
+            foreach ($items as $item) {
+                // Extraer la descripción del producto
+                $descripcionProductoArray = $item->xpath('cac:Item/cbc:Description');
+                $descripcionProducto = isset($descripcionProductoArray[0]) ? (string)$descripcionProductoArray[0] : '';
 
-            // Insertar los datos del último correlativo de notas de crédito de factura en ventas y facturación
-            if ($ultimoNotaCreditoFactura) {
-                $idVentaNotaCreditoFactura = DB::table('ventas')->insertGetId([
-                    'idempleado' => -1,
-                    'idcliente' => -1,
-                    'idcajero' => -1,
-                    'idcaja' => '-1',
-                    'fecha' => DB::raw('CURRENT_TIMESTAMP'),
-                    'fecha_vencimiento' => DB::raw('CURRENT_TIMESTAMP'),
-                    'total_venta' => 0, // Valor por defecto
-                    'tipo_pago' => '',
-                    'observacion' => 'Último correlativo de nota de crédito de factura',
-                    'igv_incluido' => '0',
-                    'eliminado' => '0',
-                    'ticket' => null,
-                    'tipo_cambio' => '0.00',
+                // Buscar el producto en la base de datos
+                $productoExistente = Producto::where('nombre', mb_strtoupper($descripcionProducto))->first();
+
+                if (!$productoExistente) {
+                    // Si no existe, crearlo
+                    $producto = new Producto();
+                    $producto->nombre = mb_strtoupper($descripcionProducto);
+                    $producto->precio = 0;
+                    $producto->costo = 0;
+                    $producto->eliminado = 0;
+                    $producto->stock_bajo = 0;
+                    $producto->idcategoria = -1; // ID categoría predeterminada
+                    $producto->tipo_producto = 2;
+                    $producto->unidad_medida = 'NIU/UND';
+                    $producto->save();
+
+                    $productoExistente = $producto;
+                }
+
+                // Extraer los datos del detalle del XML
+                $cantidadArray = $item->xpath('cbc:InvoicedQuantity | cbc:CreditedQuantity');
+                $cantidad = isset($cantidadArray[0]) ? (float)$cantidadArray[0] : 1;
+
+                $precioArray = $item->xpath('cac:Price/cbc:PriceAmount');
+                $precio = isset($precioArray[0]) ? (float)$precioArray[0] : 0;
+
+                $subtotalArray = $item->xpath('cac:TaxTotal/cac:TaxSubtotal/cbc:TaxableAmount');
+                $subtotal = isset($subtotalArray[0]) ? (float)$subtotalArray[0] : 0;
+
+                $igvArray = $item->xpath('cac:TaxTotal/cac:TaxSubtotal/cbc:TaxAmount');
+                $igv = isset($igvArray[0]) ? (float)$igvArray[0] : 0;
+
+                $total = $subtotal + $igv;
+
+                // Insertar el detalle del producto en la tabla pivot
+                DB::table('ventas_detalle')->insert([
+                    'idventa' => $idVenta, // ID de la venta
+                    'idproducto' => $productoExistente->idproducto, // ID del producto
+                    'num_item' => $i,
+                    'cantidad' => $cantidad,
+                    'monto' => $precio,
+                    'descuento' => 0,
+                    'descripcion' => mb_strtoupper($descripcionProducto),
+                    'afectacion' => 10, // Código de afectación de IGV
+                    'porcentaje_descuento' => 0,
+                    'subtotal' => $subtotal,
+                    'igv' => $igv,
+                    'total' => $total
                 ]);
 
-                DB::table('facturacion')->insert([
-                    'idventa' => $idVentaNotaCreditoFactura,
-                    'codigo_tipo_documento' => '07',
-                    'codigo_tipo_factura' => '07', // Nota de crédito de factura
-                    'serie' => $ultimoNotaCreditoFactura['serie'],
-                    'correlativo' => str_pad($ultimoNotaCreditoFactura['correlativo'], 8, '0', STR_PAD_LEFT),
-                    'codigo_moneda' => 'PEN',
-                    'estado' => 'ACEPTADO',
-                ]);
+
+                $i++;
             }
 
             DB::commit();
 
-            return response()->json(['message' => 'Últimos correlativos insertados correctamente.']);
-        } catch (\Exception $e) {
-            DB::rollback();
-            return response()->json(['error' => 'Error al insertar los correlativos: ' . $e->getMessage()], 500);
+                echo "Datos insertados correctamente para el archivo: $nombreArchivo.\n";
+            } catch (\Exception $e) {
+                DB::rollback();
+                Log::error($e);
+                echo "Error al procesar el archivo $nombreArchivo: " . $e->getMessage() . "\n";
+            }
         }
+
+        return response()->json(['message' => 'Proceso completado']);
     }
 
 
