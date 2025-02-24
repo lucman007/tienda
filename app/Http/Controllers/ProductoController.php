@@ -124,6 +124,8 @@ class ProductoController extends Controller
                 $opcion = Opciones::where('nombre_opcion','col_productos')->first();
                 if($opcion){
                     $columnas = json_decode($opcion->valor_json, true);
+                    $columnas['nombre'] = $columnas['nombre']??true;
+                    $columnas['descripcion'] = $columnas['descripcion']??true;
                 } else {
                     $columnas = [
                         'ubicacion'=>false,
@@ -139,6 +141,8 @@ class ProductoController extends Controller
                         'montaje'=>false,
                         'capsula'=>false,
                         'tipo'=>false,
+                        'nombre'=>false,
+                        'descripcion'=>false,
                         'precio_min'=>false,
                     ];
                 }
@@ -279,21 +283,16 @@ class ProductoController extends Controller
 
 		$producto=Producto::find($id);
 		$descuentos = Descuento::select('cantidad_min as cantidad','monto_desc as precio','etiqueta')->where('idproducto',$id)->get();
-		$inventario=Inventario::select('cantidad')->where('idproducto',$id)->get();
+        $saldo = Inventario::where('idproducto',$id)->orderby('idinventario','desc')->first()->saldo;
+
 		$almacen = DB::table('almacen_productos')
             ->where('idproducto',$id)
             ->orderBy('fecha', 'asc')
             ->first();
 
-        $suma=0;
-        foreach ($inventario as $inv){
-            $suma+=$inv->cantidad;
-        }
-
         $barcode = new DNS1D();
         $producto->barcode=$barcode->getBarcodePNG($producto->cod_producto, "C39+");
-
-		$producto->cantidad=$suma;
+		$producto->cantidad=$saldo;
         $producto->descuentos=$descuentos;
          if($almacen){
              $producto->almacen = $almacen;

@@ -67,11 +67,11 @@
                                         </a>
                                     </th>
                                     <th @if(!$columnas['tipo_producto']) style="display: none;" @endif scope="col">Clasif.</th>
-                                    <th style="width: 15%" scope="col">
+                                    <th @if(!$columnas['nombre']) style="display: none;" @else style="width: 15%" @endif  scope="col">
                                         <a href="{{ app('sysfact\Http\Controllers\Helpers\MainHelper')->urlOrdenamiento(request(), 'nombre') }}">
                                             Producto <span class="icon-hover @if($orderby == 'nombre') icon-hover-active @endif">{!! $order_icon !!}</span>
                                         </a>
-                                    <th scope="col" style="width: 20%">Descripción</th>
+                                    <th scope="col" @if(!$columnas['descripcion']) style="display: none;" @else style="width: 20%" @endif >Descripción</th>
                                     <th @if(!$columnas['montaje']) style="display: none;" @endif>Montaje</th>
                                     <th @if(!$columnas['capsula']) style="display: none;" @endif>Cápsula</th>
                                     <th @if(!$columnas['tipo']) style="display: none;" @endif>Tipo</th>
@@ -101,7 +101,7 @@
                                             <td @if(!$columnas['ubicacion']) style="display: none;" @endif>{{$producto->ubicacion}}</td>
                                             <td @if(!$columnas['codigo']) style="display: none;" @endif>{{str_pad($producto->cod_producto,5,'0',STR_PAD_LEFT) }}</td>
                                             <td @if(!$columnas['tipo_producto']) style="display: none;" @endif scope="col">{{$producto->tipo_producto_nombre}}</td>
-                                            <td>
+                                            <td @if(!$columnas['nombre']) style="display: none;" @endif>
                                                 {{$producto->nombre}} @if($producto->tipo_producto == 3) <span class="badge badge-warning"><i class="far fa-star"></i> KIT</span> <br>@endif
                                                 @if($producto->items_kit)
                                                     @php
@@ -113,7 +113,7 @@
                                                     @endforeach
                                                 @endif
                                             </td>
-                                            <td>{{$producto->presentacion}}</td>
+                                            <td  @if(!$columnas['descripcion']) style="display: none;" @endif>{{$producto->presentacion}}</td>
                                             <td @if(!$columnas['montaje']) style="display: none;" @endif>{{$producto->param_1}}</td>
                                             <td @if(!$columnas['capsula']) style="display: none;" @endif>{{$producto->param_2}}</td>
                                             <td @if(!$columnas['tipo']) style="display: none;" @endif>{{$producto->param_3}}</td>
@@ -261,6 +261,8 @@
                 <b-form-checkbox v-model="columnas.montaje" switch>Montaje</b-form-checkbox>
                 <b-form-checkbox v-model="columnas.capsula" switch>Cápsula</b-form-checkbox>
                 <b-form-checkbox v-model="columnas.tipo" switch>Tipo</b-form-checkbox>
+                <b-form-checkbox v-model="columnas.nombre" switch>Nombre</b-form-checkbox>
+                <b-form-checkbox v-model="columnas.descripcion" switch>Descripción</b-form-checkbox>
             </div>
         </div>
     </div>

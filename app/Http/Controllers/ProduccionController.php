@@ -46,6 +46,8 @@ class ProduccionController extends Controller
                 ->orderby('produccion.idproduccion','desc')
                 ->paginate(30);
 
+            $produccion->appends($_GET)->links();
+
             return view('produccion.index',['produccion'=>$produccion,'textoBuscado'=>$consulta,'active'=>$estado,'usuario'=>auth()->user()->persona]);
 
         }

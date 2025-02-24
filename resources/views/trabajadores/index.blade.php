@@ -55,7 +55,11 @@
                                             <td class="botones-accion" style="width: 20%">
                                                 <b-button @click="editarTrabajador({{$trabajador->idempleado}})" class="btn btn-success" title="Editar trabajador"><i
                                                             class="fas fa-edit"></i></b-button>
-                                                <a href="{{url('trabajadores/usuario').'/'.$trabajador->idempleado}}">
+                                                <a @if($trabajador->es_usuario || !$bloquear_registro)
+                                                       href="{{ url('trabajadores/usuario') . '/' . $trabajador->idempleado }}"
+                                                   @else
+                                                       onclick="alert('Ya no se pueden crear más usuarios. Migra a un plan superior.');"
+                                                        @endif>
                                                     <button class="btn btn-info" title="Gestionar accesos"><i
                                                                 class="fas fa-key"></i></button>
                                                 </a>

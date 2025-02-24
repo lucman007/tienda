@@ -11,11 +11,14 @@
     <title>@yield('titulo') </title>
 </head>
 <body>
+@php
+    $ancho_logo = json_decode(cache('config')['interfaz'], true)['ancho_logo']??'40';
+@endphp
 <div class="header">
     <div class="info-emisor">
         @if($emisor->logo)
             <div class="logo">
-                <img src="{{'images/'.$emisor->logo}}">
+                <img src="{{'images/'.$emisor->logo}}" style="width: {{$ancho_logo}}mm">
             </div>
         @endif
         <div class="texto">
@@ -107,6 +110,16 @@
                     </td>
                 </tr>
             @endif
+            @if(str_contains(app()->domain(),'linetech'))
+                <tr>
+                    <td><br></td>
+                </tr>
+                <tr>
+                    <td colspan="8" style="margin-top: 5mm">
+                        <strong>*Se cubre el envío por ventas mayores a USD 500 (Sólo Lima y Callao)</strong>
+                    </td>
+                </tr>
+            @endif
             </tbody>
         </table>
     <table class="footer">
@@ -133,7 +146,10 @@
                                 <strong>Beneficiario : </strong> {{$emisor->razon_social}}<br>
                                 <strong>Código SWIFT:</strong> {{$cuenta['cci']}} <br>
                                 <strong>Cuenta N°:</strong> {{$cuenta['cuenta']}}<br>
-                                <strong>Banco:</strong> {{$cuenta['descripcion']}} <br><br>
+                                <strong>Banco:</strong> {{$cuenta['descripcion']}} <br>
+                                @if(str_contains(app()->domain(),'linetech'))
+                                    <strong>Tipo gasto:</strong> OUR<br><br>
+                                @endif
                             @endif
                         @endforeach
                     @else
@@ -274,20 +290,20 @@
 
     .header .info-emisor{
         width: 90mm;
-        padding: 25px 20px;
+        padding: 25px 20px 10px 20px;
     }
     .header .info-emisor .logo{
-        width: 40mm;
+        width: {{}}40mm;
     }
     .header .info-emisor .logo img{
-        width: 70mm;
+        width: 40mm;
         text-align: center;
         margin-left: -5mm;
     }
     .header .info-emisor .texto{
         width: 95mm;
         right: 0;
-        top:25mm;
+        top:15mm;
     }
 
     .body{

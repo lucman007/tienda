@@ -247,9 +247,11 @@
     p,td{
         font-size: 7pt;
     }
-
+    thead td{
+        font-size: 8pt;
+    }
     .div-table-header{
-        width: 190mm; background: #318300; padding: 2mm 5mm; text-align: center; margin-top: 5mm; height: 5mm
+        width: 190mm; background: #9cb91b; padding: 2mm 5mm; text-align: center; margin-top: 5mm; height: 5mm
     }
 
     .line-bottom{

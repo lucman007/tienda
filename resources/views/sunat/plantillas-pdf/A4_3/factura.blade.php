@@ -130,7 +130,19 @@
                         Código Hash: {{$documento->hash}} <br>
                         Para consultar el comprobante ingresar a : {{url('consulta')}}</p>
                     @if($documento->facturacion->codigo_tipo_factura == '1001')
-                        <p><strong>OPERACIÓN SUJETA A DETRACCIÓN {{$documento->codigo_moneda}} {{$documento->detraccion}} ({{$documento->porcentaje_detraccion}}%)</strong></p>
+                        @php
+                            $tiposDetraccion = [
+                                '010' => 'Residuos, subproductos, desechos, recortes y desperdicios',
+                                '019' => 'Arrendamiento de bienes muebles',
+                                '020' => 'Mantenimiento y reparación de bienes muebles',
+                                '022' => 'Otros servicios empresariales',
+                                '025' => 'Fabricación de bienes por encargo',
+                                '037' => 'Demás servicios gravados con el IGV'
+                            ];
+                        @endphp
+                        <p><strong>OPERACIÓN SUJETA A DETRACCIÓN {{$documento->codigo_moneda}} {{$documento->detraccion}} ({{$documento->porcentaje_detraccion}}%)</strong><br>
+                            Tipo detracción: {{$documento->tipo_detraccion}} {{ $tiposDetraccion[$documento->tipo_detraccion] ?? '' }}
+                        </p>
                         <p>N° de cuenta Banco de la Nación detracción: {{$emisor->cuentas[0]['cuenta']}}</p>
                     @endif
                 </td>

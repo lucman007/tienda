@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use Spatie\Permission\Models\Role;
 use Spipu\Html2Pdf\Html2Pdf;
+use sysfact\AppConfig;
 use sysfact\Exports\PagosExport;
 use sysfact\Gastos;
 use sysfact\Persona;
@@ -57,11 +58,35 @@ class TrabajadorController extends Controller
 		        $trabajador->dia_pago=$fecha_de_pago;
 
             }
+
+            $config = AppConfig::where('clave','plan')->first();
+            if($config){
+                $config = json_decode($config->valor, true);
+                $plan = $config['tipo']??'plan_ilimitado';
+            } else {
+                $plan = 'plan_ilimitado';
+            }
+
+            $bloquear_registro = false;
+
+            if ($plan == 'plan_100') {
+                // Contar los usuarios existentes en el modelo Trabajadores
+                $usuariosActivos = Trabajador::where('es_usuario', true)
+                    ->where('eliminado',0)
+                    ->count();
+
+                // Bloquear si hay más de 3 usuarios
+                if ($usuariosActivos > 2) {
+                    $bloquear_registro = true;
+                }
+            }
+
 		    return view('trabajadores.index',[
 		        'trabajadores'=>$trabajadores,
                 'textoBuscado'=>$consulta,
                 'usuario'=>auth()->user()->persona,
-                'acceso'=>auth()->user()->acceso
+                'acceso'=>auth()->user()->acceso,
+                'bloquear_registro' => $bloquear_registro,
             ]);
 
 	    }
