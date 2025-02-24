@@ -21,6 +21,7 @@ class Emisor
      */
     public $tipo_documento='6';
     public $ubigeo;
+    public $codigo_establecimiento;
     public $direccion;
     public $urbanizacion;
     public $departamento;
@@ -63,9 +64,16 @@ class Emisor
         if($config){
             $emisor = json_decode($config, true);
 
+            if (isset($emisor['codigo_establecimiento'])) {
+                $codigo_establecimiento = empty($emisor['codigo_establecimiento']) ? '0000' : $emisor['codigo_establecimiento'];
+            } else {
+                $codigo_establecimiento = '0000';
+            }
+
             $this->razon_social = $emisor['razon_social'];
             $this->nombre_comercial = $emisor['nombre_comercial']==''?false:$emisor['nombre_comercial'];
             $this->ruc = $emisor['ruc'];
+            $this->codigo_establecimiento = $codigo_establecimiento;
             $this->ubigeo = $emisor['ubigeo'];
             $this->direccion = $emisor['direccion'];
             $this->urbanizacion = $emisor['urbanizacion'];

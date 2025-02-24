@@ -74,7 +74,7 @@
                 <cbc:RegistrationName><![CDATA[{{$emisor->razon_social}}]]></cbc:RegistrationName>
                 <cac:RegistrationAddress>
                     <cbc:ID>{{$emisor->ubigeo}}</cbc:ID>
-                    <cbc:AddressTypeCode>0000</cbc:AddressTypeCode>
+                    <cbc:AddressTypeCode>{{$emisor->codigo_establecimiento}}</cbc:AddressTypeCode>
                     <cbc:CityName>{{$emisor->provincia}}</cbc:CityName>
                     <cbc:CountrySubentity>{{$emisor->departamento}}</cbc:CountrySubentity>
                     <cbc:District>{{$emisor->distrito}}</cbc:District>

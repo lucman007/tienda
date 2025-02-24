@@ -7,10 +7,16 @@
         <input type="text" v-model="emisor.razon_social" autocomplete="nope" class="form-control">
     </div>
 </div>
-<div class="col-lg-6">
+<div class="col-lg-4">
     <div class="form-group">
         <label for="rsocial">Nombre comercial:</label>
         <input placeholder="Colocar sólo si se ha registrado en SUNAT" type="text" v-model="emisor.nombre_comercial" autocomplete="nope" class="form-control">
+    </div>
+</div>
+<div class="col-lg-2">
+    <div class="form-group">
+        <label for="rsocial">Código establecimiento:</label>
+        <input placeholder="En caso de ser sucursal" type="text" v-model="emisor.codigo_establecimiento" autocomplete="nope" class="form-control">
     </div>
 </div>
 <div class="col-lg-3">
