@@ -1,4 +1,4 @@
-@php /** Modelo 13 - habilitado**/@endphp
+@php /** Modelo 14 - habilitado**/@endphp
 <!doctype html>
 <html lang="{{ config('app.locale') }}">
 <head>
@@ -18,7 +18,7 @@
     <div class="info-emisor">
         @if($emisor->logo)
             <div class="logo">
-                <img src="{{'images/'.$emisor->logo}}" style="width: {{$ancho_logo}}mm">
+                <img src="{{'images/'.$emisor->logo}}">
             </div>
         @endif
         <div class="texto">
@@ -27,49 +27,62 @@
         </div>
     </div>
     <div class="info-ruc">
-        <h3 class="titulo_comprobante"><span>COTIZACIÓN <br> N° {{$presupuesto['correlativo']}}</span></h3>
+        <h3 class="titulo_comprobante">R.U.C.: {{$emisor->ruc}} <br><span>COTIZACIÓN </span><br> N° {{$presupuesto['correlativo']}}</h3>
     </div>
 </div>
 <div class="body">
-    <div class="line-bottom info-usuario">
+    <div class="info-usuario">
         <table cellpadding="0">
             <tr>
-                <td style="width: 20mm"><strong>Fecha:</strong></td>
-                <td style="width: 50mm">{{ date("d/m/Y",strtotime($presupuesto->fecha)) }}</td>
-                <td style="width: 20mm"><strong>Validez:</strong></td>
-                <td style="width: 90mm">{{$presupuesto->validez}} DÍAS</td>
+                <td class="bg-#e30613"><strong>CLIENTE:</strong></td>
+                <td colspan="3" style="width:163mm">{{$usuario->persona->nombre}}</td>
             </tr>
             <tr>
-                <td><strong>Razón social:</strong></td>
-                <td colspan="3">{{$usuario->persona->nombre}}</td>
+                <td class="bg-#e30613"><strong>DIRECCIÓN:</strong></td>
+                <td colspan="3" style="width:163mm">{{ $usuario->persona->direccion }}</td>
             </tr>
             <tr>
-                <td><strong>Dirección:</strong></td>
-                <td style="width: 120mm" colspan="3">{{ $usuario->persona->direccion }}</td>
+                <td class="bg-#e30613"><strong>RUC:</strong></td>
+                <td style="width: 45mm">{{ $usuario->num_documento }}</td>
+                <td class="bg-#e30613"><strong>REFERENCIA:</strong></td>
+                <td style="width: 45mm" >{{ $presupuesto->referencia }}</td>
             </tr>
             <tr>
-                <td><strong>Ruc:</strong></td>
-                <td>{{ $usuario->num_documento }}</td>
+                <td class="bg-#e30613"><strong>ATENCIÓN:</strong></td>
+                <td style="width: 45mm">{{ $presupuesto->atencion }}</td>
+                <td  class="bg-#e30613"><strong>VALIDEZ:</strong></td>
+                <td style="width: 45mm">{{ $presupuesto->validez }} días</td>
             </tr>
-            @if($presupuesto->exportacion)
-                <tr>
-                    <td><strong>Tipo venta:</strong></td>
-                    <td>Exportación</td>
-                    <td><strong>Incoterm:</strong> {{$presupuesto->incoterm}}</td>
-                </tr>
-            @endif
+        </table>
+    </div>
+    <div class="info-usuario" style="margin-top: 3mm;">
+        <table cellpadding="0">
             <tr>
-                <td><strong>Atención:</strong></td>
-                <td>{{ mb_strtoupper($presupuesto->atencion) }}</td>
+                <td class="bg-#e30613"><strong>TIEMPO DE ENTREGA:</strong></td>
+                <td class="bg-#e30613" style="width: 35mm"><strong>LUGAR DE ENTREGA:</strong></td>
+                <td class="bg-#e30613"><strong>VALIDEZ:</strong></td>
+                <td class="bg-#e30613" style="width: 40mm"><strong>CONDICIÓN DE PAGO:</strong></td>
+                <td class="bg-#e30613" style="width: 15mm"><strong>MONEDA:</strong></td>
+            </tr>
+            <tr>
+                <td>{{strtoupper($presupuesto->tiempo_entrega)}}</td>
+                <td>{{mb_strtoupper($presupuesto->lugar_entrega)}}</td>
+                <td>{{ $presupuesto->validez }}</td>
+                <td>{{strtoupper($presupuesto->condicion_pago)}}</td>
+                <td>@if($presupuesto->moneda=='S/')
+                            SOLES <br>
+                        @else
+                            DÓLARES <br>
+                        @endif</td>
             </tr>
         </table>
     </div>
     @php
         $i=1
     @endphp
-        <table class="items" cellpadding="0">
+        <table class="items" cellpadding="0" style="margin-top: -4mm;">
             <thead>
-                <tr class="table-header">
+                <tr class="table-header" border: 1px solid black>
                     <td>#</td>
                     <td>CÓD.</td>
                     <td>DESCRIPCIÓN</td>
@@ -83,16 +96,33 @@
             <tbody>
             @foreach($presupuesto['productos'] as $item)
                 <tr>
-                    <td style="width: 5mm">{{$i++}}</td>
+                    <td>{{$i++}}</td>
                     <td style="width: 15mm">{{$item->cod_producto}}</td>
-                    <td style="width: 65mm"><strong>{{$item->nombre}}</strong><br> {!!$item->detalle['descripcion']!!}</td>
-                    <td style="width: 20mm">{{floatval($item->detalle['cantidad'])}}</td>
-                    <td style="width: 10mm">{{explode('/',$item->unidad_medida)[1]}}</td>
-                    <td style="width: 20mm; text-align: right">@if(!$presupuesto->ocultar_precios){{number_format($item->monto, 3)}}@endif</td>
-                    <td style="width: 15mm; text-align: right">@if(!$presupuesto->ocultar_precios){{$item->monto_descuento}}@endif</td>
-                    <td style="width: 20mm; text-align: right">@if(!$presupuesto->ocultar_precios){{number_format($item->total,2)}}@endif</td>
+                    <td style="width: 60mm"><strong>{{$item->nombre}}</strong><br> {!!$item->detalle['descripcion']!!}</td>
+                    <td>{{floatval($item->detalle['cantidad'])}}</td>
+                    <td>{{explode('/',$item->unidad_medida)[1]}}</td>
+                    <td style="text-align: right">@if(!$presupuesto->ocultar_precios){{number_format($item->monto, 3)}}@endif</td>
+                    <td style="text-align: right">@if(!$presupuesto->ocultar_precios){{$item->monto_descuento}}@endif</td>
+                    <td style="text-align: right">@if(!$presupuesto->ocultar_precios){{number_format($item->total,2)}}@endif</td>
                 </tr>
             @endforeach
+            @php
+            $rows = 20;
+            $num_items = count($presupuesto['productos']);
+            $dif = ($rows - $num_items) >= 0 ? $rows - $num_items : 0;
+            @endphp
+            @for($i = 1; $i <= $dif; $i++)
+            <tr>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+            </tr>
+            @endfor
             @if(trim($presupuesto->observaciones)!='')
                 <tr>
                     <td><br></td>
@@ -110,35 +140,16 @@
                     </td>
                 </tr>
             @endif
-            @if(str_contains(app()->domain(),'linetech'))
-                <tr>
-                    <td><br></td>
-                </tr>
-                <tr>
-                    <td colspan="8" style="margin-top: 5mm">
-                        <strong>*Se cubre el envío por ventas mayores a USD 500 (Sólo Lima y Callao)</strong>
-                    </td>
-                </tr>
-            @endif
             </tbody>
         </table>
     <table class="footer">
         <tr>
             <td class="footer-l">
                 <p>
-                    <strong>Pago:</strong> {{strtoupper($presupuesto->condicion_pago)}} <br>
-                    <strong>Tiempo de entrega:</strong> {{strtoupper($presupuesto->tiempo_entrega)}} <br>
                     <strong>Garantía:</strong> {{mb_strtoupper($presupuesto->garantia)}} <br>
-                    <strong>Moneda: </strong>
-                    @if($presupuesto->moneda=='S/')
-                        SOLES <br>
-                    @else
-                        DÓLARES <br>
-                    @endif
                     <strong>Impuesto:</strong> {{mb_strtoupper($presupuesto->impuesto)}} <br>
-                    <strong>Punto de entrega:</strong> {{mb_strtoupper($presupuesto->lugar_entrega)}} <br>
                 </p>
-                <div class="border">
+                <div>
                     <p><strong>Cuentas bancarias:</strong></p>
                     @if($presupuesto->exportacion)
                         @foreach($emisor->cuentas as $cuenta)
@@ -182,12 +193,6 @@
                             <td style="width: 28mm; text-align: right">{{$presupuesto->moneda}} {{number_format($presupuesto->seguro,2)}}</td>
                         </tr>
                     @else
-                        @if($presupuesto->descuento != 0)
-                        <tr>
-                            <td><strong>Descuentos:</strong></td>
-                            <td style="width: 28mm; text-align: right">{{$presupuesto->moneda}} {{number_format($presupuesto->descuento,2)}}</td>
-                        </tr>
-                        @endif
                         @if(!$presupuesto->ocultar_impuestos)
                         <tr>
                             <td><strong>Subtotal:</strong></td>
@@ -207,26 +212,13 @@
             </td>
         </tr>
     </table>
-    <table class="atentamente">
-        <tr>
-            <td>
-                <p class="leyenda">
-                    Sin otro particular, nos despedimos de Uds. <br><br>
-                    Atentamente <br>
-                    {{mb_strtoupper($presupuesto->contacto)==''?'Área de ventas':mb_strtoupper($presupuesto->contacto)}} <br>
-                    Telf.: {{strtoupper($presupuesto->telefonos)}} <br>
-                    {{$config['website']}}
-                </p>
-            </td>
-        </tr>
-    </table>
     @php
         $logos_ = json_decode(cache('config')['interfaz'], true)['buscador_productos_alt']??false;
     @endphp
     <table style="width: 200mm">
         <tr>
             <td>
-                <span class="logo-footer-1"><img style="width: 100%" src="{{public_path('images/linetech/logos-linetech.png')}}" alt=""></span>
+                <span class="logo-footer-1"><img style="width: 100%" src="{{public_path('images/dya/logos-dya.png')}}" alt=""></span>
             </td>
         </tr>
     </table>
@@ -253,13 +245,21 @@
         padding: 20px;
     }
 
+
     table{
         margin: 0;
         padding: 0;
     }
+    .info-usuario table{
+        border-collapse: collapse;
+    }
+    .info-usuario table td{
+        border: 1px solid black;
+        padding: 1.5mm 3mm;
+    }
     .table-header td{
-        border-bottom: 1px solid #CCC;
-        margin: 0;
+        padding: 1.5mm 3mm;
+        color: white;
     }
 
     .hash{
@@ -280,42 +280,43 @@
     .header{
         position: relative;
         width: 200mm;
-        height: 40mm;
+        height: 30mm;
         float: left;
     }
 
     .header .info-ruc{
         position: absolute;
-        right: 15mm;
-        top:15mm;
+        right: 0mm;
+        top:0mm;
         text-align: center;
-        padding: 20px 45px;
-        border: 3px solid black;
-        border-radius: 10px;
+        padding: 20px 20px;
+        border: 2px solid black;
     }
 
     .header .info-emisor{
-        width: 90mm;
-        padding: 25px 20px 10px 20px;
+        width: 180mm;
+        padding: 0 20px 10px 20px;
     }
     .header .info-emisor .logo{
-        width: {{}}40mm;
+        width: 60mm;
     }
     .header .info-emisor .logo img{
-        width: 40mm;
+        width: 60mm;
         text-align: center;
         margin-left: -5mm;
     }
     .header .info-emisor .texto{
-        width: 95mm;
-        right: 0;
-        top:15mm;
+        width: 75mm;
+        margin-left: 60mm;
+        margin-top:-30mm;
     }
 
     .body{
         position: relative;
         width: 200mm;
         height: 100mm;
+        float: left;
+        margin-top: 5mm;
     }
 
     .body .info-usuario{
@@ -328,25 +329,25 @@
 
     .body .items {
         width: 200mm;
-        margin-top: 5mm;
-        position: relative;
-        border-bottom: 1px solid #CCC;
-        padding: 20px 32px;
+        margin-top: 2mm;
+        border-collapse:collapse;
     }
+    .body .items thead td{
+        background: #e30613;
+    }
+
+    .items tbody td{
+        padding: 1.5mm 3mm;
+        border-bottom: 0;
+        border: 1px solid black
+    }
+
     .footer{
         width: 200mm;
         height: 20mm;
-        margin-top: 5mm;
-        margin-bottom: 10mm;
     }
     .footer .footer-l{
-        width: 60%;
-        border-right: 1px solid #CCC;
-        padding: 20px 32px 0px 32px;
-    }
-    .footer .footer-r{
-        width: 39%;
-        padding: 20px 32px;
+        width: 73%;
     }
 
     .leyenda{
@@ -369,5 +370,18 @@
         border-radius:5px;
         padding: 0 10px 10px;
     }
+
+    .info-usuario table{
+        border-collapse: collapse;
+    }
+    .info-usuario table td{
+        border: 1px solid black;
+        padding: 1.5mm 3mm;
+    }
+    td.bg-#e30613{
+        background: #e30613;
+        color: white;
+    }
+
 
 </style>

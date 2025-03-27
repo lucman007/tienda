@@ -42,6 +42,7 @@
             <div class="col-sm-12 mt-4">
                 <div class="card">
                     <div class="card-body">
+                        @if($can_gestionar)
                         <b-dropdown id="dropdown-opc" left text="Opciones" variant="success" class="float-left mr-3">
                             <b-dropdown-item href="/productos/descargar-barcodes"><i style="width: 2em" class="fa-solid fa-barcode"></i> Descargar códigos de barra
                             </b-dropdown-item>
@@ -54,6 +55,7 @@
                         <b-button variant="danger" @click="borrarMultiple" :disabled="!count_seleccionados" v-show="showSelectColumn && tipoEdicion==2"><i class="fas fa-trash"></i> Borrar</b-button>
                         <b-button variant="outline-secondary" v-show="showSelectColumn" @click="cancelarMultiple"><i class="fas fa-times"></i> Cancelar</b-button>
                         <b-button variant="success" v-b-modal.modal-col class="float-right mb-3"><i class="fas fa-columns"></i> Columnas</b-button>
+                        @endif
                         <div class="table-responsive tabla-gestionar">
                             <table class="table table-striped table-hover table-sm">
                                 <thead class="bg-custom-green">

@@ -104,6 +104,7 @@
                                     <option value="020/12">Mantenimiento y reparación de bienes muebles - 12%</option>
                                     <option value="022/12">Otros servicios empresariales - 12%</option>
                                     <option value="025/10">Fabricación de bienes por encargo - 10%</option>
+                                    <option value="027/4">Servicio de transporte de carga - 4%</option>
                                     <option value="030/4">Contratos de construcción - 4%</option>
                                     <option value="037/12">Demás servicios gravados con el IGV - 12%</option>
                                 </select>

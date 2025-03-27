@@ -14,6 +14,7 @@ class Cliente extends Model
 		'num_documento',
 		'tipo_documento',
         'tocken',
+        'cuentas',
 		'eliminado'
 	];
 
