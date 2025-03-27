@@ -40,20 +40,31 @@
                                     <th scope="col">Dirección</th>
                                     <th scope="col">Telefono</th>
                                     <th scope="col">E-mail</th>
+                                    <th scope="col">Cuentas</th>
                                     <th scope="col"></th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 @if(count($clientes) > 0)
                                     @foreach($clientes as $cliente)
+                                        @php
+                                            $cuentas = $cliente->cuentas?json_decode($cliente->cuentas, true):false;
+                                        @endphp
                                         <tr @if(!$agent->isDesktop()) @click="editarCliente({{$cliente->idcliente}})" @endif>
                                             <td></td>
                                             <td>{{$cliente->cod_cliente}}</td>
-                                            <td>{{$cliente->nombre}}</td>
+                                            <td style="width: 20%">{{$cliente->nombre}}</td>
                                             <td>{{$cliente->num_documento}}</td>
                                             <td style="width: 30%">{{$cliente->direccion}}</td>
                                             <td>{{$cliente->telefono}}</td>
                                             <td style="width: 20%">{{$cliente->correo}}</td>
+                                            <td style="width: 10%">
+                                                @if($cuentas)
+                                                    @foreach ($cuentas as $cuenta)
+                                                        {{$cuenta['banco'].' '.$cuenta['moneda'].': '.$cuenta['cuenta'].' '.$cuenta['cci']}} <br>
+                                                    @endforeach
+                                                @endif
+                                            </td>
                                             <td @click.stop class="botones-accion" style="text-align: right">
                                                 <button @click="editarCliente({{$cliente->idcliente}})" class="btn btn-success"
                                                         title="Editar cliente"><i class="fas fa-edit"></i></button>

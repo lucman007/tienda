@@ -137,7 +137,7 @@
             <div class="row">
                 <div class="col-lg-5">
                     <label>Monto</label>
-                    <input v-model="pago.monto" type="text" class="form-control">
+                    <input v-model="pago.monto" type="text" class="form-control" onfocus="this.select()">
                 </div>
                 <div class="col-lg-6">
                     <label>Tipo de pago</label>

@@ -42,6 +42,7 @@
             <div class="col-sm-12 mt-4">
                 <div class="card">
                     <div class="card-body">
+                        @if($can_gestionar)
                         <b-dropdown id="dropdown-opc" left text="Opciones" variant="success" class="float-left mr-3">
                             <b-dropdown-item href="/productos/descargar-barcodes"><i style="width: 2em" class="fa-solid fa-barcode"></i> Descargar códigos de barra
                             </b-dropdown-item>
@@ -54,6 +55,7 @@
                         <b-button variant="danger" @click="borrarMultiple" :disabled="!count_seleccionados" v-show="showSelectColumn && tipoEdicion==2"><i class="fas fa-trash"></i> Borrar</b-button>
                         <b-button variant="outline-secondary" v-show="showSelectColumn" @click="cancelarMultiple"><i class="fas fa-times"></i> Cancelar</b-button>
                         <b-button variant="success" v-b-modal.modal-col class="float-right mb-3"><i class="fas fa-columns"></i> Columnas</b-button>
+                        @endif
                         <div class="table-responsive tabla-gestionar">
                             <table class="table table-striped table-hover table-sm">
                                 <thead class="bg-custom-green">
@@ -99,7 +101,9 @@
                                             <td></td>
                                             <td @click.stop v-show="showSelectColumn"><b-form-checkbox v-model="productosSeleccionados[{{$key}}]['seleccionado']" @change="eventSeleccionado($event,{{$key}})"></b-form-checkbox></td>
                                             <td @if(!$columnas['ubicacion']) style="display: none;" @endif>{{$producto->ubicacion}}</td>
-                                            <td @if(!$columnas['codigo']) style="display: none;" @endif>{{str_pad($producto->cod_producto,5,'0',STR_PAD_LEFT) }}</td>
+                                            <td @if(!$columnas['codigo']) style="display: none;" @endif>
+                                                {{ is_numeric($producto->cod_producto) ? str_pad($producto->cod_producto, 5, '0', STR_PAD_LEFT) : $producto->cod_producto }}
+                                            </td>
                                             <td @if(!$columnas['tipo_producto']) style="display: none;" @endif scope="col">{{$producto->tipo_producto_nombre}}</td>
                                             <td @if(!$columnas['nombre']) style="display: none;" @endif>
                                                 {{$producto->nombre}} @if($producto->tipo_producto == 3) <span class="badge badge-warning"><i class="far fa-star"></i> KIT</span> <br>@endif

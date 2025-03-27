@@ -5,83 +5,138 @@
             <template slot="modal-title">
                 {{tituloModal}}
             </template>
-            <div class="container">
-                <div class="card" style="box-shadow:none; margin-bottom:20px" v-show="accion=='insertar'">
-                    <div class="card-header">
-                        Consulta RUC / DNI
-                    </div>
-                    <div class="card-body row">
-                        <div class="col-lg-3">
-                            <label>Documento:</label>
-                            <select v-model="tipo_documento_buscar" class="custom-select">
-                                <option value="6">RUC</option>
-                                <option value="1">DNI</option>
-                            </select>
+            <b-card no-body class="no-shadow">
+                <b-tabs card>
+                    <b-tab title="General" active>
+                        <div class="card" style="box-shadow:none; margin-bottom:20px" v-show="accion=='insertar'">
+                            <div class="card-header">
+                                Consulta RUC / DNI
+                            </div>
+                            <div class="card-body row">
+                                <div class="col-lg-3">
+                                    <label>Documento:</label>
+                                    <select v-model="tipo_documento_buscar" class="custom-select">
+                                        <option value="6">RUC</option>
+                                        <option value="1">DNI</option>
+                                    </select>
+                                </div>
+                                <div class="col-lg-5 form-group">
+                                    <label>{{tipo_documento_buscar==6?'Número de RUC:':'Número de DNI:'}}</label>
+                                    <b-input-group>
+                                        <input v-on:keyup="shortcut_buscar" autocomplete="off" type="number" v-model="ruc_buscar" class="form-control" :maxlength="tipo_documento_buscar==6?11:8">
+                                        <b-input-group-append>
+                                            <b-button @click="buscar_en_sunat" variant="primary">
+                                                <span v-show="!spinnerRuc"><i class="fas fa-search"></i></span>
+                                                <b-spinner v-show="spinnerRuc" small label="Loading..." ></b-spinner>
+                                            </b-button>
+                                        </b-input-group-append>
+                                    </b-input-group>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-lg-5 form-group">
-                            <label>{{tipo_documento_buscar==6?'Número de RUC:':'Número de DNI:'}}</label>
-                            <b-input-group>
-                                <input v-on:keyup="shortcut_buscar" autocomplete="off" type="number" v-model="ruc_buscar" class="form-control" :maxlength="tipo_documento_buscar==6?11:8">
-                                <b-input-group-append>
-                                    <b-button @click="buscar_en_sunat" variant="primary">
-                                        <span v-show="!spinnerRuc"><i class="fas fa-search"></i></span>
-                                        <b-spinner v-show="spinnerRuc" small label="Loading..." ></b-spinner>
-                                    </b-button>
-                                </b-input-group-append>
-                            </b-input-group>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="form-group">
+                                    <label for="nombre">*Nombre / Razón social:</label>
+                                    <input id="nombre" autocomplete="off" type="text" v-model="nombre" name="nombre"  class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="form-group">
+                                    <label>Tipo de documento:</label>
+                                    <select v-model="tipo_documento" class="custom-select">
+                                        <option value="9">Ninguno</option>
+                                        <option value="6">RUC</option>
+                                        <option value="1">DNI</option>
+                                        <option value="0">NIF</option>
+                                        <option value="4">Carnet de extrajería</option>
+                                        <option value="7">Pasaporte</option>
+                                        <option value="D">Identification Number</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-3" v-show="tipo_documento != 9">
+                                <div class="form-group">
+                                    <label>*N° documento:</label>
+                                    <input autocomplete="off" type="text" v-model="num_documento" class="form-control" :maxlength="max_num">
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>*Dirección:</label>
+                                    <input autocomplete="off" type="text"  v-model="direccion" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="form-group">
+                                    <label>Teléfono:</label>
+                                    <input autocomplete="off" type="text"  v-model="telefono" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-lg-9">
+                                <div class="form-group">
+                                    <label>E-mail:</label>
+                                    <input autocomplete="off" type="text" v-model="email" class="form-control">
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="form-group">
-                            <label for="nombre">*Nombre / Razón social:</label>
-                            <input id="nombre" autocomplete="off" type="text" v-model="nombre" name="nombre"  class="form-control">
+                    </b-tab>
+                    <b-tab title="Bancos">
+                        <div class="row">
+                            <div class="col-lg-4 mb-3">
+                                <button @click="agregarCuenta" class="btn btn-primary"><i class="fas fa-plus"></i> Agregar cuenta
+                                </button>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="row">
+                                    <div class="col-lg-12" v-for="(item,index) in cuentas" :key="index">
+                                        <div class="row">
+                                            <div class="col-lg-3 form-group">
+                                                <label>Banco:</label>
+                                                <select v-model="item.banco" class="custom-select">
+                                                    <option value="BCP">BCP</option>
+                                                    <option value="BBVA">BBVA</option>
+                                                    <option value="INTERBANK">INTERBANK</option>
+                                                    <option value="SCOTIABANK">SCOTIABANK</option>
+                                                    <option value="PICHINCHA">PICHINCHA</option>
+                                                    <option value="BANBIF">BANBIF</option>
+                                                    <option value="BANCO DE LA NACIÓN">BANCO DE LA NACIÓN</option>
+                                                    <option value="YAPE">YAPE</option>
+                                                    <option value="PLIN">PLIN</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-lg-2 form-group">
+                                                <label>Moneda:</label>
+                                                <select v-model="item.moneda" class="custom-select">
+                                                    <option value="S/">S/</option>
+                                                    <option value="USD">USD</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-lg-3 form-group">
+                                                <label>N° de cuenta:</label>
+                                                <input class="form-control" v-model="item.cuenta" type="text"
+                                                       placeholder="Cuenta">
+                                            </div>
+                                            <div class="col-lg-3 form-group">
+                                                <label>CCI:</label>
+                                                <input class="form-control" v-model="item.cci" type="text"
+                                                       placeholder="CCI">
+                                            </div>
+                                            <div class="col-lg-1">
+                                                <button @click="borrarCuenta(index)" style="margin-top: 20px"
+                                                        class="btn btn-danger"><i class="fas fa-trash"></i></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-lg-3">
-                        <div class="form-group">
-                            <label>Tipo de documento:</label>
-                            <select v-model="tipo_documento" class="custom-select">
-                                <option value="9">Ninguno</option>
-                                <option value="6">RUC</option>
-                                <option value="1">DNI</option>
-                                <option value="0">NIF</option>
-                                <option value="4">Carnet de extrajería</option>
-                                <option value="7">Pasaporte</option>
-                                <option value="D">Identification Number</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-lg-3" v-show="tipo_documento != 9">
-                        <div class="form-group">
-                            <label>*N° documento:</label>
-                            <input autocomplete="off" type="text" v-model="num_documento" class="form-control" :maxlength="max_num">
-                        </div>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="form-group">
-                            <label>*Dirección:</label>
-                            <input autocomplete="off" type="text"  v-model="direccion" class="form-control">
-                        </div>
-                    </div>
-                    <div class="col-lg-3">
-                        <div class="form-group">
-                            <label>Teléfono:</label>
-                            <input autocomplete="off" type="text"  v-model="telefono" class="form-control">
-                        </div>
-                    </div>
-                    <div class="col-lg-9">
-                        <div class="form-group">
-                            <label>E-mail:</label>
-                            <input autocomplete="off" type="text" v-model="email" class="form-control">
-                        </div>
-                    </div>
-                    <div class="col-lg-12">
-                        <div v-for="error in errorDatosCliente">
-                            <p class="texto-error">{{ error }}</p>
-                        </div>
-                    </div>
+                    </b-tab>
+                </b-tabs>
+            </b-card>
+            <div class="col-lg-12 mt-3">
+                <div v-for="error in errorDatosCliente">
+                    <p class="texto-error">{{ error }}</p>
                 </div>
             </div>
         </b-modal>
@@ -111,9 +166,21 @@
                 spinnerRuc:false,
                 tipo_documento_buscar:6,
                 max_num:8,
+                cuentas:[],
             }
         },
         methods: {
+            agregarCuenta(){
+                this.cuentas.push({
+                    banco: 'BCP',
+                    moneda: 'S/',
+                    cuenta: '',
+                    cci: '',
+                });
+            },
+            borrarCuenta(index){
+                this.cuentas.splice(index,1);
+            },
             editarCliente(id){
                 this.accion = 'editar';
                 this.idcliente = id;
@@ -129,6 +196,7 @@
                         this.direccion=dataCliente.direccion;
                         this.telefono=dataCliente.telefono;
                         this.email=dataCliente.correo;
+                        this.cuentas=dataCliente.cuentas==null ? [] : JSON.parse(dataCliente.cuentas);
                         this.$refs['modal-nuevo-cliente'].show();
                     })
                     .catch(function (error) {
@@ -196,7 +264,8 @@
                     'tipo_documento':this.tipo_documento,
                     'direccion': this.direccion,
                     'telefono': this.telefono,
-                    'email': this.email
+                    'email': this.email,
+                    'cuentas':JSON.stringify(this.cuentas)
                 })
                     .then(response => {
                         if(response.data == '1'){
@@ -243,6 +312,9 @@
                         if(this.num_documento.length!=11) this.errorDatosCliente.push('*El número de RUC no contiene la cantidad de dígitos correctos (RUC 11 dígitos)');
                         break;
                 }
+                for(let item of this.cuentas){
+                    if (item.cuenta.length == 0) this.errorDatosCliente.push('*Las casilla de número de cuenta no puede quedar vacía');
+                }
                 if (this.errorDatosCliente.length) this.errorCliente = 1;
                 return this.errorCliente;
             },
@@ -269,6 +341,7 @@
                 this.email= '';
                 this.ruc_buscar='';
                 this.tipo_documento_buscar=6;
+                this.cuentas=[];
             }
         },
         watch:{

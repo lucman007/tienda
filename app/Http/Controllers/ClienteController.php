@@ -88,6 +88,7 @@ class ClienteController extends Controller
             $cliente->num_documento = $request->num_documento ?? $codigo;
             $cliente->tipo_documento = $request->tipo_documento;
             $cliente->eliminado = 0;
+            $cliente->cuentas=$request->cuentas;
             $persona->cliente()->save($cliente);
 
             return response()->json([
@@ -133,6 +134,7 @@ class ClienteController extends Controller
 	    $cliente->cod_cliente=mb_strtoupper($request->cod_cliente);
 	    $cliente->num_documento=$request->num_documento??'';
 	    $cliente->tipo_documento=$request->tipo_documento;
+        $cliente->cuentas=$request->cuentas;
 	    $persona->cliente()->save($cliente);
     }
 

@@ -94,7 +94,7 @@
                             <div class="col-lg-12">
                                 <div class="form-group">
                                     <label>Descripción:</label>
-                                    <textarea v-model="observacion" rows="2" class="form-control"></textarea>
+                                    <textarea v-model="observacion" rows="1" class="form-control"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -119,6 +119,8 @@
                                                     <option value="PICHINCHA">PICHINCHA</option>
                                                     <option value="BANBIF">BANBIF</option>
                                                     <option value="BANCO DE LA NACIÓN">BANCO DE LA NACIÓN</option>
+                                                    <option value="YAPE">YAPE</option>
+                                                    <option value="PLIN">PLIN</option>
                                                 </select>
                                             </div>
                                             <div class="col-lg-2 form-group">
@@ -158,7 +160,6 @@
         </b-modal>
     </div>
 </template>
-
 <script>
     export default {
         name:'agregar-proveedor',
