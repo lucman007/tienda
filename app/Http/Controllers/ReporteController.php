@@ -321,12 +321,11 @@ class ReporteController extends Controller
 
         $ventas = $badge_data['ventas'];
 
-        $fecha_anterior=null;
-
         $totales_soles=[
             'fecha'=>0,
             'ventas_brutas'=>0,
             'ventas_netas'=>0,
+            'adelantos'=>0,
             'costos'=>0,
             'utilidad'=>0,
             'impuestos'=>0,
@@ -336,6 +335,7 @@ class ReporteController extends Controller
             'fecha'=>0,
             'ventas_brutas'=>0,
             'ventas_netas'=>0,
+            'adelantos'=>0,
             'costos'=>0,
             'utilidad'=>0,
             'impuestos'=>0,
@@ -364,7 +364,7 @@ class ReporteController extends Controller
             //impuestos
             $factura = $item->facturacion;
             $igv = 0;
-
+            
             if($factura->codigo_tipo_documento == 01 || $factura->codigo_tipo_documento == 03){
                 if($factura->codigo_moneda == 'USD'){
                     $igv = $factura->igv * $tc;
@@ -377,30 +377,46 @@ class ReporteController extends Controller
             $fecha_venta=date("d-m-Y",strtotime($item->fecha));
             if($item->facturacion->codigo_moneda=='PEN'){
 
+                if($item->adelanto <= 0){
+                    $totales_soles['ventas_brutas'] += $item->total_venta;
+                }
+                $adelantoPago = $item->adelanto;
                 $totales_soles['fecha']=$fecha_venta;
-                $totales_soles['ventas_brutas'] += $item->total_venta;
                 $totales_soles['costos'] += $costo;
                 $totales_soles['impuestos'] += $igv;
-                $totales_soles['ventas_netas'] = $totales_soles['ventas_brutas'] - $totales_soles['impuestos'];
+                $totales_soles['adelantos'] += $adelantoPago;
+
+                if($totales_soles['ventas_brutas'] > 0){
+                    $totales_soles['ventas_netas'] = $totales_soles['ventas_brutas'] - $totales_soles['impuestos'] + $totales_soles['adelantos'];
+                }
+
                 $totales_soles['utilidad'] =  $totales_soles['ventas_netas'] - $totales_soles['costos'];
 
             } else{
 
+                if($item->adelanto <= 0){
+                    $totales_dolares['ventas_brutas'] += $item->total_venta;
+                }
+                $adelantoPago = $item->adelanto * $tc;
                 $totales_dolares['fecha']=$fecha_venta;
-                $totales_dolares['ventas_brutas'] += $item->total_venta;
                 $totales_dolares['costos'] += $costo;
                 $totales_dolares['impuestos'] += $igv;
-                $totales_dolares['ventas_netas'] = $totales_dolares['ventas_brutas'] * $tc - $totales_dolares['impuestos'];
+                $totales_dolares['adelantos'] += $adelantoPago;
+
+                if($totales_dolares['ventas_brutas'] > 0){
+                    $totales_dolares['ventas_netas'] = ($totales_dolares['ventas_brutas']  * $tc) - $totales_dolares['impuestos'] + $totales_dolares['adelantos'];
+                }
+
                 $totales_dolares['utilidad'] =  $totales_dolares['ventas_netas'] - $totales_dolares['costos'];
 
             }
         }
 
-        if($totales_soles['ventas_brutas']<=0){
+        if($totales_soles['ventas_brutas'] <= 0 && $totales_soles['adelantos'] == 0){
             $totales_soles = null;
         }
 
-        if($totales_dolares['ventas_brutas']<=0){
+        if($totales_dolares['ventas_brutas'] <= 0 && $totales_dolares['adelantos'] == 0){
             $totales_dolares = null;
         }
 

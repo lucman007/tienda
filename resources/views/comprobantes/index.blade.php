@@ -174,6 +174,12 @@
                                                 <td>{{$venta->facturacion->codigo_moneda}}</td>
                                             @endif
                                             <td>
+                                                @if($venta->adelanto < 0)
+                                                    <span style="opacity: 0.6">
+                                                                ADELANTO {{number_format(abs($venta->adelanto),2)}}
+                                                            </span>
+                                                    <br>
+                                                @endif
                                                 @php
                                                     $tipo_pago = \sysfact\Http\Controllers\Helpers\DataTipoPago::getTipoPago();
                                                     $pagos = $venta->pago;

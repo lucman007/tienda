@@ -185,8 +185,13 @@
                                         Impuesto de las facturas y boletas (No recibos)
                                     </b-tooltip>
                                     <div class="col-md col-sm-6">
-                                        <p class="mb-0">Ventas netas <i class="fas fa-info-circle" id="tooltip-v-netas-pen"></i><br>
-                                            <span style="font-size: 25px;">S/@{{ penReport.ventas_netas.toFixed(2) }}</span>
+                                        <p class="mb-0 d-flex flex-column">Adelantos
+                                            <span style="font-size: 25px;">S/@{{ penReport.adelantos.toFixed(2) }}</span>
+                                        </p>
+                                    </div>
+                                    <div class="col-md col-sm-6">
+                                        <p class="mb-0"><strong>Ventas netas </strong><i class="fas fa-info-circle" id="tooltip-v-netas-pen"></i><br>
+                                            <span style="font-size: 25px;"><strong>S/@{{ penReport.ventas_netas.toFixed(2) }}</strong></span>
                                         </p>
                                     </div>
                                     <b-tooltip target="tooltip-v-netas-pen" triggers="hover">
@@ -241,8 +246,13 @@
                                         Impuesto de las facturas y boletas (No recibos)
                                     </b-tooltip>
                                     <div class="col-md col-sm-6">
-                                        <p class="mb-0">Ventas netas <i class="fas fa-info-circle" id="tooltip-v-netas-usd"></i><br>
-                                            <span style="font-size: 25px;">S/@{{ usdReport.ventas_netas.toFixed(2) }}</span>
+                                        <p class="mb-0 d-flex flex-column">Adelantos
+                                            <span style="font-size: 25px;">S/@{{ usdReport.adelantos.toFixed(2) }}</span>
+                                        </p>
+                                    </div>
+                                    <div class="col-md col-sm-6">
+                                        <p class="mb-0"><strong>Ventas netas </strong><i class="fas fa-info-circle" id="tooltip-v-netas-usd"></i><br>
+                                            <span style="font-size: 25px;"><strong>S/@{{ usdReport.ventas_netas.toFixed(2) }}</strong></span>
                                         </p>
                                     </div>
                                     <b-tooltip target="tooltip-v-netas-usd" triggers="hover">
@@ -272,7 +282,7 @@
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-lg-12">
-                                        <h5 class="d-inline" style="font-size: 18px"><strong>Detalle de ventas</strong></h5>
+                                        <h5 class="d-inline" style="font-size: 18px"><strong>Detalle de pagos</strong></h5>
                                         <button class="btn btn-success float-right" title="Imprimir" @click="imprimir_reporte('tipo_pago','pen')">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-printer" viewBox="0 0 16 16">
                                                 <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>
@@ -359,10 +369,18 @@
                                                     <td>{{$venta->total_venta}}</td>
                                                     <td>{{$venta->facturacion->codigo_moneda}}</td>
                                                     <td>
+                                                        @if($venta->adelanto < 0)
+                                                            <span style="opacity: 0.6">
+                                                                ADELANTO {{number_format(abs($venta->adelanto),2)}}
+                                                            </span>
+                                                            <br>
+                                                        @endif
                                                         @foreach($venta->pago as $pago)
                                                             @php
                                                                 $index = array_search($pago->tipo, array_column($tipo_pago,'num_val'));
                                                             @endphp
+                                                                @if($venta->adelanto > 0)
+                                                                    <span title="Adelanto de pago" class="badge badge-info"><i class="fas fa-coins"></i></span>@endif
                                                             <span @if($filtros['filtro'] == 'tipo-de-pago' && $venta->tipo_pago == 4 && $filtros['buscar'] == $tipo_pago[$index]['text_val'])
                                                                   style="font-weight: bold"
                                                                   @elseif($filtros['filtro'] == 'tipo-de-pago' && $venta->tipo_pago == 4 && $filtros['buscar'] != $tipo_pago[$index]['text_val']) style="opacity: 0.6"

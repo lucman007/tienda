@@ -111,29 +111,6 @@ class VentaController extends Controller
         switch($request->comprobante){
             //copiar venta
             case -1:
-                /*$ventas = Venta::where(function ($query) use ($consulta) {
-                    $query->whereHas('persona',function ($query) use ($consulta){
-                        $query->where('nombre','LIKE', '%'.$consulta.'%');
-                    })->orwhereHas('facturacion',function ($query) use ($consulta){
-                        $query->whereRaw('CONCAT_WS("-",facturacion.serie,facturacion.correlativo) LIKE "%'.$consulta.'%"');
-                    });
-                })
-                    ->whereHas('facturacion',function ($query){
-                        $query->where('facturacion.codigo_tipo_documento','03')
-                            ->orWhere('facturacion.codigo_tipo_documento','01')
-                            ->orWhere('facturacion.codigo_tipo_documento','30');
-                    })
-                    ->where('eliminado', 0)
-                    ->orderby('idventa', 'desc')
-                    ->take(10)
-                    ->get();
-
-                foreach ($ventas as $venta) {
-                    $venta->facturacion;
-                    $venta->persona;
-                    $venta->estado = $venta->facturacion->estado;
-                }*/
-
                 $ventas = DB::table('ventas')
                     ->join('persona', 'persona.idpersona', '=', 'ventas.idcliente')
                     ->join('facturacion', 'facturacion.idventa', '=', 'ventas.idventa')
@@ -161,6 +138,21 @@ class VentaController extends Controller
                     ->where('eliminado', 0)
                     ->orderby('idventa', 'desc')
                     ->take(30)
+                    ->get();
+                break;
+            case -3:
+                $ventas = DB::table('ventas')
+                    ->join('persona', 'persona.idpersona', '=', 'ventas.idcliente')
+                    ->join('facturacion', 'facturacion.idventa', '=', 'ventas.idventa')
+                    ->select('ventas.idventa', 'facturacion.estado', 'facturacion.serie','facturacion.correlativo','facturacion.codigo_tipo_documento', 'persona.nombre', 'ventas.total_venta')
+                    ->whereRaw('(persona.nombre LIKE "%'.$consulta.'%" or CONCAT_WS("-",facturacion.serie,facturacion.correlativo) LIKE "%'.$consulta.'%")')
+                    ->where(function ($query){
+                        $query->where('facturacion.codigo_tipo_documento','30');
+                    })
+                    ->where('adelanto','>',0)
+                    ->where('eliminado', '=', 0)
+                    ->orderby('idventa', 'desc')
+                    ->take(10)
                     ->get();
                 break;
             default:
@@ -378,6 +370,8 @@ class VentaController extends Controller
             $correlativo = '00000001';
         }
 
+        $objAdelanto = json_decode($request->objAdelanto, TRUE);
+
         DB::beginTransaction();
         try {
             $venta = new Venta();
@@ -391,6 +385,13 @@ class VentaController extends Controller
                 $venta->fecha = date('Y-m-d H:i:s');
             }
             $venta->total_venta = $request->total_venta;
+            if($request->adelanto){
+                $venta->adelanto = $request->total_venta;
+            }
+            if($objAdelanto){
+                $venta->adelanto = $objAdelanto['total_venta'] * -1;
+            }
+
             if($request->tipo_pago == 2){
                 $venta->tipo_pago = $request->tipo_pago;
             } else{
@@ -533,8 +534,12 @@ class VentaController extends Controller
                                 $venta->pago()->save($pago);
                             }
                         } else {
+                            $monto = $request->total_venta;
+                            if($objAdelanto){
+                                $monto = $request->total_venta - $objAdelanto['total_venta'];
+                            }
                             $pago = new Pago();
-                            $pago->monto = $request->total_venta;
+                            $pago->monto = $monto;
                             $pago->tipo = $request->tipo_pago_contado;
                             $pago->fecha = date('Y-m-d H:i:s');
                             $venta->pago()->save($pago);

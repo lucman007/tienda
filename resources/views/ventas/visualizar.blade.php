@@ -38,7 +38,7 @@
                                     @php
                                         $index = array_search($pago->tipo, array_column($tipo_pago,'num_val'));
                                     @endphp
-                                    {{mb_strtoupper($tipo_pago[$index]['label'])}} @if(count($pagos)>1)({{$venta->codigo_moneda}}{{$pago->monto}})@endif
+                                    {{mb_strtoupper($tipo_pago[$index]['label'])}} {{$venta->codigo_moneda}}{{$pago->monto}} {{$venta->adelanto < 0 ?'/ ADELANTO: '.number_format(abs($venta->adelanto),2):''}} {{$pago->referencia?'/ OPER. '.$pago->referencia:''}}
                                     <br>
                                 @endforeach
                                 <hr>

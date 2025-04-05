@@ -26,6 +26,7 @@ class Venta extends Model
         'data_credito',
         'ticket',
         'tipo_cambio',
+        'adelanto',
         'alias'
 	];
 

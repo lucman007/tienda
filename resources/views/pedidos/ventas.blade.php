@@ -66,6 +66,12 @@
                                             <td>{{$item->persona->nombre}}</td>
                                             <td>{{$item->moneda}}{{$item->total_venta}}</td>
                                             <td>
+                                                @if($item->adelanto < 0)
+                                                    <span style="opacity: 0.6">
+                                                                ADELANTO {{number_format(abs($item->adelanto),2)}}
+                                                            </span>
+                                                    <br>
+                                                @endif
                                                 @php
                                                     $tipo_pago = \sysfact\Http\Controllers\Helpers\DataTipoPago::getTipoPago();
                                                     $pagos = $item->pago;
@@ -74,7 +80,7 @@
                                                     @php
                                                         $index = array_search($pago->tipo, array_column($tipo_pago,'num_val'));
                                                     @endphp
-                                                    {{mb_strtoupper($tipo_pago[$index]['label'])}} @if(count($pagos)>1)({{$item->moneda}}{{$pago->monto}})@endif @if($pago->referencia) (N° OP.: {{$pago->referencia}}) @endif<br>
+                                                    {{mb_strtoupper($tipo_pago[$index]['label'])}} {{$item->moneda}}{{$pago->monto}} @if($pago->referencia) (N° OP.: {{$pago->referencia}}) @endif<br>
                                                 @endforeach
                                             </td>
                                             <td id="comp_{{$item->idventa}}">
