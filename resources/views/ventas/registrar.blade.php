@@ -987,7 +987,8 @@
                      :igv="esConIgv"
                      :global="esDstoGlobal"
                      :data-descuento="dataDescuento"
-                     v-on:actualizar="actualizarDescuento">
+                     v-on:actualizar="actualizarDescuento"
+                     v-on:actualizar-detalle="actualizarDetalle">
         ></modal-descuento>
     @php
         $guia_data = json_decode(cache('config')['guia'], true);

@@ -419,7 +419,7 @@
     </div>
 </footer>
 {{--<script src="{{asset('js/app.js?v='.filemtime('js/app.js'))}}"></script>--}}
-<script src="{{asset('js/app-v14.js?v='.filemtime('js/app-v14.js'))}}"></script>
+<script src="{{asset('js/app-v15.js?v='.filemtime('js/app-v14.js'))}}"></script>
 @yield('script')
 <script>
     let app_menu = new Vue({

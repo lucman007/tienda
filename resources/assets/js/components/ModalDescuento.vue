@@ -30,6 +30,23 @@
                             <span v-show="tipo!='%'"> ({{Number(montoPorcentaje).toFixed(3)}}%)</span>
                         </div>
                     </div>
+                    <div class="col-12 mt-4" v-if="descuentos.length && !global">
+                        <h5>Lista de precios:</h5>
+                        <ul class="list-group w-100">
+                            <li v-on:click="agregarDescuento(item.monto_desc, item.cantidad_min)" style="cursor:pointer" class="list-group-item d-flex"
+                                v-for="(item,index) in descuentos">
+                                <div class="col-lg-6 p-0">
+                                    MAYOR O IGUAL A <strong>{{item.cantidad_min}}</strong> UND
+                                </div>
+                                <div class="col-lg-4 p-0">
+                                    S/{{(item.monto_desc)}} C/U
+                                </div>
+                                <div class="col-lg-2 p-0">
+                                    <span class="badge badge-warning">{{item.etiqueta}}</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
             <template #modal-footer="{ ok, cancel}">
@@ -55,10 +72,30 @@
                 esConIgv:false,
                 item_:{},
                 tipo:'%',
+                descuentos: [],
             }
         },
         methods: {
+            getDescuentosProducto(){
+                axios.get('/helper/obtener-descuentos' + '/' + this.item.idproducto)
+                    .then(response => {
+                        this.descuentos = response.data;
+                    })
+                    .catch(function (error) {
+                        alert('Ha ocurrido un error.');
+                        console.log(error);
+                    });
+            },
+            agregarDescuento(precio,cantidad){
+                this.item.precio = precio;
+                this.item.cantidad = cantidad
+                this.$emit('actualizar-detalle');
+                this.$refs['modal-descuento'].hide()
+            },
             getData(item){
+
+                this.getDescuentosProducto();
+
                 this.item_ = item;
                 this.esConIgv = this.igv;
 
@@ -138,6 +175,7 @@
                 this.montoConvertido = '0.00';
                 this.esDstoEnPorcentaje = false;
                 this.convertirPorUnidad = false;
+                this.descuento = []
             }
         }
     }
