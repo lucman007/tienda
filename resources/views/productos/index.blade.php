@@ -101,7 +101,9 @@
                                             <td></td>
                                             <td @click.stop v-show="showSelectColumn"><b-form-checkbox v-model="productosSeleccionados[{{$key}}]['seleccionado']" @change="eventSeleccionado($event,{{$key}})"></b-form-checkbox></td>
                                             <td @if(!$columnas['ubicacion']) style="display: none;" @endif>{{$producto->ubicacion}}</td>
-                                            <td @if(!$columnas['codigo']) style="display: none;" @endif>{{str_pad($producto->cod_producto,5,'0',STR_PAD_LEFT) }}</td>
+                                            <td @if(!$columnas['codigo']) style="display: none;" @endif>
+                                                {{ is_numeric($producto->cod_producto) ? str_pad($producto->cod_producto, 5, '0', STR_PAD_LEFT) : $producto->cod_producto }}
+                                            </td>
                                             <td @if(!$columnas['tipo_producto']) style="display: none;" @endif scope="col">{{$producto->tipo_producto_nombre}}</td>
                                             <td @if(!$columnas['nombre']) style="display: none;" @endif>
                                                 {{$producto->nombre}} @if($producto->tipo_producto == 3) <span class="badge badge-warning"><i class="far fa-star"></i> KIT</span> <br>@endif

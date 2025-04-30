@@ -107,7 +107,7 @@
                 </tr>
             @endforeach
             @php
-            $rows = 20;
+            $rows = 10;
             $num_items = count($presupuesto['productos']);
             $dif = ($rows - $num_items) >= 0 ? $rows - $num_items : 0;
             @endphp

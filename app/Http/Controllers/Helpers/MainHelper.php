@@ -291,7 +291,7 @@ class MainHelper extends Controller
                     ->get();
 
                 $productosPorCodigo = Producto::where('eliminado', 0)
-                    ->where('cod_producto', $consulta)
+                    ->where('cod_producto', 'LIKE', '%' . $consulta . '%')
                     ->orderby($orderby, $sort)
                     ->limit(5)
                     ->get();

@@ -70,9 +70,9 @@
                     <td>DESCRIPCIÓN</td>
                     <td>CANTIDAD</td>
                     <td>UND</td>
-                    <td>P. UNITARIO</td>
-                    <td>DSCTO</td>
-                    <td>IMPORTE</td>
+                    <td>@if(!$presupuesto->ocultar_precios) P. UNITARIO @endif</td>
+                    <td>@if(!$presupuesto->ocultar_precios) DSCTO @endif</td>
+                    <td>@if(!$presupuesto->ocultar_precios) IMPORTE @endif</td>
                 </tr>
             </thead>
             <tbody>
@@ -80,7 +80,7 @@
                 <tr>
                     <td style="width: 5mm">{{$i++}}</td>
                     <td style="width: 15mm">{{$item->cod_producto}}</td>
-                    <td style="width: 65mm"><strong>{{$item->nombre}}</strong><br> {!!$item->detalle['descripcion']!!}</td>
+                    <td style="@if(!$presupuesto->ocultar_precios)width: 65mm @else width: 95mm @endif"><strong>{{$item->nombre}}</strong><br> {!!$item->detalle['descripcion']!!}</td>
                     <td style="width: 20mm">{{floatval($item->detalle['cantidad'])}}</td>
                     <td style="width: 10mm">{{explode('/',$item->unidad_medida)[1]}}</td>
                     <td style="width: 20mm; text-align: right">@if(!$presupuesto->ocultar_precios){{number_format($item->monto, 3)}}@endif</td>

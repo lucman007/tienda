@@ -126,6 +126,11 @@
                                     Crear guía electrónica
                                 </b-form-checkbox>
                             </div>
+                            <div v-show="comprobante=='30'" class="col-lg-3 form-group">
+                                <b-form-checkbox style="margin-top: 25px" v-model="esAdelanto" switch size="sm" :disabled="productosSeleccionados.length > 0" @change="agregar_nr('00ADT')">
+                                    Adelanto de pago
+                                </b-form-checkbox>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -412,19 +417,19 @@
                         </div>
                         <div class="row mt-4">
                             @if(json_decode(cache('config')['interfaz'], true)['buscador_productos'] == 1)
-                                <div class="col-lg-6 buscar_producto order-2 order-lg-1">
+                                <div v-show="!adelantoAgregado" class="col-lg-6 buscar_producto order-2 order-lg-1">
                                     <autocomplete ref="suggest" v-on:agregar_producto="agregarProducto"></autocomplete>
                                 </div>
-                                <div class="col-lg-3 order-1 order-lg-2">
+                                <div v-show="!adelantoAgregado" class="col-lg-3 order-1 order-lg-2">
                                     <b-button v-b-modal.modal-nuevo-producto class="float-right float-lg-left"
                                               variant="primary"><i class="fas fa-plus" v-show="!mostrarSpinnerProducto"></i>
                                         <b-spinner v-show="mostrarSpinnerProducto" small label="Loading..."></b-spinner>
                                         Nuevo producto
                                     </b-button>
-                                    <b-button class="mb-4 ml-1 mt-lg-0 float-left" :disabled="disabledNr" @click="agregar_nr('00NR')"
+                                    <b-button title="Agregar item" class="mb-4 ml-1 mt-lg-0 float-left" :disabled="disabledNr" @click="agregar_nr('00NR')"
                                               variant="success"><i class="fas fa-plus"></i>
                                         <b-spinner v-show="mostrarSpinnerProducto" small label="Loading..."></b-spinner>
-                                        NR
+                                        Item
                                     </b-button>
                                 </div>
                             @else
@@ -646,7 +651,7 @@
                                 <label>Tipo de pago</label>
                                 <div class="row">
                                     <div class="col-lg-6 form-group">
-                                        <select :disabled="mostrarProgresoGuardado || productosSeleccionados.length==0 || comprobante=='07.01' || comprobante=='07.02' || comprobante=='08.01' || comprobante=='08.02'"
+                                        <select :disabled="mostrarProgresoGuardado || productosSeleccionados.length==0 || comprobante=='07.01' || comprobante=='07.02' || comprobante=='08.01' || comprobante=='08.02' || adelantoAgregado"
                                                 v-model="tipoPago" class="custom-select">
                                             <option value="1">Contado</option>
                                             <option value="2">Crédito</option>
@@ -660,7 +665,7 @@
                                             @endphp
                                             @foreach($tipo_pago as $pago)
                                                 @if($pago['num_val'] != 2)
-                                                <option value="{{$pago['num_val']}}">{{$pago['label']}}</option>
+                                                <option :disabled="'{{$pago['num_val']}}' == 4 && adelantoAgregado" value="{{$pago['num_val']}}">{{$pago['label']}}</option>
                                                 @endif
                                             @endforeach
                                         </select>
@@ -677,6 +682,11 @@
                                                     class="fas fa-plus"></i> Cuotas (@{{cuotas.length}})
                                         </b-button>
                                     </div>
+                                </div>
+                                <button v-show="!esAdelanto && (comprobante == '03' || comprobante == '01' || comprobante == '30')" @click="abrir_modal('adelantos')" class="btn btn-info"><i class="fas fa-search-plus"></i> Buscar adelantos
+                                </button>
+                                <div class="alert alert-primary mt-3" v-if="Object.keys(objAdelanto).length > 0">
+                                    Adelanto: @{{ objAdelanto.total_venta }} - @{{objAdelanto.serie}}-@{{objAdelanto.correlativo}}
                                 </div>
                             </div>
                             <div class="col-lg-4">
@@ -816,12 +826,16 @@
                                     <span class="badge"
                                           :class="{'badge-warning':doc.estado == 'PENDIENTE',
                                    'badge-success' : doc.estado == 'ACEPTADO',
-                                   'badge-dark' : doc.estado == 'ANULADO','badge-danger' : doc.estado == 'RECHAZADO'}">
+                                   'badge-dark' : doc.estado == 'ANULADO' || doc.estado == 'MODIFICADO','badge-danger' : doc.estado == 'RECHAZADO'}">
                                         @{{ doc.estado }}
                                     </span>
                                 </td>
                                 <td style="width: 5%" class="botones-accion">
-                                    <button @click="agregarDocumento(doc.idventa,false,false)" class="btn btn-info"
+                                    <button v-if="buscarAdelanto" @click="agregarAdelanto(doc)" class="btn btn-info"
+                                            title="Seleccionar documento"><i
+                                                class="fas fa-check"></i>
+                                    </button>
+                                    <button v-else @click="agregarDocumento(doc.idventa,false,false)" class="btn btn-info"
                                             title="Seleccionar documento"><i
                                                 class="fas fa-check"></i>
                                     </button>
@@ -909,7 +923,7 @@
     </b-modal>
     <!--FIN MODAL GUIAS RELACIONADAS -->
     <!--INICIO MODAL AFECTACIÓN -->
-    <b-modal size="sm" id="modal-afectacion" ref="modal-afectacion" @ok="" hide-footer>
+    <b-modal size="md" id="modal-afectacion" ref="modal-afectacion" @ok="" hide-footer>
     <template slot="modal-title">
         Afectación del IGV
     </template>
@@ -917,22 +931,22 @@
         <div class="row">
             <div class="col-lg-12 lista-afectacion">
                 <b-list-group>
-                    <b-list-group-item @click="setAfectacion('10')">Gravado - Operación Onerosa</b-list-group-item>
-                    <b-list-group-item @click="setAfectacion('11')">Gravado – Retiro por premio</b-list-group-item>
-                    <b-list-group-item @click="setAfectacion('12')">Gravado – Retiro por donación</b-list-group-item>
-                    <b-list-group-item @click="setAfectacion('13')">Gravado – Retiro</b-list-group-item>
-                    <b-list-group-item @click="setAfectacion('14')">Gravado – Retiro por publicidad</b-list-group-item>
-                    <b-list-group-item @click="setAfectacion('15')">Gravado – Bonificaciones</b-list-group-item>
-                    <b-list-group-item @click="setAfectacion('16')">Gravado – Retiro por entrega a trabajadores</b-list-group-item>
-                    <b-list-group-item @click="setAfectacion('20')">Exonerado - Operación Onerosa</b-list-group-item>
-                    <b-list-group-item @click="setAfectacion('21')">Exonerado – Transferencia Gratuita</b-list-group-item>
-                    <b-list-group-item @click="setAfectacion('30')">Inafecto - Operación Onerosa</b-list-group-item>
-                    <b-list-group-item @click="setAfectacion('31')">Inafecto – Retiro por Bonificación</b-list-group-item>
-                    <b-list-group-item @click="setAfectacion('32')">Inafecto – Retiro</b-list-group-item>
-                    <b-list-group-item @click="setAfectacion('33')">Inafecto – Retiro por Muestras Médicas</b-list-group-item>
-                    <b-list-group-item @click="setAfectacion('34')">Inafecto - Retiro por Convenio Colectivo</b-list-group-item>
-                    <b-list-group-item @click="setAfectacion('35')">Inafecto – Retiro por premio</b-list-group-item>
-                    <b-list-group-item @click="setAfectacion('36')">Inafecto - Retiro por publicidad</b-list-group-item>
+                    <b-list-group-item class="py-1" @click="setAfectacion('10')">Gravado - Operación Onerosa</b-list-group-item>
+                    <b-list-group-item class="py-1" @click="setAfectacion('11')">Gravado – Retiro por premio</b-list-group-item>
+                    <b-list-group-item class="py-1" @click="setAfectacion('12')">Gravado – Retiro por donación</b-list-group-item>
+                    <b-list-group-item class="py-1" @click="setAfectacion('13')">Gravado – Retiro</b-list-group-item>
+                    <b-list-group-item class="py-1" @click="setAfectacion('14')">Gravado – Retiro por publicidad</b-list-group-item>
+                    <b-list-group-item class="py-1" @click="setAfectacion('15')">Gravado – Bonificaciones</b-list-group-item>
+                    <b-list-group-item class="py-1" @click="setAfectacion('16')">Gravado – Retiro por entrega a trabajadores</b-list-group-item>
+                    <b-list-group-item class="py-1" @click="setAfectacion('20')">Exonerado - Operación Onerosa</b-list-group-item>
+                    <b-list-group-item class="py-1" @click="setAfectacion('21')">Exonerado – Transferencia Gratuita</b-list-group-item>
+                    <b-list-group-item class="py-1" @click="setAfectacion('30')">Inafecto - Operación Onerosa</b-list-group-item>
+                    <b-list-group-item class="py-1" @click="setAfectacion('31')">Inafecto – Retiro por Bonificación</b-list-group-item>
+                    <b-list-group-item class="py-1" @click="setAfectacion('32')">Inafecto – Retiro</b-list-group-item>
+                    <b-list-group-item class="py-1" @click="setAfectacion('33')">Inafecto – Retiro por Muestras Médicas</b-list-group-item>
+                    <b-list-group-item class="py-1" @click="setAfectacion('34')">Inafecto - Retiro por Convenio Colectivo</b-list-group-item>
+                    <b-list-group-item class="py-1" @click="setAfectacion('35')">Inafecto – Retiro por premio</b-list-group-item>
+                    <b-list-group-item class="py-1" @click="setAfectacion('36')">Inafecto - Retiro por publicidad</b-list-group-item>
                 </b-list-group>
             </div>
         </div>
@@ -1082,7 +1096,11 @@
                     },
                 ],
                 anulacion_factura_exportacion:'',
-                charCounts: []
+                charCounts: [],
+                esAdelanto:false,
+                adelantoAgregado: false,
+                buscarAdelanto: false,
+                objAdelanto: {}
             },
             mounted() {
                 if (localStorage.getItem('productos')) {
@@ -1117,6 +1135,10 @@
                 }
             },
             methods: {
+                agregarAdelanto(item){
+                    this.objAdelanto = item;
+                    this.$refs['modal-documento'].hide();
+                },
                 agregarFraccionado(){
                     this.pago_fraccionado.push({monto: '0.00', tipo: '1'});
                 },
@@ -1330,17 +1352,16 @@
                 },
                 obtenerDocumentos(copiar){
                     let filtro_comprobante = -1;
-                    if (!copiar) {
+
+                    if (typeof copiar === 'number' && copiar < 0) {
+                        filtro_comprobante = copiar;
+                    } else if (!copiar) {
                         switch (this.comprobante) {
                             case '07.01':
-                                filtro_comprobante = '03';
-                                break;
-                            case '07.02':
-                                filtro_comprobante = '01';
-                                break;
                             case '08.01':
                                 filtro_comprobante = '03';
                                 break;
+                            case '07.02':
                             case '08.02':
                                 filtro_comprobante = '01';
                                 break;
@@ -1464,6 +1485,11 @@
                             this.$refs['modal-documento'].show();
                             this.obtenerDocumentos(true);
                             break;
+                        case 'adelantos':
+                            this.$refs['modal-documento'].show();
+                            this.buscarAdelanto = true;
+                            this.obtenerDocumentos(-3);
+                            break;
                         case 'pago':
                             this.$refs['modal-tipopago'].show();
                             this.cuotasAux = Object.assign([], this.cuotas);
@@ -1490,6 +1516,9 @@
                                 break;
                             case 'copiar':
                                 this.obtenerDocumentos(true);
+                                break;
+                            case 'adelantos':
+                                this.obtenerDocumentos(-3);
                                 break;
                         }
 
@@ -1676,6 +1705,7 @@
                 },
                 resetModal(){
                     this.buscar = '';
+                    this.buscarAdelanto = false;
                 },
                 procesarVenta(){
 
@@ -1753,6 +1783,8 @@
                                 'idventa_modifica':this.idventa_modifica,
                                 'doc_observacion':this.doc_observacion,
                                 'tipo_cambio':this.tipoCambio,
+                                'adelanto':this.esAdelanto,
+                                'objAdelanto':JSON.stringify(this.objAdelanto),
                                 'pago_fraccionado': JSON.stringify(this.pago_fraccionado),
                                 'anulacion_factura_exportacion':this.anulacion_factura_exportacion
                             })
@@ -2046,6 +2078,11 @@
                     localStorage.removeItem('esConIgv');
                     this.doc_relacionado_nc='';
                     this.doc_observacion="";
+                    this.esAdelanto = false;
+                    this.adelantoAgregado = false;
+                    this.buscarAdelanto = false;
+                    this.objAdelanto = {};
+                    this.mensajesStock = [];
                 },
                 agregarUbigeo(ubigeo){
                     this.guia_datos_adicionales.ubigeo=ubigeo;
@@ -2076,6 +2113,11 @@
                     });
                 },
                 agregar_nr(codigo){
+                    if(codigo == '00ADT'){
+                        this.adelantoAgregado = true;
+                        this.inhabilitarComprobante = true;
+                        this.tipoPago = 1;
+                    }
                     this.disabledNr = true;
                     axios.get('/helper/agregar-producto'+'/'+codigo)
                         .then(response => {
@@ -2129,6 +2171,8 @@
                     this.guiasRelacionadas = [];
                     this.doc_relacionado_nc='';
                     this.esConGuia = 0;
+                    this.adelantoAgregado = false;
+                    this.esAdelanto = false;
                 },
                 esConGuia(){
                     if (this.esConGuia == 1) {

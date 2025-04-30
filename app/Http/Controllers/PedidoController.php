@@ -66,13 +66,13 @@ class PedidoController extends Controller
                 ->where('idempleado',auth()->user()->idempleado)
                 ->where('eliminado',0)
                 ->orderby('orden.idorden', 'desc')
-                ->take(30)
+                ->take(50)
                 ->get();
         } else {
             $ordenes= Orden::where('estado','EN COLA')
                 ->where('eliminado',0)
                 ->orderby('orden.idorden', 'desc')
-                ->take(30)
+                ->take(50)
                 ->get();
         }
 

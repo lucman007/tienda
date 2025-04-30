@@ -52,6 +52,7 @@ class ReenvioComprobante extends Command
             $this->cerrar_caja();
         }
         $this->reenviar_comprobantes();
+        Log::info('crontab funcionando...');
         $this->notificacion_creditos();
     }
 
