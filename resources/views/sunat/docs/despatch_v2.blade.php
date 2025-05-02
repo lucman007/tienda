@@ -132,6 +132,9 @@
         <cac:Delivery>
             <cac:DeliveryAddress>
                 <cbc:ID schemeName="Ubigeos" schemeAgencyName="PE:INEI">{{ $documento->ubigeo_direccion_llegada }}</cbc:ID>
+                @if($documento->codigo_traslado == '04')
+                <cbc:AddressTypeCode listID="{{$emisor->ruc}}" listAgencyName="PE:SUNAT" listName="Establecimientos anexos">{{$emisor->codigo_establecimiento}}</cbc:AddressTypeCode>
+                @endif
                 <cac:AddressLine>
                     <cbc:Line>{{ $documento->direccion_llegada }}</cbc:Line>
                 </cac:AddressLine>
@@ -139,6 +142,9 @@
             <cac:Despatch>
                 <cac:DespatchAddress>
                     <cbc:ID schemeName="Ubigeos" schemeAgencyName="PE:INEI">{{ $emisor->ubigeo }}</cbc:ID>
+                    @if($documento->codigo_traslado == '04')
+                        <cbc:AddressTypeCode listID="{{$emisor->ruc}}" listAgencyName="PE:SUNAT" listName="Establecimientos anexos">{{ $emisor->codigo_establecimiento == '0001' ? '0000' : '0001' }}</cbc:AddressTypeCode>
+                    @endif
                     <cac:AddressLine>
                         <cbc:Line>{{ $emisor->direccion_resumida }}</cbc:Line>
                     </cac:AddressLine>

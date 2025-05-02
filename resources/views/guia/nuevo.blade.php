@@ -259,7 +259,7 @@
                                     <b-button class="mb-4 ml-1 mt-lg-0 float-left" :disabled="disabledNr" @click="agregar_nr('00NR')"
                                               variant="success"><i class="fas fa-plus"></i>
                                         <b-spinner v-show="mostrarSpinnerProducto" small label="Loading..."></b-spinner>
-                                        NR
+                                        Item
                                     </b-button>
                                 </div>
                             @else
