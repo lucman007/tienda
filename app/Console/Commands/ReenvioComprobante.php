@@ -10,6 +10,7 @@ use sysfact\Emisor;
 use sysfact\Http\Controllers\CajaController;
 use sysfact\Http\Controllers\Cpe\CpeController;
 use sysfact\Http\Controllers\CreditoController;
+use sysfact\Mail\ReporteErroresVentas;
 use sysfact\Venta;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -52,8 +53,12 @@ class ReenvioComprobante extends Command
             $this->cerrar_caja();
         }
         $this->reenviar_comprobantes();
-        Log::info('crontab funcionando...');
         $this->notificacion_creditos();
+        $this->verificar_rechazados_del_dia();
+
+        if (date('H') >= 1 && date('H') <= 3) {
+            $this->checkVentasConsistentes();
+        }
     }
 
     public function notificacion_creditos()
@@ -71,70 +76,146 @@ class ReenvioComprobante extends Command
         }
     }
 
-
-    public function cerrar_caja(){
-        try{
-            if(date('H') >= 4 && date('H') <= 6){
-                $caja=Caja::orderby('fecha_a','desc')
-                    ->where('estado',0)
+    public function cerrar_caja()
+    {
+        try {
+            if (date('H') >= 3 && date('H') <= 5) {
+                $caja = Caja::orderby('fecha_a', 'desc')
+                    ->where('estado', 0)
                     ->first();
-                if($caja){
+                if ($caja) {
                     $cajaCon = new CajaController();
                     $cajaCon->cierre_automatico($caja->idcaja);
                 }
             }
-        } catch (\Exception $e){
+        } catch (\Exception $e) {
             Log::error($e);
         }
     }
 
-    public function reenviar_comprobantes(){
-        try{
-            $ventas=Venta::where('eliminado','=',0)
-                ->orderby('idventa','desc')
-                ->whereHas('facturacion', function($query){
+    public function reenviar_comprobantes()
+    {
+        try {
+            $ventas = Venta::where('eliminado', '=', 0)
+                ->orderby('idventa', 'desc')
+                ->whereHas('facturacion', function ($query) {
                     $query->where('estado', 'PENDIENTE');
                 })
                 ->get();
 
             $pendientes = 0;
 
-            foreach ($ventas as $venta){
+            foreach ($ventas as $venta) {
                 $cpe = new CpeController();
-                $emisor=new Emisor();
-                $nombre_fichero=$emisor->ruc.'-'.$venta->facturacion->codigo_tipo_documento.'-'.$venta->facturacion->serie.'-'.$venta->facturacion->correlativo;
-                $respuesta = $cpe->reenviar($venta->idventa,$nombre_fichero,$venta->facturacion->num_doc_relacionado);
+                $emisor = new Emisor();
+                $nombre_fichero = $emisor->ruc . '-' . $venta->facturacion->codigo_tipo_documento . '-' . $venta->facturacion->serie . '-' . $venta->facturacion->correlativo;
+                $respuesta = $cpe->reenviar($venta->idventa, $nombre_fichero, $venta->facturacion->num_doc_relacionado);
 
-                if(is_string($respuesta[0])){
-                    if(!(str_contains(strtolower($respuesta[0]),'aceptado') || str_contains(strtolower($respuesta[0]),'aceptada'))){
+                if (is_string($respuesta[0])) {
+                    if (!(str_contains(strtolower($respuesta[0]), 'aceptado') || str_contains(strtolower($respuesta[0]), 'aceptada'))) {
                         $pendientes++;
                     }
                 }
 
             }
 
-            if($pendientes>0){
+            if ($pendientes > 0) {
                 Mail::to('ces.des007@gmail.com')->send(new \sysfact\Mail\MailPendientes($pendientes));
             }
 
-        } catch(\Exception $e){
-            $ventas=Venta::where('eliminado',0)
-                ->orderby('idventa','desc')
-                ->whereHas('facturacion', function($query){
+        } catch (\Exception $e) {
+            $ventas = Venta::where('eliminado', 0)
+                ->orderby('idventa', 'desc')
+                ->whereHas('facturacion', function ($query) {
                     $query->where('estado', 'PENDIENTE');
                 })
                 ->get();
 
             $pendientes = count($ventas);
 
-            if($pendientes > 0){
-                try{
+            if ($pendientes > 0) {
+                try {
                     Mail::to('ces.des007@gmail.com')->send(new \sysfact\Mail\MailPendientes($pendientes));
-                } catch (\Swift_TransportException $e){
+                } catch (\Swift_TransportException $e) {
                     return $e;
                 }
             }
             Log::error($e);
         }
     }
+
+    public function verificar_rechazados_del_dia()
+    {
+        try {
+            // Filtra las ventas con estado RECHAZADO y fecha de hoy
+            $rechazadas = Venta::where('eliminado', 0)
+                ->whereDate('fecha', date('Y-m-d'))
+                ->whereHas('facturacion', function ($query) {
+                    $query->where('estado', 'RECHAZADO');
+                })
+                ->with('facturacion')
+                ->get();
+
+            if ($rechazadas->count() > 0) {
+                Mail::to('ces.des007@gmail.com')->send(new \sysfact\Mail\MailRechazados($rechazadas->count()));
+            }
+
+        } catch (\Exception $e) {
+            Log::error('Error al verificar facturas rechazadas: ' . $e->getMessage());
+        }
+    }
+
+    public function checkVentasConsistentes()
+    {
+        $errores = [];
+        $porcentaje_igv = json_decode(cache('config')['interfaz'], true)['porcentaje_igv'] ?? 18;
+        $inicio = Carbon::yesterday()->startOfDay()->format('Y-m-d H:i:s');
+        $fin = Carbon::now()->format('Y-m-d H:i:s');
+
+        $ventas = Venta::where('eliminado', 0)
+            ->whereBetween('fecha', [$inicio, $fin])
+            ->with(['productos', 'facturacion'])
+            ->get();
+
+        foreach ($ventas as $venta) {
+            $suma_total = 0;
+
+            foreach ($venta->productos as $producto) {
+                $monto = $producto->detalle->monto;
+                $cantidad = $producto->detalle->cantidad;
+                $suma_total += round($monto * $cantidad, 2);
+            }
+
+            $subtotal = round($suma_total / (1 + $porcentaje_igv / 100), 2);
+            $igv = round($suma_total - $subtotal, 2);
+
+            $venta_guardada = round($venta->total_venta, 2);
+            $fact = $venta->facturacion;
+
+            if (
+                abs($venta_guardada - $suma_total) > 0.01 ||
+                abs($fact->total_gravadas - $subtotal) > 0.01 ||
+                abs($fact->igv - $igv) > 0.01
+            ) {
+                $errores[] = [
+                    'venta_id' => $venta->idventa,
+                    'total_registrado' => $venta_guardada,
+                    'total_calculado' => $suma_total,
+                    'subtotal_registrado' => $fact->total_gravadas,
+                    'subtotal_calculado' => $subtotal,
+                    'igv_registrado' => $fact->igv,
+                    'igv_calculado' => $igv,
+                ];
+            }
+        }
+
+        if (count($errores)) {
+            Mail::to('ces.des007@gmail.com')->send(new ReporteErroresVentas($errores));
+            Log::info('Correo de inconsistencias enviado.');
+        } else {
+            Log::info('✅ Todas las ventas están consistentes.');
+        }
+    }
+
+
 }

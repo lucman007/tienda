@@ -8,7 +8,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use sysfact\Http\Controllers\Helpers\MainHelper;
 
-class MailPendientes extends Mailable
+class MailRechazados extends Mailable
 {
     use Queueable, SerializesModels;
     public $emisor;
@@ -34,7 +34,7 @@ class MailPendientes extends Mailable
     public function build()
     {
         return $this->from('facsy@facturacion.xyz')
-            ->subject('COMPROBANTES PENDIENTES DE ENVÍO...')
-            ->view('mail.estado_comprobantes',['emisor'=>$this->emisor,'num_comprobante'=>$this->num_comprobantes,'domain'=>app()->domain()]);
+            ->subject('COMPROBANTES RECHAZADOS')
+            ->view('mail.estado_comprobantes',['emisor'=>$this->emisor,'num_comprobante'=>$this->num_comprobantes,'domain'=>app()->domain(),'esRechazados'=>true]);
     }
 }
