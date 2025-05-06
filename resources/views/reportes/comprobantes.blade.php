@@ -156,7 +156,7 @@
             <div class="col-lg-12 mt-4">
                 <p>Exporta el TXT desde propuesta del RVIE de la plataforma SIRE y cárgalo aquí para hacer la comparación (Archivo .zip).</p>
                 <b-form-file v-model="archivo" class="mb-2" plain accept=".zip"></b-form-file>
-                <b-button :disabled="!archivo" variant="success" @click="compararVentas">Comparar</b-button>
+                <b-button :disabled="!archivo" variant="success" @click="compararVentas"><b-spinner v-show="comparando" small label="Loading..." ></b-spinner> Comparar</b-button>
             </div>
         </div>
     </div>
@@ -175,6 +175,7 @@
                 archivo: null,
                 mostrar:false,
                 periodoOk:true,
+                comparando:false
             },
             methods: {
                 checkPeriodo(){
@@ -194,6 +195,7 @@
                     formData.append("archivo", this.archivo);
                     formData.append("desde", this.desde);
                     formData.append("hasta", this.hasta);
+                    this.comparando = true;
 
                     axios.post("/reportes/comparar-txt", formData)
                         .then(response => {
@@ -202,6 +204,7 @@
                             link.href = url;
                             link.download = 'comparacion_sire.xlsx';  // Nombre del archivo a descargar
                             link.click();
+                            this.comparando = false;
                     });
                 },
                 setParams(obj){

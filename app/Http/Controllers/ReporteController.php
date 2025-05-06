@@ -1754,67 +1754,69 @@ class ReporteController extends Controller
 
     public function comparar_txt(Request $request)
     {
-        $comprobantes=$this->reporte_comprobantes_data($request->desde, $request->hasta, 'fecha', null, true);
+        $comprobantes = $this->reporte_comprobantes_data($request->desde, $request->hasta, 'fecha', null, true);
         $archivoZip = $request->file('archivo');
 
-        // Extraer el único archivo del ZIP en el almacenamiento temporal
+        // Ruta temporal para extraer
         $extractPath = storage_path('app/temp_extracted');
+        if (!file_exists($extractPath)) mkdir($extractPath, 0777, true);
+
         $zip = new ZipArchive;
         $zip->open($archivoZip->path());
         $zip->extractTo($extractPath);
         $zip->close();
 
-        // Obtener el único archivo descomprimido en el almacenamiento temporal
-        $archivos = scandir($extractPath);
-        $archivo = $archivos[2]; // El tercer elemento, excluyendo "." y ".."
+        // Obtener archivo TXT extraído
+        $archivos = array_diff(scandir($extractPath), ['.', '..']);
+        $archivo = array_values($archivos)[0]; // primer archivo real
+        $rutaArchivo = $extractPath . '/' . $archivo;
 
-        // Leer el contenido del archivo, ignorando la primera línea
-        $lineas = file($extractPath . '/' . $archivo, FILE_SKIP_EMPTY_LINES | FILE_IGNORE_NEW_LINES);
-        array_shift($lineas); // Eliminar la primera línea (encabezado)
+        // Leer líneas
+        $lineas = file($rutaArchivo, FILE_SKIP_EMPTY_LINES | FILE_IGNORE_NEW_LINES);
+        if (count($lineas) < 2) {
+            unlink($rutaArchivo);
+            rmdir($extractPath);
+            throw new \Exception("El archivo no contiene datos válidos.");
+        }
+
+        // Procesar cabecera
+        $cabecera = explode('|', $lineas[0]);
+        $indices = array_flip($cabecera); // Mapea nombres a índices
 
         $resultados = [];
-
         foreach ($comprobantes['comprobantes'] as $venta) {
-            // Analizar la venta (implementa la lógica según tu estructura de datos)
             $serie = $venta->facturacion->serie;
             $correlativo = ltrim($venta->facturacion->correlativo, '0');
             $totalVentaDB = $venta->total_venta;
-
-            // Verificar si la venta existe en el archivo
             $ventaEncontrada = false;
-            foreach ($lineas as $linea) {
-                // Analizar la línea (implementa la lógica según el formato de tu archivo)
-                $datosArchivo = explode('|', $linea);
-                $tipoComprobante = $datosArchivo[2];
-                $serieArchivo = $datosArchivo[3];
-                $correlativoArchivo = $datosArchivo[4];
-                $totalVentaArchivo = floatval($datosArchivo[21]);
 
-                if($tipoComprobante == '07'){
-                    $totalVentaArchivo = $totalVentaArchivo * -1;
+            foreach (array_slice($lineas, 1) as $linea) {
+                $datos = explode('|', $linea);
+                if (count($datos) < count($cabecera)) continue;
+
+                $tipoComprobante = $datos[$indices['Tipo CP/Doc.']];
+                $serieArchivo = $datos[$indices['Serie del CDP']];
+                $correlativoArchivo = ltrim($datos[$indices['Nro CP o Doc. Nro Inicial (Rango)']], '0');
+                $totalVentaArchivo = floatval($datos[$indices['Total CP']]);
+
+                if ($tipoComprobante == '07') {
+                    $totalVentaArchivo *= -1;
                 }
 
                 if ($serie == $serieArchivo && $correlativo == $correlativoArchivo) {
-                    // Comparar el total de la venta con el archivo
-                    $diferencia = $totalVentaDB - $totalVentaArchivo;
-
-                    // Agregar resultados al array de resultados
                     $resultados[] = [
                         'serie' => $serie,
                         'correlativo' => $correlativo,
                         'totalDB' => $totalVentaDB,
                         'totalArchivo' => $totalVentaArchivo,
-                        'diferencia' => $diferencia,
+                        'diferencia' => $totalVentaDB - $totalVentaArchivo,
                         'estado' => 'Encontrado',
                     ];
-
-                    // Indicar que la venta fue encontrada en el archivo
                     $ventaEncontrada = true;
                     break;
                 }
             }
 
-            // Si la venta no fue encontrada en el archivo
             if (!$ventaEncontrada) {
                 $resultados[] = [
                     'serie' => $serie,
@@ -1827,15 +1829,20 @@ class ReporteController extends Controller
             }
         }
 
-        // Eliminar el archivo descomprimido y el directorio temporal
-        unlink($extractPath . '/' . $archivo);
-        rmdir($extractPath);
+        // Limpieza
+        if (file_exists($rutaArchivo)) {
+            unlink($rutaArchivo);
+        }
+        if (file_exists($extractPath)) {
+            rmdir($extractPath);
+        }
 
-        // Generar el archivo Excel y guardarlo temporalmente
+        // Generar y mover Excel
         Excel::store(new ComparacionSire($resultados), 'comparacion_sire.xlsx');
-        $currentLocation = storage_path('app/comparacion_sire.xlsx');
-        $newLocation = public_path('files/comparacion_sire.xlsx');
-        rename($currentLocation, $newLocation);
+        $origen = storage_path('app/comparacion_sire.xlsx');
+        $destino = public_path('files/comparacion_sire.xlsx');
+        rename($origen, $destino);
+
         return '/files/comparacion_sire.xlsx';
     }
 
