@@ -23,8 +23,9 @@
                         </div>
                         <div class="form-group{{ $errors->has('password') ? ' has-error' : '' }}">
                             <label for="password" class="col-md-12 control-label">Contraseña</label>
-                            <div class="col-md-12">
+                            <div class="col-md-12 position-relative">
                                 <input id="password" type="password" class="form-control" name="password" required>
+                                <span toggle="#password" class="fa fa-fw fa-eye field-icon toggle-password" style="position:absolute; top:50%; right:24px; transform:translateY(-50%); cursor:pointer; color:#716e6e"></span>
                             </div>
                         </div>
                         <div class="form-group">
@@ -58,3 +59,22 @@
     </div>
 </div>
 @endsection
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const togglePassword = document.querySelector('.toggle-password');
+            const password = document.querySelector('#password');
+
+            togglePassword.addEventListener('click', function (e) {
+                // Toggle el tipo de input
+                const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+                password.setAttribute('type', type);
+
+                // Cambia el ícono
+                this.classList.toggle('fa-eye');
+                this.classList.toggle('fa-eye-slash');
+            });
+        });
+    </script>
+@endpush
+
