@@ -53,10 +53,21 @@
                                 @endif
                             </div>
                             <div class="col-lg-4">
-                                @if($venta->facturacion->oc_relacionada)
-                                <strong>Orden de compra:</strong> {{$venta->facturacion->oc_relacionada}} <hr>
-                                @endif
-                                @if($venta->facturacion->guia_fisica)
+                                <div id="oc-edit-app">
+                                    <template v-if="!editandoOC">
+                                        <strong>Orden de compra:</strong> @{{ ordenCompra }}
+                                        <a title="Editar orden de compra" @click="editandoOC = true" class="text-primary"><i class="fas fa-edit"></i></a>
+                                    </template>
+                                    <template v-else>
+                                        <strong>Orden de compra:</strong>
+                                        <input type="text" v-model="nuevaOrdenCompra" class="form-control form-control-sm d-inline w-auto" style="width: 200px;" />
+                                        <button class="btn btn-sm btn-success" @click="guardarOrdenOC"><i class="fas fa-check"></i></button>
+                                        <button class="btn btn-sm btn-secondary" @click="cancelarOC"><i class="fas fa-times"></i></button>
+                                    </template>
+                                    <hr>
+                                </div>
+
+                            @if($venta->facturacion->guia_fisica)
                                     <strong>Guía:</strong> {{$venta->facturacion->guia_fisica}} <hr>
                                 @endif
                                 @if($venta->facturacion->retencion == 1)
@@ -503,6 +514,9 @@
                 mensaje:'<?php echo html_entity_decode($venta->guia_relacionada->response??'') ?>',
                 mostrarProgresoEnvio:false,
                 formato:'A4',
+                ordenCompra: '{{ $venta->facturacion->oc_relacionada }}',
+                nuevaOrdenCompra: '{{ $venta->facturacion->oc_relacionada }}',
+                editandoOC: false,
             },
             created(){
                 if('<?php echo $venta->facturacion->estado ?>' == 'PENDIENTE' && ('<?php echo basename(url()->previous()) ?>').includes('facturacion')){
@@ -518,6 +532,22 @@
                 this.control_stock();
             },
             methods: {
+                guardarOrdenOC() {
+                    axios.post('{{ route("facturacion.actualizarOC") }}', {
+                        idventa: {{ $venta->idventa }},
+                        oc_relacionada: this.nuevaOrdenCompra,
+                    }).then(res => {
+                        this.ordenCompra = this.nuevaOrdenCompra;
+                        this.editandoOC = false;
+                    }).catch(err => {
+                        alert('Error al guardar');
+                        console.error(err);
+                    });
+                },
+                cancelarOC() {
+                    this.nuevaOrdenCompra = this.ordenCompra;
+                    this.editandoOC = false;
+                },
                 control_stock(){
                     if(('<?php echo basename(url()->previous()) ?>').includes('facturacion')){
                         axios.get('/helper/notificar-estado-stock' + '/' + '{{$venta->idventa}}')
@@ -768,4 +798,5 @@
 
         });
     </script>
+
 @endsection

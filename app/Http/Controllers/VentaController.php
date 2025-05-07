@@ -1615,4 +1615,31 @@ Imprime y entrega la NOTA DE CRÉDITO junto al comprobante anulado.',
         }
     }
 
+    public function actualizarOC(Request $request)
+    {
+        $venta = Venta::findOrFail($request->idventa);
+
+        // Actualizar OC en la tabla facturacion
+        $venta->facturacion->oc_relacionada = $request->oc_relacionada;
+        $venta->facturacion->save();
+
+        // Buscar si hay una guía relacionada
+        $guia = Guia::where('idventa', $venta->idventa)->first();
+
+        if ($guia) {
+            $datos = json_decode($guia->guia_datos_adicionales, true);
+
+            // Solo actualiza si el campo 'oc' existe
+            if (isset($datos['oc'])) {
+                $datos['oc'] = $request->oc_relacionada;
+                $guia->guia_datos_adicionales = json_encode($datos);
+                $guia->save();
+            }
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+
+
 }

@@ -212,6 +212,8 @@ Route::group(['middleware' => ['can:Facturación: facturar']], function () {
     Route::post('ventas/anulacion-rapida', 'VentaController@anulacion_rapida');
     Route::post('ventas/verificar-cdr-mail','VentaController@verificar_cdr_previo_mail');
     Route::post('ventas/obtenerDecuentoNc','VentaController@obtenerDecuentoNc');
+    Route::post('ventas/actualizar-oc', 'VentaController@actualizarOC')->name('facturacion.actualizarOC');
+
 
     //Rutas facturacion
     Route::get('ventas/reenviar/{id}/{file}/{doc_relacionado}','Cpe\CpeController@reenviar');

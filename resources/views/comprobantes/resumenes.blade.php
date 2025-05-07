@@ -16,7 +16,6 @@
                             <b-dropdown-item href="{{action('ComprobanteController@comprobantes')}}"><i class="fas fa-file-alt"></i> Comprobantes</b-dropdown-item>
                             <b-dropdown-item href="{{action('ComprobanteController@anular')}}"><i class="fas fa-ban"></i> Anulaciones</b-dropdown-item>
                             <b-dropdown-item href="{{action('ComprobanteController@consulta')}}"><i class="fas fa-external-link-square-alt"></i> Consulta CDR</b-dropdown-item>
-                            <b-dropdown-item href="{{action('ComprobanteController@resumenes_enviados')}}"><i class="fas fa-external-link-square-alt"></i> Consulta anulación</b-dropdown-item>
                             <b-dropdown-item href="{{action('ReporteController@reporte_ventas')}}"><i class="fas fa-chart-line"></i> Reporte de ventas</b-dropdown-item>
                             <b-dropdown-item href="{{action('GuiaController@index')}}"><i class="fas fa-dolly"></i> Guía de remisión</b-dropdown-item>
                         </b-dropdown>

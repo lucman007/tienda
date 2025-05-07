@@ -12,15 +12,19 @@
             <div class="col-lg-2 mb-2 mb-lg-0">
                 <b-dropdown variant="primary">
                     <template #button-content>
-                        <i class="far fa-file-alt"></i> Comprobantes
+                        <i class="fas fa-ellipsis-v"></i> Opciones
                     </template>
-                    <b-dropdown-item href="{{action('ComprobanteController@comprobantes')}}"><i class="fas fa-file-alt"></i> Comprobantes</b-dropdown-item>
                     <b-dropdown-item href="{{action('ComprobanteController@anular')}}"><i class="fas fa-ban"></i> Anulaciones</b-dropdown-item>
                     <b-dropdown-item href="{{action('ComprobanteController@consulta')}}"><i class="fas fa-external-link-square-alt"></i> Consulta CDR</b-dropdown-item>
                     <b-dropdown-item href="{{action('ComprobanteController@resumenes_enviados')}}"><i class="fas fa-external-link-square-alt"></i> Consulta anulación</b-dropdown-item>
                     <b-dropdown-item href="{{action('ReporteController@reporte_ventas')}}"><i class="fas fa-chart-line"></i> Reporte de ventas</b-dropdown-item>
                     <b-dropdown-item href="{{action('GuiaController@index')}}"><i class="fas fa-dolly"></i> Guía de remisión</b-dropdown-item>
                 </b-dropdown>
+                @can('Facturación: facturar')
+                <a href="{{action('VentaController@registrar')}}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Nuevo
+                </a>
+                @endcan
             </div>
             <div class="col-lg-10">
                 <div class="row">
@@ -128,11 +132,8 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-sm-12 mt-4">
+            <div class="col-sm-12">
                 <div class="card">
-                    <div class="card-header">
-                        Lista de comprobantes
-                    </div>
                     <div class="card-body">
                         <div class="table-responsive tabla-gestionar">
                             <table class="table table-striped table-hover table-sm">
@@ -244,10 +245,6 @@
                         {{$ventas->links('layouts.paginacion')}}
                     </div>
                 </div>
-                <br>
-                Notas: <br>
-                -Sólo se pueden eliminar las ventas guardadas sin comprobante (serie REC-000). <br>
-                -Sólo puede anular facturas y boletas con estado aceptado.
             </div>
         </div>
     </div>
