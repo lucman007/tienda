@@ -440,21 +440,45 @@ class ComprobanteController extends Controller
 
     public function anular_facturas(Request $request){
 
-        $cpe = new CpeController();
-        $rpta = $cpe->sendVoided($request);
+        try{
+            $cpe = new CpeController();
+            $rpta = $cpe->sendVoided($request);
 
-        //Actualizar pedido
+            $items = json_decode($request->items,TRUE);
 
-        $items = json_decode($request->items,TRUE);
+            foreach ($items as $item) {
+                $venta = Venta::find($item['idventa']);
+                $facturacion = $venta->facturacion;
 
-        foreach ($items as $item){
-            $venta=Venta::find($item['idventa']);
-            $venta->orden()->update([
-                'estado'=>'VENTA ANULADA'
-            ]);
+                if ($facturacion->codigo_tipo_documento === '07' && $facturacion->num_doc_relacionado) {
+                    // Separar serie y correlativo desde el num_doc_relacionado (ej. F001-00012345)
+                    [$serie, $correlativo] = explode('-', $facturacion->num_doc_relacionado);
+
+                    $factura_original = Facturacion::where('serie', $serie)
+                        ->where('correlativo', $correlativo)
+                        ->where('codigo_tipo_documento', '!=', '07') // evitar otra NC
+                        ->first();
+
+                    if ($factura_original) {
+                        $factura_original->estado = 'ACEPTADO';
+                        $factura_original->save();
+                        Log::info("Documento relacionado actualizado a ACEPTADO: $serie-$correlativo");
+                    } else {
+                        Log::warning("No se encontró documento relacionado: $serie-$correlativo");
+                    }
+                }
+
+                // Anular orden si existe
+                $venta->orden()->update(['estado' => 'VENTA ANULADA']);
+            }
+
+            return $rpta;
+
+        } catch (\Exception $e){
+            Log::error($e);
+            return $e->getMessage();
         }
 
-        return $rpta;
     }
 
     public function anular_boletas(Request $request){

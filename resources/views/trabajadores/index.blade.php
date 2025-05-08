@@ -5,8 +5,8 @@
     <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
         <div class="row">
             <div class="col-lg-9">
-                <h3 class="titulo-admin-1">Empleados</h3>
-                <b-button class="mb-2 mb-lg-0" v-b-modal.modal-1 variant="primary"><i class="fas fa-plus"></i> Nuevo</b-button>
+                <h3 class="titulo-admin-1">Trabajadores</h3>
+                <b-button v-b-modal.modal-1 variant="primary"><i class="fas fa-plus"></i> Nuevo</b-button>
             </div>
             <div class="col-lg-3">
                 @include('trabajadores.buscador')
@@ -44,15 +44,14 @@
                                         <tr @if(!$agent->isDesktop()) @click="editarTrabajador({{$trabajador->idempleado}})" @endif>
                                             <td></td>
                                             <td style="display:none">{{$trabajador->idempleado}}</td>
-                                            <td>{{$trabajador->nombre}} {{$trabajador->apellidos}} <i
-                                                        v-show="{{$trabajador->es_usuario}}==1"
-                                                        class="fas fa-user-circle"></i></td>
+                                            <td> <i v-show="{{$trabajador->es_usuario}}==1"
+                                                        class="fas fa-user-circle"></i> {{$trabajador->nombre}} {{$trabajador->apellidos}}</td>
                                             <td>{{$trabajador->dni}}</td>
                                             <td>{{$trabajador->direccion}} - {{$trabajador->ciudad}}</td>
                                             <td>{{$trabajador->telefono}}</td>
                                             <td>{{$trabajador->correo}}</td>
                                             <td>{{$trabajador->dia_pago}}</td>
-                                            <td class="botones-accion" style="width: 20%">
+                                            <td @click.stop class="botones-accion" style="width: 20%">
                                                 <b-button @click="editarTrabajador({{$trabajador->idempleado}})" class="btn btn-success" title="Editar trabajador"><i
                                                             class="fas fa-edit"></i></b-button>
                                                 <a @if($trabajador->es_usuario || !$bloquear_registro)
@@ -74,17 +73,17 @@
                                         </tr>
                                     @endif
                                     @if($trabajador->acceso == 1 && $acceso == 1)
-                                        <tr>
+                                        <tr @if(!$agent->isDesktop()) @click="editarTrabajador({{$trabajador->idempleado}})" @endif>
                                             <td></td>
                                             <td style="display:none">{{$trabajador->idempleado}}</td>
-                                            <td>{{$trabajador->nombre}} {{$trabajador->apellidos}} <i v-show="{{$trabajador->es_usuario}}==1" class="fas fa-user-circle"></i></td>
+                                            <td><i v-show="{{$trabajador->es_usuario}}==1" class="fas fa-user-circle"></i> {{$trabajador->nombre}} {{$trabajador->apellidos}}</td>
                                             <td>{{$trabajador->dni}}</td>
                                             <td>{{$trabajador->direccion}} - {{$trabajador->ciudad}}</td>
                                             <td>{{$trabajador->telefono}}</td>
                                             <td>{{$trabajador->correo}}</td>
                                             <td>{{$trabajador->dia_pago}}</td>
-                                            <td class="botones-accion" style="width: 20%">
-                                                <a @@click="editarTrabajador({{$trabajador->idempleado}})" href="javascript:void(0)">
+                                            <td @click.stop class="botones-accion" style="width: 20%">
+                                                <a @click="editarTrabajador({{$trabajador->idempleado}})" href="javascript:void(0)">
                                                     <button class="btn btn-success" title="Editar trabajador"><i
                                                                 class="fas fa-edit"></i></button>
                                                 </a>
@@ -94,7 +93,7 @@
                                                 <a href="{{url('trabajadores/pagos').'/'.$trabajador->idempleado}}">
                                                     <button class="btn btn-warning" title="Historial de pagos"><i class="fas fa-coins"></i></button>
                                                 </a>
-                                                <a @@click="borrarTrabajador({{$trabajador->idempleado}})" href="javascript:void(0)">
+                                                <a @click="borrarTrabajador({{$trabajador->idempleado}})" href="javascript:void(0)">
                                                     <button class="btn btn-danger" title="Eliminar"><i class="fas fa-trash-alt"></i>
                                                     </button>
                                                 </a>
@@ -118,6 +117,25 @@
     @{{tituloModal}}
 </template>
 <div class="container">
+    <div class="card" style="box-shadow:none; margin-bottom:20px" v-show="accion=='insertar'">
+        <div class="card-header">
+            Buscar por DNI
+        </div>
+        <div class="card-body row">
+            <div class="col-lg-6 form-group">
+                <label>Número de DNI:</label>
+                <b-input-group>
+                    <input v-model="dni_buscar" @keyup.enter="buscarDNI" class="form-control" maxlength="8" type="number" autocomplete="off">
+                    <b-input-group-append>
+                        <b-button @click="buscarDNI" variant="primary">
+                            <span v-show="!spinnerDni"><i class="fas fa-search"></i></span>
+                            <b-spinner v-show="spinnerDni" small></b-spinner>
+                        </b-button>
+                    </b-input-group-append>
+                </b-input-group>
+            </div>
+        </div>
+    </div>
     <div class="row">
         <div class="col-lg-6">
             <div class="form-group">
@@ -244,6 +262,7 @@
 @endsection
 @section('script')
     <script>
+        window.userId = {{ auth()->user()->idempleado }};
         let app = new Vue({
             el: '.app',
             data: {
@@ -263,9 +282,42 @@
                 ciclo_pago: 1,
                 sueldo:'',
                 dia_pago:'31',
-                cargo:-1
+                cargo:-1,
+                dni_buscar: '',
+                spinnerDni: false,
             },
             methods: {
+                buscarDNI() {
+                    if (this.dni_buscar.length !== 8 || isNaN(this.dni_buscar)) {
+                        alert('Ingrese un DNI válido');
+                        return;
+                    }
+
+                    this.spinnerDni = true;
+
+                    axios.post('/helper/buscar-ruc', {
+                        num_doc: this.dni_buscar,
+                        tipo_doc: 1
+                    })
+                        .then(response => {
+                            let data = response.data;
+                            if (!data || !data.nombre_o_razon_social) {
+                                alert('No se encontró información, ingréselo manualmente');
+                            } else {
+                                const nombresCompletos = data.nombre_o_razon_social.trim().split(' ');
+                                this.nombre = nombresCompletos.slice(2).join(' ');
+                                this.apellidos = nombresCompletos.slice(0, 2).join(' ');
+                                this.dni = data.ruc;
+                                this.direccion = data.direccion || '';
+                            }
+                            this.spinnerDni = false;
+                        })
+                        .catch(error => {
+                            this.spinnerDni = false;
+                            alert('Error al consultar DNI');
+                            console.error(error);
+                        });
+                },
                 agregarTrabajador(e){
                     if (this.validarTrabajador()) {
                         e.preventDefault();
@@ -328,11 +380,15 @@
                         });
 
                 },
-                borrarTrabajador(id){
-                    if(confirm('Realmente desea eliminar el trabajador')){
+                borrarTrabajador(id) {
+                    if (confirm('Realmente desea eliminar el trabajador')) {
                         axios.delete('{{url('/trabajadores/destroy')}}' + '/' + id)
                             .then(() => {
-                                window.location.reload(true);
+                                if (parseInt(id) === window.userId) {
+                                    window.location.href = '{{ url('/logout') }}';
+                                } else {
+                                    window.location.reload(true);
+                                }
                             })
                             .catch(error => {
                                 console.log(error);

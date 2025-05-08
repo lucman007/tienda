@@ -332,14 +332,22 @@ class ProcesarRespuestas
 
                         $detalle = Venta::find($venta['idventa']);
 
+                        $esNotaCredito = $fact->codigo_tipo_documento === '07';
+                        $operacionTexto = $esNotaCredito
+                            ? 'RESTAURACIÓN POR ANULACIÓN DE NOTA DE CRÉDITO N° ' . $fact->serie.'-'.$fact->correlativo
+                            : 'ANULACIÓN DE VENTA N° ' . $venta['idventa'];
+
                         foreach ($detalle->productos as $producto) {
-                            //Actualizar inventario
+                            $cantidad = $producto['detalle']['cantidad'];
+
                             $inventario = new Inventario();
                             $inventario->idproducto = $producto['idproducto'];
-                            $inventario->idempleado = auth()->user()->idempleado??-1;
-                            $inventario->cantidad = $producto['detalle']['cantidad'];
-                            $inventario->saldo = $producto->inventario()->first()->saldo + $producto['detalle']['cantidad'];
-                            $inventario->operacion = 'ANULACIÓN DE VENTA N° ' . $venta['idventa'];
+                            $inventario->idempleado = auth()->user()->idempleado ?? -1;
+                            $inventario->cantidad = $esNotaCredito ? -$cantidad : $cantidad;
+
+                            $saldoActual = $producto->inventario()->first()->saldo ?? 0;
+                            $inventario->saldo = $saldoActual + $inventario->cantidad;
+                            $inventario->operacion = $operacionTexto;
                             $inventario->save();
                         }
                     }
