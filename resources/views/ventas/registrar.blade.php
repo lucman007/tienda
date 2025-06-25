@@ -1539,7 +1539,13 @@
                     this.$set(this.productosSeleccionados[i], 'subtotal', subtotal);
 
 
-                    if(this.codigo_tipo_factura == '0101'){
+                    if(this.codigo_tipo_factura == '0200'){
+
+                        this.$set(this.productosSeleccionados[i], 'igv', 0);
+                        this.$set(this.productosSeleccionados[i], 'tipoAfectacion', '10');
+                        this.$set(this.productosSeleccionados[i], 'total', subtotal);
+
+                    } else{
                         this.$set(this.productosSeleccionados[i], 'igv', this.productosSeleccionados[i]['precio'] * 0.18);
                         this.$set(this.productosSeleccionados[i], 'tipoAfectacion', '10');
                         this.$set(this.productosSeleccionados[i], 'total', this.productosSeleccionados[i]['precio'] * 1.18);
@@ -1550,11 +1556,6 @@
                             this.$set(this.productosSeleccionados[i], 'igv', this.productosSeleccionados[i]['precio'] - subtotal);
                             this.$set(this.productosSeleccionados[i], 'total', this.productosSeleccionados[i]['precio']);
                         }
-
-                    } else{
-                        this.$set(this.productosSeleccionados[i], 'igv', 0);
-                        this.$set(this.productosSeleccionados[i], 'tipoAfectacion', '10');
-                        this.$set(this.productosSeleccionados[i], 'total', subtotal);
                     }
 
                     this.calcularTotalVenta();
