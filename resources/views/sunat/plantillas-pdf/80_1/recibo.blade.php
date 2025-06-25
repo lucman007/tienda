@@ -80,6 +80,11 @@
                 <td>TOTAL:</td>
                 <td>{{$documento->codigo_moneda}} {{$documento->total_venta}}</td>
             </tr>
+            @if($documento->observacion)
+                <tr>
+                    <td colspan="2">Observación: {{$documento->observacion}}</td>
+                </tr>
+            @endif
             <tr>
                 <td colspan="3">
                     <hr style="border: 1px dashed black">

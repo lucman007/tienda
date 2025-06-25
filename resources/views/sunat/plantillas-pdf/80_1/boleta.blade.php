@@ -140,6 +140,11 @@
                 <td style="width: 20mm">Total:</td>
                 <td style="text-align: right; width: 38mm">{{$documento->codigo_moneda}} {{$documento->total_venta}}</td>
             </tr>
+                @if($documento->observacion)
+                    <tr>
+                        <td colspan="2">Observación: {{$documento->observacion}}</td>
+                    </tr>
+                @endif
         </table>
         <table style="text-align: center">
             <tr>

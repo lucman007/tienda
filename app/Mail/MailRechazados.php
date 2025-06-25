@@ -33,7 +33,7 @@ class MailRechazados extends Mailable
      */
     public function build()
     {
-        return $this->from('facsy@facturacion.xyz')
+        return $this->from('facsy@coditecdigital.com')
             ->subject('COMPROBANTES RECHAZADOS')
             ->view('mail.estado_comprobantes',['emisor'=>$this->emisor,'num_comprobante'=>$this->num_comprobantes,'domain'=>app()->domain(),'esRechazados'=>true]);
     }

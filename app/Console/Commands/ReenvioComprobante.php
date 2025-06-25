@@ -48,8 +48,8 @@ class ReenvioComprobante extends Command
      */
     public function handle()
     {
-        $cierre_automatico = json_decode(cache('config')['interfaz'], true)['cierre_automatico']??true;
-        if($cierre_automatico){
+        $cierre_automatico = json_decode(cache('config')['interfaz'], true)['cierre_automatico'] ?? true;
+        if ($cierre_automatico) {
             $this->cerrar_caja();
         }
         $this->reenviar_comprobantes();
@@ -71,7 +71,7 @@ class ReenvioComprobante extends Command
 
             DB::table('opciones')->updateOrInsert(
                 ['nombre_opcion' => 'notificacion_creditos'],
-                ['fecha' => date('Y-m-d').' 09:00:00']
+                ['fecha' => date('Y-m-d') . ' 09:00:00']
             );
         }
     }
@@ -186,8 +186,14 @@ class ReenvioComprobante extends Command
                 $suma_total += round($monto * $cantidad, 2);
             }
 
-            $subtotal = round($suma_total / (1 + $porcentaje_igv / 100), 2);
-            $igv = round($suma_total - $subtotal, 2);
+            if ($venta->igv_incluido) {
+                $subtotal = round($suma_total / (1 + $porcentaje_igv / 100), 2);
+                $igv = round($suma_total - $subtotal, 2);
+            } else {
+                $subtotal = round($suma_total, 2);
+                $igv = round($subtotal * ($porcentaje_igv / 100), 2);
+                $suma_total = round($subtotal + $igv, 2);
+            }
 
             $venta_guardada = round($venta->total_venta, 2);
             $fact = $venta->facturacion;

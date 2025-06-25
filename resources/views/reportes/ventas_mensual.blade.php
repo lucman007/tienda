@@ -216,11 +216,11 @@
                         }
                         this.chartValues=[
                             {
-                                data: datos,
+                                data: datos.reverse(),
                                 type: 'line'
                             }
                         ];
-                        this.labels = labels;
+                        this.labels = labels.reverse();
                     }
 
                 },
