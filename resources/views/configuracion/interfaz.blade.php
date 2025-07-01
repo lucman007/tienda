@@ -20,11 +20,6 @@
     </div>
 </div>
 <div class="col-lg-3 mt-3">
-    <b-form-checkbox v-model="interfaz.layout" switch size="lg">
-        <p style="font-size: 14px;">Ancho completo</p>
-    </b-form-checkbox>
-</div>
-<div class="col-lg-3 mt-3">
     <b-form-checkbox v-model="interfaz.igv_incluido" switch size="lg">
         <p style="font-size: 14px;">Igv incluido</p>
     </b-form-checkbox>
@@ -77,6 +72,11 @@
 <div class="col-lg-3 mt-3">
     <b-form-checkbox v-model="interfaz.emitir_como_contado" switch size="lg">
         <p style="font-size: 14px;">Opción de emitir como contado</p>
+    </b-form-checkbox>
+</div>
+<div class="col-lg-3 mt-3">
+    <b-form-checkbox v-model="interfaz.modulo_nota_de_venta" switch size="lg">
+        <p style="font-size: 14px;">Módulo para nota de venta</p>
     </b-form-checkbox>
 </div>
 <div class="col-lg-3 mt-3">
@@ -151,8 +151,7 @@
 <div class="col-lg-4 mt-3">
     <select v-model="interfaz_pedidos.tipo" class="custom-select">
         <option value="modo_1">Interfaz 1</option>
-        <option value="modo_2">Interfaz 2</option>
-        <option value="modo_3">Interfaz 3</option>
+        <option value="modo_2">Interfaz 2 - Facilito</option>
         <option value="modo_4">Interfaz 4</option>
     </select>
 </div>

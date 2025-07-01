@@ -2,7 +2,7 @@
 @section('titulo', 'Caja')
 @section('contenido')
     @php $agent = new \Jenssegers\Agent\Agent() @endphp
-    <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
+    <div class="container-fluid">
         <div class="row">
             <div class="col-md-6 col-lg-8 mb-md-2">
                 <h3 class="titulo-admin-1">Turnos</h3>

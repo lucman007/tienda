@@ -39,12 +39,19 @@ class VentaController extends Controller
         //$this->idcaja = MainHelper::obtener_idcaja();
     }
 
-    public function registrar()
+    public function registrar(Request $request)
     {
         $serie_comprobates = $this->serie_comprobante->getSeries();
         $emisor=new Emisor();
+        $notaDeVenta = filter_var($request->notaDeVenta, FILTER_VALIDATE_BOOLEAN);
 
-        return view('ventas/registrar', [
+        if($notaDeVenta){
+            $view = 'ventas/nota_de_venta';
+        } else {
+            $view = 'ventas/registrar';
+        }
+
+        return view($view, [
             'ruc_emisor'=>json_encode($emisor->ruc),
             'usuario' => auth()->user()->persona,
             'disabledVentas'=>MainHelper::disabledVentas()[1],

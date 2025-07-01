@@ -50,12 +50,19 @@ class ComprobanteController extends Controller
         if($this->solo_comprobantes) {
             $query->where('codigo_tipo_documento','!=','30');
         }
+
+        $modulo_nota_venta = json_decode(cache('config')['interfaz'], true)['modulo_nota_de_venta']??false;
+
+        if($modulo_nota_venta) {
+            $query->where('codigo_tipo_documento','!=','30');
+        }
     }
 
     public function comprobantes(Request $request, $desde=null,$hasta=null){
 
         $filtro = $request->filtro;
         $buscar = $request->buscar;
+        $notasDeVenta = filter_var($request->notasDeVenta, FILTER_VALIDATE_BOOLEAN);
 
         if(!$filtro){
             $filtro='fecha';
@@ -63,7 +70,46 @@ class ComprobanteController extends Controller
             $hasta=date('Y-m-d');
         }
 
-        $ventas=$this->comprobantes_data($desde, $hasta, $filtro, $buscar);
+        if($notasDeVenta){
+            $filtro='documento';
+            $buscar='recibo';
+            $desde='2017-01-01';
+            $hasta=date('Y-m-d');
+
+        }
+
+        if ($notasDeVenta && $texto = trim($request->textoBuscado)) {
+
+            $ventas = Venta::where('eliminado', 0)
+                ->whereHas('facturacion', function ($q) use ($filtro, $buscar) {
+                    $q->where('codigo_tipo_documento','30');
+                })
+                ->where(function ($q) use ($texto) {
+                    $q->whereHas('persona', function ($q2) use ($texto) {
+                        $q2->where('nombre', 'like', "%{$texto}%");
+                    })
+                        ->orWhereHas('facturacion', function ($q3) use ($texto) {
+                            $q3->where('correlativo', 'like', "%{$texto}%");
+                        });
+                })
+                ->orderByDesc('fecha')
+                ->orderByDesc('idventa')
+                ->paginate(30)
+                ->appends(request()->query());
+
+            $ventas = [
+                'usuario' => auth()->user()->persona,
+                'ventas'=>$ventas,
+                'filtros'=>null,
+                'textoBuscado'=>$texto,
+            ];
+
+        } else {
+            $ventas=$this->comprobantes_data($desde, $hasta, $filtro, $buscar);
+            $ventas['textoBuscado'] = "";
+        }
+
+
 
         return view('comprobantes.index',$ventas);
     }

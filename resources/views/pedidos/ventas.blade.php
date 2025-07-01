@@ -4,7 +4,7 @@
     @php
         $codigos_pais = \sysfact\Http\Controllers\Helpers\DataGeneral::getCodigoPais();
     @endphp
-    <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
+    <div class="container-fluid">
         <div class="row">
             <div class="col-lg-8">
                 <h3 class="titulo-admin-1">

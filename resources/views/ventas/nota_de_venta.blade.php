@@ -16,37 +16,14 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-sm-12">
-                <h3 class="titulo-admin-1">Facturación</h3>
-                <b-button
-                        :disabled="comprobante=='07.01' || comprobante=='07.02' || comprobante=='08.01' || comprobante=='08.02'"
-                        @click="abrir_modal('copiar')" class="mr-2" variant="primary"><i class="fas fa-copy"></i> Copiar
-                    de...
-                </b-button>
+                <h3 class="titulo-admin-1">Nota de venta</h3>
             </div>
         </div>
         <div class="row">
             <div class="col-lg-12 mt-4 mb-3">
                 <div class="card">
-                    <div class="card-header">
-                        Datos facturación
-                    </div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-lg-3 form-group">
-                                <label>Comprobante</label>
-                                <select :disabled="inhabilitarComprobante" v-model="comprobante" name="comprobante"
-                                        class="custom-select" id="selectComprobante">
-                                    <option value="30">Ninguno</option>
-                                    @if(!($emitir_solo_ticket || $disabledVentas))
-                                    <option value="03">Boleta</option>
-                                    <option value="01">Factura</option>
-                                    <option value="07.01">Nota de crédito (Boleta)</option>
-                                    <option value="07.02">Nota de crédito (Factura)</option>
-                                    <option value="08.01">Nota de débito (Boleta)</option>
-                                    <option value="08.02">Nota de débito (Factura)</option>
-                                    @endif
-                                </select>
-                            </div>
                             <div class="col-lg-3 form-group">
                                 <label>Serie y correlativo</label>
                                 <div class="row no-gutters">
@@ -72,297 +49,13 @@
                                 </select>
                             </div>
                             <div class="col-lg-2 form-group">
-                                <label>Fecha de emisión</label>
-                                <input type="date" v-model="fecha" min="{{date('Y-m-d', strtotime(date('Y-m-d').' - 2 days'))}}" max="{{date('Y-m-d')}}"
+                                <label>Fecha</label>
+                                <input type="date" v-model="fecha" max="{{date('Y-m-d')}}"
                                        class="form-control">
                             </div>
                             <div class="col-lg-2 form-group">
                                 <label>Tipo de cambio</label>
                                 <input type="text" v-model="tipoCambio"
-                                       class="form-control">
-                            </div>
-                            <div v-show="comprobante == 01" class="col-lg-3 form-group">
-                                <label>Tipo de operación</label>
-                                <select v-model="codigo_tipo_factura" class="custom-select">
-                                    <option value="0101">Venta interna</option>
-                                    <option value="0200">Exportación de bienes</option>
-                                    <option value="1001">Operación sujeta a detracción</option>
-                                    <option value="1">Operación sujeta a retención</option>
-                                </select>
-                            </div>
-                            <div v-show="codigo_tipo_factura=='1001'" class="col-lg-3 form-group">
-                                <label>Bienes y servicios sujetos a detracción</label>
-                                <select v-model="tipoDetraccion" class="custom-select">
-                                    {{--<option value="001/10">Azúcar y melaza de caña - 10%</option>
-                                    <option value="003/10">Alcohol etílico - 10%</option>
-                                    <option value="005/4">Maíz amarillo duro - 4%</option>
-                                    <option value="007/10">Caña de azúcar - 10%</option>
-                                    <option value="008/4">Madera - 4%</option>
-                                    <option value="009/10">Arena y piedra. - 10%</option>--}}
-				    <option value="010/15">Residuos, subproductos, desechos, recortes y desperdicios - 15%</option>
-                                    <option value="019/10">Arrendamiento de bienes muebles - 10%</option>
-                                    <option value="020/12">Mantenimiento y reparación de bienes muebles - 12%</option>
-                                    <option value="022/12">Otros servicios empresariales - 12%</option>
-                                    <option value="025/10">Fabricación de bienes por encargo - 10%</option>
-                                    <option value="027/4">Servicio de transporte de carga - 4%</option>
-                                    <option value="030/4">Contratos de construcción - 4%</option>
-                                    <option value="037/12">Demás servicios gravados con el IGV - 12%</option>
-                                </select>
-                            </div>
-                            <div v-show="comprobante==01 || comprobante==03 || comprobante==30" class="col-lg-3 form-group">
-                                <label>N° orden de compra</label>
-                                <input type="text" v-model="numeroOc" name="numeroOc"
-                                       placeholder="Número orden de compra"
-                                       class="form-control">
-                            </div>
-                            <div v-show="comprobante==01" class="col-lg-3 form-group">
-                                <label class="d-block">Guías relacionadas</label>
-                                <b-button @click="abrir_modal('guias')" variant="primary"><i
-                                            class="fas fa-plus"></i> Agregar guías (@{{guiasRelacionadas.length}})
-                                </b-button>
-                            </div>
-                            <div v-show="comprobante=='01'" class="col-lg-3 form-group">
-                                <b-form-checkbox style="margin-top: 18px" v-model="esConGuia" switch size="sm">
-                                    Crear guía electrónica
-                                </b-form-checkbox>
-                            </div>
-                            <div v-show="comprobante=='30'" class="col-lg-3 form-group">
-                                <b-form-checkbox style="margin-top: 25px" v-model="esAdelanto" switch size="sm" :disabled="productosSeleccionados.length > 0" @change="agregar_nr('00ADT')">
-                                    Adelanto de pago
-                                </b-form-checkbox>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div v-show="esConGuia" class="col-lg-12 mb-3">
-                <div class="card">
-                    <div class="card-header">
-                        Datos guía electrónica
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-lg-2 form-group">
-                                <label>Fecha de emisión</label>
-                                <input disabled type="date" v-model="fecha" name="fecha" class="form-control">
-                            </div>
-                            <div class="col-lg-3 form-group">
-                                <label>Serie y correlativo</label>
-                                <input disabled type="text" v-model="numeroGuia" class="form-control">
-                            </div>
-                            <div class="col-lg-3 form-group">
-                                <label>Documento relacionado</label>
-                                <select v-model="guia_datos_adicionales.doc_relacionado" class="custom-select">
-                                    @php
-                                        $doc_relacionado = \sysfact\Http\Controllers\Helpers\DataGuia::getDocumentoRelacionado();
-                                    @endphp
-                                    <option value="-1">Ninguno</option>
-                                    @foreach($doc_relacionado as $item)
-                                        <option value="{{$item['num_val']}}">{{$item['label']}}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div v-show="guia_datos_adicionales.doc_relacionado!='-1'" class="col-lg-3 form-group">
-                                <label>N° documento relacionado</label>
-                                <input type="text" v-model="guia_datos_adicionales.num_doc_relacionado" placeholder="Número documento relacionado"
-                                       class="form-control">
-                            </div>
-                            <div class="col-lg-6 form-group">
-                                <label>Dirección de llegada</label>
-                                <div class="row">
-                                    <div class="col-lg-4">
-                                        <b-form-checkbox @change="cambiarDireccionGuia" v-model="domicilioFiscalCliente" switch size="sm">
-                                            Domicilio fiscal cliente
-                                        </b-form-checkbox>
-                                    </div>
-                                    <div class="col-lg-8">
-                                        <input :disabled="domicilioFiscalCliente" maxlength="100" type="text" v-model="guia_datos_adicionales.direccion"
-                                               name="direccion"
-                                               class="form-control" placeholder="*Máximo 100 caracteres">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-2 form-group">
-                                <label>Ubigeo</label>
-                                <b-input-group>
-                                    <input disabled type="text" v-model="guia_datos_adicionales.ubigeo" class="form-control">
-                                    <b-input-group-append>
-                                        <b-button v-b-modal.modal-ubigeo variant="primary">
-                                            <i class="fas fa-search"></i>
-                                        </b-button>
-                                    </b-input-group-append>
-                                </b-input-group>
-                            </div>
-                            <div class="col-lg-2 form-group">
-                                <label>Peso</label>
-                                <b-input-group>
-                                    <input type="number" v-model="guia_datos_adicionales.peso" name="peso"
-                                           class="form-control">
-                                    <b-input-group-append>
-                                        <b-input-group-text>
-                                            KG
-                                        </b-input-group-text>
-                                    </b-input-group-append>
-                                </b-input-group>
-                            </div>
-                            <div class="col-lg-2 form-group">
-                                <label>Bultos</label>
-                                <b-input-group>
-                                    <input type="number" v-model="guia_datos_adicionales.bultos" name="bultos"
-                                           class="form-control">
-                                    <b-input-group-append>
-                                        <b-input-group-text>
-                                            UND
-                                        </b-input-group-text>
-                                    </b-input-group-append>
-                                </b-input-group>
-                            </div>
-                            <div class="col-lg-2 form-group">
-                                <label>Tipo de transporte</label>
-                                <select v-model="guia_datos_adicionales.tipo_transporte" class="custom-select">
-                                    <option value="01">Público</option>
-                                    <option value="02">Privado</option>
-                                </select>
-                            </div>
-                            <div class="col-lg-2 form-group">
-                                <label>Categoría</label>
-                                <select v-model="guia_datos_adicionales.categoria_vehiculo" class="custom-select">
-                                    <option value="M1_L">Vehículo M1 o L (De 2 ó 3 ruedas, o menor a 8 asientos)</option>
-                                    <option value="otros">Otros</option>
-                                </select>
-                            </div>
-                            <div v-show="guia_datos_adicionales.tipo_transporte == '02'" class="col-lg-1 form-group">
-                                <label>Placa</label>
-                                <input type="text" v-model="guia_datos_adicionales.placa_vehiculo"
-                                       class="form-control">
-                            </div>
-                            <div class="col-lg-8" v-show="guia_datos_adicionales.tipo_transporte == '01' && guia_datos_adicionales.categoria_vehiculo != 'M1_L'">
-                                <div class="row">
-                                    <div class="col-lg-3 form-group">
-                                        <label>Ruc de transportista</label>
-                                        <b-input-group>
-                                            <input @keyup.enter="consultaRucDni(guia_datos_adicionales.tipo_doc_transportista,guia_datos_adicionales.num_doc_transportista)" type="number" v-model="guia_datos_adicionales.num_doc_transportista"
-                                                   class="form-control">
-                                            <b-input-group-append>
-                                                <b-button :disabled="guia_datos_adicionales.num_doc_transportista.length==0" @click="consultaRucDni(guia_datos_adicionales.tipo_doc_transportista,guia_datos_adicionales.num_doc_transportista)" variant="primary" >
-                                                    <span v-show="!spinnerRuc"><i class="fas fa-search"></i></span>
-                                                    <b-spinner v-show="spinnerRuc" small label="Loading..." ></b-spinner>
-                                                </b-button>
-                                            </b-input-group-append>
-                                        </b-input-group>
-
-                                    </div>
-                                    <div class="col-lg-6 form-group">
-                                        <label>Razón social transportista</label>
-                                        <input type="text" v-model="guia_datos_adicionales.razon_social_transportista"
-                                               class="form-control">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-7" v-show="guia_datos_adicionales.tipo_transporte == '02' && guia_datos_adicionales.categoria_vehiculo != 'M1_L'">
-                                <div class="row">
-                                    <div class="col-lg-3 form-group">
-                                        <label>Licencia de cond.</label>
-                                        <input type="text" v-model="guia_datos_adicionales.licencia_conductor"
-                                               class="form-control">
-                                    </div>
-                                    <div class="col-lg-3 form-group">
-                                        <label>DNI del conductor</label>
-                                        <b-input-group>
-                                            <input @keyup.enter="consultaRucDni(1,guia_datos_adicionales.dni_conductor)" type="number" v-model="guia_datos_adicionales.dni_conductor"
-                                                   class="form-control">
-                                            <b-input-group-append>
-                                                <b-button :disabled="guia_datos_adicionales.dni_conductor.length==0" @click="consultaRucDni(1,guia_datos_adicionales.dni_conductor)" variant="primary" >
-                                                    <span v-show="!spinnerRuc"><i class="fas fa-search"></i></span>
-                                                    <b-spinner v-show="spinnerRuc" small label="Loading..." ></b-spinner>
-                                                </b-button>
-                                            </b-input-group-append>
-                                        </b-input-group>
-                                    </div>
-                                    <div class="col-lg-3 form-group">
-                                        <label>Nombres</label>
-                                        <input type="text" v-model="guia_datos_adicionales.nombre_conductor"
-                                               class="form-control">
-                                    </div>
-                                    <div class="col-lg-3 form-group">
-                                        <label>Apellidos</label>
-                                        <input type="text" v-model="guia_datos_adicionales.apellido_conductor"
-                                               class="form-control">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-4 form-group">
-                                <label>Motivo de traslado</label>
-                                <select v-model="guia_datos_adicionales.codigo_traslado" class="custom-select">
-                                    @php
-                                        $motivo_traslado = \sysfact\Http\Controllers\Helpers\DataGuia::getMotivoTraslado();
-                                    @endphp
-                                    @foreach($motivo_traslado as $item)
-                                        <option value="{{$item['num_val']}}">{{$item['label']}}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-lg-2 form-group">
-                                <label>Fecha traslado</label>
-                                <input type="date" v-model="guia_datos_adicionales.fecha_traslado" class="form-control">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-12 mb-3"
-                 v-show="comprobante=='07.01' || comprobante=='07.02' || comprobante=='08.01' || comprobante=='08.02'">
-                <div class="card">
-                    <div class="card-header">
-                        Documento relacionado
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-lg-3 form-group">
-                                <label>Tipo</label>
-                                <select :disabled="inhabilitarComprobante" v-show="comprobante=='07.01' || comprobante=='07.02'"
-                                        v-model="tipo_nota_electronica" class="custom-select"
-                                        id="selectMotivo">
-                                    <option value="01">Anulación de la operación</option>
-                                    <option value="02">Anulación por error en el RUC</option>
-                                    <option value="13">Ajustes – montos y/o fechas de pago</option>
-                                    {{--<option value="03">Corrección por error en la descripción</option>
-                                    <option v-show="comprobante != '07.01'" value="04">Descuento global</option>--}}
-                                    <option v-show="comprobante != '07.01'" value="04">Descuento global</option>
-                                    <option v-show="comprobante != '07.01'" value="05">Descuento por ítem</option>
-                                    {{--<option value="06">Devolución total</option>--}}
-                                    <option value="07">Devolución por ítem</option>
-                                    {{--<option value="10">Otros conceptos</option>--}}
-                                </select>
-                                <select v-show="comprobante=='08.01' || comprobante=='08.02'"
-                                        v-model="tipo_nota_electronica" class="custom-select"
-                                        id="selectMotivo">
-                                    <option value="01">Intereses por mora</option>
-                                    <option value="02">Aumento en el valor</option>
-                                    <option value="03">Penalidades/Otros conceptos</option>
-                                </select>
-                            </div>
-                            <div class="col-lg-4 form-group">
-                                <label>Documento que modifica</label>
-                                <b-input-group>
-                                    <input disabled type="text" v-model="comprobanteReferencia"
-                                           placeholder="Serie y correlativo"
-                                           class="form-control">
-                                    <b-input-group-append>
-                                        <b-button @click="abrir_modal('nota')" variant="primary">
-                                            Seleccionar
-                                        </b-button>
-                                    </b-input-group-append>
-                                </b-input-group>
-                            </div>
-                            <div class="col-lg-5 form-group">
-                                <label>Motivo</label>
-                                <input autocomplete="nope" type="text" v-model="motivo" placeholder="Descripcion breve"
-                                       class="form-control">
-                            </div>
-                            <div class="col-lg-3 form-group" v-show="tipo_nota_electronica == '02'">
-                                <label>Correlativo de la nueva factura</label>
-                                <input autocomplete="nope" type="text" v-model="doc_relacionado_nc" placeholder="Serie-correlativo"
                                        class="form-control">
                             </div>
                         </div>
@@ -375,9 +68,6 @@
                    comprobante == '03' ||
                    ((comprobante == '08.01' || comprobante == '08.02') && comprobanteReferencia != '')">
                 <div class="card">
-                    <div class="card-header">
-                        Detalle
-                    </div>
                     <div class="card-body">
                         <div class="row">
                             @if(json_decode(cache('config')['interfaz'], true)['buscador_clientes'] == 1)
@@ -545,13 +235,8 @@
                             </table>
                         @endif
                         <div class="dropdown-divider"></div>
-                        <div class="row  mt-3">
-                            <div class="col-lg-2 mb-2">
-                                <b-button :disabled="productosSeleccionados.length==0 || gravadas <= 0" class="w-100" v-b-modal.modal-descuento @click="editarItem()" variant="success">
-                                    <i class="fas fa-percentage"></i> Descuento global: @{{tipo_descuento_global?porcentaje_descuento_global+'%':moneda+' '+(Number(monto_descuento_global)).toFixed(2)}}
-                                </b-button>
-                            </div>
-                            <div class="col-lg-10">
+                        <div class="row mt-3">
+                            <div class="col-lg-12">
                                 <div class="form-group">
                                     <input class="form-control"
                                            v-model="doc_observacion" type="text" placeholder="Observación">
@@ -683,8 +368,6 @@
                                         </b-button>
                                     </div>
                                 </div>
-                                <button v-show="!esAdelanto && (comprobante == '03' || comprobante == '01' || comprobante == '30')" @click="abrir_modal('adelantos')" class="btn btn-info"><i class="fas fa-search-plus"></i> Buscar adelantos
-                                </button>
                                 <div class="alert alert-primary mt-3" v-if="Object.keys(objAdelanto).length > 0">
                                     Adelanto: @{{ objAdelanto.total_venta }} - @{{objAdelanto.serie}}-@{{objAdelanto.correlativo}}
                                 </div>
@@ -1817,7 +1500,7 @@
                                             text: response.data.respuesta,
                                             timer: 60000,
                                         }).then(() => {
-                                            location.href = '/facturacion/documento/' + response.data.idventa;
+                                            location.href = '/facturacion/documento/' + response.data.idventa + '?notaDeVenta=true';
                                         });
                                     }
                                 })

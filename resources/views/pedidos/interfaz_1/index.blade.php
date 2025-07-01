@@ -10,7 +10,7 @@
         $tipo_cambio_compra = cache('opciones')['tipo_cambio_compra'];
         $unidad_medida = \sysfact\Http\Controllers\Helpers\DataUnidadMedida::getUnidadMedida();
     @endphp
-    <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}} interfaz_3">
+    <div class="container-fluid interfaz_3">
         <div class="row no-gutters">
             <div class="col-lg-4" style="z-index: 9;">
                 <div class="card">

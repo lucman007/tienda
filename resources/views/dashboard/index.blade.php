@@ -1,7 +1,7 @@
 @extends('layouts.main')
 @section('titulo', 'Dashboard')
 @section('contenido')
-    <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
+    <div class="container-fluid">
         <div class="row">
             <div class="col-lg-4">
                 <div class="card">

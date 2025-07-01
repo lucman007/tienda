@@ -1,7 +1,7 @@
 @extends('layouts.main')
 @section('titulo', 'Resumen diario')
 @section('contenido')
-    <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
+    <div class="container-fluid">
         <div class="row">
             <div class="col-lg-9">
                 <h3 class="titulo-admin-1">Reporte de productos</h3>

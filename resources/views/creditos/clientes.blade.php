@@ -2,7 +2,7 @@
 @section('titulo', 'Créditos')
 @section('contenido')
     @php $agent = new \Jenssegers\Agent\Agent() @endphp
-    <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
+    <div class="container-fluid">
         <div class="row">
             <div class="col-sm-12">
                 <div class="card">

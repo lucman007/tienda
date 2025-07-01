@@ -1,15 +1,19 @@
 @extends('layouts.main')
 @section('titulo', 'Comprobantes')
 @section('contenido')
-    @php $agent = new \Jenssegers\Agent\Agent() @endphp
-    <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
+    @php
+        $agent = new \Jenssegers\Agent\Agent();
+        $notasDeVenta = isset($_GET['notasDeVenta']) && $_GET['notasDeVenta'] == 'true';
+    @endphp
+    <div class="container-fluid">
         <div class="row">
             <div class="col-lg-9">
-                <h3 class="titulo-admin-1">Comprobantes</h3>
+                <h3 class="titulo-admin-1">{{$notasDeVenta?'Notas de venta':'Comprobantes'}}</h3>
             </div>
         </div>
         <div class="row">
             <div class="col-lg-2 mb-2 mb-lg-0">
+                @if(!$notasDeVenta)
                 <b-dropdown variant="primary">
                     <template #button-content>
                         <i class="fas fa-ellipsis-v"></i> Opciones
@@ -20,117 +24,132 @@
                     <b-dropdown-item href="{{action('ReporteController@reporte_ventas')}}"><i class="fas fa-chart-line"></i> Reporte de ventas</b-dropdown-item>
                     <b-dropdown-item href="{{action('GuiaController@index')}}"><i class="fas fa-dolly"></i> Guía de remisión</b-dropdown-item>
                 </b-dropdown>
+                @endif
                 @can('Facturación: facturar')
-                <a href="{{action('VentaController@registrar')}}" class="btn btn-primary">
+                <a href="{{action('VentaController@registrar')}}{{$notasDeVenta?'?notaDeVenta=true':''}}" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Nuevo
                 </a>
                 @endcan
             </div>
-            <div class="col-lg-10">
-                <div class="row">
-                    <div class="col-lg-3 mb-2 mb-lg-0">
-                        <b-input-group>
-                            <b-input-group-prepend>
-                                <b-input-group-text>
-                                    <i class="fas fa-filter"></i>
-                                </b-input-group-text>
-                            </b-input-group-prepend>
-                            <select v-model="filtro" class="custom-select">
-                                <option value="fecha">Fecha</option>
-                                <option value="documento">Comprobante</option>
-                                <option value="tipo-de-pago">Tipo de pago</option>
-                                <option value="moneda">Moneda</option>
-                                <option value="estado">Estado</option>
-                                <option value="cliente">Cliente</option>
-                            </select>
-                        </b-input-group>
-                    </div>
-                    <div class="col-lg-2 mb-2 mb-lg-0" v-show="filtro=='documento'">
-                        <b-input-group>
-                            <b-input-group-prepend>
-                                <b-input-group-text>
-                                    <i class="fas fa-check"></i>
-                                </b-input-group-text>
-                            </b-input-group-prepend>
-                            <select @change="filtrar" v-model="buscar" class="custom-select">
-                                <option value="n">Seleccionar</option>
-                                <option value="boleta">Boleta</option>
-                                <option value="factura">Factura</option>
-                                <option value="nota-de-credito">Nota de crédito</option>
-                                <option value="nota-de-debito">Nota de débito</option>
-                                <option value="recibo">Recibo</option>
-                            </select>
-                        </b-input-group>
-                    </div>
-                    <div class="col-lg-2 mb-2 mb-lg-0" v-show="filtro=='tipo-de-pago'">
-                        <b-input-group>
-                            <b-input-group-prepend>
-                                <b-input-group-text>
-                                    <i class="fas fa-check"></i>
-                                </b-input-group-text>
-                            </b-input-group-prepend>
-                            <select @change="filtrar" v-model="buscar" class="custom-select">
-                                <option value="n">Seleccionar</option>
-                                @php
-                                $tipo_pago = \sysfact\Http\Controllers\Helpers\DataTipoPago::getTipoPago();
-                                @endphp
-                                @foreach($tipo_pago as $pago)
-                                    @if($pago['num_val'] != 4)
-                                        <option value="{{$pago['text_val']}}">{{$pago['label']}}</option>
-                                    @endif
-                                @endforeach
-                            </select>
-                        </b-input-group>
-                    </div>
-                    <div class="col-lg-2 mb-2 mb-lg-0" v-show="filtro=='moneda'">
-                        <b-input-group>
-                            <b-input-group-prepend>
-                                <b-input-group-text>
-                                    <i class="fas fa-check"></i>
-                                </b-input-group-text>
-                            </b-input-group-prepend>
-                            <select @change="filtrar" v-model="buscar" class="custom-select">
-                                <option value="n">Seleccionar</option>
-                                <option value="pen">PEN</option>
-                                <option value="usd">USD</option>
-                            </select>
-                        </b-input-group>
-                    </div>
-                    <div class="col-lg-2 mb-2 mb-lg-0" v-show="filtro=='estado'">
-                        <b-input-group>
-                            <b-input-group-prepend>
-                                <b-input-group-text>
-                                    <i class="fas fa-check"></i>
-                                </b-input-group-text>
-                            </b-input-group-prepend>
-                            <select @change="filtrar" v-model="buscar" class="custom-select">
-                                <option value="n">Seleccionar</option>
-                                <option value="pendiente">Pendiente</option>
-                                <option value="aceptado">Aceptado</option>
-                                <option value="anulado">Anulado</option>
-                                <option value="rechazado">Rechazado</option>
-                            </select>
-                        </b-input-group>
-                    </div>
-                    <div class="col-lg-5 form-group mb-2 mb-lg-0" v-show="filtro=='cliente'">
-                        <b-input-group>
-                            <b-input-group-prepend>
-                                <b-input-group-text>
-                                    <i class="fas fa-user"></i>
-                                </b-input-group-text>
-                            </b-input-group-prepend>
-                            <input v-model="buscar" type="text" class="form-control" placeholder="Buscar..." @keyup="buscar_cliente">
-                            <b-input-group-append>
-                                <b-button :disabled="buscar.length==0" @click="filtrar" variant="primary" ><i class="fas fa-search"></i></b-button>
-                            </b-input-group-append>
-                        </b-input-group>
-                    </div>
-                    <div class="col-lg-3 form-group">
-                        <range-calendar :inicio="desde + ' 00:00:00'" :fin="hasta + ' 00:00:00'" v-on:setparams="setParams"></range-calendar>
+            @if($notasDeVenta)
+                <div class="offset-lg-7 col-lg-3 mb-2 mb-lg-4">
+                    @include('comprobantes.buscador')
+                </div>
+            @else
+                <div class="col-lg-10">
+                    <div class="row">
+                        <div class="col-lg-3 mb-2 mb-lg-0">
+                            <b-input-group>
+                                <b-input-group-prepend>
+                                    <b-input-group-text>
+                                        <i class="fas fa-filter"></i>
+                                    </b-input-group-text>
+                                </b-input-group-prepend>
+                                <select v-model="filtro" class="custom-select">
+                                    <option value="fecha">Fecha</option>
+                                    <option value="documento">Comprobante</option>
+                                    <option value="tipo-de-pago">Tipo de pago</option>
+                                    <option value="moneda">Moneda</option>
+                                    <option value="estado">Estado</option>
+                                    <option value="cliente">Cliente</option>
+                                </select>
+                            </b-input-group>
+                        </div>
+                        <div class="col-lg-2 mb-2 mb-lg-0" v-show="filtro=='documento'">
+                            <b-input-group>
+                                <b-input-group-prepend>
+                                    <b-input-group-text>
+                                        <i class="fas fa-check"></i>
+                                    </b-input-group-text>
+                                </b-input-group-prepend>
+                                <select @change="filtrar" v-model="buscar" class="custom-select">
+                                    <option value="n">Seleccionar</option>
+                                    <option value="boleta">Boleta</option>
+                                    <option value="factura">Factura</option>
+                                    <option value="nota-de-credito">Nota de crédito</option>
+                                    <option value="nota-de-debito">Nota de débito</option>
+                                    <option value="recibo">Recibo</option>
+                                </select>
+                            </b-input-group>
+                        </div>
+                        <div class="col-lg-2 mb-2 mb-lg-0" v-show="filtro=='tipo-de-pago'">
+                            <b-input-group>
+                                <b-input-group-prepend>
+                                    <b-input-group-text>
+                                        <i class="fas fa-check"></i>
+                                    </b-input-group-text>
+                                </b-input-group-prepend>
+                                <select @change="filtrar" v-model="buscar" class="custom-select">
+                                    <option value="n">Seleccionar</option>
+                                    @php
+                                        $tipo_pago = \sysfact\Http\Controllers\Helpers\DataTipoPago::getTipoPago();
+                                    @endphp
+                                    @foreach($tipo_pago as $pago)
+                                        @if($pago['num_val'] != 4)
+                                            <option value="{{$pago['text_val']}}">{{$pago['label']}}</option>
+                                        @endif
+                                    @endforeach
+                                </select>
+                            </b-input-group>
+                        </div>
+                        <div class="col-lg-2 mb-2 mb-lg-0" v-show="filtro=='moneda'">
+                            <b-input-group>
+                                <b-input-group-prepend>
+                                    <b-input-group-text>
+                                        <i class="fas fa-check"></i>
+                                    </b-input-group-text>
+                                </b-input-group-prepend>
+                                <select @change="filtrar" v-model="buscar" class="custom-select">
+                                    <option value="n">Seleccionar</option>
+                                    <option value="pen">PEN</option>
+                                    <option value="usd">USD</option>
+                                </select>
+                            </b-input-group>
+                        </div>
+                        <div class="col-lg-2 mb-2 mb-lg-0" v-show="filtro=='estado'">
+                            <b-input-group>
+                                <b-input-group-prepend>
+                                    <b-input-group-text>
+                                        <i class="fas fa-check"></i>
+                                    </b-input-group-text>
+                                </b-input-group-prepend>
+                                <select @change="filtrar" v-model="buscar" class="custom-select">
+                                    <option value="n">Seleccionar</option>
+                                    <option value="pendiente">Pendiente</option>
+                                    <option value="aceptado">Aceptado</option>
+                                    <option value="anulado">Anulado</option>
+                                    <option value="rechazado">Rechazado</option>
+                                </select>
+                            </b-input-group>
+                        </div>
+                        <div class="col-lg-5 form-group mb-2 mb-lg-0" v-show="filtro=='cliente'">
+                            <b-input-group>
+                                <b-input-group-prepend>
+                                    <b-input-group-text>
+                                        <i class="fas fa-user"></i>
+                                    </b-input-group-text>
+                                </b-input-group-prepend>
+                                <input v-model="buscar" type="text" class="form-control" placeholder="Buscar..." @keyup="buscar_cliente">
+                                <b-input-group-append>
+                                    <b-button :disabled="buscar.length==0" @click="filtrar" variant="primary" ><i class="fas fa-search"></i></b-button>
+                                </b-input-group-append>
+                            </b-input-group>
+                        </div>
+                        <div class="col-lg-3 form-group">
+                            <range-calendar :inicio="desde + ' 00:00:00'" :fin="hasta + ' 00:00:00'" v-on:setparams="setParams"></range-calendar>
+                        </div>
                     </div>
                 </div>
-            </div>
+            @endif
         </div>
+        @if($textoBuscado!='')
+            <div class="row">
+                <div class="col-lg-12 mt-2">
+                    <div class="alert alert-dark" role="alert"><h5 class="mb-0">Resultados de búsqueda para: {{$textoBuscado}}
+                            <a href="{{url('/comprobantes?notasDeVenta=true')}}"><i class="fa fa-times float-right"></i></a></h5></div>
+                </div>
+            </div>
+        @endif
         <div class="row">
             <div class="col-sm-12">
                 <div class="card">
@@ -212,7 +231,7 @@
                                                 @endif
                                             </td>
                                             <td class="botones-accion" style="width: 10%" @click.stop>
-                                                <a href="{{url('facturacion/documento').'/'.$venta->idventa}}">
+                                                <a href="{{url('facturacion/documento').'/'.$venta->idventa}}{{$notasDeVenta?'?notaDeVenta=true':''}}">
                                                     <button class="btn btn-info" title="Ver detalle de venta">
                                                         <i class="fas fa-folder-open"></i>
                                                     </button>

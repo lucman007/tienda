@@ -32,6 +32,7 @@
     $color = json_decode(cache('config')['interfaz'], true)['text_top_header_style']??'';
     $interfaz = json_decode(cache('config')['interfaz_pedidos'], true)['tipo'];
     $agent = new \Jenssegers\Agent\Agent();
+    $modulo_nota_venta = json_decode(cache('config')['interfaz'], true)['modulo_nota_de_venta']??false;
     if($interfaz == 'modo_2'){
         $ruta = 'facilito/';
     } else {
@@ -48,7 +49,7 @@
             </div>
             <div style="width: 100%">
                 <div class="top-header d-none d-lg-block" style="background: linear-gradient(180deg, rgba(116,34,132,1) 0%, rgba(82,34,108,1) 100%);">
-                    <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
+                    <div class="container-fluid">
                         <div class="row no-gutters">
                             <div class="col-sm-12">
                                 <div class="float-left">
@@ -78,7 +79,7 @@
                     </div>
                 </div>
                 <div class="middle-header" style="background: linear-gradient(180deg, rgba(116,34,132,1) 0%, rgba(82,34,108,1) 100%);">
-                    <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
+                    <div class="container-fluid">
                         <div>
                             <b-navbar toggleable="lg" type="dark">
                                 <b-navbar-brand class="d-lg-none" href="/"><img src="{{url('images/logo-facilito.png')}}" alt=""></b-navbar-brand>
@@ -190,7 +191,7 @@
     @else
     <header class="fixed-top">
         <div class="top-header d-none d-lg-block" style="{{json_decode(cache('config')['interfaz'], true)['top_header_style']}}">
-            <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
+            <div class="container-fluid">
                 <div class="row no-gutters">
                     <div class="col-sm-12">
                         <div class="float-left">
@@ -220,7 +221,7 @@
             </div>
         </div>
         <div class="middle-header" style="{{json_decode(cache('config')['interfaz'], true)['bottom_header_style']}}">
-            <div class="{{json_decode(cache('config')['interfaz'], true)['layout']?'container-fluid':'container'}}">
+            <div class="container-fluid">
                 <div>
                     <b-navbar toggleable="lg" type="dark">
                         <b-navbar-brand href="/"><img src="{{url('images/'.cache('config')['logo_sistema'])}}" alt=""></b-navbar-brand>
@@ -257,6 +258,9 @@
                                         </template>
                                         <b-dropdown-item @cannot('Facturación: comprobantes') class="disabled" disabled @endcannot href="{{action('ComprobanteController@comprobantes')}}"><i class="fas fa-file-invoice-dollar"></i> Comprobantes emitidos</b-dropdown-item>
                                         <b-dropdown-item @cannot('Facturación: guía') class="disabled" disabled @endcannot href="{{action('GuiaController@index')}}"><i class="fas fa-shipping-fast"></i> Guía de remisión electrónica</b-dropdown-item>
+                                        @if($modulo_nota_venta)
+                                        <b-dropdown-item href="{{url("comprobantes?notasDeVenta=true")}}"><i class="fas fa-file-edit"></i> Nota de venta</b-dropdown-item>
+                                        @endif
                                     </b-nav-item-dropdown>
                                     <b-nav-item @cannot('Cotizaciones') class="disabled" disabled @endcannot href="{{action('PresupuestoController@index')}}">
                                         <img src="{{url('images/menubar/icons/cotizar.png')}}" alt="">
