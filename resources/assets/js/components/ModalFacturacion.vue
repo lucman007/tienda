@@ -368,25 +368,32 @@
             borrarCuota(index){
                 this.cuotasAux.splice(index, 1);
             },
-            agregarCuotasVenta(){
+            agregarCuotasVenta() {
+              const totalCuotas = this.cuotasAux
+                  .reduce((t, c) => t + parseFloat(c.monto || 0), 0);
 
-                for (let cuota of this.cuotasAux) {
-                    if ((Number(cuota.monto)) <= 0) {
-                        alert('Solo se admiten casillas con cuotas mayor a 0.00');
-                        return;
-                    }
-                    if (!cuota.fecha) {
-                        alert('Una de las fechas de pago no tiene el formato correcto');
-                        return;
-                    }
-                    if(cuota.fecha < this.fecha){
-                        alert('Las fechas de las cuotas deben ser mayor a la fecha actual');
-                        return;
-                    }
+              if (Math.abs(totalCuotas - parseFloat(this.total_venta)) > 0.01) {
+                alert('La suma de las cuotas debe ser igual al total de la venta');
+                return;
+              }
+
+              for (let cuota of this.cuotasAux) {
+                if ((Number(cuota.monto)) <= 0) {
+                  alert('Solo se admiten casillas con cuotas mayor a 0.00');
+                  return;
                 }
+                if (!cuota.fecha) {
+                  alert('Una de las fechas de pago no tiene el formato correcto');
+                  return;
+                }
+                if (cuota.fecha < this.fecha) {
+                  alert('Las fechas de las cuotas deben ser mayor a la fecha actual');
+                  return;
+                }
+              }
 
-                this.cuotas = Object.assign([], this.cuotasAux);
-                this.$refs['modal-tipopago'].hide();
+              this.cuotas = Object.assign([], this.cuotasAux);
+              this.$refs['modal-tipopago'].hide();
 
             },
             cancelarCuotas(){

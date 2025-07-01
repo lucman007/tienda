@@ -15,7 +15,7 @@
             <div class="texto">
                 <p>
                     <strong>{{$emisor->nombre_comercial?$emisor->nombre_comercial:$emisor->nombre_publicitario}}</strong><br>
-                    <strong>{{json_decode(cache('config')['impresion'], true)['ocultar_razon_social']?'':$emisor->razon_social}}</strong><br>
+                    <strong>{{(json_decode(cache('config')['impresion'], true)['ocultar_razon_social']??false)?'':$emisor->razon_social}}</strong><br>
                     R.U.C. {{$emisor->ruc}}<br>{{$emisor->direccion}}, {{$emisor->urbanizacion==''?'':$emisor->urbanizacion.','}} {{$emisor->provincia}},
                     {{$emisor->departamento}}, {{$emisor->distrito}} <br> {{$emisor->telefono_1}}<br>
                     <strong>NOTA DE VENTA {{$documento->facturacion->serie}}-{{$documento->facturacion->correlativo}}</strong>
