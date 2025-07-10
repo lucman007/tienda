@@ -79,8 +79,13 @@
             <tbody>
             @foreach($items as $item)
                 <tr class="items-tr">
+                    @php
+                        $desc = (!empty($item->cod_producto) && $item->cod_producto !== '00NR')
+                            ? "{$item->cod_producto} - "
+                            : '';
+                    @endphp
                     <td style="width: 5mm">{{$item->detalle->num_item}}</td>
-                    <td style="width: 88mm">{{$item->nombre}} {!! $item->detalle->descripcion !!}</td>
+                    <td style="width: 88mm">{{($desc)}} {!! $item->nombre.' '.strtoupper($item->detalle->descripcion) !!}</td>
                     <td style="width: 12mm">{{$item->detalle->cantidad}}</td>
                     <td style="width: 10mm">{{explode('/',$item->unidad_medida)[1]}}</td>
                     <td style="width: 20mm; text-align: right">{{$item->detalle->monto}}</td>

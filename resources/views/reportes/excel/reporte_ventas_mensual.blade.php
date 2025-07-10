@@ -9,7 +9,7 @@
         @endif
         <th scope="col">Impuestos</th>
         <th scope="col">Ventas netas</th>
-        <th scope="col">Costo de bienes</th>
+        <th scope="col">Precio compra</th>
         <th scope="col">Utilidad bruta</th>
     </tr>
     </thead>

@@ -461,8 +461,10 @@
                                 <td>{{ $venta->codigo_moneda }} {{ $venta->facturacion['total_gravadas'] }}</td>
                             </tr>
                             <tr>
+                                @if(!$notaDeVenta)
                                 <td style="width: 50%">IGV:</td>
                                 <td>{{ $venta->codigo_moneda }} {{ $venta->facturacion['igv'] }}</td>
+                                @endif
                             </tr>
                         </table>
                         <p class="p-2 mt-2 total-venta" style="margin-top:140px;">{{ $venta->codigo_moneda }} {{ $venta->total_venta }}</p>

@@ -104,6 +104,15 @@
                 @endif
             </tbody>
         </table>
+        @if($documento->observacion)
+        <table class="items">
+            <tbody>
+                <tr>
+                    <td colspan="7">Observación: {{$documento->observacion}}</td>
+                </tr>
+            </tbody>
+        </table>
+        @endif
         <table class="footer">
             <tr>
                 <td class="footer-l">
@@ -122,10 +131,12 @@
                             <td>Total valor venta gravado:</td>
                             <td style="width: 28mm; text-align: right">{{$documento->codigo_moneda}} {{$documento->facturacion->total_gravadas}}</td>
                         </tr>
+                        @if($documento->facturacion->igv != 0)
                         <tr>
                             <td>Total IGV 18%:</td>
                             <td style="width: 28mm; text-align: right">{{$documento->codigo_moneda}} {{$documento->facturacion->igv}}</td>
                         </tr>
+                        @endif
                         <tr>
                             <td>Importe total:</td>
                             <td style="width: 28mm; text-align: right">{{$documento->codigo_moneda}} {{$documento->total_venta}}</td>

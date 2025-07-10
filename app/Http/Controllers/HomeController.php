@@ -111,8 +111,8 @@ class HomeController extends Controller
     public function obtenerReporte(Request $request){
 
         $reporte = new ReporteController();
-        $ventas_usd = $reporte->reporte_ventas_diario_data(date('Y-m'),'USD','fecha-actual');
-        $ventas_pen = $reporte->reporte_ventas_diario_data(date('Y-m'),'PEN','fecha-actual');
+        $ventas_usd = $reporte->reporte_ventas_diario_data(date('Y-m'),'USD');
+        $ventas_pen = $reporte->reporte_ventas_diario_data(date('Y-m'),'PEN');
 
         $data = [
             'soles'=>[

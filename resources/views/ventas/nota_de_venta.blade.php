@@ -136,11 +136,6 @@
                                     </b-button>
                                 </div>
                             @endif
-                            <div class="col-lg-2 order-3 my-2 my-md-0" v-show="codigo_tipo_factura != '0200'">
-                                <b-form-checkbox v-model="esConIgv" switch size="sm">
-                                    Incluir IGV
-                                </b-form-checkbox>
-                            </div>
                         </div>
                         @if($agent->isDesktop())
                         <div class="table-responsive tabla-gestionar">
@@ -153,9 +148,7 @@
                                     <th scope="col" style="width: 90px">Precio</th>
                                     <th scope="col" style="width: 110px">Cantidad</th>
                                     <th scope="col" style="width: 70px; text-align: center">Dscto</th>
-                                    {{--<th scope="col" style="width: 100px">Afectación</th>--}}
                                     <th scope="col" style="width: 80px; text-align: center">Subtotal</th>
-                                    <th scope="col" style="width: 80px; text-align: center">Igv</th>
                                     <th scope="col" style="width: 80px; text-align: center">Total</th>
                                     <th scope="col" style="width: 100px;"></th>
                                 </tr>
@@ -185,15 +178,11 @@
                                     <td style="display:none;"><input @keyup="calcular(index)" class="form-control"
                                                                      type="text" v-model="producto.descuento"></td>
                                     <td class="text-center">@{{Number(producto.subtotal).toFixed(2)}}</td>
-                                    <td class="text-center">@{{Number(producto.igv).toFixed(2)}}</td>
                                     <td class="text-center">@{{Number(producto.total).toFixed(2)}}</td>
                                     <td style="text-align: right">
                                         <b-button :disabled="producto['precio']<=0 || producto['cantidad']<=0" v-b-modal.modal-descuento @click="editarItem(producto,index)" variant="success" title="Agregar descuento">
                                             <i class="fas fa-percentage"></i>
                                         </b-button>
-                                        <button @click="editarItem(producto,index)" class="btn btn-warning" v-b-modal.modal-afectacion
-                                                title="Afectación"><i class="fas fa-stream"></i>
-                                        </button>
                                         <button @click="borrarItemVenta(index)" class="btn btn-danger" title="Borrar item"><i
                                                     class="fas fa-trash"></i>
                                         </button>
@@ -248,80 +237,6 @@
                                 @{{ mensaje.mensaje }}
                             </b-alert>
                         </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-12 mb-3" v-show="(comprobanteReferencia != '' && (comprobante=='07.01' || comprobante == '07.02'))
-            && tipo_nota_electronica != '13'">
-                <div class="card">
-                    <div class="card-header">
-                        Detalle
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <strong>Cliente: </strong> @{{ this.clienteSeleccionado['num_documento'] }} - @{{this.clienteSeleccionado['nombre']}} <hr>
-                            </div>
-                            <div class="col-lg-6" v-show="codigo_tipo_factura != '0200'">
-                                <b-form-checkbox v-model="esConIgv" switch size="sm" class="float-right">
-                                    Incluir IGV
-                                </b-form-checkbox>
-                            </div>
-                        </div>
-                        <div class="table-responsive tabla-gestionar">
-                            <table class="table table-striped table-hover table-sm tabla-facturar">
-                                <thead class="bg-custom-green">
-                                <tr>
-                                    <th scope="col" style="width: 10px"></th>
-                                    <th scope="col" style="width: 200px">Producto</th>
-                                    <th scope="col" style="width: 250px">Caracteristicas</th>
-                                    <th scope="col" style="width: 90px">@{{ tipo_nota_electronica == '04' || tipo_nota_electronica == '05'?'Monto descuento':'Precio' }}</th>
-                                    <th scope="col" style="width: 90px">Cantidad</th>
-                                    <th scope="col" style="width: 90px">Dscto</th>
-                                    <th scope="col" style="width: 80px;">Subtotal</th>
-                                    <th scope="col" style="width: 80px;">Igv</th>
-                                    <th scope="col" style="width: 80px;">Total</th>
-                                    <th scope="col" style="width: 50px"></th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr v-for="(producto,index) in productosSeleccionados" :key="producto.index">
-                                    <td></td>
-                                    <td>@{{ producto.nombre }}</td>
-                                    <td v-show="tipo_nota_electronica != 03" style="white-space: break-spaces">@{{ producto.presentacion}}</td>
-                                    <td v-show="tipo_nota_electronica == 03"><textarea rows="1" @keyup="agregarCaracteristicasSession()" class="form-control texto-desc" ref="textareas" @input="expandirYContarTextarea(index, $event)"
-                                                  v-model="producto.presentacion"></textarea></td>
-                                    <td v-show="!(tipo_nota_electronica == 04 || tipo_nota_electronica == 05)">@{{ producto.precio }}</td>
-                                    <td v-show="tipo_nota_electronica == 04 || tipo_nota_electronica == 05">
-                                        <input @keyup="calcular(index)" class="form-control" type="text"
-                                               v-model="producto.precio">
-                                    </td>
-                                    <td v-show="tipo_nota_electronica != 07">@{{ producto.cantidad }}</td>
-                                    <td v-show="tipo_nota_electronica == 07">
-                                        <input @keyup="calcular(index)" class="form-control" type="text"
-                                               v-model="producto.cantidad">
-                                    </td>
-                                    <td>@{{ producto.descuento }}</td>
-                                    <td>@{{ (Number(producto.subtotal)).toFixed(2) }}</td>
-                                    <td>@{{ (Number(producto.igv)).toFixed(2) }}</td>
-                                    <td>@{{ (Number(producto.total)).toFixed(2) }}</td>
-                                    <td>
-                                        <button v-show="tipo_nota_electronica == 07" @click="borrarItemVenta(index)" class="btn btn-danger" title="Borrar item"><i
-                                                    class="fas fa-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr class="text-center" v-show="productosSeleccionados.length == 0">
-                                    <td colspan="11">Ningún producto seleccionado</td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="alert alert-primary text-center" v-show="tipo_nota_electronica == 07">
-                            <strong>Instrucciones:</strong> Para este tipo de nota deberás colocar la cantidad a devolver en la casilla correspondiente. Elimina de la lista los productos que no serán devueltos.
-                        </div>
-                        <div class="dropdown-divider"></div>
-                        <p v-show="tipo_nota_electronica != 04">Descuento global: @{{tipo_descuento_global?porcentaje_descuento_global+'%':moneda+' '+(Number(monto_descuento_global)).toFixed(2)}}</p>
                     </div>
                 </div>
             </div>
@@ -390,18 +305,6 @@
                             </div>
                             <div class="col-lg-4">
                                 <table style="width:100%;">
-                                    <tr v-show="gratuitas > 0">
-                                        <td style="width: 50%">OP. GRATUITAS:</td>
-                                        <td>@{{ moneda }} @{{ gratuitas.toFixed(2) }}</td>
-                                    </tr>
-                                    <tr v-show="inafectas > 0">
-                                        <td style="width: 50%">OP. INAFECTAS:</td>
-                                        <td>@{{ moneda }} @{{ inafectas.toFixed(2) }}</td>
-                                    </tr>
-                                    <tr v-show="exoneradas > 0">
-                                        <td style="width: 50%">OP. EXONERADAS:</td>
-                                        <td>@{{ moneda }} @{{ exoneradas.toFixed(2) }}</td>
-                                    </tr>
                                     <tr v-show="descuentos > 0">
                                         <td style="width: 50%">DESCUENTOS:</td>
                                         <td>@{{ moneda }} @{{ descuentos }}</td>
@@ -409,10 +312,6 @@
                                     <tr>
                                         <td style="width: 50%">OP. GRAVADAS:</td>
                                         <td>@{{ moneda }} @{{ gravadas.toFixed(2) }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td style="width: 50%">IGV:</td>
-                                        <td>@{{ moneda }} @{{ igv.toFixed(2) }}</td>
                                     </tr>
                                 </table>
                                 <p class="p-2 mt-2 total-venta">@{{ moneda }} @{{ totalVenta }}</p>
@@ -471,67 +370,6 @@
     </template>
     </b-modal>
     <!--FIN MODAL PAGO FRACCIONADO -->
-    <!--INICIO MODAL DOCUMENTO -->
-    <b-modal size="lg" id="modal-documento" ref="modal-documento" ok-only @hidden="resetModal">
-        <template slot="modal-title">
-            Seleccionar documento
-        </template>
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-6">
-                    <div class="form-group">
-                        <label for="buscar">Busca por correlativo o cliente:</label>
-                        <input @keyup="delay()" v-model="buscar" type="text" name="buscar"
-                               placeholder="Buscar..." class="form-control" autocomplete="off">
-                    </div>
-                </div>
-                <div class="col-lg-12">
-                    <div class="table-responsive tabla-gestionar">
-                        <table class="table table-striped table-hover table-sm">
-                            <thead class="bg-custom-green">
-                            <tr>
-                                <th scope="col">N° Doc.</th>
-                                <th scope="col">Serie/correlativo</th>
-                                <th scope="col">Cliente</th>
-                                <th scope="col">Importe</th>
-                                <th scope="col">Estado</th>
-                                <th scope="col"></th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr :class="{'td-anulado':doc.estado=='ANULADO'}" v-for="(doc,index) in listaDocumentos"
-                                :key="doc.idventa">
-                                <td>@{{doc.idventa}}</td>
-                                <td style="width: 20%">@{{doc.serie}}-@{{doc.correlativo}}</td>
-                                <td style="width: 40%">@{{doc.nombre}}</td>
-                                <td>@{{doc.total_venta}}</td>
-                                <td>
-                                    <span class="badge"
-                                          :class="{'badge-warning':doc.estado == 'PENDIENTE',
-                                   'badge-success' : doc.estado == 'ACEPTADO',
-                                   'badge-dark' : doc.estado == 'ANULADO' || doc.estado == 'MODIFICADO','badge-danger' : doc.estado == 'RECHAZADO'}">
-                                        @{{ doc.estado }}
-                                    </span>
-                                </td>
-                                <td style="width: 5%" class="botones-accion">
-                                    <button v-if="buscarAdelanto" @click="agregarAdelanto(doc)" class="btn btn-info"
-                                            title="Seleccionar documento"><i
-                                                class="fas fa-check"></i>
-                                    </button>
-                                    <button v-else @click="agregarDocumento(doc.idventa,false,false)" class="btn btn-info"
-                                            title="Seleccionar documento"><i
-                                                class="fas fa-check"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </b-modal>
-    <!--FIN MODAL DOCUMENTO -->
     <!--INICIO MODAL TIPO DE PAGO -->
     <b-modal size="md" id="modal-tipopago" ref="modal-tipopago" @ok="">
     <template slot="modal-title">
@@ -571,71 +409,6 @@
     </template>
     </b-modal>
     <!--FIN MODAL TIPO DE PAGO -->
-    <!--INICIO MODAL GUIAS RELACIONADAS -->
-    <b-modal size="sm" id="modal-guias" ref="modal-guias" @ok="">
-    <template slot="modal-title">
-        Guias relacionadas
-    </template>
-    <div class="container">
-        <div class="row">
-            <div v-for="(guia,index) in guiasRelacionadasAux" class="col-lg-12 mb-3" :key="index">
-                <div class="row">
-                    <div class="col-lg-10">
-                        <label>Guía @{{ index + 1 }}</label>
-                        <input v-model="guia.correlativo" type="text" class="form-control">
-                    </div>
-                    <div class="col-lg-2">
-                        <i @click="borrarGuia(index)" class="fas fa-times-circle btnBorrarCuota"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-12 mb-4">
-                <button @click="agregarGuia(true)" class="btn btn-info"><i class="fas fa-plus"></i> Agregar
-                </button>
-            </div>
-        </div>
-    </div>
-    <template #modal-footer="{ ok, cancel}">
-        <b-button variant="secondary" @click="cancelarGuiasRel()">
-            Cancel
-        </b-button>
-        <b-button variant="primary" @click="agregarGuiasRel">
-            OK
-        </b-button>
-    </template>
-    </b-modal>
-    <!--FIN MODAL GUIAS RELACIONADAS -->
-    <!--INICIO MODAL AFECTACIÓN -->
-    <b-modal size="md" id="modal-afectacion" ref="modal-afectacion" @ok="" hide-footer>
-    <template slot="modal-title">
-        Afectación del IGV
-    </template>
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12 lista-afectacion">
-                <b-list-group>
-                    <b-list-group-item class="py-1" @click="setAfectacion('10')">Gravado - Operación Onerosa</b-list-group-item>
-                    <b-list-group-item class="py-1" @click="setAfectacion('11')">Gravado – Retiro por premio</b-list-group-item>
-                    <b-list-group-item class="py-1" @click="setAfectacion('12')">Gravado – Retiro por donación</b-list-group-item>
-                    <b-list-group-item class="py-1" @click="setAfectacion('13')">Gravado – Retiro</b-list-group-item>
-                    <b-list-group-item class="py-1" @click="setAfectacion('14')">Gravado – Retiro por publicidad</b-list-group-item>
-                    <b-list-group-item class="py-1" @click="setAfectacion('15')">Gravado – Bonificaciones</b-list-group-item>
-                    <b-list-group-item class="py-1" @click="setAfectacion('16')">Gravado – Retiro por entrega a trabajadores</b-list-group-item>
-                    <b-list-group-item class="py-1" @click="setAfectacion('20')">Exonerado - Operación Onerosa</b-list-group-item>
-                    <b-list-group-item class="py-1" @click="setAfectacion('21')">Exonerado – Transferencia Gratuita</b-list-group-item>
-                    <b-list-group-item class="py-1" @click="setAfectacion('30')">Inafecto - Operación Onerosa</b-list-group-item>
-                    <b-list-group-item class="py-1" @click="setAfectacion('31')">Inafecto – Retiro por Bonificación</b-list-group-item>
-                    <b-list-group-item class="py-1" @click="setAfectacion('32')">Inafecto – Retiro</b-list-group-item>
-                    <b-list-group-item class="py-1" @click="setAfectacion('33')">Inafecto – Retiro por Muestras Médicas</b-list-group-item>
-                    <b-list-group-item class="py-1" @click="setAfectacion('34')">Inafecto - Retiro por Convenio Colectivo</b-list-group-item>
-                    <b-list-group-item class="py-1" @click="setAfectacion('35')">Inafecto – Retiro por premio</b-list-group-item>
-                    <b-list-group-item class="py-1" @click="setAfectacion('36')">Inafecto - Retiro por publicidad</b-list-group-item>
-                </b-list-group>
-            </div>
-        </div>
-    </div>
-    </b-modal>
-    <!--FIN MODAL AFECTACIÓN -->
     <modal-ubigeo
             :es_ubigeo="true"
             v-on:agregar_ubigeo="agregarUbigeo">
@@ -767,7 +540,7 @@
                 dataDescuento:{},
                 spinnerRuc:false,
                 domicilioFiscalCliente:true,
-                doc_observacion:"",
+                doc_observacion:"MÁS IGV",
                 mensajesStock: [],
                 pago_fraccionado:[
                     {
@@ -1221,25 +994,9 @@
                     this.$set(this.productosSeleccionados[i], 'descuento', '0.00');
                     this.$set(this.productosSeleccionados[i], 'subtotal', subtotal);
 
-
-                    if(this.codigo_tipo_factura == '0200'){
-
-                        this.$set(this.productosSeleccionados[i], 'igv', 0);
-                        this.$set(this.productosSeleccionados[i], 'tipoAfectacion', '10');
-                        this.$set(this.productosSeleccionados[i], 'total', subtotal);
-
-                    } else{
-                        this.$set(this.productosSeleccionados[i], 'igv', this.productosSeleccionados[i]['precio'] * 0.18);
-                        this.$set(this.productosSeleccionados[i], 'tipoAfectacion', '10');
-                        this.$set(this.productosSeleccionados[i], 'total', this.productosSeleccionados[i]['precio'] * 1.18);
-
-                        if (this.esConIgv) {
-                            subtotal = this.productosSeleccionados[i]['precio'] / 1.18;
-                            this.$set(this.productosSeleccionados[i], 'subtotal', subtotal);
-                            this.$set(this.productosSeleccionados[i], 'igv', this.productosSeleccionados[i]['precio'] - subtotal);
-                            this.$set(this.productosSeleccionados[i], 'total', this.productosSeleccionados[i]['precio']);
-                        }
-                    }
+                    this.$set(this.productosSeleccionados[i], 'igv', 0);
+                    this.$set(this.productosSeleccionados[i], 'tipoAfectacion', '10');
+                    this.$set(this.productosSeleccionados[i], 'total', subtotal);
 
                     this.calcularTotalVenta();
                     this.validar_stock(this.productosSeleccionados[i]);
@@ -1260,35 +1017,10 @@
                         monto_descuento = (this.esConIgv?precio_bruto:producto['precio']) * producto['cantidad'] * _porcentaje_descuento;
                     }
 
-                    if(this.codigo_tipo_factura == '0200'){
-                        producto['subtotal'] = (producto['precio'] * producto['cantidad'] - monto_descuento);
-                        producto['igv'] = 0;
-                        producto['total'] = producto['subtotal'];
-                    } else {
-                        switch (producto['tipoAfectacion']) {
-                            case '10':
-                                producto['subtotal'] = (producto['precio'] * producto['cantidad'] - monto_descuento);
-                                producto['igv'] = (producto['subtotal'] * 0.18);
-                                producto['total'] = (Number(producto['subtotal']) + Number(producto['igv']));
-                                if (this.esConIgv) {
-                                    producto['subtotal'] = (precio_bruto * producto['cantidad'] - monto_descuento);
-                                    producto['igv'] = (producto['subtotal'] * 0.18);
-                                    producto['total'] = (Number(producto['subtotal']) + Number(producto['igv']));
-                                }
-                                break;
-                            case '20':
-                            case '30':
-                                producto['subtotal'] = (producto['precio'] * producto['cantidad'] - monto_descuento);
-                                producto['total'] = (producto['precio'] * producto['cantidad'] - monto_descuento);
-                                producto['igv'] = (producto['total'] - producto['subtotal']);
-                                break;
-                            default:
-                                producto['subtotal'] = (producto['precio'] * producto['cantidad'] - monto_descuento);
-                                producto['total'] = 0;
-                                producto['igv'] = 0;
-                                break;
-                        }
-                    }
+                    producto['subtotal'] = (producto['precio'] * producto['cantidad'] - monto_descuento);
+                    producto['igv'] = 0;
+                    producto['total'] = (Number(producto['subtotal']) + Number(producto['igv']));
+
 
                     if(producto['descuento'] > 0 && (producto['precio']<=0 || producto['cantidad']<=0)){
                         producto['tipo_descuento']=0;
@@ -1324,42 +1056,18 @@
                     let total_venta_bruto = 0;
 
                     for (let producto of this.productosSeleccionados) {
-                        switch (producto.tipoAfectacion) {
-                            case '10':
-                                sumas.gravadas += Number(producto['subtotal']);
-                                total_venta_bruto += producto['cantidad'] * (this.esConIgv ? producto['precio'] / 1.18 : producto['precio']);
-                                break;
-                            case '20':
-                                sumas.exoneradas += Number(producto.subtotal);
-                                total_venta_bruto += producto['cantidad'] * producto['precio'];
-                                break;
-                            case '30':
-                                sumas.inafectas += Number(producto.subtotal);
-                                total_venta_bruto += producto['cantidad'] * producto['precio'];
-                                break;
-                            default:
-                                sumas.gratuitas += Number(producto.subtotal);
-                        }
+
+                        sumas.gravadas += Number(producto['subtotal']);
+                        total_venta_bruto += producto['cantidad'] * producto['precio'];
 
                         sumas.descuentos += Number(producto['descuento']);
-                        sumas.igv += Number(producto['igv']);
+                        sumas.igv += 0;
                     }
 
-                    if (this.tipo_descuento_global) {
-                        this.gravadas = (sumas.gravadas - (sumas.gravadas * desc_global));
-                        this.exoneradas = (sumas.exoneradas - (sumas.exoneradas * desc_global));
-                        this.inafectas = (sumas.inafectas - (sumas.inafectas * desc_global));
-                        this.igv = (sumas.igv - (sumas.igv * desc_global));
-                    } else {
-                        this.gravadas = (sumas.gravadas - desc_global);
-                        this.exoneradas = (sumas.exoneradas);
-                        this.inafectas = (sumas.inafectas);
-                        if(this.codigo_tipo_factura == '0200'){
-                            this.igv = 0;
-                        } else {
-                            this.igv = (this.gravadas * 0.18);
-                        }
-                    }
+                    this.gravadas = (sumas.gravadas - desc_global);
+                    this.exoneradas = (sumas.exoneradas);
+                    this.inafectas = (sumas.inafectas);
+                    this.igv = 0;
 
                     this.gratuitas = (sumas.gratuitas);
                     this.totalVenta = (Number(this.gravadas) + Number(this.exoneradas) + Number(this.inafectas) + Number(this.igv)).toFixed(2);

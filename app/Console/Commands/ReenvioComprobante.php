@@ -4,12 +4,14 @@ namespace sysfact\Console\Commands;
 
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use sysfact\Caja;
 use sysfact\Emisor;
 use sysfact\Http\Controllers\CajaController;
 use sysfact\Http\Controllers\Cpe\CpeController;
 use sysfact\Http\Controllers\CreditoController;
+use sysfact\Http\Controllers\ReporteController;
 use sysfact\Mail\ReporteErroresVentas;
 use sysfact\Venta;
 use Illuminate\Support\Facades\Log;
@@ -22,7 +24,7 @@ class ReenvioComprobante extends Command
      *
      * @var string
      */
-    protected $signature = 'reenviarComprobante';
+    protected $signature = 'reenviarComprobante {--domain=}';
 
     /**
      * The console command description.
@@ -59,7 +61,49 @@ class ReenvioComprobante extends Command
         if (date('H') >= 1 && date('H') <= 3) {
             $this->checkVentasConsistentes();
         }
+        if ($this->debeGenerarResumen()) {
+            $this->generarResumenMensual();
+        }
+
     }
+
+    protected function debeGenerarResumen(): bool
+    {
+        $hoy = now();
+
+        // Solo entre la 1 y 3 am
+        $hora = (int) $hoy->format('H');
+        if ($hora < 1 || $hora > 3) {
+            return false;
+        }
+
+        // Solo en días pares
+        return $hoy->day % 2 === 0;
+    }
+
+    public function generarResumenMensual()
+    {
+        $reporte    = new ReporteController();
+        $anio        = date('Y');
+        $mes_actual = date('n');
+
+        foreach (['PEN','USD'] as $moneda) {
+            for ($mes = 1; $mes <= $mes_actual; $mes++) {
+                $fecha_inicio_mes = Carbon::createFromDate($anio, $mes, 1)->format('Y-m-d');
+
+                // Creamos un Request con el parámetro moneda
+                $rq = Request::create('/', 'GET', ['moneda' => $moneda]);
+
+                try {
+                    $reporte->reporte_mensual_generar_mes($rq, $fecha_inicio_mes);
+                    Log::info("✅ [$moneda] Resumen de ventas generado: $fecha_inicio_mes");
+                } catch (\Exception $e) {
+                    Log::error("❌ [$moneda] Error al generar resumen $fecha_inicio_mes: " . $e->getMessage());
+                }
+            }
+        }
+    }
+
 
     public function notificacion_creditos()
     {

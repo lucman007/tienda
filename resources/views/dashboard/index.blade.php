@@ -13,7 +13,7 @@
                         <doughnut-chart v-if="chartValues" :chart-data="chartValues"></doughnut-chart>
                     </div>
                     <div class="col-lg-12 mt-3">
-                        <p>*Las ventas en dólares se muestran convertidos al tipo de cambio actual.</p>
+                        <p>*Las ventas en dólares se muestran convertidos al tipo de cambio correspondiente.</p>
                     </div>
                 </div>
             </div>

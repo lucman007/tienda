@@ -43,23 +43,6 @@
                                     </template>
                                 </b-input-group>
                             </div>
-                            @if($moneda=='USD')
-                                <div class="col-lg-3 form-group">
-                                    <b-input-group>
-                                        <b-input-group-prepend>
-                                            <b-input-group-text>
-                                                <i class="fas fa-dollar-sign"></i>
-                                            </b-input-group-text>
-                                        </b-input-group-prepend>
-                                        <template #append>
-                                            <b-dropdown variant="outline-secondary" class="variant-alt" text="{{$usar_tipo_cambio =='fecha-actual'?'Tipo cambio de hoy':'Tipo cambio de venta'}}">
-                                                <b-dropdown-item href="?moneda=USD&tc=fecha-actual">Usar tipo cambio de hoy</b-dropdown-item>
-                                                <b-dropdown-item href="?moneda=USD&tc=fecha-venta">Usar tipo cambio de fecha de venta</b-dropdown-item>
-                                            </b-dropdown>
-                                        </template>
-                                    </b-input-group>
-                                </div>
-                            @endif
                             <div class="col-lg-3 form-group">
                                 @if(count($ventas)!=0)
                                     <a href="{{str_contains(url()->full(),'?')?url()->full().'&export=true':url()->current().'?export=true'}}" class="btn btn-primary"><i class="fas fa-file-export"></i> Exportar excel</a>
@@ -119,7 +102,7 @@
                                                     @endif
                                                     <th scope="col">Impuestos</th>
                                                     <th scope="col">Ventas netas</th>
-                                                    <th scope="col">Costo de bienes</th>
+                                                    <th scope="col">Precio compra</th>
                                                     <th scope="col">Utilidad bruta</th>
                                                 </tr>
                                                 </thead>

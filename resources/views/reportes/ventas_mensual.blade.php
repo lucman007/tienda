@@ -55,23 +55,6 @@
                                     </template>
                                 </b-input-group>
                             </div>
-                            @if($moneda=='USD')
-                                <div class="col-lg-3 form-group">
-                                    <b-input-group>
-                                        <b-input-group-prepend>
-                                            <b-input-group-text>
-                                                <i class="fas fa-dollar-sign"></i>
-                                            </b-input-group-text>
-                                        </b-input-group-prepend>
-                                        <template #append>
-                                            <b-dropdown variant="outline-secondary" class="variant-alt" text="{{$usar_tipo_cambio =='fecha-actual'?'Tipo cambio de hoy':'Tipo cambio de venta'}}">
-                                                <b-dropdown-item href="?moneda=USD&tc=fecha-actual">Usar tipo cambio de hoy</b-dropdown-item>
-                                                <b-dropdown-item href="?moneda=USD&tc=fecha-venta">Usar tipo cambio de fecha de venta</b-dropdown-item>
-                                            </b-dropdown>
-                                        </template>
-                                    </b-input-group>
-                                </div>
-                            @endif
                             <div class="col-lg-3 form-group">
                                 @if(count($ventas)!=0)
                                     <a href="{{str_contains(url()->full(),'?')?url()->full().'&export=true':url()->current().'?export=true'}}" class="btn btn-primary"><i class="fas fa-file-export"></i> Exportar excel</a>
@@ -92,13 +75,6 @@
                                     </div>
                                 </div>
                             </div>
-                            @if($manual)
-                            <div class="col-lg-12 mt-3 text-center">
-                                <h4 style="color:#119527">El volumen de ventas es demasiado grande para ser analizado.</h4>
-                                <p>Genera el reporte de cada mes manualmente haciendo click en el botón <strong>ACTUALIZAR</strong> de la tabla inferior.
-                                    <br> Solo vuelve a actulizar si eliminas o editas ventas de algún mes en específico</p>
-                            </div>
-                            @endif
                             <div class="col-lg-12 mt-3">
                                 <div class="card no-shadow">
                                     <div class="card-body">
@@ -108,8 +84,8 @@
                                                     <div class="card-body">
                                                         <div class="row">
                                                             <div class="col-md-2 col-sm-6">
-                                                                <p class="mb-0">Total ventas <br>
-                                                                    <span style="font-size: 30px;"><strong>S/ {{number_format($ventas[1]['bruto'],2)}}</strong></span>
+                                                                <p class="mb-0">Total ventas {{$moneda=='USD'?'dólares':''}} <br>
+                                                                    <span style="font-size: 30px;"><strong>{{$moneda=='USD'?'USD':'S/'}} {{number_format($ventas[1]['bruto'],2)}}</strong></span>
                                                                 </p>
                                                             </div>
                                                             <div class="col-md-2 col-sm-6">
@@ -133,16 +109,11 @@
                                                 <tr>
                                                     <th scope="col">Fecha</th>
                                                     <th scope="col">Ventas brutas</th>
-                                                    @if($moneda == 'USD')
-                                                    <th scope="col">Tipo de cambio</th>
-                                                    @endif
                                                     <th scope="col">Impuestos</th>
                                                     <th scope="col">Ventas netas</th>
-                                                    <th scope="col">Costo de bienes</th>
+                                                    <th scope="col">Precio compra</th>
                                                     <th scope="col">Utilidad bruta</th>
-                                                    @if($manual)
                                                     <th scope="col">Reporte</th>
-                                                    @endif
                                                 </tr>
                                                 </thead>
                                                 <tbody>
@@ -151,16 +122,16 @@
                                                         <tr>
                                                             <td>{{ $item['fecha']}}</td>
                                                             <td>{{$moneda=='PEN'?'S/':'USD '}}{{number_format($item['ventas_brutas'],2)}}</td>
-                                                            @if($moneda == 'USD')
-                                                                <td>x {{$item['tipo_cambio']}}</td>
-                                                            @endif
                                                             <td>S/{{number_format($item['impuestos'],2)}}</td>
                                                             <td>S/{{number_format($item['ventas_netas'],2)}}</td>
                                                             <td>S/{{number_format($item['costos'],2)}}</td>
                                                             <td style="color:{{$item['utilidad']<0?'red':'inherit'}}">S/{{number_format($item['utilidad'],2)}}</td>
-                                                            @if($manual)
-                                                            <td><b-button href="/reportes/ventas/generar-mes/{{date('Y-m', strtotime($item['fecha']))}}?moneda={{$moneda}}&tc={{$usar_tipo_cambio}}" style="padding: 4px 10px;" class="btn btn-warning"><i class="fas fa-sync"></i> Actualizar</b-button></td>
-                                                            @endif
+                                                            <td class="d-flex align-items-center">
+                                                                <b-button title="Actualizar reporte" href="/reportes/ventas/generar-mes/{{date('Y-m', strtotime($item['fecha']))}}?moneda={{$moneda}}&tc={{$usar_tipo_cambio}}" style="padding: 4px 10px;" class="btn btn-warning"><i class="fas fa-sync"></i></b-button>
+                                                                @if(isset($item['fecha_actualizacion']))
+                                                                <p class="mb-0 ml-1 text-black-50">Actualizado el <br> {{$item['fecha_actualizacion']}}</p>
+                                                                @endif
+                                                            </td>
                                                         </tr>
                                                     @endforeach
                                                 @else
@@ -202,12 +173,7 @@
                 set_data_chart(){
                     labels=[];
                     datos=[];
-                    @php
-                        $manual = json_decode(cache('config')['interfaz'], true)['reporte_ventas_manual']??false;
-                    @endphp
-                    @if($manual)
-                        this.ventas.reverse();
-                    @endif
+                    this.ventas.reverse();
                     if(this.ventas) {
                         for (let venta of this.ventas) {
                             let fecha = (venta.fecha).split('-');
