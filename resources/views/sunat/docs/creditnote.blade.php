@@ -304,7 +304,7 @@
             @else
                 <cac:Price>
                     <cbc:PriceAmount
-                            currencyID="{{$documento->codigo_moneda}}">{{round($item->valor_venta_unitario_por_item / $item->cantidad,2)}}</cbc:PriceAmount>
+                            currencyID="{{$documento->codigo_moneda}}">{{$item->valor_venta_bruto_unitario}}</cbc:PriceAmount>
                 </cac:Price>
             @endif
         </cac:CreditNoteLine>

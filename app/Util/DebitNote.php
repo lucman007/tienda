@@ -38,8 +38,8 @@ class DebitNote {
 
             /*DATOS DE ITEMS SOLO PARA XML*/
 
-            $item->valor_venta_unitario_por_item = $item->detalle->subtotal; //PRECIO * CANTIDAD  SIN IGV
-            $item->precio_venta_unitario_por_item = $item->detalle->total; //PRECIO * CANTIDAD  CON IGV
+            $item->valor_venta_unitario_por_item=round($item->detalle->subtotal, 4); //PRECIO * CANTIDAD  SIN IGV
+            $item->precio_venta_unitario_por_item=$item->detalle->total; //PRECIO * CANTIDAD  CON IGV
 
             $porcentaje_descuento = round($item->detalle->porcentaje_descuento / 100, 2);
 
@@ -47,7 +47,7 @@ class DebitNote {
                 //VERIFICAMOS SI EL PRECIO DE PRODUCTO INCLUYE O NO EL IGV
                 if ($documento->igv_incluido) {
                     // Si incluir igv es true
-                    $item->valor_venta_bruto_unitario = round($item->detalle->monto/1.18,2);//PRECIO UNITARIO DE PRODUCTO SIN IGV
+                    $item->valor_venta_bruto_unitario = round($item->detalle->monto/1.18,10);//PRECIO UNITARIO DE PRODUCTO SIN IGV
                     $item->base_descuento=round($item->detalle->monto*$item->detalle->cantidad/1.18,2);
                 } else{
                     // Si incluir igv es false
