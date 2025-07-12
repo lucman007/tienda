@@ -258,6 +258,12 @@ class ProcesarRespuestas
                     $venta->estado='RECHAZADO';
                     $venta->save();
 
+                    //Revertir estado de factura anulada con nota de credito
+                    $correlativo_factura=explode('-',$doc_relacionado);
+                    $factura_a_anular=Facturacion::where('serie',$correlativo_factura[0])->where('correlativo',$correlativo_factura[1])->first();
+                    $factura_a_anular->estado='ACEPTADO';
+                    $factura_a_anular->save();
+
                     //Actualizar inventario
                     $venta = Venta::find($this->idventa);
                     $productos=$venta->productos;

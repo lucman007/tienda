@@ -375,7 +375,7 @@
 
                         axios.get('{{url('ventas/reenviar')}}' + '/' + idventa + '/' + nombre_comprobante + '/' + doc_relacionado)
                             .then(response => {
-                                alert(response.data);
+                                alert(response.data[0]);
                                 window.location.reload();
                             })
                             .catch(error => {
