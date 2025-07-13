@@ -13,6 +13,7 @@ use sysfact\Http\Controllers\Cpe\CpeController;
 use sysfact\Http\Controllers\CreditoController;
 use sysfact\Http\Controllers\ReporteController;
 use sysfact\Mail\ReporteErroresVentas;
+use sysfact\Opciones;
 use sysfact\Venta;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -88,6 +89,13 @@ class ReenvioComprobante extends Command
         $mes_actual = date('n');
 
         foreach (['PEN','USD'] as $moneda) {
+
+            $opcion = Opciones::where('nombre_opcion', 'reporte-mensual-' . $anio . '-' . $moneda)->orderby('valor', 'asc')->get();
+
+            if (count($opcion) == 0) {
+                $reporte->inicializarMesesParaReporteMensual($anio, $moneda);
+            }
+
             for ($mes = 1; $mes <= $mes_actual; $mes++) {
                 $fecha_inicio_mes = Carbon::createFromDate($anio, $mes, 1)->format('Y-m-d');
 
@@ -227,7 +235,7 @@ class ReenvioComprobante extends Command
             foreach ($venta->productos as $producto) {
                 $monto = $producto->detalle->monto;
                 $cantidad = $producto->detalle->cantidad;
-                $suma_total += round($monto * $cantidad, 2);
+                $suma_total += (round($monto * $cantidad, 2) - $producto->detalle->descuento);
             }
 
             if ($venta->igv_incluido) {

@@ -652,25 +652,9 @@ class ReporteController extends Controller
         $totales_del_mes = [];
 
         $opcion = Opciones::where('nombre_opcion', 'reporte-mensual-' . $anio . '-' . $moneda)->orderby('valor', 'asc')->get();
+
         if (count($opcion) == 0) {
-            for ($i = 0; $i < 12; $i++) {
-                $mes = str_pad($i + 1, 2, '0', STR_PAD_LEFT);
-                $totales_del_mes[$i]['fecha'] = date("M Y", strtotime($anio . '-' . $mes . '-01'));
-                $totales_del_mes[$i]['ventas_brutas'] = 0;
-                $totales_del_mes[$i]['costos'] = 0;
-                $totales_del_mes[$i]['utilidad'] = 0;
-                $totales_del_mes[$i]['impuestos'] = 0;
-                $totales_del_mes[$i]['ventas_netas'] = 0;
-                $totales_del_mes[$i]['tipo_cambio'] = 0;
-
-                $opt = new Opciones();
-                $opt->nombre_opcion = 'reporte-mensual-' . $anio . '-' . $moneda;
-                $opt->valor = $mes;
-                $opt->valor_json = json_encode($totales_del_mes[$i]);
-                $opt->save();
-
-            }
-
+            $this->inicializarMesesParaReporteMensual($anio, $moneda);
         } else {
             foreach ($opcion as $item) {
                 $data = json_decode($item->valor_json, true);
@@ -760,6 +744,28 @@ class ReporteController extends Controller
         }
 
         return redirect('/reportes/ventas/mensual/' . date('Y', strtotime($mes)) . '?moneda=' . $moneda);
+
+    }
+
+    public function inicializarMesesParaReporteMensual($anio, $moneda){
+
+        for ($i = 0; $i < 12; $i++) {
+            $mes = str_pad($i + 1, 2, '0', STR_PAD_LEFT);
+            $totales_del_mes[$i]['fecha'] = date("M Y", strtotime($anio . '-' . $mes . '-01'));
+            $totales_del_mes[$i]['ventas_brutas'] = 0;
+            $totales_del_mes[$i]['costos'] = 0;
+            $totales_del_mes[$i]['utilidad'] = 0;
+            $totales_del_mes[$i]['impuestos'] = 0;
+            $totales_del_mes[$i]['ventas_netas'] = 0;
+            $totales_del_mes[$i]['tipo_cambio'] = 0;
+
+            $opt = new Opciones();
+            $opt->nombre_opcion = 'reporte-mensual-' . $anio . '-' . $moneda;
+            $opt->valor = $mes;
+            $opt->valor_json = json_encode($totales_del_mes[$i]);
+            $opt->save();
+
+        }
 
     }
 
