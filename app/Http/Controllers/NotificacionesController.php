@@ -4,7 +4,9 @@ namespace sysfact\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use sysfact\Http\Controllers\Helpers\MainHelper;
+use sysfact\Notificacion;
 use sysfact\User;
 
 class NotificacionesController extends Controller
@@ -21,6 +23,26 @@ class NotificacionesController extends Controller
             $query->where('id', 5);
         })->first()->notifications()->paginate(30);
         return view('notificaciones.index', ['notifications'=>$notifications,'usuario'=>auth()->user()->persona]);
+    }
+
+    public function count()
+    {
+        $user = auth()->user();
+
+        if ($user->notification_checked_at) {
+            $query = Notificacion::where('created_at', '>', $user->notification_checked_at);
+        }
+
+        return response()->json($query->count());
+    }
+
+    public function resetCounter(Request $request)
+    {
+        $request->user()->forceFill([
+            'notification_checked_at' => now(),
+        ])->save();
+
+        return response()->json(['ok' => true]);
     }
 
     public function countNotificaciones(){

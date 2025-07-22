@@ -98,6 +98,11 @@
         methods:{
             obtenerNotificaciones(){
                 this.openPanel = true;
+                axios.post('/notificaciones/reset-counter')
+                  .then(() => {
+                    this.numNotificaciones = 0;
+                  })
+
                 axios.get('/notificaciones/obtener-notificaciones')
                     .then(response => {
                         this.notificaciones = response.data;

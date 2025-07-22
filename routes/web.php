@@ -396,11 +396,13 @@ Route::get('consulta/get-badget/{tocken}', 'ConsultaController@getBadget');
 
 Route::group(['middleware' => ['can:Pedido']], function () {
     Route::get('notificaciones','NotificacionesController@index');
-    Route::get('notificaciones/count','NotificacionesController@countNotificaciones');
+    Route::get('notificaciones/count','NotificacionesController@count');
     Route::get('notificaciones/marcar-como-leido/{id}','NotificacionesController@marcarComoLeido');
     Route::get('notificaciones/marcar-todo-como-leido','NotificacionesController@marcarTodoComoLeido');
     Route::get('notificaciones/obtener-notificaciones','NotificacionesController@obtenerNotificaciones');
     Route::get('notificaciones/count-comprobantes','NotificacionesController@countComprobantes');
+    Route::post('/notificaciones/reset-counter', 'NotificacionesController@resetCounter');
+
 });
 
 Route::group(['middleware' => ['can:Inventario: almacenes']], function () {
