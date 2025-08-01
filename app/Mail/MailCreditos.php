@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Luciano
- * Date: 19/04/2023
- * Time: 20:38
- */
 
 namespace sysfact\Mail;
 
@@ -13,10 +7,10 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use sysfact\Http\Controllers\Helpers\MainHelper;
 
-
 class MailCreditos extends Mailable
 {
     use Queueable, SerializesModels;
+
     public $ventas;
     public $emisor;
 
@@ -29,12 +23,14 @@ class MailCreditos extends Mailable
 
     public function build()
     {
-        $mail = $this->from('facsy@coditecdigital.com')
-            ->subject('VENTAS A CRÉDITO POR VENCER - '.$this->emisor)
-            ->view('mail.creditos',['ventas'=>$this->ventas]);
+        $fromAddress = config('mail.from.address');
+        $fromName = config('mail.from.name');
 
-        return $mail;
+        $subject = 'VENTAS A CRÉDITO POR VENCER - ' . $this->emisor;
 
+        return $this
+            ->from($fromAddress, $fromName)
+            ->subject($subject)
+            ->view('mail.creditos', ['ventas' => $this->ventas]);
     }
-
 }

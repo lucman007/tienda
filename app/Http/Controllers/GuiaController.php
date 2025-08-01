@@ -12,6 +12,7 @@ use sysfact\Guia;
 use sysfact\Http\Controllers\Cpe\CpeController;
 use sysfact\Http\Controllers\Helpers\DataGuia;
 use sysfact\Http\Controllers\Helpers\PdfHelper;
+use sysfact\Http\Controllers\Helpers\UsesSmtpOverride;
 use sysfact\Presupuesto;
 use sysfact\Producto;
 use sysfact\Venta;
@@ -20,6 +21,7 @@ use sysfact\Mail\EnviarDocumentos;
 
 class GuiaController extends Controller
 {
+    use UsesSmtpOverride;
 
     public function __construct()
     {
@@ -523,13 +525,23 @@ class GuiaController extends Controller
     {
         try {
             PdfHelper::generarPdfGuia($request->idguia, false, 'F');
-            Mail::to($request->mail)->send(new EnviarDocumentos($request));
+
+            $smtpOverride = $this->getOverrideConfig();
+
+            $mailable = new EnviarDocumentos($request, $smtpOverride['from_address']);
+
+            $this->sendWithOverride($request->mail, $mailable, $smtpOverride);
+
             if(file_exists(storage_path() . '/app/sunat/pdf/' . $request->guia . '.pdf')){
                 unlink(storage_path() . '/app/sunat/pdf/' . $request->guia . '.pdf');
             }
             return 'Se envió el correo con éxito';
-        } catch (\Swift_TransportException $e) {
-            return response(['mensaje'=>$e->getMessage()],500);
+        }  catch (\Swift_TransportException $e) {
+            Log::error($e);
+            return response(['mensaje' => $e->getMessage()], 500);
+        } catch (\Throwable $e) {
+            Log::error($e);
+            return response(['mensaje' => $e->getMessage()], 500);
         }
     }
 

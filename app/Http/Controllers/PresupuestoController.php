@@ -3,22 +3,21 @@
 namespace sysfact\Http\Controllers;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Luecano\NumeroALetras\NumeroALetras;
 use Spipu\Html2Pdf\Html2Pdf;
-use sysfact\AppConfig;
 use sysfact\Categoria;
 use sysfact\Emisor;
 use sysfact\Http\Controllers\Helpers\MainHelper;
+use sysfact\Http\Controllers\Helpers\UsesSmtpOverride;
 use sysfact\Mail\EnviarPresupuesto;
-use sysfact\Orden;
 use sysfact\Presupuesto;
 use Illuminate\Http\Request;
 use sysfact\Producto;
-use Illuminate\Support\Facades\Mail;
 
 class PresupuestoController extends Controller
 {
-
+    use UsesSmtpOverride;
 	public function __construct()
 	{
 		$this->middleware('auth');
@@ -492,59 +491,66 @@ class PresupuestoController extends Controller
     }
 
 
-    public function enviar_presupuesto_por_email(Request $request){
+    public function enviar_presupuesto_por_email(Request $request)
+    {
+        $pdf = $this->generarPdf($request->idpresupuesto);
+        $pdfPath = storage_path("app/{$pdf['name']}");
+        $pdf['file']->output($pdfPath, 'F');
 
-        $pdf=$this->generarPdf($request->idpresupuesto);
-        $pdf['file']->output(storage_path() . '/app/' .$pdf['name'],'F');
+        try {
+            $cc = json_decode($request->destinatarios) ?: [];
 
-        try{
-            $cc = json_decode($request->destinatarios);
-            Mail::to($request->mail)->cc($cc)->send(new EnviarPresupuesto($request->mensaje,$pdf['name'],$request->conCopia));
-            unlink(storage_path() . '/app/' .$pdf['name']);
+            $smtpOverride = $this->getOverrideConfig();
 
+            $mailable = new EnviarPresupuesto(
+                $request->mensaje,
+                $pdf['name'],
+                $request->conCopia,
+                $smtpOverride['from_address']
+            );
+
+            $this->sendWithOverride($request->mail, $mailable, $smtpOverride, $cc);
+
+            // Borrar PDF
+            @unlink($pdfPath);
+
+            // Registrar en datos adicionales
             $presupuesto = Presupuesto::find($request->idpresupuesto);
             $data = $presupuesto->datos_adicionales;
-            if(!$data){
-                $mail_data = [
-                    'mail'=>[
-                        [
-                            'direccion'=>$request->mail,
-                            'fecha'=>date('Y-m-d H:i:s')
-                        ]
-                    ]
+
+            $nuevo_mail = [
+                [
+                    'direccion' => $request->mail,
+                    'fecha'     => date('Y-m-d H:i:s')
+                ]
+            ];
+            foreach ($cc as $item) {
+                $nuevo_mail[] = [
+                    'direccion' => $item,
+                    'fecha'     => date('Y-m-d H:i:s')
                 ];
-                if(count($cc)>0){
-                    foreach ($cc as $item){
-                        $mail_data['mail'][] = [
-                            'direccion'=>$item,
-                            'fecha'=>date('Y-m-d H:i:s')
-                        ];
-                    }
-                }
-                $presupuesto->datos_adicionales = json_encode($mail_data);
-                $presupuesto->save();
-            } else {
-                $mail_data = json_decode($data, true)['mail'];
-                $mail_data[] = [
-                    'direccion'=>$request->mail,
-                    'fecha'=>date('Y-m-d H:i:s')
-                ];
-                if(count($cc)>0){
-                    foreach ($cc as $item){
-                        $mail_data[] = [
-                            'direccion'=>$item,
-                            'fecha'=>date('Y-m-d H:i:s')
-                        ];
-                    }
-                }
-                $presupuesto->datos_adicionales = json_encode(['mail'=>$mail_data]);
-                $presupuesto->save();
             }
 
+            if (!$data) {
+                $presupuesto->datos_adicionales = json_encode(['mail' => $nuevo_mail]);
+            } else {
+                $existing = json_decode($data, true);
+                $mail_array = $existing['mail'] ?? [];
+                $mail_array = array_merge($mail_array, $nuevo_mail);
+                $presupuesto->datos_adicionales = json_encode(['mail' => $mail_array]);
+            }
+            $presupuesto->save();
+
             return 'Se envió el correo con éxito';
-        } catch (\Swift_TransportException $e){
-            unlink(storage_path() . '/app/' .$pdf['name']);
-            return response(['mensaje'=>$e->getMessage()],500);
+
+        } catch (\Swift_TransportException $e) {
+            @unlink($pdfPath);
+            Log::error($e);
+            return response(['mensaje' => $e->getMessage()], 500);
+        } catch (\Throwable $e) {
+            @unlink($pdfPath);
+            Log::error($e);
+            return response(['mensaje' => $e->getMessage()], 500);
         }
     }
 

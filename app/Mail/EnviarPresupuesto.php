@@ -11,6 +11,7 @@ use sysfact\Http\Controllers\Helpers\MainHelper;
 class EnviarPresupuesto extends Mailable
 {
     use Queueable, SerializesModels;
+
     public $mensaje;
     public $cotizacion;
     public $conCopia;
@@ -18,56 +19,53 @@ class EnviarPresupuesto extends Mailable
     public $mail_send_from = [];
     public $cuerpo_mensaje = '';
     public $saludo_mensaje = '';
+    public $fromAddress;
+    public $fromName;
 
     /**
-     * Create a new message instance.
-     *
-     * @return void
+     * @param string $mensaje  contacto / mensaje
+     * @param string $cotizacion  ruta del archivo de cotización (relativa a storage/app)
+     * @param bool $conCopia
      */
-    public function __construct($mensaje,$cotizacion,$conCopia)
+    public function __construct($mensaje, $cotizacion, $conCopia, $from_address)
     {
-        $this->mensaje =$mensaje;
+        $this->mensaje = $mensaje;
         $this->cotizacion = $cotizacion;
         $this->conCopia = $conCopia;
 
-        $conf = MainHelper::configuracion(['mail_send_from','mail_contact','cotizacion']);
+        $conf = MainHelper::configuracion(['mail_send_from','mail_contact', 'cotizacion']);
         $this->mail_contact = json_decode($conf['mail_contact'], true);
         $this->mail_send_from = json_decode($conf['mail_send_from'], true);
+
         $cotizacion_config = json_decode($conf['cotizacion'], true);
-        if(isset($cotizacion_config['texto'])){
-            $this->cuerpo_mensaje = $cotizacion_config['texto'];
-        } else {
-            $this->cuerpo_mensaje = null;
-        }
-        if(isset($cotizacion_config['texto_saludo'])){
-            $this->saludo_mensaje = $cotizacion_config['texto_saludo'];
-        } else {
-            $this->saludo_mensaje = null;
-        }
+        $this->cuerpo_mensaje = $cotizacion_config['texto'] ?? null;
+        $this->saludo_mensaje = $cotizacion_config['texto_saludo'] ?? null;
+
+        $this->fromAddress = $from_address;
+        $this->fromName = $this->mail_send_from['remitente'];
+
     }
 
-    /**
-     * Build the message.
-     *
-     * @return $this
-     */
     public function build()
     {
         $data = [
-            'contacto'=>$this->mensaje,
-            'config'=>$this->mail_contact,
-            'cuerpo_mensaje'=>$this->cuerpo_mensaje,
-            'saludo_mensaje'=>$this->saludo_mensaje,
-            'emisor'=>new Emisor()
+            'contacto'        => $this->mensaje,
+            'config'          => $this->mail_contact,
+            'cuerpo_mensaje'  => $this->cuerpo_mensaje,
+            'saludo_mensaje'  => $this->saludo_mensaje,
+            'emisor'          => new Emisor()
         ];
 
-        $mail = $this->from($this->mail_send_from['email'])
-            ->subject('COTIZACION '.mb_strtoupper($this->mail_send_from['remitente']))
-            ->view('mail.presupuesto',$data)
-            ->attach(storage_path().'/app/'.$this->cotizacion);
+        $subjectName = mb_strtoupper($this->fromName);
 
-        if($this->conCopia){
-            $mail->bcc($this->mail_send_from['email']);
+        $mail = $this
+            ->from($this->fromAddress, $this->fromName)
+            ->subject('COTIZACION ' . $subjectName)
+            ->view('mail.presupuesto', $data)
+            ->attach(storage_path("app/{$this->cotizacion}"));
+
+        if ($this->conCopia) {
+            $mail->bcc($this->fromAddress);
         }
 
         return $mail;

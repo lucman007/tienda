@@ -19,8 +19,14 @@ class ReporteErroresVentas extends Mailable
 
     public function build()
     {
-        return $this->from('facsy@coditecdigital.com')
+        $fromAddress = config('mail.from.address');
+        $fromName = config('mail.from.name');
+
+        return $this
+            ->from($fromAddress, $fromName)
             ->subject('⚠️ Inconsistencias detectadas en ventas')
-            ->view('mail.errores_ventas');
+            ->view('mail.errores_ventas', [
+                'errores' => $this->errores
+            ]);
     }
 }

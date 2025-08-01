@@ -5,15 +5,14 @@ namespace sysfact\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 use sysfact\Categoria;
 use sysfact\Emisor;
 use sysfact\Facturacion;
 use sysfact\Guia;
 use sysfact\Http\Controllers\Cpe\CpeController;
-use sysfact\Http\Controllers\Helpers\DataTipoPago;
 use sysfact\Http\Controllers\Helpers\MainHelper;
 use sysfact\Http\Controllers\Helpers\PdfHelper;
+use sysfact\Http\Controllers\Helpers\UsesSmtpOverride;
 use sysfact\Inventario;
 use sysfact\Mail\EnviarDocumentos;
 use sysfact\Orden;
@@ -31,6 +30,7 @@ class VentaController extends Controller
     private $interfaz;
     private $idcaja;
     private $porcentaje_igv = 18;
+    use UsesSmtpOverride;
 
     public function __construct()
     {
@@ -954,70 +954,65 @@ class VentaController extends Controller
 
     }
 
-    public function enviar_comprobantes_por_email(Request $request)
+public function enviar_comprobantes_por_email(Request $request)
     {
         try {
-            $cc = json_decode($request->destinatarios);
+            $cc = json_decode($request->destinatarios) ?: [];
+
             PdfHelper::generarPdf($request->idventa, false, 'F');
             if ($request->idguia != -1) {
                 PdfHelper::generarPdfGuia($request->idguia, false, 'F');
             }
-            Mail::to($request->mail)->cc($cc)->send(new EnviarDocumentos($request));
+
+            $smtpOverride = $this->getOverrideConfig();
+
+            $mailable = new EnviarDocumentos($request, $smtpOverride['from_address']);
+
+            $this->sendWithOverride($request->mail, $mailable, $smtpOverride, $cc);
 
             $venta = Venta::find($request->idventa);
             $data = $venta->datos_adicionales;
-            if (!$data) {
-                $mail_data = [
-                    'mail' => [
-                        [
-                            'direccion' => $request->mail,
-                            'fecha' => date('Y-m-d H:i:s')
-                        ]
-                    ]
-                ];
-                if (count($cc) > 0) {
-                    foreach ($cc as $item) {
-                        $mail_data['mail'][] = [
-                            'direccion' => $item,
-                            'fecha' => date('Y-m-d H:i:s')
-                        ];
-                    }
-                }
-                $venta->datos_adicionales = json_encode($mail_data);
-                $venta->save();
-            } else {
-                $mail_data = json_decode($data, true)['mail'];
-                $mail_data[] = [
+
+            $nuevo_mail = [
+                [
                     'direccion' => $request->mail,
-                    'fecha' => date('Y-m-d H:i:s')
+                    'fecha'     => date('Y-m-d H:i:s')
+                ]
+            ];
+            foreach ($cc as $item) {
+                $nuevo_mail[] = [
+                    'direccion' => $item,
+                    'fecha'     => date('Y-m-d H:i:s')
                 ];
-                if (count($cc) > 0) {
-                    foreach ($cc as $item) {
-                        $mail_data[] = [
-                            'direccion' => $item,
-                            'fecha' => date('Y-m-d H:i:s')
-                        ];
-                    }
-                }
-                $venta->datos_adicionales = json_encode(['mail' => $mail_data]);
-                $venta->save();
             }
 
-            if (file_exists(storage_path() . '/app/sunat/pdf/' . $request->factura . '.pdf')) {
-                unlink(storage_path() . '/app/sunat/pdf/' . $request->factura . '.pdf');
+            if (!$data) {
+                $venta->datos_adicionales = json_encode(['mail' => $nuevo_mail]);
+            } else {
+                $existing = json_decode($data, true);
+                $mail_array = $existing['mail'] ?? [];
+                $mail_array = array_merge($mail_array, $nuevo_mail);
+                $venta->datos_adicionales = json_encode(['mail' => $mail_array]);
             }
-            if (file_exists(storage_path() . '/app/sunat/pdf/' . $request->guia . '.pdf')) {
-                unlink(storage_path() . '/app/sunat/pdf/' . $request->guia . '.pdf');
+            $venta->save();
+
+            // limpiar PDFs generados
+            foreach (['factura', 'guia', 'recibo'] as $tipo) {
+                $valor = $request->{$tipo} ?? null;
+                if ($valor && file_exists(storage_path("app/sunat/pdf/{$valor}.pdf"))) {
+                    @unlink(storage_path("app/sunat/pdf/{$valor}.pdf"));
+                }
             }
-            if (file_exists(storage_path() . '/app/sunat/pdf/' . $request->recibo . '.pdf')) {
-                unlink(storage_path() . '/app/sunat/pdf/' . $request->recibo . '.pdf');
-            }
+
             return 'Se envió el correo con éxito';
         } catch (\Swift_TransportException $e) {
+            Log::error($e);
+            return response(['mensaje' => $e->getMessage()], 500);
+        } catch (\Throwable $e) {
+            Log::error($e);
             return response(['mensaje' => $e->getMessage()], 500);
         }
     }
-
     public function eliminar_venta($idventa)
     {
         try {

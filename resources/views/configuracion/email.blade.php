@@ -1,11 +1,5 @@
 <div class="col-lg-12">
-    <h4>Enviar correos desde:</h4>
-</div>
-<div class="col-lg-6">
-    <div class="form-group">
-        <label>Email:</label>
-        <input type="text" v-model="mail_send_from.email" autocomplete="nope" class="form-control">
-    </div>
+    <h4>Email:</h4>
 </div>
 <div class="col-lg-6">
     <div class="form-group">

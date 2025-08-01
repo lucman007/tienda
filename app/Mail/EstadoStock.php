@@ -3,27 +3,23 @@
 namespace sysfact\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
-use sysfact\Http\Controllers\Helpers\MainHelper;
 
 class EstadoStock extends Mailable
 {
     use Queueable, SerializesModels;
+
     public $mensaje;
-    public $config;
 
     /**
      * Create a new message instance.
      *
-     * @return void
+     * @param mixed $mensaje
      */
     public function __construct($mensaje)
     {
         $this->mensaje = $mensaje;
-        $mail = MainHelper::configuracion('mail_send_from');
-        $this->config = json_decode($mail, true);
     }
 
     /**
@@ -33,10 +29,14 @@ class EstadoStock extends Mailable
      */
     public function build()
     {
-        $mail = $this->from('facsy@coditecdigital.com')
-            ->subject('STOCK DE PRODUCTOS '.date('d/m/Y').' - '.mb_strtoupper($this->config['remitente']))
-            ->view('mail.stock',['mensajes'=>$this->mensaje]);
+        $fromAddress = config('mail.from.address');
+        $fromName = config('mail.from.name');
 
-        return $mail;
+        $asunto = 'STOCK DE PRODUCTOS ' . date('d/m/Y') . ' - ' . mb_strtoupper($fromName);
+
+        return $this
+            ->from($fromAddress, $fromName)
+            ->subject($asunto)
+            ->view('mail.stock', ['mensajes' => $this->mensaje]);
     }
 }

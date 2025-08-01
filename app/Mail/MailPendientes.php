@@ -3,7 +3,6 @@
 namespace sysfact\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use sysfact\Http\Controllers\Helpers\MainHelper;
@@ -11,14 +10,10 @@ use sysfact\Http\Controllers\Helpers\MainHelper;
 class MailPendientes extends Mailable
 {
     use Queueable, SerializesModels;
+
     public $emisor;
     public $num_comprobantes;
 
-    /**
-     * Create a new message instance.
-     *
-     * @return void
-     */
     public function __construct($num_comprobantes)
     {
         $config = MainHelper::configuracion('emisor');
@@ -26,15 +21,20 @@ class MailPendientes extends Mailable
         $this->num_comprobantes = $num_comprobantes;
     }
 
-    /**
-     * Build the message.
-     *
-     * @return $this
-     */
     public function build()
     {
-        return $this->from('facsy@coditecdigital.com')
-            ->subject('COMPROBANTES PENDIENTES DE ENVÍO...')
-            ->view('mail.estado_comprobantes',['emisor'=>$this->emisor,'num_comprobante'=>$this->num_comprobantes,'domain'=>app()->domain()]);
+        $fromAddress = config('mail.from.address');
+        $fromName = config('mail.from.name');
+
+        $subject = 'COMPROBANTES PENDIENTES DE ENVÍO - ' . $this->emisor;
+
+        return $this
+            ->from($fromAddress, $fromName)
+            ->subject($subject)
+            ->view('mail.estado_comprobantes', [
+                'emisor' => $this->emisor,
+                'num_comprobante' => $this->num_comprobantes,
+                'domain' => app()->domain()
+            ]);
     }
 }
