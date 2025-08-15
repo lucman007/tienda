@@ -431,11 +431,19 @@ class VentaController extends Controller
             $facturacion->total_descuentos = $request->descuentos;
             $facturacion->igv = $request->igv;
             $facturacion->valor_venta_bruto = $request->subtotal;
-            $facturacion->porcentaje_descuento_global = $request->porcentaje_descuento_global / 100;
-            $facturacion->descuento_global = $request->monto_descuento_global;
-            $facturacion->tipo_descuento = $request->tipo_descuento;
-            $facturacion->base_descuento_global = $request->base_descuento_global;
             $facturacion->estado = 'PENDIENTE';
+
+            $datosDescuento = $this->calcularDescuento(
+                $request->base_descuento_global,
+                $request->tipo_descuento,
+                $request->porcentaje_descuento_global,
+                $request->monto_descuento_global
+            );
+
+            $facturacion->base_descuento_global = $datosDescuento['base'];
+            $facturacion->tipo_descuento = $datosDescuento['tipo'];
+            $facturacion->porcentaje_descuento_global = $datosDescuento['porcentaje'];
+            $facturacion->descuento_global = $datosDescuento['monto'];
 
             if ($request->comprobante == '07') {
                 $facturacion->motivo_baja = $request->anulacion_factura_exportacion ?? '';
@@ -598,11 +606,42 @@ class VentaController extends Controller
 
         } catch (\Exception $e) {
             DB::rollback();
-            Log::info($e);
+            Log::error($e);
             return response(['mensaje' => 'Ha ocurrido un error al guardar la venta: ' . $e->getMessage()], 500);
         }
 
     }
+
+    private function calcularDescuento($base, $tipo, $porcentaje, $monto)
+    {
+        $base = (float) $base;
+        $tipo = (int) $tipo;
+        $porcentaje = (float) $porcentaje;
+        $monto = (float) $monto;
+
+        if ($tipo === 0) {
+            // Descuento en dinero → calcular %
+            $monto = round($monto, 2);
+            $porcentaje = $base > 0 ? round($monto / $base, 4) : 0;
+        } elseif ($tipo === 1) {
+            // Descuento en porcentaje → calcular monto
+            $porcentaje = $porcentaje / 100;
+            $monto = round($base * $porcentaje, 2);
+        } else {
+            // Tipo inválido
+            $tipo = 0;
+            $monto = 0;
+            $porcentaje = 0;
+        }
+
+        return [
+            'base' => $base,
+            'tipo' => $tipo,
+            'porcentaje' => $porcentaje,
+            'monto' => $monto
+        ];
+    }
+
 
     public function show($id)
     {
@@ -611,14 +650,18 @@ class VentaController extends Controller
         $venta->facturacion;
         $venta->cliente;
         $venta->persona;
+
         $venta->retencion = round($venta->total_venta * 0.03, 2);
         $venta->monto_menos_retencion = round($venta->total_venta - $venta->retencion, 2);
 
         if ($venta->facturacion->tipo_detraccion) {
-            $detraccion = explode('/', $venta->facturacion->tipo_detraccion);
-            $porcentaje_detraccion = number_format($detraccion[1], 2);
+            list(,$porc) = explode('/', $venta->facturacion->tipo_detraccion);
+            $porcentaje_detraccion = floatval($porc);
 
-            $venta->detraccion = round($venta->total_venta * ($porcentaje_detraccion / 100), 2);
+            $rawDet = $venta->total_venta * ($porcentaje_detraccion / 100);
+
+            // 2. Aplicar redondeo SUNAT (entero)
+            $venta->detraccion = $this->aplicarRedondeoSUNAT($rawDet);
             $venta->monto_menos_detraccion = round($venta->total_venta - $venta->detraccion, 2);
         }
 
@@ -649,6 +692,21 @@ class VentaController extends Controller
             $producto->items_kit = json_decode($producto->detalle->items_kit, true);
             $ex = explode('/', $producto->unidad_medida);
             $producto->unidad_medida = $ex[1];
+        }
+
+        foreach ($venta->pago as $item) {
+            $item->monto_neto = $item->monto;
+            if($venta->facturacion->retencion == 1){
+                $r = round($item->monto * 0.03,2);
+                $item->monto_neto =  round($item->monto - $r,2);
+            }
+            if($venta->facturacion->codigo_tipo_factura == '1001'){
+                $detraccion = explode('/',$venta->facturacion->tipo_detraccion);
+                $porcentaje_detraccion = number_format($detraccion[1],2);
+                $r = round($item->monto * ($porcentaje_detraccion/100),2);
+                $rawMonto =  round($item->monto - $r,2);
+                $item->monto_neto = $this->aplicarRedondeoSUNAT($rawMonto);
+            }
         }
 
         if ($venta->facturacion->codigo_moneda == 'PEN') {
@@ -682,6 +740,13 @@ class VentaController extends Controller
             'venta' => $venta,
             'usuario' => auth()->user()->persona
         ]);
+    }
+
+    public function aplicarRedondeoSUNAT(float $monto): int
+    {
+        $entero = floor($monto);
+        $primerDecimal = intval(floor(($monto - $entero) * 10));
+        return $primerDecimal >= 5 ? $entero + 1 : $entero;
     }
 
     public function copiarPresupuesto(Request $request)

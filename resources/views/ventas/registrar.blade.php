@@ -559,7 +559,7 @@
                             </div>
                         </div>
                         <div>
-                            <b-alert v-for="mensaje in mensajesStock" show fade dismissible :key="mensaje.id" :variant="mensaje.estilo" v-on:dismissed="cerrarMensajeStock(mensaje.id)">
+                            <b-alert v-for="(mensaje, index) in mensajesStock" show fade dismissible :key="index" :variant="mensaje.estilo" v-on:dismissed="cerrarMensajeStock(mensaje.id)">
                                 @{{ mensaje.mensaje }}
                             </b-alert>
                         </div>
@@ -1620,6 +1620,7 @@
                     this.calcularTotalVenta();
                     this.validar_stock(producto);
                     this.agregarProductosSession();
+
                 },
                 calcularTotalPorItem(){
                     for (let producto of this.productosSeleccionados) {
@@ -1681,24 +1682,43 @@
                     this.gratuitas = (sumas.gratuitas);
                     this.totalVenta = (Number(this.gravadas) + Number(this.exoneradas) + Number(this.inafectas) + Number(this.igv)).toFixed(2);
                     this.base_descuento_global = sumas.gravadas + sumas.inafectas + sumas.exoneradas;
-                    this.descuentos = (sumas.descuentos + Number(this.monto_descuento_global)).toFixed(2);
+                    let monto_descuento_global = this.tipo_descuento_global ? this.base_descuento_global * desc_global : desc_global;
+                    this.descuentos = (sumas.descuentos + Number(monto_descuento_global)).toFixed(2);
                     this.subtotalVenta = total_venta_bruto.toFixed(3);
                     this.calcularDeducciones();
 
                 },
                 calcularDeducciones(){
-                    if(this.codigo_tipo_factura == '1' || this.codigo_tipo_factura == '1001'){
+                    if (this.codigo_tipo_factura === '1' || this.codigo_tipo_factura === '1001') {
 
                         let porcentaje = 0.03;
-                        if(this.codigo_tipo_factura == '1001'){
-                            let string= this.tipoDetraccion.split('/');
-                            porcentaje = Number(string[1]) / 100;
+                        if (this.codigo_tipo_factura === '1001') {
+                            const [tipo, porcStr] = this.tipoDetraccion.split('/');
+                            porcentaje = Number(porcStr) / 100;
                         }
 
-                        this.montoDeduccion = (this.totalVenta * porcentaje).toFixed(2);
+                        // 2) Cálculo bruto de la detracción
+                        const rawDet = this.totalVenta * porcentaje;
+
+                        if (this.codigo_tipo_factura === '1001') {
+                            // 3A) Para facturas 1001: redondeo SUNAT (entero)
+                            const deduccionEntera = this.redondeoSunat(rawDet);
+                            this.montoDeduccion = deduccionEntera;
+                            this.montoNePenPago = (this.totalVenta - deduccionEntera).toFixed(2);
+                        } else {
+                            // 3B) Para facturas 1: monto con 2 decimales, sin redondeo SUNAT
+                            this.montoDeduccion = rawDet.toFixed(2);
+                            this.montoNePenPago = (this.totalVenta - rawDet).toFixed(2);
+                        }
+
+                        // 4) Porcentaje a mostrar (igual en ambos casos)
                         this.montoDeduccionPorcentaje = porcentaje * 100;
-                        this.montoNePenPago = (this.totalVenta - this.montoDeduccion).toFixed(2);
                     }
+                },
+                redondeoSunat(monto) {
+                    const entero = Math.floor(monto);
+                    const primerDecimal = Math.floor((monto - entero) * 10);
+                    return (primerDecimal >= 5) ? (entero + 1) : entero;
                 },
                 borrarItemVenta(index){
                     this.productosSeleccionados.splice(index, 1);

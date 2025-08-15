@@ -304,7 +304,7 @@
             @else
                 <cac:Price>
                     <cbc:PriceAmount
-                            currencyID="{{$documento->codigo_moneda}}">{{$item->valor_venta_bruto_unitario}}</cbc:PriceAmount>
+                            currencyID="{{$documento->codigo_moneda}}">{{$item->valor_venta_unitario_por_item}}</cbc:PriceAmount>
                 </cac:Price>
             @endif
         </cac:CreditNoteLine>
