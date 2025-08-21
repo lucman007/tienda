@@ -166,7 +166,8 @@ class Invoice
             $documento->detraccion_soles = round($documento->detraccion * $tc, 2);
 
             // 4. Monto neto a recibir
-            $documento->monto_menos_detraccion = round($documento->total_venta - $documento->detraccion, 2);
+            $netoPendPago = round($documento->total_venta - $documento->detraccion, 2);
+            $documento->monto_menos_detraccion = $this->aplicarRedondeoSUNAT($netoPendPago);
 
             // 5. Ajustar cada pago (opcional, si quieres restar proporcionalmente)
             foreach ($documento->pago as $pago) {

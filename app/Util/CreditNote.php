@@ -147,6 +147,9 @@ class CreditNote {
             if($documento->facturacion->descuento_global>0){
                 $desc_by_item =  $item->valor_venta_unitario_por_item * $documento->facturacion->porcentaje_descuento_global;
                 $item->valor_venta_unitario_por_item = round($item->valor_venta_unitario_por_item - $desc_by_item,2);
+
+                $desc_by_bruto = $item->valor_venta_bruto_unitario  * $documento->facturacion->porcentaje_descuento_global;
+                $item->valor_venta_bruto_unitario = round($item->valor_venta_bruto_unitario - $desc_by_bruto,4);
                 $item->igv = round($item->detalle->igv - ($item->detalle->igv * $documento->facturacion->porcentaje_descuento_global),2);
                 $item->detalle->subtotal = round($item->detalle->subtotal - ($item->detalle->subtotal * $documento->facturacion->porcentaje_descuento_global),2);
             }
