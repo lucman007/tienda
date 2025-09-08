@@ -2,6 +2,7 @@
 
 namespace sysfact\Util;
 
+use Illuminate\Support\Facades\Log;
 use Luecano\NumeroALetras\NumeroALetras;
 
 class Invoice
@@ -166,15 +167,16 @@ class Invoice
             $documento->detraccion_soles = round($documento->detraccion * $tc, 2);
 
             // 4. Monto neto a recibir
-            $netoPendPago = round($documento->total_venta - $documento->detraccion, 2);
-            $documento->monto_menos_detraccion = $this->aplicarRedondeoSUNAT($netoPendPago);
+            $documento->monto_menos_detraccion = round($documento->total_venta - $documento->detraccion, 2);
 
             // 5. Ajustar cada pago (opcional, si quieres restar proporcionalmente)
             foreach ($documento->pago as $pago) {
                 // Resta proporcional según porcentaje (aquí usas round a 2 decimales)
                 $r = round($pago->monto * ($documento->porcentaje_detraccion / 100), 2);
+                $r = $this->aplicarRedondeoSUNAT($r);
+
                 $rawPago = round($pago->monto - $r, 2);
-                $pago->monto = $this->aplicarRedondeoSUNAT($rawPago);
+                $pago->monto = $rawPago;
             }
         }
         //Retención

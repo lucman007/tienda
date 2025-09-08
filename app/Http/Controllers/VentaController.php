@@ -704,8 +704,9 @@ class VentaController extends Controller
                 $detraccion = explode('/',$venta->facturacion->tipo_detraccion);
                 $porcentaje_detraccion = number_format($detraccion[1],2);
                 $r = round($item->monto * ($porcentaje_detraccion/100),2);
+                $r = $this->aplicarRedondeoSUNAT($r);
                 $rawMonto =  round($item->monto - $r,2);
-                $item->monto_neto = $this->aplicarRedondeoSUNAT($rawMonto);
+                $item->monto_neto = $rawMonto;
             }
         }
 
