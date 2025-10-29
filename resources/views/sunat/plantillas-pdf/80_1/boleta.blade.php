@@ -146,6 +146,29 @@
                     </tr>
                 @endif
         </table>
+        <table>
+            <tr>
+                <td colspan="3" style="width: 60mm">
+                    <hr style="border: 1px dashed black">
+                </td>
+            </tr>
+            <tr>
+                @if($documento->tipo_pago != 2)
+                    <td colspan="3">PAGOS:
+                        @php
+                            $tipo_pago = \sysfact\Http\Controllers\Helpers\DataTipoPago::getTipoPago();
+                        @endphp
+                        @foreach($documento->pago as $pago)
+                            @php
+                                $index = array_search($pago->tipo, array_column($tipo_pago,'num_val'));
+                            @endphp
+                            <br>
+                            {{mb_strtoupper($tipo_pago[$index]['label'])}} {{$documento->codigo_moneda}} {{$pago->monto}}
+                        @endforeach
+                    </td>
+                @endif
+            </tr>
+        </table>
         <table style="text-align: center">
             <tr>
                 <td style="width: 62mm"><img class="qr" src="images/qr/{{$documento->qr}}"></td>

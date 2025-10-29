@@ -420,35 +420,63 @@
                             </b-dropdown>
                         @endcan
                         <div v-show="!editar" class="col-lg-12 mt-5">
-                            <label class="mb-2">Enviar a correo electrónico:</label>
                             <div class="row">
-                                <div class="col-lg-4">
-                                    <div class="form-group mb-2">
-                                        <input v-model="mensaje" class="form-control mb-2" placeholder="Nombre del destinatario" type="text">
+                                <div class="col-lg-6">
+                                    @php
+                                        $codigos_pais = \sysfact\Http\Controllers\Helpers\DataGeneral::getCodigoPais();
+                                    @endphp
+                                    <input-whatsapp
+                                            :params='@json($presupuesto->params_whatsapp)'
+                                            :codigos='@json($codigos_pais)'
+                                            :link='"{{ $agent->isDesktop() ? 'https://web.whatsapp.com' : 'https://api.whatsapp.com' }}"'>
+                                    </input-whatsapp>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <b-input-group class="mb-2">
+                                                <b-input-group-prepend>
+                                                    <b-input-group-text>
+                                                        <i class="fas fa-user"></i>
+                                                    </b-input-group-text>
+                                                </b-input-group-prepend>
+                                                <input v-model="mensaje" class="form-control" placeholder="Nombre del destinatario" type="text">
+                                            </b-input-group>
+                                            <b-input-group>
+                                                <b-input-group-prepend>
+                                                    <b-input-group-text>
+                                                        <i class="fas fa-envelope"></i>
+                                                    </b-input-group-text>
+                                                </b-input-group-prepend>
+                                                <input v-model="mail" type="email" class="form-control" placeholder="Correo electrónico">
+                                            </b-input-group>
+                                        </div>
+                                        <div class="col-lg-12">
+                                            <button @click="agregarCC" class="btn btn-primary float-right my-2"><i class="fas fa-user-plus"></i></button>
+                                        </div>
+                                        <div class="col-lg-12">
+                                            <div v-for="item in cc" :key="index">
+                                                <b-input-group class="mb-2">
+                                                    <b-input-group-prepend>
+                                                        <b-input-group-text>
+                                                            <i class="fas fa-envelope"></i>
+                                                        </b-input-group-text>
+                                                    </b-input-group-prepend>
+                                                    <input v-model="item.email" type="email" class="form-control" placeholder="Con copia a...">
+                                                </b-input-group>
+                                            </div>
+                                            <div class="mt-2">
+                                                <b-form-checkbox v-model="conCopia" switch size="sm" class="my-2">
+                                                    Enviarme una copia
+                                                </b-form-checkbox>
+                                                <b-button :disabled="mostrarProgresoMail" @click="enviar_a_correo" variant="primary">
+                                                    <i v-show="!mostrarProgresoMail" class="fas fa-paper-plane"></i>
+                                                    <b-spinner v-show="mostrarProgresoMail" small label="Loading..." ></b-spinner> Enviar
+                                                </b-button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="col-lg-7">
-                                    <div class="form-group mb-2">
-                                        <input v-model="mail" type="email" class="form-control" placeholder="Correo electrónico">
-                                    </div>
-                                </div>
-                                <div class="col-lg-1">
-                                    <button @click="agregarCC" class="btn btn-primary"><i class="fas fa-user-plus"></i></button>
-                                </div>
-                                <div class="offset-lg-4 col-lg-7" v-for="item in cc" :key="index">
-                                    <div class="form-group mb-2">
-                                        <input v-model="item.email" type="email" class="form-control" placeholder="Con copia a...">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-12 mb-3">
-                                <b-form-checkbox v-model="conCopia" switch size="sm" class="my-2">
-                                    Enviarme una copia
-                                </b-form-checkbox>
-                                <b-button :disabled="mostrarProgresoMail" @click="enviar_a_correo" variant="primary">
-                                    <i v-show="!mostrarProgresoMail" class="fas fa-envelope"></i>
-                                    <b-spinner v-show="mostrarProgresoMail" small label="Loading..." ></b-spinner> Enviar
-                                </b-button>
                             </div>
                             <div class="col-lg-12">
                                 @php

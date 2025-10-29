@@ -13,12 +13,14 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use sysfact\AppConfig;
 use sysfact\Caja;
 use sysfact\Categoria;
 use sysfact\Cliente;
 use sysfact\Descuento;
+use sysfact\Emisor;
 use sysfact\Http\Controllers\ClienteController;
 use sysfact\Http\Controllers\Controller;
 use sysfact\Http\Controllers\OpcionController;
@@ -680,5 +682,51 @@ class MainHelper extends Controller
         ]);
         return url()->current() . '?' . http_build_query($queryParams);
     }
+
+    public static function generarLinkWhatsapp(int $id, $soloPdf, $esCotizacion = false): array
+    {
+        $expiration = now()->addHours(24);
+
+        $emisor = new Emisor();
+
+        $empresa = ($emisor->nombre_publicitario == "" ? $emisor->razon_social : $emisor->nombre_publicitario);
+
+        $data = [
+            'empresa' => $empresa,
+            'usarPortal' => false,
+            'esCotizacion' => $esCotizacion
+        ];
+
+        if($esCotizacion){
+            $data['pdf'] = URL::temporarySignedRoute(
+                'descargar.cotizacion',
+                $expiration,
+                ['idcotizacion' => $id]
+            );
+        } else {
+            $data['pdf'] = URL::temporarySignedRoute(
+                'descargar.comprobante',
+                $expiration,
+                ['tipo' => 'pdf', 'idventa' => $id]
+            );
+        }
+
+        if (!$soloPdf) {
+            $data['xml'] = URL::temporarySignedRoute(
+                'descargar.comprobante',
+                $expiration,
+                ['tipo' => 'xml', 'idventa' => $id]
+            );
+            $data['cdr'] = URL::temporarySignedRoute(
+                'descargar.comprobante',
+                $expiration,
+                ['tipo' => 'cdr', 'idventa' => $id]
+            );
+        }
+
+        return $data;
+
+    }
+
 
 }

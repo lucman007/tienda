@@ -3,6 +3,7 @@
 @section('contenido')
     @php
         $codigos_pais = \sysfact\Http\Controllers\Helpers\DataGeneral::getCodigoPais();
+        $tipo_pago = \sysfact\Http\Controllers\Helpers\DataTipoPago::getTipoPago();
     @endphp
     <div class="container-fluid">
         <div class="row">
@@ -48,7 +49,7 @@
                                     <th scope="col">Fecha</th>
                                     <th scope="col">Caja</th>
                                     <th scope="col">Vend.</th>
-                                    <th scope="col">Cliente</th>
+                                    <th scope="col" style="width: 30%">Cliente</th>
                                     <th scope="col">Importe</th>
                                     <th scope="col">Pago</th>
                                     <th scope="col">N° comprobante</th>
@@ -60,7 +61,7 @@
                                     @foreach($ventas as $item)
                                         <tr>
                                             <td></td>
-                                            <td style="width:10%;">{{date("d-m-Y H:i:s",strtotime($item->fecha))}}</td>
+                                            <td>{{date("d/m/Y H:i:s",strtotime($item->fecha))}}</td>
                                             <td>{{$item->caja->idpersona == -1?'-':strtoupper($item->caja->nombre)}}</td>
                                             <td>{{$item->empleado->idpersona == -1?'-':strtoupper($item->empleado->nombre)}}</td>
                                             <td>{{$item->persona->nombre}}</td>
@@ -73,14 +74,13 @@
                                                     <br>
                                                 @endif
                                                 @php
-                                                    $tipo_pago = \sysfact\Http\Controllers\Helpers\DataTipoPago::getTipoPago();
                                                     $pagos = $item->pago;
                                                 @endphp
                                                 @foreach($pagos as $pago)
                                                     @php
                                                         $index = array_search($pago->tipo, array_column($tipo_pago,'num_val'));
                                                     @endphp
-                                                    {{mb_strtoupper($tipo_pago[$index]['label'])}} {{$item->moneda}}{{$pago->monto}} @if($pago->referencia) (N° OP.: {{$pago->referencia}}) @endif<br>
+                                                    {{mb_strtoupper($tipo_pago[$index]['abreviatura'])}} {{$item->moneda}}{{$pago->monto}} @if($pago->referencia) (N° OP.: {{$pago->referencia}}) @endif<br>
                                                 @endforeach
                                             </td>
                                             <td id="comp_{{$item->idventa}}">
@@ -110,7 +110,7 @@
                                                     <b-dropdown-item id="btn_anular_{{$item->idventa}}" @click="abrir_modal('anulacion',{{$item}})" :disabled="{{$item->facturacion->codigo_tipo_documento}} == 30">
                                                         <i class="fas fa-times"></i> Anular comprobante
                                                     </b-dropdown-item>
-                                                    <b-dropdown-item @click="text_whatsapp = '{{$item->text_whatsapp}}'" v-b-modal.modal-whatsapp><i style="width: 2em;" class="fab fa-whatsapp"></i> Enviar por whatsapp</b-dropdown-item>
+                                                    <b-dropdown-item @click='params_whatsapp = @json($item->params_whatsapp)' v-b-modal.modal-whatsapp><i style="width: 2em;" class="fab fa-whatsapp"></i> Enviar por whatsapp</b-dropdown-item>
                                                 </b-dropdown>
                                                 <button id="btn_borrar_{{$item->idventa}}" @if($item->facturacion->codigo_tipo_documento!='30') disabled style="opacity: 0.2" @endif @click="eliminar({{$item->idventa}})"
                                                         class="btn btn-danger" title="Eliminar"><i class="fas fa-trash-alt"></i>
@@ -148,9 +148,6 @@
                 <div class="col-lg-6">
                     <label>Tipo de pago</label>
                     <select v-model="pago.tipo" class="custom-select">
-                        @php
-                            $tipo_pago = \sysfact\Http\Controllers\Helpers\DataTipoPago::getTipoPago();
-                        @endphp
                         @foreach($tipo_pago as $pago)
                             @if($pago['num_val'] != 4 && $pago['num_val'] != 2)
                                 <option value="{{$pago['num_val']}}">{{$pago['label']}}</option>
@@ -179,11 +176,11 @@
         <div class="col-lg-12">
             <label>Tipo de pago</label>
             <div class="row">
+                <div class="col-lg-4">
+                    <input type="text" class="form-control" v-model="totalVenta" disabled>
+                </div>
                 <div class="col-lg-5 form-group">
                     <select v-model="tipoPagoContado" class="custom-select">
-                        @php
-                            $tipo_pago = \sysfact\Http\Controllers\Helpers\DataTipoPago::getTipoPago();
-                        @endphp
                         @foreach($tipo_pago as $pago)
                             <option value="{{$pago['num_val']}}">{{$pago['label']}}</option>
                         @endforeach
@@ -255,7 +252,7 @@
             v-on:countcomprobantes="obtener_num_comprobantes"
             v-on:after-save="after_save">
     </modal-facturacion>
-    <modal-whatsapp :text="text_whatsapp" :link="'{{$agent->isDesktop()?'https://web.whatsapp.com':'https://api.whatsapp.com'}}'" :codigos="{{json_encode($codigos_pais)}}"></modal-whatsapp>
+    <modal-whatsapp :params="params_whatsapp" :link="'{{$agent->isDesktop()?'https://web.whatsapp.com':'https://api.whatsapp.com'}}'" :codigos="{{json_encode($codigos_pais)}}"></modal-whatsapp>
 @endsection
 @section('script')
     <script>
@@ -290,7 +287,7 @@
                 anulacionSuccess:true,
                 anulacion:{},
                 anulacionDisabled:false,
-                text_whatsapp: '',
+                params_whatsapp: '',
                 disabledVentas: !!'<?php echo $disabledVentas ?>'
             },
             methods:{
@@ -434,8 +431,7 @@
                     })
                         .then(response => {
                             this.mostrarProgresoGuardado = false;
-                            alert(response.data);
-                            window.location.reload();
+                            window.location.href = '/pedidos/ventas';
                             this.$refs['modal-editarPago'].hide()
                         })
                         .catch(error => {

@@ -358,7 +358,11 @@
                                     @php
                                         $codigos_pais = \sysfact\Http\Controllers\Helpers\DataGeneral::getCodigoPais();
                                     @endphp
-                                    <input-whatsapp :text="'{{$venta->text_whatsapp}}'" :codigos="{{json_encode($codigos_pais)}}" :link="'{{$agent->isDesktop()?'https://web.whatsapp.com':'https://api.whatsapp.com'}}'"></input-whatsapp>
+                                    <input-whatsapp
+                                            :params='@json($venta->links_whatsapp)'
+                                            :codigos='@json($codigos_pais)'
+                                            :link='"{{ $agent->isDesktop() ? 'https://web.whatsapp.com' : 'https://api.whatsapp.com' }}"'>
+                                    </input-whatsapp>
                                 </div>
                                 <div class="col-lg-6">
                                     <b-input-group>
@@ -380,9 +384,14 @@
                                             <button @click="agregarCC" class="btn btn-primary float-right mt-2"><i class="fas fa-user-plus"></i></button>
                                         </div>
                                         <div class="col-lg-12 mt-2" v-for="item,index in cc" :key="index">
-                                            <div class="form-group mb-2">
+                                            <b-input-group class="mb-2">
+                                                <b-input-group-prepend>
+                                                    <b-input-group-text>
+                                                        <i class="fas fa-envelope"></i>
+                                                    </b-input-group-text>
+                                                </b-input-group-prepend>
                                                 <input v-model="item.email" type="email" class="form-control" placeholder="Con copia a...">
-                                            </div>
+                                            </b-input-group>
                                         </div>
                                     </div>
                                     <b-form-checkbox v-model="conCopia" switch size="sm" class="my-2 text-center">

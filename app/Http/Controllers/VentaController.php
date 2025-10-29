@@ -668,7 +668,9 @@ class VentaController extends Controller
         $emisor = new Emisor();
 
         $venta->nombre_fichero = $emisor->ruc . '-' . $venta->facturacion->codigo_tipo_documento . '-' . $venta->facturacion->serie . '-' . $venta->facturacion->correlativo;
-        $venta->text_whatsapp = MainHelper::texto_whatsap($venta, $emisor);
+        $soloPdf = $venta->facturacion->codigo_tipo_documento == 30;
+        $linkWhats = MainHelper::generarLinkWhatsapp($venta->idventa, $soloPdf);
+        $venta->links_whatsapp = $linkWhats;
 
         switch ($venta->facturacion->codigo_tipo_documento) {
             case '03':

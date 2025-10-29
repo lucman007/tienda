@@ -104,7 +104,6 @@ class ReenvioComprobante extends Command
 
                 try {
                     $reporte->reporte_mensual_generar_mes($rq, $fecha_inicio_mes);
-                    Log::info("✅ [$moneda] Resumen de ventas generado: $fecha_inicio_mes");
                 } catch (\Exception $e) {
                     Log::error("❌ [$moneda] Error al generar resumen $fecha_inicio_mes: " . $e->getMessage());
                 }

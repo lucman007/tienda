@@ -21,7 +21,7 @@
 <script>
     export default{
         name: 'input-whatsapp',
-        props: ['text','link','codigos'],
+        props: ['link','params','codigos'],
         data(){
             return {
                 whatsapp:'',
@@ -32,18 +32,38 @@
             setCodigoPais(codigo){
                 this.codigoPais = codigo;
             },
-            enviarWhatsapp(){
-                if(this.whatsapp==""){
-                    alert('Ingresa un número válido')
-                } else {
-                    let codigoPais = this.codigoPais.replace(/\+/g, '');
-                    window.open(this.link+'/send/?phone='+codigoPais+this.whatsapp+'&text='+this.text+'&app_absent=1', '_blank');
-                }
-            },
-            reset(){
-                this.whatsapp = '';
-                this.codigoPais = '+51';
-            },
+          enviarWhatsapp() {
+            const telefono = this.codigoPais.replace('+', '') + this.whatsapp
+
+            let mensaje = "";
+
+            if(this.params.esCotizacion){
+              mensaje = `¡Hola! 😃  Descarga tu cotización aquí: 👇🏻\n\n✅ ${this.params.pdf}`
+            } else {
+              mensaje = `¡Hola! 😃  Descarga tu comprobante aquí: 👇🏻\n\n✅ PDF: ${this.params.pdf}`
+            }
+
+            if (!this.params.usarPortal) {
+              if(this.params.xml){
+                mensaje += `\n\n✅ XML: ${this.params.xml}`
+              }
+              if(this.params.cdr){
+                mensaje += `\n\n✅ CDR: ${this.params.cdr}`
+              }
+            }
+
+            mensaje += `\n\n*${this.params.empresa}*`
+
+            mensaje += `\n\n_ℹ️ ¡Recuerda que los links son válidos solo por 24 horas! ⏳_`
+
+            const encoded = encodeURIComponent(mensaje)
+            const url = `${this.link}/send?phone=${telefono}&text=${encoded}&app_absent=1`
+            window.open(url, '_blank')
+          },
+          reset() {
+              this.whatsapp = '';
+              this.codigoPais = '+51';
+            }
         }
     }
 </script>

@@ -7,7 +7,7 @@
             <div class="container">
                 <div class="row">
                     <div class="col-lg-12">
-                        <input-whatsapp :codigos="codigos" :link="link" :text="text"></input-whatsapp>
+                        <input-whatsapp :params="params" :codigos="codigos" :link="link"></input-whatsapp>
                     </div>
                 </div>
             </div>
@@ -21,7 +21,7 @@
 <script>
     export default {
         name: 'modal-whatsapp',
-        props: ['text','link','codigos'],
+        props: ['link','params','codigos'],
         data() {
             return {
                 whatsapp:''

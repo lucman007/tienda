@@ -389,9 +389,18 @@ Route::group(['middleware' => ['can:Créditos']], function () {
 Route::get('consulta', 'ConsultaController@index');
 Route::post('consulta/obtenerDocumento', 'ConsultaController@obtener_documento');
 Route::get('consulta/descargar/{file}', 'ConsultaController@descargarArchivo');
-Route::get('consulta/descargar-comprobante/{tipo}/{file}', 'ConsultaController@descargar_comprobante');
 Route::get('consulta/creditos/{tocken}', 'ConsultaController@verCredito');
 Route::get('consulta/get-badget/{tocken}', 'ConsultaController@getBadget');
+
+Route::get('/consulta/descargar-comprobante/{tipo}/{idventa}',
+    'ConsultaController@descargar_comprobante')
+    ->name('descargar.comprobante')
+    ->middleware(['signed', 'throttle:10,1']);
+
+Route::get('/consulta/descargar-cotizacion/{idcotizacion}',
+    'ConsultaController@descargar_cotizacion')
+    ->name('descargar.cotizacion')
+    ->middleware(['signed', 'throttle:10,1']);
 
 
 Route::group(['middleware' => ['can:Pedido']], function () {

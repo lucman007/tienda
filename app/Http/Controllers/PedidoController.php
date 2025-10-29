@@ -465,7 +465,12 @@ class PedidoController extends Controller
                 $item->badge_class='badge-success';
                 $item->estado_orden='ATENDIDO';
                 $item->nombre_fichero=$emisor->ruc.'-'.$item->facturacion->codigo_tipo_documento.'-'.$item->facturacion->serie.'-'.$item->facturacion->correlativo;
-                $item->text_whatsapp = MainHelper::texto_whatsap($item,$emisor);
+
+                $soloPdf = $item->facturacion->codigo_tipo_documento == 30;
+                $linkWhats = MainHelper::generarLinkWhatsapp($item->idventa, $soloPdf);
+
+                $item->params_whatsapp = $linkWhats;
+
                 if($item->facturacion->codigo_moneda == 'PEN'){
                     $item->moneda = 'S/';
                 } else {

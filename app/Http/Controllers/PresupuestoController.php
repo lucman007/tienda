@@ -180,6 +180,10 @@ class PresupuestoController extends Controller
             $presupuesto->moneda='S/';
         }
 
+        $linkWhats = MainHelper::generarLinkWhatsapp($presupuesto->idpresupuesto, true, true);
+
+        $presupuesto->params_whatsapp = $linkWhats;
+
         $productos=[];
         $i=0;
         foreach($pro as $product){

@@ -281,8 +281,10 @@
                     let errorVenta = 0;
                     let errorDatosVenta = [];
                     let errorString = '';
+/*
 
                     if (Object.keys(this.proveedorSeleccionado).length == 0) errorDatosVenta.push('*Debes ingresar un proveedor');
+*/
 
                     if (errorDatosVenta.length) {
                         errorVenta = 1;

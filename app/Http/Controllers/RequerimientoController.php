@@ -165,7 +165,7 @@ class RequerimientoController extends Controller
     public function update(Request $request)
     {
         $requerimiento=Requerimiento::find($request->idrequerimiento);
-        $requerimiento->idproveedor=$request->idproveedor;
+        $requerimiento->idproveedor=$request->idproveedor??-1;
         $requerimiento->total_compra=$request->total_compra;
         if ($request->moneda == 'S/') {
             $moneda = 'PEN';
