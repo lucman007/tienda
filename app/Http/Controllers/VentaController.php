@@ -389,7 +389,7 @@ class VentaController extends Controller
             $venta->idcajero = auth()->user()->idempleado;
             $venta->idcaja = MainHelper::obtener_idcaja();
             $venta->fecha = $request->fecha . ' ' . date('H:i:s');
-            $venta->tipo_cambio = $request->tipo_cambio ?? cache('opciones')['tipo_cambio_compra'];
+            $venta->tipo_cambio = $request->tipo_cambio ?? cache('opciones')['tipo_cambio_venta'];
             if ($request->fecha > date('Y-m-d')) {
                 $venta->fecha = date('Y-m-d H:i:s');
             }

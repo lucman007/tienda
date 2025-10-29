@@ -1073,7 +1073,7 @@
                 doc_relacionado_nc:'',
                 guiasRelacionadas: [],
                 guiasRelacionadasAux: [],
-                tipoCambio: <?php echo cache('opciones')['tipo_cambio_compra'] ?>,
+                tipoCambio: <?php echo cache('opciones')['tipo_cambio_venta'] ?>,
                 nombreCliente: "",
                 idventa_modifica:-1,
                 disabledNr:false,
